@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to R for Applied Epidemiology</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="March 2022" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Introduction to R for<br>Applied Epidemiology
+## Geographic Information Systems (GIS):</br>An introduction with R
+### March 2022
+### <a href="mailto:contact@appliedepi.org">contact@appliedepi.org</a>
+
+---
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+
+
+# Outline
+* ...
+* ...
+     * ...
+
+
+
+---
+# Objectives
+  
+*A demonstration*:   
+
+* Briefly demonstrate the GIS capabilities in R  
+* Introduce you to R packages and functions for GIS  
+
+   
+
+---
+
+# COVID data (Georgia, USA)  
+
+* For this demonstration, we use a COVID-19 case linelist from from Georgia, USA. 
+
+* We will also use shapefiles associated with these data.  
+
+* You will work with this linelist on the final module of this course  
+
+
+
+
+---
+# Shapefiles 
+.pull-left[
+- Multiple layers make file 
+- Made up of: 
+  - Points, lines, polygons
+- handled with [{sf}](https://r-spatial.github.io/sf/) package
+  - simple features:
+   make things much more simple!
+  - Can use tidyverse syntax as if dataframes
+- Other formats exist (e.g. GeoJson)
+]
+
+.pull-right[
+
+&lt;img src="../../../../images/gis/shapefiles.png" width="80%" /&gt;
+
+]
+
+.footnote[
+See the [EpiRHandbook section on GIS basics](https://epirhandbook.com/gis-basics.html)
+]
+
+???
+Until a few years ago geospatial work in R was very painful - but with SF it has
+now become as easy as dataframes in tidyverse! 
+
+
+
+
+---
+# Import shapefile 
+
+
+
+```r
+# import shapefile
+shapefile &lt;- read_sf(
+  # define path to file
+  here::here("data", "covid_example_data", "covid_shapefile", 
+             "FultonCountyZipCodes.shp")
+)
+```
+
+
+```
+## Simple feature collection with 48 features and 4 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 2087952 ymin: 1274336 xmax: 2317492 ymax: 1522856
+*## Projected CRS: NAD83 / Georgia West (ftUS)
+## # A tibble: 48 x 5
+##    ZipCode SHAPE_Leng  SHAPE_Area Population                                                                                geometry
+##    &lt;chr&gt;        &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;                                                         &lt;MULTIPOLYGON [US_survey_foot]&gt;
+##  1 30304        3578.     874668.          0 (((2228175 1327979, 2227998 1327860, 2227928 1327925, 2227705 1328261, 2227427 13284...
+##  2 30098        6187.    2071539.        118 (((2297621 1477003, 2296953 1476974, 2297100 1477318, 2297169 1477465, 2297218 14775...
+##  3 30291      123056.  271391984.      20835 (((2193467 1298536, 2192364 1298065, 2192170 1296991, 2189781 1296650, 2189841 12958...
+##  4 30268      294091. 1729387442.       7729 (((2121821 1318505, 2122024 1317567, 2122496 1316385, 2122541 1315850, 2122695 13157...
+##  5 30305       87773.  187624264.      29220 (((2233900 1400489, 2233914 1399920, 2234194 1399945, 2234281 1399875, 2234564 13994...
+##  6 30213      375869. 1801881966.      39840 (((2151675 1332989, 2151274 1332205, 2150956 1331852, 2150099 1331680, 2147987 13308...
+##  7 30092       17665.    2769444.          0 (((2278083 1456502, 2278075 1456499, 2278048 1456498, 2278010 1456495, 2277974 14564...
+##  8 30024       33262.   30183784.        299 (((2300742 1476746, 2300594 1476793, 2300490 1476842, 2300566 1476813, 2300742 14767...
+##  9 30097      124207.  336153806.      26791 (((2295375 1480030, 2295462 1480000, 2295886 1479853, 2296075 1479790, 2296150 14797...
+## 10 30022      169357.  673419811.      69893 (((2286054 1475364, 2286025 1475138, 2285791 1475009, 2285374 1475035, 2284582 14750...
+## # ... with 38 more rows
+```
+
+
+???
+We can see here that the CRS is specific to Georgia (so doesn't play well with GPS points)
+
+---
+# Coordinate reference systems
+
+
+&lt;iframe width="100%" height="676" frameborder="0"
+  src="https://observablehq.com/embed/@d3/projection-transitions?cells=viewof+context"&gt;&lt;/iframe&gt;
+
+.footnote[
+Source: [Mike Bostock]("https://twitter.com/mbostock/status/1292887409474994176")
+]
+
+---
+# Changing the CRS 
+
+
+```r
+# change shapefile coordinate reference system to WGS84
+shapefile &lt;- st_transform(shapefile, crs = 4326)
+```
+
+
+
+```
+## Simple feature collection with 48 features and 4 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: -84.85116 ymin: 33.5025 xmax: -84.09764 ymax: 34.1862
+*## Geodetic CRS:  WGS 84
+## # A tibble: 48 x 5
+##    ZipCode SHAPE_Leng  SHAPE_Area Population                                                                                geometry
+##  * &lt;chr&gt;        &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;                                                                      &lt;MULTIPOLYGON [°]&gt;
+##  1 30304        3578.     874668.          0 (((-84.39147 33.65054, -84.39205 33.65021, -84.39228 33.65039, -84.39302 33.65132, -...
+##  2 30098        6187.    2071539.        118 (((-84.16324 34.0603, -84.16545 34.06022, -84.16496 34.06116, -84.16473 34.06157, -8...
+##  3 30291      123056.  271391984.      20835 (((-84.50521 33.56937, -84.50882 33.56806, -84.50945 33.56511, -84.51729 33.56415, -...
+##  4 30268      294091. 1729387442.       7729 (((-84.74079 33.62338, -84.7401 33.6208, -84.73853 33.61756, -84.73837 33.61609, -84...
+##  5 30305       87773.  187624264.      29220 (((-84.37313 33.84985, -84.37308 33.84829, -84.37216 33.84836, -84.37187 33.84817, -...
+##  6 30213      375869. 1801881966.      39840 (((-84.64293 33.6636, -84.64424 33.66144, -84.64528 33.66047, -84.64809 33.65998, -8...
+##  7 30092       17665.    2769444.          0 (((-84.22771 34.00394, -84.22774 34.00394, -84.22783 34.00393, -84.22796 34.00392, -...
+##  8 30024       33262.   30183784.        299 (((-84.15294 34.05959, -84.15342 34.05972, -84.15377 34.05985, -84.15351 34.05977, -...
+##  9 30097      124207.  336153806.      26791 (((-84.17066 34.06862, -84.17037 34.06853, -84.16897 34.06813, -84.16835 34.06796, -...
+## 10 30022      169357.  673419811.      69893 (((-84.20143 34.05579, -84.20153 34.05517, -84.2023 34.05481, -84.20367 34.05488, -8...
+## # ... with 38 more rows
+```
+
+???
+We can use sf::st_transform to re-project a spatial object 
+We can use sf::st_crs to check (or set) the crs for a spatial object
+
+---
+# Take a look!
+
+.pull-left[
+
+```r
+# open up a ggplot
+ggplot() + 
+  # add the shapefile on top
+  geom_sf(data = shapefile, 
+          # no fill
+          fill = NA,
+          # black borders
+          colour = "black") 
+```
+]
+
+.pull-right[
+&lt;img src="slides_gis_demo_files/figure-html/plot_shp_show-1.png" width="504" /&gt;
+]
+
+
+
+---
+# Set CRS for point coordinates
+
+
+```r
+# define period of interest
+recent_period   &lt;- seq(as.Date("2021-06-30") - 13, as.Date("2021-06-30"), by = 1)
+# convert linelist data frame into sf object (with georeference points)
+covid_sf &lt;- covid %&gt;%
+  # remove rows missing gps coordinates
+  drop_na(lat, lon) %&gt;%
+  filter(
+    # drop those with wrong GPS points
+    lat &gt;= 33 &amp; lat &lt;= 35,
+    lon &gt;= -85 &amp; lon &lt;= -84,
+    # drop those outside the last 2 weeks 
+    date_report %in% recent_period
+  ) %&gt;%
+  # create an sf object
+* st_as_sf(
+    # define the coordinates based on lat/long variables
+*   coords = c("lon", "lat"),
+    # set the coordinate reference system to WGS84
+*   crs = 4326,
+    # do not change string variables to factors 
+*   stringsAsFactors = FALSE
+  )
+```
+
+---
+# Set CRS for point coordinates
+
+
+```
+## Simple feature collection with 126 features and 4 fields
+## Geometry type: POINT
+## Dimension:     XY
+## Bounding box:  xmin: -84.66011 ymin: 33.53836 xmax: -84.20438 ymax: 34.16152
+## Geodetic CRS:  WGS 84
+## First 10 features:
+##                 pid date_report age gender                   geometry
+## 1  0de96c1a7bfc991b  2021-06-18   6 Female POINT (-84.38023 33.95349)
+## 2  fb6aac67ab0dbfe3  2021-06-18  23 Female POINT (-84.36471 33.74956)
+## 3  adc636708adbd668  2021-06-17  89 Female POINT (-84.36682 33.74679)
+## 4  4987c88010a7b125  2021-06-20  65 Female POINT (-84.36018 34.02925)
+## 5  9738fc3209ac189f  2021-06-21  14   Male POINT (-84.55165 33.60726)
+## 6  8f03d5ffc0354218  2021-06-18  57 Female  POINT (-84.5458 33.58735)
+## 7  c46e8649039e2fa9  2021-06-17  27 Female POINT (-84.34898 33.81149)
+## 8  ac79c1b0d6993a5c  2021-06-17  47   Male POINT (-84.37456 33.86814)
+## 9  e305f709c166eaf5  2021-06-17   7 Female POINT (-84.49827 33.56734)
+## 10 b834f3e6759d0915  2021-06-18   1   Male POINT (-84.37045 33.67755)
+```
+
+---
+# Basemaps 
+
+- A screenshot of the map area 
+- Called tiles 
+  - Smaller images pieced together 
+- Added for context (bottom layer of *ggplot*)
+- A lot of different tile servers 
+- A lot of different R packages 
+  - We demonstrate [{ggspatial}](https://paleolimbot.github.io/ggspatial/)
+    - Able to save tiles for offline use 
+    - Also have scalebars 
+
+---
+# Bounding boxes
+
+.center[
+
+&lt;img src="../../../../images/gis/bounding_box.png" width="60%" /&gt;
+
+]
+
+---
+# Download &amp; plot basemap
+
+.pull-left[
+
+```r
+# get the bounding box for the shapefile 
+bounding_box &lt;- shapefile %&gt;% 
+  st_bbox()
+# plot a base map including scale bar 
+basemap &lt;- ggplot() +
+  # change the bounding box to an sf object
+  # this defines the area to download map tiles for
+  geom_sf(data = st_as_sfc(bounding_box)) +
+  # download map tiles and add to the plot
+* annotation_map_tile(
+    # define what map tiles to use
+    type =  "cartolight",
+    # define folder to store tile images 
+    cachedir = here::here("data", "map_tiles"),
+    # define if should download tiles each time
+    forcedownload = FALSE,
+    # hide messages about download status and zoom
+    progress = "none" ) 
+```
+]
+
+.pull-right[
+&lt;img src="slides_gis_demo_files/figure-html/basemap_show-1.png" width="504" /&gt;
+]
+
+---
+# Points 
+
+.pull-left[
+
+```r
+# plot the basemap 
+points_map &lt;- basemap + 
+  # add the shapefile on top with no fill and black borders
+  geom_sf(data = shapefile, 
+          fill = NA, 
+          colour = "black") +
+  # plot points from linelist coloured by ethnicity
+  # (order the factor so that the most frequent group is plotted first)
+  geom_sf(data = covid_sf, 
+          mapping = aes(colour = fct_infreq(eth_race))) + 
+  # choose colour combination 
+  scale_colour_brewer(palette = "Set1") +
+  # change the legend label
+  labs(colour = "Ethnicity") + 
+  theme(legend.position = "bottom")
+```
+]
+
+.pull-right[
+&lt;img src="slides_gis_demo_files/figure-html/points_map_show-1.png" width="504" /&gt;
+]
+
+
+---
+# Choropleths - prepare data
+
+
+```r
+# get counts of points within polygons
+shapefile &lt;- shapefile %&gt;%
+  # add a column to the shapefile with counts
+  mutate(
+    # see which points are in which zip code polygon
+*   cases = st_intersects(., covid_sf) %&gt;%
+            # count how many are in each
+*           lengths()
+    )
+# calculate incidence in shapefiledata
+shapefile &lt;- shapefile %&gt;% 
+  mutate(
+    # divide cases by population 
+    incidence = round(cases / Population * 100000, digits = 1), 
+    # clean up calculations 
+    incidence = case_when(
+           # fix the outliers: set infinity to NA and cases less than 10 to NA
+           cases &lt; 5              ~ NA_real_,
+           is.infinite(incidence) ~ NA_real_,  ## nb. infinite due to zero denominator
+           TRUE                   ~ incidence)
+    )
+```
+
+---
+# Choropleths - prepare data
+
+
+```r
+# define breaks (for plotting groups)
+breakers &lt;- shapefile %&gt;% 
+  # change shapefile to a tibble (otherwise geometry pulled with)
+  as_tibble() %&gt;% 
+  # only keep zips with more than ten cases
+  filter(cases &gt; 5) %&gt;% 
+  # pull the incidence column
+  select(incidence) %&gt;% 
+  # define grouping cut-offs based on quartiles of observations 
+  quantile(probs = seq(0, 1, 0.25), na.rm = TRUE) 
+# create a factor variable for incidence
+shapefile &lt;- shapefile %&gt;% 
+* mutate(
+    # define groups using the cut function       
+    incidence_cats = cut(incidence,                                       
+                         # cut-offs as defined above (including zero)
+                         breaks = c(0, breakers), 
+                         # add labels by using the cut-offs
+                         labels = str_glue("&lt;={breakers}"))
+    )
+```
+
+
+---
+# Choropleths - plot data
+
+.pull-left[
+
+```r
+# plot basemap 
+choropleth &lt;- basemap + 
+  # add in shapefile (with black borders) colour by incidence categories
+  geom_sf(data = shapefile, 
+          aes(fill = incidence_cats),
+          colour = "black") + 
+  # define colour scheme 
+  scale_fill_brewer(palette = "YlGn", 
+                    # edit legend labels to the categories defined
+                    # rename the missing group to be fewer than 10 cases
+                    labels = c(
+                      levels(shapefile$incidence_cats),
+                      "Fewer than 5 cases")) + 
+  # add in text labels for each zip code 
+  geom_sf_text(data = shapefile, 
+               aes(label = ZipCode), 
+               check_overlap = TRUE) + 
+  # change the legend title 
+  labs(fill = "Confirmed cases per \n 100,000 by Zip code")
+```
+]
+
+.pull-right[
+&lt;img src="slides_gis_demo_files/figure-html/choropleths_plot_show-1.png" width="504" /&gt;
+]
+
+
+---
+# Bivariate choropleths 
+- Placeholder for demo &gt; see case study [weekly_report.Rmd](https://github.com/appliedepi/emory_training/blob/master/case_study/weekly_report.Rmd#L1894) for details 
+
+
+
+
+.center[
+&lt;img src="slides_gis_demo_files/figure-html/bivarmap_demo-1.png" width="504" /&gt;
+]
+
+
+---
+# Heatmaps 
+
+- Three dimensional distribution over each point and then interpolated  
+
+&lt;img src="../../../../images/gis/heatmaps.png" width="80%" /&gt;
+
+
+
+---
+# Heatmaps - distance
+- How many x-units in one kilometre? 
+
+.pull-left[
+
+&lt;img src="../../../../images/gis/axis_distance.png" width="80%" /&gt;
+
+]
+
+.pull-right[
+
+`$$x_{units} = \frac{x_{max}-x_{min}}{x_{metres}}$$`
+]
+
+---
+# Heatmaps - calculating 
+
+
+```r
+# define x and y minimum/maximum coordinates based on bounding box of base map
+xmin &lt;- st_point(c(bounding_box$xmin, bounding_box$ymin))
+xmax &lt;- st_point(c(bounding_box$xmax, bounding_box$ymin))
+ymin &lt;- xmin
+ymax &lt;- st_point(c(bounding_box$xmin, bounding_box$ymax))
+                 
+# create sf points (with coordinate reference system WGS84) for the x and y axis
+xaxis &lt;- st_sfc(xmin, xmax, crs = 4326)
+yaxis &lt;- st_sfc(ymin, ymax, crs = 4326)
+                 
+# calculate the distance in metres on the axes of your based on longitude and latitude
+# i.e. how many metres on your x axis and how many on your y
+*xdist &lt;- st_distance(xaxis)[2] %&gt;% units::set_units("miles")
+*ydist &lt;- st_distance(yaxis)[2] %&gt;% units::set_units("miles")
+# calculate how many lat/long units there are on each axis 
+*xunits &lt;- st_distance(xmin, xmax)
+*yunits &lt;- st_distance(ymin, ymax)
+# divide the difference in latitude or longitude by the corresponding distance
+# returns the number of units per distance of interest (i.e. coord units per mile)
+*xfact &lt;- as.numeric(xunits / xdist)
+*yfact &lt;- as.numeric(yunits / ydist)
+```
+
+
+---
+# Heatmaps - plotting 
+
+.pull-left[
+
+```r
+heatmap &lt;- basemap + 
+  # add in shapefile not filled with black border
+  geom_sf(data = shapefile, fill = NA, colour = "black") +
+  # add in a density layer 
+  stat_density_2d(
+        # using the sf formatted linelist
+        data = covid_sf,
+        aes(
+          # extract the lat lon from geometry (list column)
+          x = purrr::map_dbl(geometry, ~.[1]),
+          y = purrr::map_dbl(geometry, ~.[2]), 
+          # fill based on the calculated density
+          fill = after_stat(level)
+          ),
+        # define the shape to use for smoothing
+        geom = "polygon",
+        # define whether to show legend (removed as uninformative)
+        show.legend = FALSE,
+        # bandwith (distance squared) 
+        h = c(xfact, yfact)
+        ) + 
+  # define fill palette (viridis continuous) 
+  scale_fill_viridis_c(option = "C")
+```
+]
+
+.pull-right[
+&lt;img src="slides_gis_demo_files/figure-html/heatmaps_plotting_show-1.png" width="504" /&gt;
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

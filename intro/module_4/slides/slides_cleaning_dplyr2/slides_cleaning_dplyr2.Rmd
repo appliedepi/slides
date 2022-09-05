@@ -1,0 +1,395 @@
+---
+title: "Introduction to R for Applied Epidemiology"
+subtitle: "<br>Cleaning data with R: Part 2"
+author: "2022"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  online: TRUE
+---
+class: inverse, center, middle
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,       # for decorating code chunks with colors
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+
+```{r, echo=F, include = F}
+surv_raw <- rio::import(here::here("intro_course", "surveillance_linelist_20141201.csv"))
+```
+
+
+.pull-left[
+## Tidy data 
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "85%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_shelves.png")))
+```
+
+]
+
+---
+# Today: objectives & schedule  
+
+**In this module we aim to help you:**  
+* Gain familiarity of {dplyr} functions used to clean public health data  
+* Apply a series of functions to a data frame using the pipe operator  
+* Begin writing an R script to analyze outbreak data  
+
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  "10 minutes",      "Main",      "Review of previous module",
+  "30 minutes",     "Main",      "Tidy data and data cleaning",
+  "15 minutes",     "Main",      "Demo - data cleaning", 
+  "1h 30minutes",  "Breakouts",   "Exercise",
+  "30 minutes",     "Main",      "Plenary debrief"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Breaks are incorporated above, but not shown as rows")
+```
+
+**This is a *long* exercise, but very important.**  
+
+???
+Note stretch breaks throughout.
+
+
+---
+# Review of previous module  
+
+- The versatility, community, and features of R  
+
+--
+
+- R projects, `import()`, and relative file paths with {here}  
+
+--
+
+- Running commands, writing comments, saving objects  
+
+--
+
+- Operators like `<`  `>`  `==`  `%in%`  
+
+--
+
+- Functions, sometimes with multiple arguments  
+
+--
+
+- Reviewing a dataset `skim()`, `summary()`  
+
+--
+
+- Columns and objects have *classes* that can be checked with `class()`  
+
+
+
+---
+
+# Demo dataset  
+
+Let's use a smaller version to practice with, and explore some core R functions
+```{r, echo=F}
+demo <- surv_raw %>% 
+     head(5) %>% 
+     select(case_id, age, gender, lab_confirmed, fever, epilink)
+```
+
+```{r, eval=T}
+demo %>% 
+  knitr::kable()
+     
+```
+
+--
+
+We will name it "**`demo`**"
+
+---
+
+# The {dplyr} package  
+
+Some of the {dplyr} functions we will use:  
+
+
+Function       | Utility                               
+---------------|---------------------------------------
+`filter()`|subset rows
+`select()`|subset columns
+`rename()`|rename columns 
+`mutate()`|create and transform columns 
+`case_when()`|re-code values using logical criteria  
+
+
+
+
+
+---
+
+# Printing vs. saving  
+
+Our pipes have only *printed* the modified `demo` - the data frame has **not** changed!  
+
+```{r, echo=T, eval=F}
+demo %>%                    # PRINT only cases over 10 years
+  filter(age > 10)
+```
+
+```{r, echo=F, eval=T}
+demo %>%                    # print only cases over 10 years
+  filter(age > 10) %>% 
+  knitr::kable()
+```
+
+--
+
+
+To save: add the assignment operator **<-** to define a new data frame.  
+
+```{r pipe-assign, eval=F, echo=T}
+demo_over10 <- demo %>%
+  filter(age > 10)
+```
+
+(No output to the R console, but a new object in the Environment pane)  
+
+???
+Note how the column names in `demo` are old! It's because our changes have not yet been saved.  
+
+---
+
+# `mutate()` to edit columns  
+ 
+`mutate()` is also used to *edit* existing columns, such as *recoding* values
+
+Below, `recode()` is used inside `mutate()` to recode the gender column  
+
+--
+
+
+
+```{r, echo=TRUE, eval=TRUE}
+demo %>% 
+  mutate(gender = recode(gender,   # re-define gender as: 
+    'm' = 'male',                  # when "m", change to "male"   
+    'f' = 'female'))               # when "f", change to "female"
+```
+
+???
+Explain that there are many nuances to case_when() which you will practice in the breakout exercise
+
+
+
+---
+
+# `ifelse()` for simple logic  
+ 
+`ifelse()` within `mutate()` is used to apply simple recoding logic  
+
+```{r, results = "asis", echo = FALSE}
+"The syntax is: new column name = a function that creates the new values:" %>%
+  flair("new column name", color = "deeppink") %>%
+  flair("function", color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+--
+
+```{r mutate, include = F}
+demo %>% 
+  mutate(adult = ifelse(age >= 18, TRUE, FALSE)) # creates new T/F column
+```
+
+```{r mutate_flair, echo=F}
+decorate("mutate") %>%
+  flair("adult", color = "deeppink") %>%
+  flair("ifelse(age >= 18, TRUE, FALSE)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+--
+
+`ifelse()` applies a logical criteria to each row, returns one value if true, and returns another value if false.  
+
+
+
+---
+
+# Use `case_when()` for complex logic  
+ 
+`case_when()` is used to test a series of logical criteria against each row, and assign a corresponding new value. 
+
+--
+
+```{r, results = "asis", echo = FALSE}
+"The case_when() syntax is: logical criteria for row ~ outcome if met" %>%
+  flair("logical criteria for row", color = "orange") %>%
+  flair("~", color = "deeppink") %>%
+  flair("outcome if met", color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r mutate3, include = F}
+demo %>% 
+  mutate(case_def = case_when(
+    lab_confirmed == TRUE             ~ "Confirmed",
+    epilink == 'yes' & fever == 'yes' ~ "Suspect",
+    TRUE                              ~ "To investigate"))
+```
+
+```{r mutate3_flair, echo=F}
+decorate("mutate3") %>%
+  flair("'Confirmed", color = "cornflowerblue") %>%
+  flair("'Suspect'", color = "cornflowerblue") %>%
+  flair("To investigate)", color = "cornflowerblue") %>%
+  flair("~", color = "deeppink") %>%
+  flair("lab_confirmed == TRUE", color = "orange") %>%
+  flair(" epilink == 'yes' & fever == 'yes'", color = "orange") %>%
+  knit_print.with_flair()
+```
+
+Every row in the dataset is evaluated for the criteria (from top-to-bottom).  
+The bottom `TRUE` criteria catches rows that did not meet any other criteria.  
+
+???
+Explain that there are many nuances to case_when() which you will practice in the breakout exercise
+
+
+
+
+
+---
+class: inverse, center, middle
+
+
+
+## Exercise  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "COVID dominoes.png")))
+```
