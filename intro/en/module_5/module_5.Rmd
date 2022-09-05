@@ -1,0 +1,1053 @@
+---
+title: "Introduction to R for<br>Applied Epidemiology"
+subtitle: "<br>Grouping and summarizing data"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flextable,  # pretty tables
+  scales,     # percents in tables
+  flair,      # text highlights
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{r, include=FALSE}
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+```
+
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+
+
+
+
+# Grouping data 
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "Grouping_1500x500.png")))
+```
+
+
+
+---
+# Today: objectives & schedule  
+
+**In this module we aim to help you:**  
+* Practice using {janitor} to quickly create simple tabulations  
+* Practice using {dplyr} to summarise data with versatility  
+* Practice using {gtsummary} to make publication-ready tables  
+* Make tables of printable quality and export as PNG, Word, etc.  
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  "15 minutes",     "Main",      "Review of previous module",
+  "20 minutes",     "Main",      "Approaches for grouping and summarizing data",
+  "45 minutes",     "Breakouts", "Demo & Exercise: {janitor}",
+  "45 minutes",     "Breakouts", "Demo & Exercise: {dplyr}",
+  "45 minutes",     "Breakouts", "Demo & Exercise: {gtsummary}",
+  "20 minutes",     "Main",      "Plenary debrief & {flextable} demo (if time)"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Breaks are incorporated above, but not shown as rows")
+```
+
+???
+Note stretch breaks throughout.
+
+
+
+
+---
+class: inverse, center, middle
+
+## {janitor} - speed  
+
+## {tidyverse} - flexibility  
+
+## {gtsummary} - beauty
+
+
+
+
+
+---
+class: inverse, center, middle
+
+## {janitor} - speed  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "65%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "simple_table.png")))
+```
+
+
+
+
+---
+
+# `tabyl()`  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district)            #<<
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district)
+```
+
+]
+
+
+---
+
+# `adorn_()` functions  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district) %>% 
+  adorn_totals()            #<<
+```
+
+]
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district) %>% 
+  adorn_totals()
+```
+
+]
+
+
+
+
+---
+
+# `adorn_()` functions  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district) %>% 
+  adorn_totals() %>% 
+  adorn_pct_formatting()                            #<<
+```
+
+]
+
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district) %>% 
+  adorn_totals() %>% 
+  adorn_pct_formatting()
+```
+
+]
+
+
+
+---
+
+# `tabyl()` cross-tabulation   
+
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district, gender)              #<<
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district, gender)
+```
+
+]
+
+
+
+---
+
+# `tabyl()` cross-tabulation   
+
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE)              #<<
+```
+
+Remove missing values from the table.  
+
+]
+
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE)
+```
+
+]
+
+
+
+---
+
+# `adorn_()` cross-tabulation  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both")                     #<<
+```
+
+Add totals for both rows and columns.  
+
+]
+
+
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") 
+```
+
+]
+
+---
+
+# `adorn_()` cross-tabulation  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") %>% 
+  adorn_percentages() %>%     #<<
+  adorn_pct_formatting()      #<<
+```
+
+Add formatted percents with these two commands.  
+
+]
+
+
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") %>% 
+  adorn_percentages() %>%     
+  adorn_pct_formatting()      
+```
+
+]
+
+
+---
+
+# `adorn_()` cross-tabulation  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") %>% 
+  adorn_percentages() %>%     
+  adorn_pct_formatting(digits = 0)      #<<
+```
+
+Set the number of decimal digits.  
+
+]
+
+
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") %>% 
+  adorn_percentages() %>%     
+  adorn_pct_formatting(digits = 0)      
+```
+
+]
+
+
+???
+This may look ugly, but you can make this into pretty image very easily  
+
+---
+
+# {flextable}
+
+Easily pipe the table to `qflextable()` to print nicely as html.  
+
+.pull-left[
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") %>% 
+  adorn_percentages() %>%     
+  adorn_pct_formatting(digits = 0) %>% 
+  qflextable()                                       #<<
+```
+]
+
+.pull-right[
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") %>% 
+  adorn_percentages() %>%     
+  adorn_pct_formatting(digits = 0) %>% 
+  qflextable()                                       #<<
+```
+
+]
+
+.footnote[`qflextable()` means "quick flextable"]
+
+
+
+
+
+
+
+
+---
+class: inverse, center, middle
+
+## {tidyverse} - flexibility  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "65%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "flexibility.png")))
+```
+
+
+
+
+
+---
+
+# Functions  
+
+Common grouping/summarising functions, all from the {tidyverse}:  
+
+* `count()`  
+* `group_by()`  
+* `summarise()`  
+* `arrange()`  
+
+
+
+
+---
+# `count()`  
+
+Pipe the data into to `count()`, and provide a column name.  
+
+This returns the number of rows per unique value (per group)  
+
+--
+
+
+```{r, echo=T}
+surv %>% 
+  count(hospital)                            #<<
+```
+
+???
+Very quick and fast
+
+
+---
+# `count()`  
+
+You can include multiple grouping columns  
+
+--
+
+```{r, echo=T}
+surv %>% 
+  count(hospital, gender)                            #<<
+```
+
+???
+Very quick and fast
+
+
+---
+# group_by() and summarise()  
+
+But what if you want more than just the counts?  
+
+--
+
+"What is mean age in each group?"  
+
+--
+
+"What is the latest date of symptom onset in each group?"  
+
+--
+
+"What is the number of deaths among males in each group?"  
+
+--
+
+`group_by()` and `summarise()` together allow the flexibility to create a  
+**new, summary data frame** with **statistics by group**.  
+
+
+.footnote[`summarise()` and `summarize()` are equivalent]  
+
+
+
+
+---
+# group_by() and summarise()  
+
+```{r, echo=T, eval=F}
+surv %>% 
+  group_by(hospital)
+```
+
+No perceptible change to the dataset *until* another {dplyr} function is applied.  
+
+--
+
+If printed, the `Groups:` are listed above the data.
+
+```{r, echo=F, eval=T}
+surv %>% 
+  group_by(hospital)
+```
+
+
+
+???
+Note the `groups: hospital`, at the top of the tibble
+
+
+
+
+---
+# group_by() and summarise()  
+
+Within `summarise()`, *create columns in a **new**, summarized dataset.*  
+
+--
+
+```{r, results = "asis", echo = FALSE}
+"summarise(new column name = a function to apply to each group of rows)" %>%
+  flair("new column name", color = "deeppink") %>%
+  flair("a function", color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+--
+
+```{r summarise, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise()   
+```
+
+```{r summarise_flair, echo=F}
+decorate("summarise") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
+
+
+
+---
+# group_by() and summarise()  
+
+Within the parentheses, *list new columns for the **new**, summary dataset.*  
+
+```{r, results = "asis", echo = FALSE}
+"summarise(new column name = a function to apply to each group of rows)" %>%
+  flair("new column name", color = "deeppink") %>%
+  flair("a function", color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r summarise2, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(n_rows = n())                        # n() counts the number of rows per group
+```
+
+```{r summarise2_flair, echo=F}
+decorate("summarise2") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
+
+
+---
+# group_by() and summarise()  
+
+Within the parentheses, *create columns in a **new**, summarized dataset.*  
+
+```{r, results = "asis", echo = FALSE}
+"summarise(new column name = a function to apply to each group of rows)" %>%
+  flair("new column name", color = "deeppink") %>%
+  flair("a function", color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r summarise3, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T))        # mean age in the group
+```
+
+```{r summarise3_flair, echo=F}
+decorate("summarise3") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
+
+
+---
+# group_by() and summarise()  
+
+Within the parentheses, *create columns in a **new**, summarized dataset.*  
+
+```{r, results = "asis", echo = FALSE}
+"summarise(new column name = a function to apply to each group of rows)" %>%
+  flair("new column name", color = "deeppink") %>%
+  flair("a function", color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r summarise4, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T))        # latest onset date
+
+```
+
+```{r summarise4_flair, echo=F}
+decorate("summarise4") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
+
+
+---
+# group_by() and summarise()  
+
+Within the parentheses, *create columns in a **new**, summarized dataset.*  
+
+```{r, results = "asis", echo = FALSE}
+"summarise(new column name = a function to apply to each group of rows)" %>%
+  flair("new column name", color = "deeppink") %>%
+  flair("a function", color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r summarise5, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T)) # number female in group
+
+```
+
+```{r summarise5_flair, echo=F}
+decorate("summarise5") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair(" n_female ", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(gender == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
+
+---
+# group_by() and summarise()  
+
+Within the parentheses, *create columns in a **new**, summarized dataset.*  
+
+```{r, results = "asis", echo = FALSE}
+"summarise(new column name = a function to apply to each group of rows)" %>%
+  flair("new column name", color = "deeppink") %>%
+  flair("a function", color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r summarise6, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                                # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T), # number female in group
+    pct_female = percent(n_female / n_rows))     # percent female in group
+```
+
+```{r summarise6_flair, echo=F}
+decorate("summarise6") %>%
+  flair(" n_rows ", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair(" n_female ", color = "deeppink") %>%
+  flair("pct_female", color = "deeppink") %>%
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(gender == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("percent(n_female / n_rows)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+---
+
+# `arrange()`
+
+Sort the table by placing the column(s) for sorting within `arrange()`  
+
+```{r arange, echo=T}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T), # number female in group
+    pct_female = percent(n_female / n_rows)) %>% # percent female in group
+  arrange(n_rows)                                  #<<
+```
+
+
+
+
+---
+
+# `arrange()`
+
+Wrap the column(s) in `desc()` to reverse the sorting  
+
+```{r arange-desc, echo=T}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T), # number female in group
+    pct_female = percent(n_female / n_rows)) %>% # percent female in group
+  arrange(desc(n_rows))                             #<<
+```
+
+
+
+---
+
+# flextable
+
+As with {janitor}, pipe to `qflextable()` for a quick HTML table.  
+
+```{r dplyr-flex, echo=T}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T), # number female in group
+    pct_female = percent(n_female / n_rows)) %>% # percent female in group
+  arrange(desc(n_rows)) %>% 
+  qflextable()                                   #<<
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+class: inverse, center, middle
+
+## {gtsummary} - beauty  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "65%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "beauty.png")))
+```
+
+
+---
+
+# `tbl_summary()`  
+
+* Default output is meant to be *publication ready*  
+
+--
+
+.pull-left[
+
+```{r, echo=T, eval= F}
+surv %>% 
+  select(hospital, age_years)   #<<
+```
+
+Select the columns to summarise.  
+For demonstration:  
+* One character column (`hospital`)  
+* One numeric column (`age_years`)  
+
+]
+
+
+
+---
+
+# `tbl_summary()`  
+
+* Default output is meant to be *publication ready*  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  select(hospital, age_years) %>% 
+  tbl_summary()                 #<<
+```
+
+Select the columns to summarise.  
+For demonstration:  
+* One character column (`hospital`)  
+* One numeric column (`age_years`)  
+
+]
+
+--
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  select(hospital, age_years) %>%   
+  tbl_summary()                    #<<
+```
+
+]
+
+
+
+
+---
+
+# `tbl_summary()`  
+
+* Stratify by another variable  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(by = gender)                 #<<
+```
+
+See tips on customization in the [Epi R Handbook chapter on Descriptive tables](https://epirhandbook.com/en/descriptive-tables.html#tbl_gt)
+]
+
+--
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  select(age_years, hospital, gender) %>%   
+  tbl_summary(by = gender)   #<<
+```
+
+]
+
+
+
+---
+
+# `tbl_summary()`  
+
+* Adjust labels  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(
+       by = gender,
+       label = list(
+         age_years = "Age (years)", 
+         hospital = "Hospital"))     
+```
+
+See tips on customization in the [Epi R Handbook chapter on Descriptive tables](https://epirhandbook.com/en/descriptive-tables.html#tbl_gt)
+]
+
+--
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(by = gender,
+              label = list(
+                   age_years = "Age (years)", #<<
+                   hospital = "Hospital"))    #<< 
+```
+
+]
+
+
+
+---
+class: inverse, center, middle
+
+## Which to use?  
+
+In R, you have many choices.  
+Get comfortable with a tool that works for you.  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "90%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "choices.png")))
+```
+
+
