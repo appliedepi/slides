@@ -4,7 +4,7 @@
 pacman::p_load(rio, googlesheets4, tidyr, stringr, janitor)
 
 # list all langs desired
-langs <- c("en", "fr")
+langs <- c("fr")
 slides_folders <- list.files(here::here("intro", "en"), recursive = FALSE)
 
 # Create function
@@ -53,14 +53,14 @@ for (l in langs) {
 
 
 
-# Import from google sheet; save as dataframes ----------------------------
+#Import from google sheet; save as dataframes ----------------------------
 
-gen <- googlesheets4::read_sheet(
-  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
-  range = "generic") %>%
-  clean_names()
-
-mod1 <- googlesheets4::read_sheet(
-  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
-  range = "mod1", col_types = "c") %>%
-  clean_names()
+# gen <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "generic") %>%
+#   clean_names()
+#
+# mod1 <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "mod1", col_types = "c") %>%
+#   clean_names()
