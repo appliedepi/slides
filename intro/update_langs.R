@@ -43,7 +43,7 @@ for (l in langs) {
   for (slide in slides_folders) {
     update_slides(folder = slide,
                   rmd = paste0(slide, ".Rmd"),
-                  lang = l)
+                  lang_to = l)
   }
 }
 
