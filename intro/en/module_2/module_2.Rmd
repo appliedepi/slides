@@ -99,26 +99,34 @@ style_mono_accent(
   }
 ```
 
-
 ```{r, echo=F, eval=T}
 surv <- rio::import(xfun::relative_path(here::here("data", "surveillance_linelist_clean_20141201.rds")))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic") %>%
+  clean_names()
+
+mod2 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod2", col_types = "c") %>%
+  clean_names()
 ```
 
-
-# Review of previous session  
+# `r paste0(mod2[mod2$uid == "mod2_h1_review", params$lang])`   
 
 ???
 If 5-day course, pause here and give demo of the initial setup and tutorials.  
 
 
 ---
-# This session: objectives & schedule  
+# `r paste0(mod2[mod2$uid == "mod2_h1_objectives", params$lang])`  
 
-**In this module we aim to help you:**  
-* Learn an easy way to organize files in an RStudio project  
-* How to import data easily with {rio} and {here}  
-* Importing and reviewing data in R  
-* Principles of tidy data and tips for proper data format  
+`r paste0(mod2[mod2$uid == "mod2_op_objectives", params$lang])`  
+* `r paste0(mod2[mod2$uid == "mod2_bu_objectives_1", params$lang])`   
+* `r paste0(mod2[mod2$uid == "mod2_bu_objectives_2", params$lang])`  
+* `r paste0(mod2[mod2$uid == "mod2_bu_objectives_3", params$lang])`  
+* `r paste0(mod2[mod2$uid == "mod2_bu_objectives_4", params$lang])`  
 
 
 ```{r, echo=FALSE, warning=F, message=F}
@@ -142,44 +150,43 @@ Note stretch breaks throughout.
 
 
 ---
-# File management  
+# `r paste0(mod2[mod2$uid == "mod2_h1_management", params$lang])`  
 
-R is not just about coding - you must know how to organize your files too.  
+`r paste0(mod2[mod2$uid == "mod2_tx_management_1", params$lang])`  
 
-In the past, R users were often frustrated by not being able to import their data into R.  
-
+`r paste0(mod2[mod2$uid == "mod2_tx_management_2", params$lang])`  
 --
 
-In the last 3-5 years, several advancements have made this process easier:  
+`r paste0(mod2[mod2$uid == "mod2_op_advancement", params$lang])`  
 
-* **The {rio} package** for importing data  
-* **"RStudio projects"** for holding files  
-* **The {here} package** for file paths   
+* `r paste0(mod2[mod2$uid == "mod2_bu_advancement_1", params$lang])`  
+* `r paste0(mod2[mod2$uid == "mod2_bu_advancement_2", params$lang])`  
+* `r paste0(mod2[mod2$uid == "mod2_bu_advancement_3", params$lang])`  
 
-Knowing the details of how they work is not so important.  
-But know that using these three tools together prevents a lot of headache.  
+`r paste0(mod2[mod2$uid == "mod2_tx_advancement_1", params$lang])`  
+`r paste0(mod2[mod2$uid == "mod2_tx_advancement_2", params$lang])`  
 
 
 
 
 ---
-# Importing data with {rio}  
+# `r paste0(mod2[mod2$uid == "mod2_h1_rio", params$lang])`  
 
-Importing data into R **used to be** painful  
+`r paste0(mod2[mod2$uid == "mod2_tx_rio_1", params$lang])`  
 
-You had to remember one function for each type of file: `read.csv()`, `read_excel()`, `read_xlsx()`...  
+`r paste0(mod2[mod2$uid == "mod2_tx_rio_2", params$lang])`  
 
 --
 
-The {rio} package makes it easy with only one function: **`import()`**  
+`r paste0(mod2[mod2$uid == "mod2_tx_rio_3", params$lang])`  
 
 ```{eval=F}
 import("surveillance_linelist_20141201.csv")
 ```
 
 .pull-left[
-"rio" is shorthand for  
-"R inputs/outputs"  
+`r paste0(mod2[mod2$uid == "mod2_tx_rio_4", params$lang])`  
+`r paste0(mod2[mod2$uid == "mod2_tx_rio_5", params$lang])`  
 ]
 
 .pull-right[
@@ -195,11 +202,11 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "functions_pack
 
 
 ---
-# File paths  
+# `r paste0(mod2[mod2$uid == "mod2_h1_paths", params$lang])`  
 
 .pull-left[
 
-File paths tell R where to look for a file.  
+`r paste0(mod2[mod2$uid == "mod2_tx_paths_1", params$lang])`  
 
 ]
 
@@ -215,39 +222,39 @@ File paths tell R where to look for a file.
 
 ]
 
-This path says to start at C: and go to the folders "Users", "Laura", "Documents"...  
+`r paste0(mod2[mod2$uid == "mod2_tx_paths_2", params$lang])`  
 
 ```{r, eval=F, echo=T}
 import("C:\Users\Laura\Documents\intro_course\data\clean\linelist.csv")
 ```
 
 --
-But will this "absolute" file path work on *your* computer? Mostly likely not, because you do not have a "Laura" folder.  
+`r paste0(mod2[mod2$uid == "mod2_tx_paths_3", params$lang])`  
 
 --
 
-"RStudio projects" allow analyses to be portable between computers.  
+`r paste0(mod2[mod2$uid == "mod2_tx_paths_4", params$lang])`  
 
 
 
 ---
-# RStudio projects  
+# `r paste0(mod2[mod2$uid == "mod2_h1_projects", params$lang])`  
 
 
 
 .pull-left[
 
-An RStudio project is a self-contained and portable R working environment.  
+`r paste0(mod2[mod2$uid == "mod2_tx_projects_1", params$lang])`  
 
-It is a folder with all the files associated with a distinct project:  
+`r paste0(mod2[mod2$uid == "mod2_op_projects", params$lang])`  
 * Data files  
 * R scripts  
 * Outputs  
 * etc.
 
-This makes your life immensely easier.  
+`r paste0(mod2[mod2$uid == "mod2_tx_projects_2", params$lang])`  
 
-The project is represented by a .Rproj file in the folder.  
+`r paste0(mod2[mod2$uid == "mod2_tx_projects_3", params$lang])`  
 
 ]
 
@@ -268,11 +275,11 @@ You can zip the folder and share it with a colleague, it can be hosted on a shar
 
 
 ---
-# RStudio projects  
+# `r paste0(mod2[mod2$uid == "mod2_h1_RStudio", params$lang])`  
 
 .pull-left[
 
-Using R projects, the file path *before* the R project folder is flexible.  
+`r paste0(mod2[mod2$uid == "mod2_tx_RStudio_1", params$lang])`  
 
 ]
 
@@ -286,15 +293,15 @@ Using R projects, the file path *before* the R project folder is flexible.
 
 --
 
-The command **`import("linelist.csv")`** used in an R project...  
+`r paste0(mod2[mod2$uid == "mod2_tx_import", params$lang])`  
 
-...produces this file path on Laura's computer:  
+`r paste0(mod2[mod2$uid == "mod2_tx_laura", params$lang])`  
 
 `"C:\Users\Laura\Documents\`**intro_course\linelist.csv"**  
 
 --
 
-...and produces *this* on Rajiv's Mac computer:  
+`r paste0(mod2[mod2$uid == "mod2_tx_rajiv", params$lang])`  
 
 `"home/Rajiv/docs/`**intro_course/linelist.csv"**  
 
@@ -304,13 +311,13 @@ The command **`import("linelist.csv")`** used in an R project...
 
 
 ---
-# {here}  
+# `r paste0(mod2[mod2$uid == "mod2_h1_here", params$lang])`  
 
 .pull-left[
 
-If your script and data are in different subfolders, it can cause problems.  
+`r paste0(mod2[mod2$uid == "mod2_tx_here_1", params$lang])`  
 
-E.g. if you move your script, the file path to the data can break.  
+`r paste0(mod2[mod2$uid == "mod2_tx_here_2", params$lang])`  
 
 
 ]
@@ -331,10 +338,10 @@ E.g. if you move your script, the file path to the data can break.
 
 --
 
-Using {here}, file paths always start from the project **root (top) folder** ("relative").  
-**Run from any** location within the R project, this path will find the linelist.csv  
+`r paste0(mod2[mod2$uid == "mod2_tx_here_3", params$lang])`  
+`r paste0(mod2[mod2$uid == "mod2_tx_here_4", params$lang])`  
 
-**`here("data", "clean", "linelist.csv")`**  
+`r paste0(mod2[mod2$uid == "mod2_tx_here_5", params$lang])`  
 
 
 
@@ -343,7 +350,7 @@ Using {here}, file paths always start from the project **root (top) folder** ("r
 
 
 ---
-# Projects, {here}, & {rio} together  
+# `r paste0(mod2[mod2$uid == "mod2_h1_together", params$lang])`  
 
 ```{r, echo=T, eval=F}
 import(here("data", "clean", "linelist.csv"))
@@ -351,7 +358,7 @@ import(here("data", "clean", "linelist.csv"))
 
 .pull-left[
 
-Finally, by combining `import()` and `here()` in an RStudio project, we create a command that is truly versatile.  
+`r paste0(mod2[mod2$uid == "mod2_tx_together_1", params$lang])`  
 
 ]
 
@@ -372,25 +379,24 @@ Finally, by combining `import()` and `here()` in an RStudio project, we create a
 
 
 .footnote[
-See the [EpiRHandbook section on here package](https://epirhandbook.com/import-and-export.html?q=here#here) and on [EpiRHandbook section on importing data](https://epirhandbook.com/en/import-and-export.html)
+`r paste0(mod2[mod2$uid == "mod2_fn_here", params$lang])`  
 ]
 
 ---
-# Reviewing your dataset
+# `r paste0(mod2[mod2$uid == "mod2_h1_dataset", params$lang])`  
 
-Once imported into R, what do you look for when initially reviewing your data?
-
-
----
-
-# Importing demo
+`r paste0(mod2[mod2$uid == "mod2_tx_dataset_1", params$lang])`  
 
 
 ---
-class: inverse, center, middle
+
+# `r paste0(mod2[mod2$uid == "mod2_h1_import", params$lang])`  
 
 
-## Tidy data 
+---
+`r paste0(mod2[mod2$uid == "mod2_tx_import_1", params$lang])`  
+
+## `r paste0(mod2[mod2$uid == "mod2_h2_tidy", params$lang])`  
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "85%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
@@ -402,26 +408,27 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 
 ---
-# Tidy data
+# `r paste0(mod2[mod2$uid == "mod2_h1_tidy", params$lang])`  
 
-Clean data should also be "tidy". Below are 3 core principles of "tidy data":  
-
---
-
-1. Each **value** must have its own **cell**
+`r paste0(mod2[mod2$uid == "mod2_op_tidy_1", params$lang])`  
 
 --
 
-2. Each **variable** must have its own **column**
+1. `r paste0(mod2[mod2$uid == "mod2_nu_tidy_1", params$lang])`  
 
 --
 
-3. Each **observation** must have its own **row**  
+2. `r paste0(mod2[mod2$uid == "mod2_nu_tidy_2", params$lang])`  
+
+--
+
+3. `r paste0(mod2[mod2$uid == "mod2_nu_tidy_3", params$lang])`  
 
 
 
 
-.footnote[Source: [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)]
+.footnote[`r paste0(mod2[mod2$uid == "mod2_fn_source", params$lang])`  
+]
 
 ???
 
