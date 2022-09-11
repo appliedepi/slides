@@ -5,7 +5,7 @@ author: "2022"
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
   xaringan::moon_reader:
-    seal: TRUE
+    seal: false
     lib_dir: libs
     nature:
       highlightStyle: github
@@ -13,9 +13,9 @@ output:
       countIncrementalSlides: false
     css: xaringan-themer.css
 params:
-  lang: "en"
+  lang: "fr"
 ---
-class: inverse, center, middle
+class: inverse, center, middle, title-slide
 
 ```{r, eval=F, echo=F, include = F}
 # Must do in order to render.
@@ -124,11 +124,28 @@ style_mono_accent(
 
 ```{r, echo=F, include = F}
 surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic") %>%
+  clean_names()
+
+mod4 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod4", col_types = "c") %>%
+  clean_names()
 ```
 
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
+
+### `r paste0(mod4[mod4$uid == "mod4_h1_subtitle", params$lang])`
+
+contact@appliedepi.org
+
+---
 
 .pull-left[
-## Tidy data 
+## `r paste0(mod4[mod4$uid == "mod4_h2_tidy", params$lang])` 
 ]
 
 .pull-right[
@@ -143,12 +160,12 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 ]
 
 ---
-# Today: objectives & schedule  
+# `r paste0(mod4[mod4$uid == "mod4_h1_objectives", params$lang])`  
 
-**In this module we aim to help you:**  
-* Gain familiarity of {dplyr} functions used to clean public health data  
-* Apply a series of functions to a data frame using the pipe operator  
-* Begin writing an R script to analyze outbreak data  
+`r paste0(mod4[mod4$uid == "mod4_op_objectives", params$lang])`  
+* `r paste0(mod4[mod4$uid == "mod4_bu_objectives_1", params$lang])`  
+* `r paste0(mod4[mod4$uid == "mod4_bu_objectives_2", params$lang])`  
+* `r paste0(mod4[mod4$uid == "mod4_bu_objectives_3", params$lang])`  
 
 
 ```{r, echo=FALSE, warning=F, message=F}
@@ -166,48 +183,48 @@ outline %>%
   flextable::add_footer_lines("Breaks are incorporated above, but not shown as rows")
 ```
 
-**This is a *long* exercise, but very important.**  
+`r paste0(mod4[mod4$uid == "mod4_tx_objectives", params$lang])`  
 
 ???
 Note stretch breaks throughout.
 
 
 ---
-# Review of previous module  
+# `r paste0(mod4[mod4$uid == "mod4_h1_review", params$lang])`  
 
-- The versatility, community, and features of R  
-
---
-
-- R projects, `import()`, and relative file paths with {here}  
+- `r paste0(mod4[mod4$uid == "mod4_bu_review_1", params$lang])`  
 
 --
 
-- Running commands, writing comments, saving objects  
+- `r paste0(mod4[mod4$uid == "mod4_bu_review_2", params$lang])`  
 
 --
 
-- Operators like `<`  `>`  `==`  `%in%`  
+- `r paste0(mod4[mod4$uid == "mod4_bu_review_3", params$lang])`  
 
 --
 
-- Functions, sometimes with multiple arguments  
+- `r paste0(mod4[mod4$uid == "mod4_bu_review_4", params$lang])`  
 
 --
 
-- Reviewing a dataset `skim()`, `summary()`  
+- `r paste0(mod4[mod4$uid == "mod4_bu_review_5", params$lang])`  
 
 --
 
-- Columns and objects have *classes* that can be checked with `class()`  
+- `r paste0(mod4[mod4$uid == "mod4_bu_review_6", params$lang])`  
+
+--
+
+- `r paste0(mod4[mod4$uid == "mod4_bu_review_7", params$lang])`  
 
 
 
 ---
 
-# Demo dataset  
+# `r paste0(mod4[mod4$uid == "mod4_h1_demo", params$lang])`  
 
-Let's use a smaller version to practice with, and explore some core R functions
+`r paste0(mod4[mod4$uid == "mod4_tx_demo_1", params$lang])`
 ```{r, echo=F}
 demo <- surv_raw %>% 
      head(5) %>% 
@@ -222,22 +239,22 @@ demo %>%
 
 --
 
-We will name it "**`demo`**"
+`r paste0(mod4[mod4$uid == "mod4_tx_demo_2", params$lang])`
 
 ---
 
-# The {dplyr} package  
+# `r paste0(mod4[mod4$uid == "mod4_h1_dplyR", params$lang])`  
 
-Some of the {dplyr} functions we will use:  
+`r paste0(mod4[mod4$uid == "mod4_tx_dplyR", params$lang])`  
 
 
-Function       | Utility                               
+`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_1", params$lang])`       | `r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2", params$lang])`                               
 ---------------|---------------------------------------
-`filter()`|subset rows
-`select()`|subset columns
-`rename()`|rename columns 
-`mutate()`|create and transform columns 
-`case_when()`|re-code values using logical criteria  
+`filter()`|`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2_1", params$lang])`
+`select()`|`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2_2", params$lang])`
+`rename()`|`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2_3", params$lang])` 
+`mutate()`|`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2_4", params$lang])` 
+`case_when()`|`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2_5", params$lang])`   
 
 
 
@@ -245,9 +262,9 @@ Function       | Utility
 
 ---
 
-# Printing vs. saving  
+# `r paste0(mod4[mod4$uid == "mod4_h1_print", params$lang])`   
 
-Our pipes have only *printed* the modified `demo` - the data frame has **not** changed!  
+`r paste0(mod4[mod4$uid == "mod4_tx_print_1", params$lang])` 
 
 ```{r, echo=T, eval=F}
 demo %>%                    # PRINT only cases over 10 years
@@ -263,25 +280,25 @@ demo %>%                    # print only cases over 10 years
 --
 
 
-To save: add the assignment operator **<-** to define a new data frame.  
+`r paste0(mod4[mod4$uid == "mod4_tx_print_2", params$lang])` 
 
 ```{r pipe-assign, eval=F, echo=T}
 demo_over10 <- demo %>%
   filter(age > 10)
 ```
 
-(No output to the R console, but a new object in the Environment pane)  
+`r paste0(mod4[mod4$uid == "mod4_tx_print_3", params$lang])`  
 
 ???
 Note how the column names in `demo` are old! It's because our changes have not yet been saved.  
 
 ---
 
-# `mutate()` to edit columns  
+# `r paste0(mod4[mod4$uid == "mod4_h1_mutate", params$lang])`  
  
-`mutate()` is also used to *edit* existing columns, such as *recoding* values
+`r paste0(mod4[mod4$uid == "mod4_tx_mutate_1", params$lang])`
 
-Below, `recode()` is used inside `mutate()` to recode the gender column  
+`r paste0(mod4[mod4$uid == "mod4_tx_mutate_2", params$lang])`  
 
 --
 
@@ -301,14 +318,14 @@ Explain that there are many nuances to case_when() which you will practice in th
 
 ---
 
-# `ifelse()` for simple logic  
+# `r paste0(mod4[mod4$uid == "mod4_h1_ifelse", params$lang])`  
  
-`ifelse()` within `mutate()` is used to apply simple recoding logic  
+`r paste0(mod4[mod4$uid == "mod4_tx_ifelse_1", params$lang])`  
 
 ```{r, results = "asis", echo = FALSE}
-"The syntax is: new column name = a function that creates the new values:" %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("function", color = "cornflowerblue") %>%
+str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_3", params$lang])}) %>%
+  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_4", params$lang])}), color = "deeppink") %>%
+  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_4", params$lang])}), color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -329,23 +346,23 @@ decorate("mutate") %>%
 
 --
 
-`ifelse()` applies a logical criteria to each row, returns one value if true, and returns another value if false.  
+`r paste0(mod4[mod4$uid == "mod4_tx_ifelse_2", params$lang])`  
 
 
 
 ---
 
-# Use `case_when()` for complex logic  
+# `r paste0(mod4[mod4$uid == "mod4_h1_casewhen", params$lang])`  
  
-`case_when()` is used to test a series of logical criteria against each row, and assign a corresponding new value. 
+`r paste0(mod4[mod4$uid == "mod4_tx_casewhen_1", params$lang])` 
 
 --
 
 ```{r, results = "asis", echo = FALSE}
-"The case_when() syntax is: logical criteria for row ~ outcome if met" %>%
-  flair("logical criteria for row", color = "orange") %>%
+str_glue({paste0(mod4[mod4$uid == "mod4_tx_casewhen_4", params$lang])}) %>%
+  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_casewhen_5", params$lang])}), color = "orange") %>%
   flair("~", color = "deeppink") %>%
-  flair("outcome if met", color = "cornflowerblue") %>%
+  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_casewhen_6", params$lang])}), color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -369,8 +386,8 @@ decorate("mutate3") %>%
   knit_print.with_flair()
 ```
 
-Every row in the dataset is evaluated for the criteria (from top-to-bottom).  
-The bottom `TRUE` criteria catches rows that did not meet any other criteria.  
+`r paste0(mod4[mod4$uid == "mod4_tx_casewhen_1", params$lang])`  
+`r paste0(mod4[mod4$uid == "mod4_tx_casewhen_1", params$lang])`  
 
 ???
 Explain that there are many nuances to case_when() which you will practice in the breakout exercise
@@ -384,7 +401,7 @@ class: inverse, center, middle
 
 
 
-## Exercise  
+## `r paste0(mod4[mod4$uid == "mod4_h1_exercise", params$lang])`  
 
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
