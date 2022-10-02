@@ -291,7 +291,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "r_p
 
 .pull-right[
 
-```{r difficulty_plot, warning = FALSE, message = FALSE}
+```{r difficulty_plot, warning = FALSE, message = FALSE, eval = params$lang == "en"}
 exp <- function(x){x^2}
 lgr <- function(x){log(x) + 4}
 num <- 10000
@@ -317,6 +317,36 @@ ggplot() +
         legend.position = "bottom", 
         legend.title = element_blank())
 ```
+
+
+```{r difficulty_plot, warning = FALSE, message = FALSE, eval = params$lang == "fr"}
+exp <- function(x){x^2}
+lgr <- function(x){log(x) + 4}
+num <- 10000
+linwid <- 2
+ggplot() + 
+  geom_function(fun = exp,
+                n = num, 
+                size = linwid,
+                aes(colour = "Excel")) +
+  geom_function(fun = lgr, 
+                n = num, 
+                size = linwid,
+                aes(colour = "R")) + 
+  scale_y_continuous(expand = c(0, 0), 
+                     limits = c(0, 10)) + 
+  scale_x_continuous(expand = c(0, 0), 
+                     limits = c(0, 5)) + 
+  labs(x = "Complexité du code", 
+       y = "Difficulté des tâches") + 
+  theme_classic(base_size = 24) + 
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(), 
+        legend.position = "bottom", 
+        legend.title = element_blank())
+```
+
+
 
 ]
 
@@ -505,7 +535,11 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "par
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
-knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "Applied_Epi_Offerings.png")))
+#knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", #"Applied_Epi_Offerings.png")))
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", paste0("Applied_Epi_Offerings_", params$lang, ".png"))))
+
+
 ```
 
 
@@ -1064,7 +1098,10 @@ What is returned by this Excel equation?
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
-knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "Function_Bread_Example.png")))
+#knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", #"Function_Bread_Example.png")))
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", paste0("Function_Bread_Example_", params$lang, ".png"))))
+
 ```
 
 
@@ -1169,13 +1206,6 @@ str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_6", params$lang])}) %>%
 
 
 
-
-
-
-
-
-
-
 ---
 # `r paste0(mod1[mod1$uid == "mod1_h1_tbl", params$lang])` 
 
@@ -1227,8 +1257,6 @@ decorate("tblcross") %>%
   flair("row =", color = "orange") %>%
   knit_print.with_flair()
 ```
-
-
 
 
 ---
