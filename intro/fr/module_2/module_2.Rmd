@@ -13,7 +13,7 @@ output:
       countIncrementalSlides: false
     css: [xaringan-themer.css]
 params:
-  lang: "en"
+  lang: "fr"
 ---
 class: center, middle, inverse, title-slide
 
@@ -136,7 +136,7 @@ If 5-day course, pause here and give demo of the initial setup and tutorials.
 * `r paste0(mod2[mod2$uid == "mod2_bu_objectives_4", params$lang])`  
 
 
-```{r, echo=FALSE, warning=F, message=F}
+```{r, echo=FALSE, warning=F, message=F, eval = params$lang == "en"}
 outline <- dplyr::tribble(
   ~Time, ~Location, ~Topic,
   "15 minutes",     "Main",     "Review of previous session",
@@ -150,6 +150,23 @@ outline %>%
   flextable::qflextable() %>% 
   flextable::add_footer_lines("Take breaks as you wish during the exercise")
 ```
+
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_1_1", params$lang])}),     str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_2_1", params$lang])}),      str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_3_1", params$lang])}),
+  str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_1_2", params$lang])}),     str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_2_2", params$lang])}),      str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_3_2", params$lang])}),
+  str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_1_3", params$lang])}),     str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_2_3", params$lang])}),      str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_3_3", params$lang])}),
+  str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_1_4", params$lang])}),     str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_2_4", params$lang])}),      str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_3_4", params$lang])}),
+  str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_1_5", params$lang])}),        str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_2_5", params$lang])}), str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_3_5", params$lang])})
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines(str_glue({paste0(mod2[mod2$uid == "mod2_tb_session_4", params$lang])}))
+```
+
 
 ???
 Note stretch breaks throughout.
@@ -254,10 +271,10 @@ import("C:\Users\Laura\Documents\intro_course\data\clean\linelist.csv")
 `r paste0(mod2[mod2$uid == "mod2_tx_projects_1", params$lang])`  
 
 `r paste0(mod2[mod2$uid == "mod2_op_projects", params$lang])`  
-* Data files  
-* R scripts  
-* Outputs  
-* etc.
+* `r paste0(mod2[mod2$uid == "mod2_bu_Rproject_1", params$lang])`  
+* `r paste0(mod2[mod2$uid == "mod2_bu_Rproject_2", params$lang])`  
+* `r paste0(mod2[mod2$uid == "mod2_bu_Rproject_3", params$lang])`  
+* `r paste0(mod2[mod2$uid == "mod2_bu_Rproject_4", params$lang])`
 
 `r paste0(mod2[mod2$uid == "mod2_tx_projects_2", params$lang])`  
 
@@ -398,7 +415,7 @@ import(here("data", "clean", "linelist.csv"))
 
 
 ---
-`r paste0(mod2[mod2$uid == "mod2_tx_class", params$lang])`  
+class: inverse, center, middle
 
 ## `r paste0(mod2[mod2$uid == "mod2_h2_tidy", params$lang])`  
 
@@ -511,7 +528,10 @@ Let's start with an easy one...
 # Using here() alone won't work because Rmd folder becomes the rendering root.
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
-knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_image.png")))
+#knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_image.png")))
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", paste0("tidy_image_", params$lang, ".png"))))
+
 ```
 
 .footnote[`r paste0(mod2[mod2$uid == "mod2_fn_term", params$lang])`]
