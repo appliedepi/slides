@@ -163,7 +163,7 @@ outline <- dplyr::tribble(
 
 outline %>% 
   flextable::qflextable() %>% 
-  flextable::add_footer_lines("Breaks are incorporated above, but not shown as rows")
+  flextable::add_footer_lines(str_glue({paste0(mod1[mod1$uid == "mod3_tb_session_4", params$lang])}))
 ```
 
 `r paste0(mod3[mod3$uid == "mod3_tx_objectives", params$lang])`  
@@ -211,17 +211,6 @@ Note stretch breaks throughout.
 
 
 .pull-left[
-```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
-# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
-# It dynamically creates the ../../etc filepath.
-
-knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_broom.png")))
-```
-]
-
---
-
-.pull-right[
 
 - `r paste0(mod3[mod3$uid == "mod3_bu_clean_1", params$lang])`  
 
@@ -239,14 +228,21 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
  
 ]
 
+--
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_broom.png")))
+```
+]
 
 .footnote[]
 
 ???
 Ask the participants to quickly write what makes a dataset clean, in their view, in the chat
-
-
-
 
 
 ---
@@ -405,10 +401,21 @@ filter(demo, age < 18 & (gender == "m" | lab_confirmed == TRUE))
 
 # `r paste0(mod3[mod3$uid == "mod3_h1_filter", params$lang])`  
 
-```{r, eval=F, echo=T}
+```{r, eval=F, echo=params$lang == "en"}
 # complete demo data
 filter(demo, ___)
 ```
+
+```{r, eval=F, echo=params$lang == "fr"}
+# données de démo complètes
+filter(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+# полные демонстрационные данные
+filter(demo, ___)
+```
+
 
 ```{r, eval=T, echo=F}
 demo %>% knitr::kable()
@@ -421,10 +428,23 @@ demo %>% knitr::kable()
 # `r paste0(mod3[mod3$uid == "mod3_h1_filter", params$lang])`  
 
 
-```{r eval = F, echo=T}
+```{r eval = F, echo=params$lang == "en"}
 # filter applied  
 filter(demo, age < 18)
 ```
+
+
+```{r eval = F, echo=params$lang == "fr"}
+# filtre appliqué
+filter(demo, age < 18)
+```
+
+
+```{r eval = F, echo=params$lang == "ru"}
+# применён фильтр
+filter(demo, age < 18)
+```
+
 
 ```{r eval = T, echo=F}
 filter(demo, age < 18) %>% knitr::kable()
@@ -441,8 +461,18 @@ filter(demo, age < 18) %>% knitr::kable()
 
 --
 
-```{r, eval=F, echo=T}
+```{r, eval=F, echo=params$lang == "en"}
 # complete demo data
+select(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+# données de démo complètes
+select(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+# полные демонстрационные данные
 select(demo, ___)
 ```
 
@@ -459,11 +489,20 @@ demo %>% knitr::kable()
 
 `r paste0(mod3[mod3$uid == "mod3_tx_select_2", params$lang])`
 
-```{r, eval=F, echo=T}
+```{r, eval=F, echo=params$lang == "en"}
 # select() to keep case_id and age columns only
 select(demo, case_id, age)
 ```
 
+```{r, eval=F, echo=params$lang == "fr"}
+# select() pour ne garder que les colonnes case_id et age
+select(demo, case_id, age)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+# select() to keep case_id and age columns only
+select(demo, case_id, age)
+```
 
 ```{r, eval=T, echo=F}
 select(demo, case_id, age) %>% knitr::kable()
@@ -475,11 +514,20 @@ select(demo, case_id, age) %>% knitr::kable()
 
 `r paste0(mod3[mod3$uid == "mod3_tx_select_2", params$lang])`
 
-```{r, eval=F, echo=T}
+```{r, eval=F, echo=params$lang == "en"}
 # add gender column
 select(demo, case_id, age, gender)
 ```
 
+```{r, eval=F, echo=params$lang == "fr"}
+# ajouter la colonne sexe
+select(demo, case_id, age, gender)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+# add gender column
+select(demo, case_id, age, gender)
+```
 
 ```{r, eval=T, echo=F}
 select(demo, case_id, age, gender) %>% knitr::kable()
@@ -492,7 +540,17 @@ select(demo, case_id, age, gender) %>% knitr::kable()
 
 `r paste0(mod3[mod3$uid == "mod3_tx_select_3", params$lang])`
 
-```{r, eval=F, echo=T}
+```{r, eval=F, echo=params$lang == "en"}
+# remove case_id and lab_confirmed columns from original dataset
+select(demo, -case_id, -lab_confirmed)
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+#supprimer les colonnes case_id et lab_confirmed du jeu de données original
+select(demo, -case_id, -lab_confirmed)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
 # remove case_id and lab_confirmed columns from original dataset
 select(demo, -case_id, -lab_confirmed)
 ```
@@ -613,9 +671,19 @@ demo %>%
 `r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
 `r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
 
-```{r, eval=F, echo=T}
+```{r, eval=F, echo=params$lang == "en"}
 demo %>% 
-  select(case_id, age, gender, lab_confirmed)
+  select(case_id, age, gender, lab_confirmed)        # select columns
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed)        # sélectionner les colonnes
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed)        # select columns
 ```
 
 ```{r, eval=T, echo=F}
@@ -630,10 +698,22 @@ demo %>%
 `r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
 
 
-```{r, eval=F, echo=T}
+```{r, eval=F, echo=params$lang == "en"}
 demo %>% 
-  select(case_id, age, gender, lab_confirmed) %>% 
-  distinct()
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct()                                         # de-duplicate
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # sélectionner les colonnes
+  distinct()                                         # dédupliquer 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct()                                         # de-duplicate
 ```
 
 ```{r, eval=T, echo=F}
@@ -650,11 +730,25 @@ demo %>%
 `r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
 
 
-```{r, eval=F, echo=T}
+```{r, eval=F, echo=params$lang == "en"}
 demo %>% 
-  select(case_id, age, gender, lab_confirmed) %>% 
-  distinct() %>% 
-  filter(age < 18, lab_confirmed == TRUE)
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct() %>%                                     # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE)            # only young children confirmed cases
+```
+
+```{r, eval=F, echo= params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # Sélectionner les colonnes
+  distinct() %>%                                     # dédupliquer 
+  filter(age < 18, lab_confirmed == TRUE)            # uniquement les cas confirmés d'enfants 
+```
+
+```{r, eval=F, echo=params$lang== "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct() %>%                                     # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE)            # only young children confirmed cases
 ```
 
 ```{r, eval=T, echo=F}
@@ -674,7 +768,25 @@ demo %>%
 `r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
 
 
-```{r, eval=F, echo=T}
+```{r, eval=F, echo=params$lang == "en"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%               
+  distinct() %>%                                                
+  filter(age < 18, lab_confirmed == TRUE) %>%                   
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))       
+ 
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # Sélectionner les colonnes
+  distinct() %>%                                     # dédupliquer 
+  filter(age < 18, lab_confirmed == TRUE) %>%        # uniquement les cas confirmés d'enfants
+  mutate(infant = ifelse(age < 1, "infant", "not infant")) # créer une colonne       
+ 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
 demo %>% 
   select(case_id, age, gender, lab_confirmed) %>%               
   distinct() %>%                                                
@@ -701,12 +813,31 @@ demo %>%
 `r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
 
 
-```{r, eval=F, echo=T}
+```{r, eval=F, echo=params$lang == "en"}
 demo %>% 
-  select(case_id, age, gender, lab_confirmed) %>% 
-  distinct() %>% 
-  filter(age < 18, lab_confirmed == TRUE) %>% 
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))
+  select(case_id, age, gender, lab_confirmed) %>%               
+  distinct() %>%                                                
+  filter(age < 18, lab_confirmed == TRUE) %>%                   
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))       
+ 
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # Sélectionner les colonnes
+  distinct() %>%                                     # dédupliquer 
+  filter(age < 18, lab_confirmed == TRUE) %>%        # uniquement les cas confirmés d'enfants
+  mutate(infant = ifelse(age < 1, "infant", "not infant")) # créer une colonne       
+ 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%               
+  distinct() %>%                                                
+  filter(age < 18, lab_confirmed == TRUE) %>%                   
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))       
+ 
 ```
 
 ```{r, eval=T, echo=F}
@@ -720,7 +851,7 @@ demo %>%
 
 `r paste0(mod3[mod3$uid == "mod3_tx_vertical_3", params$lang])`
 
-.footnote[`r paste0(mod3[mod3$uid == "mod3_fn_vertical_2", params$lang])`]
+`r paste0(mod3[mod3$uid == "mod3_fn_vertical_2", params$lang])`]
 
 
 
@@ -762,11 +893,31 @@ demo %>%
 
 `r paste0(mod3[mod3$uid == "mod3_tx_rename_2", params$lang])`  
 
-```{r, echo=T}
+```{r, echo=params$lang == "en"}
 demo %>% 
   clean_names() %>% 
   rename(
        # NEW      = OLD
+       age_years  = age,                    #<<
+       date_onset = onset_date) %>%         #<<
+  names()
+```
+
+```{r, echo=params$lang == "fr"}
+demo %>% 
+  clean_names() %>% 
+  rename(
+       # Nouveau  = Ancien
+       age_years  = age,                    #<<
+       date_onset = onset_date) %>%         #<<
+  names()
+```
+
+```{r, echo=params$lang == "ru"}
+demo %>% 
+  clean_names() %>% 
+  rename(
+       # Nouveau  = Ancien
        age_years  = age,                    #<<
        date_onset = onset_date) %>%         #<<
   names()
@@ -779,7 +930,17 @@ demo %>%
 
 `r paste0(mod3[mod3$uid == "mod3_tx_print_1", params$lang])`  
 
-```{r, echo=T, eval=F}
+```{r, echo=params$lang == "en", eval=F}
+demo %>%                    # PRINT only child cases
+  filter(age < 18)
+```
+
+```{r, echo=params$lang == "fr", eval=F}
+demo %>%                    # IMPRIMER uniquement les cas d'enfants
+  filter(age < 18)
+```
+
+```{r, echo=params$lang == "ru", eval=F}
 demo %>%                    # PRINT only child cases
   filter(age < 18)
 ```
@@ -849,9 +1010,23 @@ decorate("mutate") %>%
 
 
 
-```{r mutate2, echo=TRUE, eval=TRUE}
+```{r mutate2, echo=params$lang == "en", eval=params$lang == "en"}
 demo %>% 
-  mutate(gender = recode(gender,   # re-define gender as: 
+  mutate(gender = recode(gender,   #re-define gender as: 
+    'm' = 'male',                  # when "m", change to "male"   
+    'f' = 'female'))               # when "f", change to "female"
+```
+
+```{r mutate2, echo=params$lang == "fr", eval=params$lang == "fr"}
+demo %>% 
+  mutate(gender = recode(gender,   # redéfinir le genre comme : 
+    'm' = 'male',                  # quand 'm', devient 'male'   
+    'f' = 'female'))               # quand "f", devient 'female'
+```
+
+```{r mutate2, echo=params$lang == "ru", eval=param$lang == "ru"}
+demo %>% 
+  mutate(gender = recode(gender,   #re-define gender as: 
     'm' = 'male',                  # when "m", change to "male"   
     'f' = 'female'))               # when "f", change to "female"
 ```
@@ -925,7 +1100,7 @@ demo %>%
 
 ]
 
-.footnote[`r paste0(mod3[mod3$uid == "mod3_fn_lubridate", params$lang])`]
+`r paste0(mod3[mod3$uid == "mod3_fn_lubridate", params$lang])`
 
 
 
