@@ -37,33 +37,30 @@ class: center, middle, inverse, title-slide
 &lt;/style&gt;
 
 
-# Introduction à R pour l'épidémiologie appliquée
+# Introduction to R for Applied Epidemiology
 
-### Importation de données, gestion de projets et mise en ordre des données
+### Data import, project management, and tidy data
 
 contact@appliedepi.org
 
 ---
-# Revue de la session précédente   
+# Review of previous session   
 
 ???
 If 5-day course, pause here and give demo of the initial setup and tutorials.  
 
 
 ---
-# Cette session : objectifs et programme  
+# This session: objectives &amp; schedule  
 
-**Dans ce module, nous voulons vous aider à :**  
-* Organiser simplement et clairement les fichiers dans un project RStudio.   
-* Importer facilement des données avec {rio} et {here}  
-* Importer et réviser des données dans R  
-* Principes d'organisation et de formatage des données  
-
-
+**In this module we aim to help you:**  
+* Learn an easy way to organize files in an RStudio project   
+* How to import data easily with {rio} and {here}  
+* Importing and reviewing data in R  
+* Principles of tidy data and tips for proper data format  
 
 
-
-&lt;template id="24ba29fc-1e27-4e16-93d4-f85c59d0c82c"&gt;&lt;style&gt;
+&lt;template id="6718d058-b447-4317-a41d-51d193c4c55b"&gt;&lt;style&gt;
 .tabwid table{
   border-spacing:0px !important;
   border-collapse:collapse;
@@ -102,11 +99,62 @@ background-color: transparent;
 .katex-display {
     margin: 0 0 !important;
 }
-&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-51d5ae02{}.cl-51cacb22{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-51cf1330{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-51cf2c26{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c30{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c3a{width:6.387in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c3b{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c44{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c45{width:6.387in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c46{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c4e{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c4f{width:6.387in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c50{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c58{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c59{width:6.387in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c62{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c6c{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c6d{width:6.387in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c6e{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c76{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-51cf2c80{width:6.387in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-51d5ae02'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-51cf2c26"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-51cf2c30"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-51cf2c3a"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-51cf2c3b"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-51cf2c44"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-51cf2c45"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Revue de la session précédente&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-51cf2c46"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-51cf2c4e"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-51cf2c4f"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Introduction aux projets RStudio, à l'importation de données et au nettoyage des données.&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-51cf2c50"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-51cf2c58"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-51cf2c59"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Demo&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-51cf2c46"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;2 heures&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-51cf2c4e"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Exercice&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-51cf2c4f"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Fichiers, projets, importation, révision, formats de données&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-51cf2c62"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-51cf2c6c"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-51cf2c6d"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;Débriefing en plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-51cf2c6e"&gt;&lt;p class="cl-51cf1330"&gt;&lt;span class="cl-51cacb22"&gt;character(0)&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
-&lt;div class="flextable-shadow-host" id="2d2fdf14-a766-4682-bd5a-ff3289aa44f8"&gt;&lt;/div&gt;
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-91ab22f8{}.cl-91a06138{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-91a4e2f8{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-91a4f838{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f842{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f856{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f857{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f860{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f861{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f86a{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f874{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f87e{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f87f{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f888{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f892{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f89c{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f8a6{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f8a7{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f8a8{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f8b0{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f8b1{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f8ba{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f8c4{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91a4f8ce{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-91ab22f8'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-91a4f838"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91a4f842"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91a4f856"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-91a4f857"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91a4f860"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91a4f861"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Review of previous session&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-91a4f86a"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91a4f874"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91a4f87e"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Overview of RStudio projects, data import, and tidy data&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-91a4f87f"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91a4f888"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91a4f892"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Demo&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-91a4f89c"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;2 hours&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91a4f8a6"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91a4f8a7"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Files, projects, importing, reviewing, and data formats&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-91a4f8a8"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91a4f8b0"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91a4f8b1"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Plenary debrief&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-91a4f8ba"&gt;&lt;p class="cl-91a4e2f8"&gt;&lt;span class="cl-91a06138"&gt;Take breaks as you wish during the exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="49be80e1-4d30-4d5f-b329-9f91d4ca6305"&gt;&lt;/div&gt;
 &lt;script&gt;
-var dest = document.getElementById("2d2fdf14-a766-4682-bd5a-ff3289aa44f8");
-var template = document.getElementById("24ba29fc-1e27-4e16-93d4-f85c59d0c82c");
+var dest = document.getElementById("49be80e1-4d30-4d5f-b329-9f91d4ca6305");
+var template = document.getElementById("6718d058-b447-4317-a41d-51d193c4c55b");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+
+&lt;template id="7618805a-4c35-4b4b-8a1c-d06eef9d7108"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-91daefc4{}.cl-91c77016{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-91cc7f70{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-91cc99ba{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc99c4{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc99ce{width:4.022in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc99d8{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc99d9{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc99ec{width:4.022in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc99ed{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc99f6{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc99f7{width:4.022in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc9a0a{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc9a0b{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc9a14{width:4.022in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc9a1e{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc9a28{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc9a32{width:4.022in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc9a33{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc9a3c{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc9a3d{width:4.022in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc9a46{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc9a50{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-91cc9a5a{width:4.022in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-91daefc4'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-91cc99ba"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91cc99c4"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91cc99ce"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-91cc99d8"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91cc99d9"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91cc99ec"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Review of previous session&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-91cc99ed"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91cc99f6"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91cc99f7"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Overview of RStudio projects, data import and tidy data&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-91cc9a0a"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91cc9a0b"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91cc9a14"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Demo&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-91cc9a1e"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;2 hours&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91cc9a28"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91cc9a32"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Files, projects, importing, reviewing, and data formats&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-91cc9a33"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91cc9a3c"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-91cc9a3d"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;Plenary debrief&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-91cc9a46"&gt;&lt;p class="cl-91cc7f70"&gt;&lt;span class="cl-91c77016"&gt;character(0)&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="3a9e6626-b30f-41b0-a14a-11bb0faf633d"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("3a9e6626-b30f-41b0-a14a-11bb0faf633d");
+var template = document.getElementById("7618805a-4c35-4b4b-8a1c-d06eef9d7108");
 var caption = template.content.querySelector("caption");
 var fantome = dest.attachShadow({mode: 'open'});
 var templateContent = template.content;
@@ -120,42 +168,42 @@ Note stretch breaks throughout.
 
 
 ---
-# Gestion des fichiers  
+# File management  
 
-R n'est pas seulement une question de code : il faut aussi savoir organiser vos fichiers.  
+R is not just about coding - you must know how to organize your files too.  
 
-Dans le passé, les utilisateurs de R étaient souvent frustrés par la difficulté d'importer leurs données dans le logiciel.  
+In the past, R users were often frustrated by not being able to import their data into R.  
 --
 
-Au cours des 3 à 5 dernières années, plusieurs avancées ont facilité ce processus :  
+In the last 3-5 years, several advancements have made this process easier:  
 
-* **Le paquet {rio} pour l'importation de données**  
-* **Les "projets RStudio"** pour contenir les fichiers.  
-* **Le paquet {here} pour les chemins de fichiers**  
+* **The {rio} package** for importing data  
+* **"RStudio projects"** for holding files  
+* **The {here} package** for file paths  
 
-Connaître les détails de leur fonctionnement n'est pas si important.  
-Mais sachez que l'utilisation conjointe de ces trois outils évite bien des maux de tête.  
+Knowing the details of how they work is not so important.  
+But know that using these three tools together prevents a lot of headache.  
 
 
 
 
 ---
-# Importer des données avec {rio}  
+# Importing data with {rio}  
 
-L'importation de données dans R était **autrefois** douloureuse  
+Importing data into R **used to be** painful  
 
-Vous deviez vous souvenir d'une fonction pour chaque type de fichier : `read.csv()`, `read_excel()`, `read_xlsx()`...  
+You had to remember one function for each type of file: `read.csv()`, `read_excel()`, `read_xlsx()`...  
 
 --
 
-Le paquet {rio} vous facilite la tâche avec une seule fonction : **`import()`**  
+The {rio} package makes it easy with only one function: **`import()`**  
 
 ```{eval=F}
 import("surveillance_linelist_20141201.csv")
 ```
 
 .pull-left[
-"rio" est une abréviation de  
+"rio" is shorthand for  
 "R inputs/outputs"  
 ]
 
@@ -167,27 +215,27 @@ import("surveillance_linelist_20141201.csv")
 
 
 ---
-# Chemins d'accès aux fichiers  
+# File paths  
 
 .pull-left[
 
-Les chemins d'accès aux fichiers indiquent à R où chercher un fichier.  
+File paths tell R where to look for a file.  
 
 ]
 
 .pull-right[
 
-* 📂 C:Users  
-  * 📁 Laura  
-      * 📁 Documents  
-          * 📁 intro_course  
-               * 📄 **linelist.csv**
-               * 📃 **analysis.R**
+* 📁 C:Users  
+  * 📂 Laura  
+      * 📂 Documents  
+          * 📂 intro_course  
+               * 📝 **linelist.csv**
+               * 📝 **analysis.R**
 
 
 ]
 
-Ce chemin dit de commencer à C: et d'aller dans les dossiers "Users", "Laura", "Documents"...  
+This path says to start at C: and go to the folders "Users", "Laura", "Documents"...  
 
 
 ```r
@@ -195,32 +243,32 @@ import("C:\Users\Laura\Documents\intro_course\data\clean\linelist.csv")
 ```
 
 --
-Mais ce chemin de fichier "absolu" fonctionnera-t-il sur *votre* ordinateur ? Il est fort probable que non, car vous n'avez pas de dossier "Laura".  
+But will this "absolute" file path work on *your* computer? Mostly likely not, because you do not have a "Laura" folder.  
 
 --
 
-Les "projets RStudio" permettent aux analyses d'être portables entre les ordinateurs.  
+"RStudio projects" allow analyses to be portable between computers.  
 
 
 
 ---
-# Projets RStudio  
+# RStudio projects  
 
 
 
 .pull-left[
 
-Un projet RStudio est un environnement de travail R autonome et portable.  
+An RStudio project is a self-contained and portable R working environment.  
 
-Il s'agit d'un dossier contenant tous les fichiers associés à un projet distinct :  
-* Fichiers de données  
-* Scripts R  
-* Sorties  
+It is a folder with all the files associated with a distinct project:  
+* Data files  
+* R scripts  
+* Outputs  
 * etc.
 
-Cela facilite énormément la vie.  
+This makes your life immensely easier.  
 
-Le projet est représenté par un fichier .Rproj dans le dossier.  
+The project is represented by a .Rproj file in the folder.  
 
 ]
 
@@ -236,33 +284,33 @@ You can zip the folder and share it with a colleague, it can be hosted on a shar
 
 
 ---
-# Projets RStudio  
+# RStudio projects  
 
 .pull-left[
 
-Avec les projets RStudio, le chemin du fichier *avant* le dossier du projet R est flexible.  
+Using R projects, the file path *before* the R project folder is flexible.  
 
 ]
 
 .pull-right[
 
-* 📁 intro_course (R project folder)  
+* 📂 intro_course (R project folder)  
      * intro_course.Rproj  
-     * 📄 **linelist.csv**
+     * 📝 **linelist.csv**
      * 📃 **my_analysis.R**
 ]
 
 --
 
-La commande **`import("linelist.csv")`** utilisée dans un projet R...  
+The command **`import("linelist.csv")`** used in an R project...  
 
-...produit ce chemin de fichier sur l'ordinateur de Laura :  
+...produces this file path on Laura's computer:  
 
 `"C:\Users\Laura\Documents\`**intro_course\linelist.csv"**  
 
 --
 
-...et produit *ceci* sur l'ordinateur Mac de Rajiv :  
+...and produces *this* on Rajiv's Mac computer:  
 
 `"home/Rajiv/docs/`**intro_course/linelist.csv"**  
 
@@ -276,9 +324,9 @@ La commande **`import("linelist.csv")`** utilisée dans un projet R...
 
 .pull-left[
 
-Si votre script et vos données se trouvent dans des sous-dossiers différents, cela peut poser des problèmes.  
+If your script and data are in different subfolders, it can cause problems.  
 
-Par exemple, si vous déplacez votre script, le chemin d'accès aux données peut devenir cassé.  
+E.g. if you move your script, the file path to the data can break.  
 
 
 ]
@@ -288,10 +336,10 @@ Par exemple, si vous déplacez votre script, le chemin d'accès aux données peu
 * 📂 intro_course (R project folder)  
      * intro_course.Rproj  
      * .here  
-     * 📂 scripts
-          * 📜 **my_analysis.R**
+     * 📁 scripts
+          * 📝 **my_analysis.R**
      * 📁 data  
-          * 📁 clean  
+          * 📂 clean  
                * 📝 **linelist.csv**
 
 
@@ -299,16 +347,16 @@ Par exemple, si vous déplacez votre script, le chemin d'accès aux données peu
 
 --
 
-En utilisant {here}, les chemins de fichier commencent toujours à partir du dossier **root (supérieur) du projet** (chemin "relatif").  
-**Exécutez depuis n'importe quel emplacement** dans le projet R, ce chemin trouvera le fichier linelist.csv.  
+Using {here}, file paths always start from the project **root (top) folder** ("relative").  
+**Run from any** location within the R project, this path will find the linelist.csv  
 
-**here("data", "clean", "linelist.csv")**  
+**`here("data", "clean", "linelist.csv")`**  
 
 
 
 
 ---
-# Projets, {here}, &amp; {rio} ensemble  
+# Projects, {here}, &amp; {rio} together  
 
 
 ```r
@@ -317,19 +365,19 @@ import(here("data", "clean", "linelist.csv"))
 
 .pull-left[
 
-Enfin, en combinant `import()` et `here()` dans un projet RStudio, nous créons une commande qui est vraiment polyvalente.  
+Finally, by combining `import()` and `here()` in an RStudio project, we create a command that is truly versatile.  
 
 ]
 
 
 .pull-right[
 
-* 📁 intro_course (R project folder)  
+* 📂 intro_course (R project folder)  
      * intro_course.Rproj  
      * .here  
      * 📂 scripts
           * 📃 **my_analysis.R**
-     * 📁 data  
+     * 📂 data  
           * 📂 clean  
                * 📝 **linelist.csv**
 
@@ -338,45 +386,45 @@ Enfin, en combinant `import()` et `here()` dans un projet RStudio, nous créons 
 
 
 .footnote[
-Voir la [section du manuel EpiRHandbook sur le paquet {here}](https://epirhandbook.com/import-and-export.html?q=here#here) et la [section du manuel EpiRHandbook sur l'importation des données](https://epirhandbook.com/en/import-and-export.html).  
+See the [EpiRHandbook section on here package](https://epirhandbook.com/import-and-export.html?q=here#here) and on [EpiRHandbook section on importing data](https://epirhandbook.com/en/import-and-export.html)  
 ]
 
 ---
-# Révision du jeu de données  
+# Reviewing your dataset  
 
-Une fois importées dans R, à quoi faut-il être attentif lors de l'examen initial de vos données ?  
+Once imported into R, what do you look for when initially reviewing your data?  
 
 
 ---
 
-# Démo d'importation  
+# Importing demo  
 
 
 ---
 class: inverse, center, middle
 
-## Données ordonnées  
+## Tidy data  
 
 &lt;img src="../../../images/data_cleaning/tidy_shelves.png" width="85%" /&gt;
 
 
 
 ---
-# Données ordonnées  
+# Tidy data  
 
-Des données propres doivent également être "ordonnées". Voici les trois principes fondamentaux des "données ordonnées" :  
-
---
-
-1. Chaque **valeur** doit avoir sa propre **cellule**.  
+Clean data should also be "tidy". Below are 3 core principles of "tidy data":  
 
 --
 
-2. Chaque **variable** doit avoir sa propre **colonne**.  
+1. Each **value** must have its own **cell**  
 
 --
 
-3. Chaque **observation** doit avoir sa propre **ligne**.  
+2. Each **variable** must have its own **column**  
+
+--
+
+3. Each **observation** must have its own **row**  
 
 
 
@@ -390,13 +438,13 @@ Des données propres doivent également être "ordonnées". Voici les trois prin
 
 
 ---
-# Les valeurs dans leur propre cellule  
+# Values in their own cell  
 
 
 
 .pull-left[
 
-**Désordonné :** Quels changements permettraient de rendre ces données plus ordonnées ?  
+**Messy:** What changes would make this dataset more tidy?  
 
 
 &lt;table&gt;
@@ -432,7 +480,7 @@ Des données propres doivent également être "ordonnées". Voici les trois prin
 
 .pull-right[
 
-**Nettoyé** : L'âge et l'unité d'âge sont séparés dans des cellules distinctes.  
+**Tidy:** Age and the age unit are separated into distinct cells  
 
 &lt;table&gt;
  &lt;thead&gt;
@@ -476,31 +524,31 @@ Let's start with an easy one...
 
 ---
 
-# Terminologie  
+# Terminology  
 
-Les "dataframes" dans R se composent de **colonnes** et de **lignes**.  
-
---
-
-Cependant, les **"variables "** et les **"observations "** sont des concepts plus *abstraits* :  
-
-* **Les variables** mesurent un *attribut* (âge, résultat, ou date d'apparition).  
-* **Les observations** se rapportent à une *unité d'analyse*.  
+Structurally, "data frames" in R consist of **columns** and **rows**.  
 
 --
 
-Idéalement, ils s'alignent : **colonnes = variables** et **lignes = observations**.  
+However, **"variables"** and **"observations"** are more *abstract* concepts:  
 
-&lt;img src="../../../images/data_cleaning/tidy_image_fr.png" width="696" height="65%" /&gt;
+* **Variables** measure one *underlying attribute* (age, outcome, or date of onset)  
+* **Observations** relate to a *unit of analysis*  
 
-.footnote[Source de l'image : [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)]
+--
+
+Ideally, they align: **columns = variables** and **rows = observations**  
+
+&lt;img src="../../../images/data_cleaning/tidy_image_en.png" width="853" height="65%" /&gt;
+
+.footnote[Image source: [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)]
 
 
 
 
 
 ---
-# Mais ce n'est pas toujours clair...  
+# But it is not always clear...  
 
 .pull-left[
 
@@ -535,10 +583,10 @@ Idéalement, ils s'alignent : **colonnes = variables** et **lignes = observation
 &lt;/tbody&gt;
 &lt;/table&gt;
 
-* Est-ce que "janvier" est une variable ?  
-* Où se trouve la variable "mois" ?  
-* A-t-elll sa propre colonne ?  
-* Chaque observation est-elle une ligne ?  
+* Is "January" a variable?  
+* Where is the variable "month"?  
+* Does it have its own column?  
+* Is each observation a row?  
 
 
 ]
@@ -613,7 +661,7 @@ Idéalement, ils s'alignent : **colonnes = variables** et **lignes = observation
 class: inverse, center, middle
 
 
-## Exercice  
+## Exercise  
 
 
 &lt;img src="../../../images/breakout/teamwork2.png" width="50%" /&gt;

@@ -62,37 +62,37 @@ class: center, middle, inverse, title-slide
 }
 &lt;/style&gt;
 
-# Introduction à R pour l'épidémiologie appliquée
+# Introduction to R for Applied Epidemiology
 
-### {ggplot2} - Échelles, thèmes et étiquettes
+### {ggplot2} - Scales, themes, and labels
 
 contact@appliedepi.org
 
 ---
-# Grammaire des graphiques  
+# Grammar of Graphics  
 
-Revenons à la séquence qui construit un ggplot :
+Let's return to that sequence that builds a ggplot:
 --
 
-L'ordre des couches ressemble généralement à ceci :
+The order of layers will usually look like this:
 
-1) `r emo::ji("check")` ** "Ouvrir" le graphe**.
-
---
-
-2) `r emo::ji("check")`**"Cartographier" les colonnes de données***.
+1) `r emo::ji("check")` **"Open" the plot**
 
 --
 
-3) `r emo::ji("check")` **Ajouter (`+`) des couches "geom "**
+2) `r emo::ji("check")`**"Map" data columns**
 
 --
 
-4) **Modifier des "échelles "**, comme une échelle de couleurs ou des ruptures d'axe y.
+3) `r emo::ji("check")` **Add (`+`) “geom” layers**
 
 --
 
-5) **Ajoutez des éléments de conception de tracé "thématiques "**, tels que des étiquettes d'axe, un titre, une légende, des polices, des tailles de texte, des thèmes d'arrière-plan ou une rotation des axes.
+4) **Modify "scales"**, such as a color scale or y-axis breaks
+
+--
+
+5) **Add "theme" plot design elements** such as axis labels, title, caption, fonts, text sizes, background themes, or axes rotation
 
 
 ???
@@ -107,7 +107,7 @@ Remember that although the commands may be long, it is infinitely easier to edit
 ---
 class: inverse, center, middle
 
-## Échelles dans {ggplot2}
+## Scales in {ggplot2}
 
 
 &lt;img src="../../../images/ggplot_scales_themes/scales.png" width="50%" /&gt;
@@ -117,12 +117,12 @@ class: inverse, center, middle
 
 
 ---
-# Échelles - vue d'ensemble
+# Scales - overview
 
-Les commandes d'échelle remplacent les valeurs par défaut pour la façon dont l'esthétique est affichée, telles que :
-* *Quelles* couleurs ou formes afficher
-* *Comment* les dates ou les proportions sont écrites dans les étiquettes des axes.
-* Le min/max et la fréquence des ruptures d'axes
+Scale commands replace defaults for how aesthetics are displayed such as:
+* *Which* colors or shapes to display
+* *How* date or proportions are written in axis labels
+* The min/max and frequency of axes breaks
 
 --
 
@@ -150,24 +150,24 @@ Les commandes d'échelle remplacent les valeurs par défaut pour la façon dont 
 
 
 ---
-# Exemples d'échelles  
+# Scales examples  
 
-Quelques exemples de commandes d'échelle :
+Some examples of scale commands:
 
-Vous voulez ajuster|Commande d'échelle
+You want to adjust|Scale command
 --------------------|-------------------
-axe des y continu |`scale_y_continuous()`
-axe des x de la date |`scale_x_date()`  
-axe des x catégorique |`scale_x_discrete()`  
-remplissage, continu |`scale_fill_continuous()`
-remplissage, continu |`scale_fill_gradient()`  
-couleur, attribution manuelle |`scale_color_manual()`  
+continuous y-axis |`scale_y_continuous()`
+date x-axis |`scale_x_date()`  
+categorical x-axis |`scale_x_discrete()`  
+fill, continuous |`scale_fill_continuous()`
+fill, continuous |`scale_fill_gradient()`  
+color, manual assign |`scale_color_manual()`  
 
 
 
 
 ---
-# Échelles - par défaut |`scale_color_manual()`  
+# Scales - default |`scale_color_manual()`  
 
 .pull-left[
 
@@ -182,7 +182,7 @@ geom_bar()
 ```
 
 
-Ci-dessus, le remplissage d'un graphique à barres utilise les **couleurs et les ruptures d'axe par défaut** : |`scale_color_manual()`  
+Above, the fill of a bar plot uses the **default colors and axis breaks**: |`scale_color_manual()`  
 
 ]
 
@@ -196,7 +196,7 @@ Ci-dessus, le remplissage d'un graphique à barres utilise les **couleurs et les
 Ignore the overlapping x-axis labels, for code simplicity we are not adjusting these in this slide.  
 
 ---
-# Échelles - remplissage ajusté |`scale_color_manual()`  
+# Scales - adjusted fill |`scale_color_manual()`  
 
 .pull-left[
 
@@ -215,11 +215,11 @@ geom_bar() +
 *    "female"   = "aquamarine"))
 ```
 
-Dans `scale_fill_manual()`, nous fournissons des affectations **manuelles**. |`scale_color_manual()`  
-dans un vecteur `c()`. |`scale_color_manual()`  
+Within `scale_fill_manual()` we provide **manual** assignments |`scale_color_manual()`  
+within a vector `c()`. |`scale_color_manual()`  
 
 
-.footnote[Utilisez *na.value = "grey "* pour les valeurs manquantes. |`scale_color_manual()`  
+.footnote[Use *na.value = "grey"* for missing values |`scale_color_manual()`  
 ]  
 
 ]
@@ -236,7 +236,7 @@ Discuss the na.value= arguments in most scale commands, and the difference betwe
 
 
 ---
-# Échelles - colorbrewer |`scale_color_manual()`  
+# Scales - colorbrewer |`scale_color_manual()`  
 
 .pull-left[
 
@@ -254,10 +254,10 @@ geom_bar() +
 *   na.value = "grey50")
 ```
 
-Utilisez `scale_fill_brewer()` pour des palettes agréables |`scale_color_manual()`  
+Use `scale_fill_brewer()` for pleasant palettes |`scale_color_manual()`  
 
 
-.footnote[Utilisez *na.value = "grey "* pour les valeurs manquantes. |`scale_color_manual()`  
+.footnote[Use *na.value = "grey"* for missing values |`scale_color_manual()`  
 ]  
 
 ]
@@ -273,7 +273,7 @@ Briefly mention the `na.value=` arguments in most scale commands, and the differ
 
 
 ---
-# Échelles - axe des y ajusté |`scale_color_manual()`  
+# Scales - adjusted y-axis |`scale_color_manual()`  
 
 .pull-left[
 
@@ -295,7 +295,7 @@ scale_fill_manual(
 *               by = 10))
 ```
 
-Dans `scale_y_continuous()` nous ajustons les ruptures de l'axe des y en utilisant `seq()` pour définir une séquence numérique. |`scale_color_manual()`  
+In `scale_y_continuous()` we adjust the y-axis breaks using `seq()` to define a numeric sequence. |`scale_color_manual()`  
 
 ]
 
@@ -310,7 +310,7 @@ Dans `scale_y_continuous()` nous ajustons les ruptures de l'axe des y en utilisa
 
 
 ---
-# Echelles - début des axes à 0 |`scale_color_manual()`  
+# Scales - start axes at 0 |`scale_color_manual()`  
 
 .pull-left[
 
@@ -335,7 +335,7 @@ scale_y_continuous(
 *  expand = c(0, 0))
 ```
 
-Dans les commandes `scale_x_` ou `scale_y_`, utilisez `expand = c(0,0)` pour supprimer l'espace excédentaire autour du tracé. |`scale_color_manual()`  
+In `scale_x_` or `scale_y_` commands, use `expand = c(0,0)` to remove excess space around the plot. |`scale_color_manual()`  
 
 ]
 
@@ -349,7 +349,7 @@ Dans les commandes `scale_x_` ou `scale_y_`, utilisez `expand = c(0,0)` pour sup
 
 
 ---
-# Échelles - étiquettes des axes de date |`scale_color_manual()`  
+# Scales - date axis labels |`scale_color_manual()`  
 
 .pull-left[
 
@@ -361,7 +361,7 @@ ggplot(
 geom_histogram()
 ```
 
-L'échelle par défaut des axes de date varie en fonction de la plage de vos données. |`scale_color_manual()`  
+The default scale for date axes will vary by the range of your data. |`scale_color_manual()`  
 
 ]
 
@@ -380,7 +380,7 @@ L'échelle par défaut des axes de date varie en fonction de la plage de vos don
 
 
 ---
-# Échelles - ruptures d'étiquettes de date |`scale_color_manual()`  
+# Scales - date label breaks |`scale_color_manual()`  
 
 .pull-left[  
 
@@ -394,12 +394,12 @@ geom_histogram() +
 *  date_breaks = "2 months")
 ```
 
-Ajustez les étiquettes des axes avec `scale_x_date()`. |`scale_color_manual()`  
+Adjust axis labels with `scale_x_date()`. |`scale_color_manual()`  
 
-Utilisez des valeurs `date_breaks=` comme "1 semaine", "2 semaines", ou "3 mois". |`scale_color_manual()`  
+Use `date_breaks=` values like "1 week", "2 weeks", or "3 months". |`scale_color_manual()`  
 
 
-.footnote[Ces valeurs ajustent les étiquettes des axes, pas les cases de l'histogramme ! |`scale_color_manual()`  
+.footnote[These adjust axis break *labels*, not histogram bins! |`scale_color_manual()`  
 ]  
 
 ]
@@ -421,7 +421,7 @@ For tips on geom_histogram() bins, see Epi R Handbook epicurves page
 
 
 ---
-# Échelles - étiquettes d'axe de date |`scale_color_manual()`  
+# Scales - date axis labels |`scale_color_manual()`  
 
 .pull-left[
 
@@ -436,13 +436,13 @@ scale_x_date(
 * date_labels = "%d %b\n%Y")
 ```
 
-Spécifiez le format des étiquettes de date dans `date_labels=` en utilisant |`scale_color_manual()`  
+Specify date label format to `date_labels=` using |`scale_color_manual()`  
 ["strptime" syntax](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime)  
 
-`"%d %b %Y"` pour DD MM YYYY. |`scale_color_manual()`  
+`"%d %b %Y"` for DD MM YYYY. |`scale_color_manual()`  
 
 
-.footnote[Voir les chapitres [Epicurves](https://epirhandbook.com/epidemic-curves.html) et [Strings](https://epirhandbook.com/characters-and-strings.html) du manuel Epi R. |`scale_color_manual()`  
+.footnote[See Epi R Handbook [Epicurves](https://epirhandbook.com/epidemic-curves.html) and [Strings](https://epirhandbook.com/characters-and-strings.html) chapters |`scale_color_manual()`  
 ]  
 
 
@@ -463,7 +463,7 @@ Spécifiez le format des étiquettes de date dans `date_labels=` en utilisant |`
 
 
 ---
-# Échelles - étiquettes auto-efficaces |`scale_color_manual()`  
+# Scales - auto-efficient labels |`scale_color_manual()`  
 
 .pull-left[
 
@@ -478,9 +478,9 @@ scale_x_date(
 * labels = label_date_short() )
 ```
 
-Ou, simplement assigner `labels=` à `label_date_short()` de [{scales}](https://scales.r-lib.org/) |`scale_color_manual()`  
+Or, simply assign `labels=` to `label_date_short()` from [{scales}](https://scales.r-lib.org/) |`scale_color_manual()`  
 
-L'année n'est pas répétée sur chaque étiquette. |`scale_color_manual()`  
+The year is not repeated on each label. |`scale_color_manual()`  
 
 ]
 
@@ -498,7 +498,7 @@ L'année n'est pas répétée sur chaque étiquette. |`scale_color_manual()`
 ---
 class: inverse, center, middle
 
-## Étiquettes dans {ggplot2} |`scale_color_manual()`  
+## Labels in {ggplot2} |`scale_color_manual()`  
 
 
 &lt;img src="../../../images/ggplot_scales_themes/labels.png" width="50%" /&gt;
@@ -508,7 +508,7 @@ class: inverse, center, middle
 
 
 ---
-# Étiquettes de tracé |`scale_color_manual()`  
+# Plot labels |`scale_color_manual()`  
 
 .pull-left[
 
@@ -538,7 +538,7 @@ scale_fill_brewer(type = "qual",
 
 
 ---
-# Étiquettes de tracé |`scale_color_manual()`  
+# Plot labels |`scale_color_manual()`  
 
 .pull-left[
 
@@ -566,9 +566,9 @@ scale_fill_brewer(type = "qual",
 ```
 
 
-Utilisez `labs()` comme ci-dessus. |`scale_color_manual()`  
+Use `labs()` as above. |`scale_color_manual()`  
 
-Remarque : modifiez le titre de la légende via l'esthétique qui a créé la légende (par exemple, `fill=`). |`scale_color_manual()`  
+Note: edit legend title via the aesthetic that created the legend (e.g. `fill=`). |`scale_color_manual()`  
 
 ]
 
@@ -582,10 +582,10 @@ Remarque : modifiez le titre de la légende via l'esthétique qui a créé la l�
 
 
 ---
-# Étiquettes dynamiques |`scale_color_manual()`  
+# Dynamic labels |`scale_color_manual()`  
 
-Incorporez du code dans `str_glue("texte ici {CODE ICI} texte ici")`. |`scale_color_manual()`  
-Le code sera mis à jour avec les données. |`scale_color_manual()`  
+Embed code within `str_glue("text here {CODE HERE} text here")` |`scale_color_manual()`  
+The code will update with the data. |`scale_color_manual()`  
 
 
 ```r
@@ -593,7 +593,7 @@ str_glue("Data as of {Sys.Date()}")
 ```
 
 ```
-## Data as of 2022-10-09
+## Data as of 2022-10-10
 ```
 
 --
@@ -607,7 +607,7 @@ str_glue("{fmt_count(surv, is.na(date_onset))} cases missing onset and not shown
 ## 28 (5.2%) cases missing onset and not shown
 ```
 
-.footnote[Voir le [chapitre Strings du manuel Epi R] (https://epirhandbook.com/characters-and-strings.html#dynamic-strings) et le paquet {stringr}. |`scale_color_manual()`  
+.footnote[See the [Epi R Handbook Strings chapter](https://epirhandbook.com/characters-and-strings.html#dynamic-strings) and the {stringr} package. |`scale_color_manual()`  
  
 ]
 
@@ -623,7 +623,7 @@ Explain that in str_glue, anything within curly brackets it will run as R code.
 ---
 class: inverse, center, middle
 
-## Thèmes dans {ggplot2} |`scale_color_manual()`  
+## Themes in {ggplot2} |`scale_color_manual()`  
 
 
 &lt;img src="../../../images/ggplot_scales_themes/themes.png" width="50%" /&gt;
@@ -631,29 +631,29 @@ class: inverse, center, middle
 
 ---
 
-# Thèmes |`scale_color_manual()`  
+# Themes |`scale_color_manual()`  
 
-Les thèmes sont des caractéristiques de conception **non-données**, par exemple : |`scale_color_manual()`  
+Themes are **non-data** design features, for example: |`scale_color_manual()`  
 
-* L'arrière-plan du canevas du graphe |`scale_color_manual()`  
-* La taille, la couleur et l'orientation du texte |`scale_color_manual()`  
-* Position de la légende |`scale_color_manual()`  
+* Plot canvas background |`scale_color_manual()`  
+* Text size, color, and orientation |`scale_color_manual()`  
+* Position of legend |`scale_color_manual()`  
 
 --
 
-La puissance de {ggplot2} - vous pouvez faire de très petits ajustements |`scale_color_manual()`  
+The power of {ggplot2} - you can make extremely small adjustments |`scale_color_manual()`  
 
-... si vous le souhaitez. |`scale_color_manual()`  
+... if you want to. |`scale_color_manual()`  
 
 
 
 ---
-# Thèmes |`scale_color_manual()`  
+# Themes |`scale_color_manual()`  
 
 .pull-left[
 
 
-Les ["Thèmes complets"](https://ggplot2.tidyverse.org/reference/ggtheme.html) sont faciles à ajouter. |`scale_color_manual()`  
+["Complete themes"](https://ggplot2.tidyverse.org/reference/ggtheme.html) are easy to add. |`scale_color_manual()`  
 
 
 ```r
@@ -667,7 +667,7 @@ theme_void()
 theme_classic()
 ```
 
-Essayez l'argument `base_size = 16` pour augmenter rapidement la taille du texte. |`scale_color_manual()`  
+Try the argument `base_size = 16` to quickly increase text size. |`scale_color_manual()`  
 
 ]
 
@@ -682,37 +682,37 @@ Essayez l'argument `base_size = 16` pour augmenter rapidement la taille du texte
 
 
 ---
-# Micro-ajustements |`scale_color_manual()`  
+# Micro-adjustments |`scale_color_manual()`  
 
-Faites des micro-réglages dans `theme()`. |`scale_color_manual()`  
+Make micro-adjustments within `theme()`. |`scale_color_manual()`  
 
-Fournissez des arguments pour chaque petit changement que vous voulez faire, par exemple : |`scale_color_manual()`  
+Supply arguments for each small change you want to make, for example: |`scale_color_manual()`  
 
-Composant du graphe |`scale_color_manual()`       | Argument de thème |`scale_color_manual()`
+Plot component |`scale_color_manual()`       | Theme argument |`scale_color_manual()`
 -----------------------------------------------------------------------------------------------|---------------  
-position de la légende |`scale_color_manual()`       |`legend.position = `  
-direction de la légende (horizontale ou verticale) |`scale_color_manual()`       | `legend.direction = `  
+legend position |`scale_color_manual()`       |`legend.position = `  
+legend direction (horizontal or vertical) |`scale_color_manual()`       | `legend.direction = `  
 
 --
 
-Ces arguments peuvent être *très très* spécifiques : |`scale_color_manual()`  
+These can be *very very* specific: |`scale_color_manual()`  
 
-Composant du graphe |`scale_color_manual()`       | Argument de thème |`scale_color_manual()`
+Plot component |`scale_color_manual()`       | Theme argument |`scale_color_manual()`
 -----------------------------------------------------------------------------------------------|---------------  
-Longueur des ticks de l'axe des X |`scale_color_manual()`       |`axis.ticks.length.x = `  
+Length of axis ticks on the X-axis |`scale_color_manual()`       |`axis.ticks.length.x = `  
 
-Il y a littéralement des centaines d'options. |`scale_color_manual()`  
+There are literally hundreds of options. |`scale_color_manual()`  
 
 ???
 Think of all the minute adjustments that you make when creating a plot in Excel. How many times do you have to re-do all those steps? All of those steps can be coded, which makes the plot adjustable. 
 
 
 ---
-# Thèmes 
+# Themes 
 
 .pull-left[
 
-Faites des micro-ajustements dans `theme()`. 
+Make micro-adjustments within `theme()`. 
 
 
 ```r
@@ -742,7 +742,7 @@ theme_minimal(base_size = 16) +
 
 .pull-right[
 
-La syntaxe demande de la pratique - voir [cette liste](https://ggplot2.tidyverse.org/reference/theme.html) d'arguments spécifiques aux fonctionnalités. 
+The syntax takes practice - see [this list](https://ggplot2.tidyverse.org/reference/theme.html) of feature-specific arguments. 
 
 &lt;img src="module_6-2_files/figure-html/unnamed-chunk-42-1.png" width="504" /&gt;
 ]
@@ -756,9 +756,9 @@ Remember to add them AFTER any complete themes.
 
 
 ---
-# Thèmes - `element_text()` 
+# Themes - `element_text()` 
 
-Si vous changez le *texte*, les micro-ajustements doivent souvent être faits *dans* `element_text()`. 
+If changing *text*, the micro-adjustments often need to be made *within* `element_text()` 
 
 
 ```r
@@ -770,7 +770,7 @@ theme(
 * axis.title.y = element_text(angle = 90))
 ```
 
-Cette syntaxe est similaire à celle de `mapping = aes()`. 
+This is a similar syntax to `mapping = aes()` 
 
 
 ???
@@ -785,7 +785,7 @@ class: inverse, center, middle
 
 
 
-## Exercice 
+## Exercise 
 
 
 &lt;img src="../../../images/breakout/teamwork3.png" width="50%" /&gt;
