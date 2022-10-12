@@ -118,29 +118,29 @@ style_mono_accent(
 contact@appliedepi.org
 ---
 
-# Today: objectives & schedule  
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_objectives", params$lang])`  
 
-**In this module we aim to help you:**  
-* Learn how to join two or more data frames together  
-* Learn about the different joins and using id key/identifier columns  
-* Practice pivoting data from wide-to-long format to create patient "timelines"  
-* Convert variables to class "factor" with the {forcats} package  
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_op_objectives", params$lang])`  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_objectives_1", params$lang])`  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_objectives_2", params$lang])` 
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_objectives_3", params$lang])`  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_objectives_4", params$lang])`  
 
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
   ~Time, ~Location, ~Topic,
-  "20 minutes",    "Main",      "Joins",
-  "1h 15 minutes", "Breakout",  "Exercise: Joining data",
-  "15 minutes",    "Main",      "Pivoting data",
-  "1 hour",        "Main",      "Exercise: Pivoting data & Factors",
-  "10 minutes",    "Main",      "Plenary debrief"
+  str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_1_1", params$lang])}),    str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_2_1", params$lang])}),      str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_3_1", params$lang])}),
+  str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_1_2", params$lang])}), str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_2_2", params$lang])}),  str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_3_2", params$lang])}),
+  str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_1_3", params$lang])}),    str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_2_3", params$lang])}),      str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_3_3", params$lang])}),
+  str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_1_4", params$lang])}),        str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_2_4", params$lang])}),      str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_3_4", params$lang])}),
+  str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_1_5", params$lang])}),    str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_2_5", params$lang])}),      str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_3_5", params$lang])})
 
 )
 
 outline %>% 
   flextable::qflextable() %>% 
-  flextable::add_footer_lines("Breaks are incorporated above, but not shown as rows")
+  flextable::add_footer_lines(str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_fn_objectives", params$lang])}))
 ```
 
 
@@ -148,11 +148,11 @@ outline %>%
 ---
 class: inverse, center, middle
 
-# Joining dataframes
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_joinintro", params$lang])`
 
-*Join, merge, unite, combine, assemble, link, match, unite...* dataframes
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_joinintro", params$lang])`
 
-.footnote[Thank you to Garrick Aden-Buie for providing the gifs used in these slides]
+.footnote[`r paste0(mod7_1[mod7_1$uid == "mod7_1_fn_joinintro", params$lang])`]
 
 ???
 
@@ -165,7 +165,7 @@ Explain that:
 
 ---
 
-# Situation: data is scattered between dataframes
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_situation", params$lang])`
 
 
 ???
@@ -182,19 +182,19 @@ Provide examples of situations they might encounter to highlight how common it i
 
 
 ---
-# Types of joins
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_jointype", params$lang])`
 
-#### Several types of joins
-* **Mutating joins**: add new variable to a dataframe
-     * **Left join** / **Right join**: add data to a dataframe
-     * **Full join**: combine two full dataframes
-     * **Inner join**: take the intersection of two dataframes
-* **Filtering joins**: filter a dataframe based on another one
-     * **Anti join** / **semi join**
+#### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h4_jointype", params$lang])`
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_jointype_1", params$lang])`
+     * `r paste0(mod7_1[mod7_1$uid == "mod7_1_sb_jointype_1", params$lang])`
+     * `r paste0(mod7_1[mod7_1$uid == "mod7_1_sb_jointype_2", params$lang])`
+     * `r paste0(mod7_1[mod7_1$uid == "mod7_1_sb_jointype_3", params$lang])`
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_jointype_2", params$lang])`
+     * `r paste0(mod7_1[mod7_1$uid == "mod7_1_sb_jointype_4", params$lang])`
 
-#### General syntax
-* We use the `join` functions from **dplyr** package
-* Homogeneous syntax:
+#### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h4_syntax", params$lang])`
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_jointype_3", params$lang])`
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_jointype_4", params$lang])`
 
 ```{r include=TRUE, echo=TRUE, eval=FALSE}
 xxx_join(dataframe_1, dataframe_2, 
@@ -213,7 +213,7 @@ Explain that the function are always in this form, two dataframes, the first one
 
 ---
 
-# Example: add patient outcomes  
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_example", params$lang])`  
 
 
 ```{r include=FALSE, echo=F}
@@ -246,12 +246,12 @@ hosp <- tribble(
 #      head(3)
 ```
 
-Let's demonstrate with these small datasets: we want to *join* both data frames:  
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_example_1", params$lang])`  
 
 
 .pull-left[
 
-`patients` *(Info about patients)*  
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_example_2", params$lang])`  
 
 ```{r include=TRUE, echo=FALSE}
 patients %>% 
@@ -265,7 +265,7 @@ patients %>%
 
 .pull-right[
 
-`hosp` *(Info about hospitalisations)*  
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_example_3", params$lang])`  
 
 ```{r include=TRUE, echo=FALSE}
 hosp %>% 
@@ -278,7 +278,7 @@ hosp %>%
 
 <br>
 
-The **KEY** columns linking the two dataframes are **case_id** and **id_patient**
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_example_4", params$lang])`
 
 
 ???
@@ -292,18 +292,18 @@ For the purpose of the slides, we created two _mini_ dataframes to see what's ha
 
 
 ---
-# Left join
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_leftjoin", params$lang])`
 
 
 .pull-left[
 
-* Left joins are often used to **add columns** to a data frame.
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_leftjoin_1", params$lang])`
 
-* All rows from the baseline (left) data frame are kept
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_leftjoin_2", params$lang])`
 
-* Rows from the second (right) data frame that match are joined  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_leftjoin_3", params$lang])` 
 
-* Columns from the second data frame are added (with `NA` filling any gaps)
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_leftjoin_4", params$lang])`
 
 ]
 
@@ -322,7 +322,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 Sometimes called Left *outer* join  
 
 ---
-# Left join
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_leftjoin", params$lang])`
 
 .pull-left[
 
@@ -383,7 +383,7 @@ left_join(patients,
 
 
 ---
-# Left join
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_leftjoin", params$lang])`
 
 .pull-left[
 
@@ -450,17 +450,17 @@ left_join(patients,
 
 
 ---
-# Right join  
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_rightjoin", params$lang])`  
 
 .pull-left[
 
-* Not used very often  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_rightjoin_1", params$lang])`  
 
-* Keeps matched rows from the baseline data frame  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_rightjoin_2", params$lang])`  
 
-* Adds *unmatched* rows from the second data frame  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_rightjoin_3", params$lang])`  
 
-* Adds columns from the second data frame  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_rightjoin_4", params$lang])`  
 
 ]
 
@@ -477,7 +477,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 
 ---
-# Right join
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_rightjoin", params$lang])`
 
 .pull-left[
 
@@ -541,15 +541,15 @@ right_join(patients,
 Not used very often. 
 
 ---
-# Full joins
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_fulljoin", params$lang])`
 
 .pull-left[
 
-* The most inclusive of joins  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_fulljoin_1", params$lang])`  
 
-* Keeps **all rows from both data frames**  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_fulljoin_2", params$lang])`  
 
-* Fills in spaces with `NA` as necessary  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_fulljoin_3", params$lang])`  
 
 ]
 
@@ -562,12 +562,12 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 ]
 
 
-.footnote[Sometimes called *Full outer join*, or *Outer join*]
+.footnote[`r paste0(mod7_1[mod7_1$uid == "mod7_1_fn_fulljoin", params$lang])`]
 
 
 
 ---
-# Full join
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_fulljoin", params$lang])`
 
 .pull-left[
 
@@ -629,15 +629,15 @@ full_join(patients,
 Now is a good time to insist on how consistent the arguments of the join function family are: you always write them the same way
 
 ---
-# Inner join 
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_innerjoin", params$lang])` 
 
 .pull-left[
 
-* The most **restrictive** of joins  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_innerjoin_1", params$lang])`  
 
-* Takes the **intersection** between two data frames: keeps only rows that match  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_innerjoin_2", params$lang])`  
 
-* **Discard** rows without matches
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_innerjoin_3", params$lang])`
 
 ]
 
@@ -649,13 +649,13 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 ]
 
-.footnote[Also called a *natural join*]
+.footnote[`r paste0(mod7_1[mod7_1$uid == "mod7_1_fn_innerjoin", params$lang])`]
 
 ???
 Well, the bullet points all sort of say the same thing, but I think it is good to make sure that everyone uderstand what it means to take the _intersection_.
 
 ---
-# Inner join 
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_innerjoin", params$lang])` 
 
 
 .pull-left[
@@ -717,9 +717,9 @@ inner_join(patients,
 
 
 ---
-# Syntax tips
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_tips", params$lang])`
 
-* Joins can be used in **pipelines** (the piped dataframe is the _left_ one):  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_tips_1", params$lang])`  
 ```{r echo = TRUE, eval=FALSE, include=TRUE}
 patients %>%               
      left_join(hosp, by = c("case_id" = "id_patient")) %>%  #<<
@@ -728,7 +728,7 @@ patients %>%
 
 --
 
-* Simple syntax if **identifier column has the same name** in both data frames:  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_tips_2", params$lang])`  
 ```{r echo = TRUE, eval=FALSE, include=TRUE}
 left_join(patients, hosp,       
            by = "case_id")   #<<
@@ -736,7 +736,7 @@ left_join(patients, hosp,
 
 --
 
-* Pass **several columns** to use as identifiers:
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_tips_3", params$lang])`
 ```{r echo = TRUE, eval=FALSE, include=TRUE}
 left_join(dataframe1, dataframe2,       
            by = c("name" = "first_name",  
@@ -746,17 +746,17 @@ left_join(dataframe1, dataframe2,
 
 
 ---
-# Filtering joins
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_filterjoin", params$lang])`
 
-* Filtering joins are used to **filter rows** from the *baseline* data frame based on matches in the second data frame. 
-* Filtering joins *do not add any columns or rows*  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_filterjoin_1", params$lang])` 
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_filterjoin_2", params$lang])`  
 
 .pull-left[
 
-#### Anti join
+#### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h4_antijoin", params$lang])`
 
-Keeps the baseline rows  
-**without matches in other dataframe**
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_antijoin_1", params$lang])`  
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_antijoin_2", params$lang])`
 
 ```{r eval = TRUE, echo=FALSE, out.width = '50%'}
 knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "anti-join.gif")))
@@ -766,17 +766,17 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 .pull-right[
 
-#### Semi join
+#### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h4_semioin", params$lang])`
 
-Keeps the baseline rows   
-**with a match in other data frame**
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_semioin_1", params$lang])`   
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_semioin_2", params$lang])`
 
 ```{r eval = TRUE, echo=FALSE, out.width = '50%'}
 knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "semi-join.gif")))
 ```
 ]
 
-**Filtering joins never duplicate rows, they can only drop them**
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_filterjoin", params$lang])`
 
 ???
 Anti joins are very useful for seeing which rows in a dataset do *not* match
@@ -784,13 +784,13 @@ Anti joins are very useful for seeing which rows in a dataset do *not* match
 
 
 ---
-# Real-life challenges  
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_challenges", params$lang])`  
 
 
 
 
 ---
-# Overlapping column names
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_overlap", params$lang])`
 
 ```{r eval = TRUE, echo=FALSE}
 df1 <- tibble(ID = c("id_1", "id_2", "id_3", "id_4"), sexe = c("F", "M", "M", "F"))
@@ -850,7 +850,7 @@ Mention orally that there is a "suffix" argument and you can give it a vector to
 
 
 ---
-# Overlapping column names
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_overlap", params$lang])`
 
 .pull-left[
 ```{r eval = TRUE, echo=FALSE}
@@ -906,7 +906,7 @@ Mention orally that there is a "suffix" argument and you can give it a vector to
 
 ---
 
-### One-to-many
+### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h3_one", params$lang])`
 .pull-left[
 ```{r eval = TRUE, echo=FALSE}
 patients %>% 
@@ -958,7 +958,7 @@ left_join(patients,
 
 ---
 
-### Many-to-one  
+### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h3_many", params$lang])`  
 .pull-left[
 ```{r eval = TRUE, echo=FALSE}
 
@@ -1011,11 +1011,11 @@ left_join(patients_dup,
 
 
 ---
-# Good practices
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_practices", params$lang])`
 
-Use `semi_join()` and `anti_join()` to **understand why rows are dropped**  
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_practices_1", params$lang])`  
 
-"Which `hosp` rows will not left join to `patients`?" Examine why with `anti_join()`
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_practices_2", params$lang])`
 ```{r eval = FALSE, echo=TRUE}
 anti_join(hosp, patients, by = c("id_patient" = "case_id"))
 ```
@@ -1026,9 +1026,9 @@ anti_join(hosp, patients, by = c("id_patient" = "case_id")) %>%
 ```
 
 ---
-# Good practices  
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_practices", params$lang])`  
 
-**Check dimensions** of data frames before and after the merge!
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_practices_3", params$lang])`
 
 ```{r eval = TRUE, echo=TRUE}
 nrow(patients)
@@ -1054,7 +1054,7 @@ Another good check is to use the `count()` function to count the number of rows 
 ---
 class: inverse, center, middle  
 
-# Exercise!
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_exercise", params$lang])`
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
 # Using here() alone won't work because Rmd folder becomes the rendering root.

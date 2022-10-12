@@ -5,7 +5,7 @@ author: "2022"
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
   xaringan::moon_reader:
-    seal: TRUE
+    seal: false
     lib_dir: libs
     nature:
       highlightStyle: github
@@ -13,9 +13,9 @@ output:
       countIncrementalSlides: false
     css: xaringan-themer.css
 params:
-  lang: "en"
+  lang: "fr"
 ---
-class: inverse, center, middle
+class: center, middle, inverse, title-slide
 
 ```{r, eval=F, echo=F, include = F}
 # Must do in order to render.
@@ -124,26 +124,41 @@ style_mono_accent(
 
 ```{r, echo=F, include = F}
 surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic") %>%
+  clean_names()
+
+mod3 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod3", col_types = "c") %>%
+  clean_names()
 ```
 
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
+
+### `r paste0(mod3[mod3$uid == "mod3_h1_subtitle", params$lang])`
+
+contact@appliedepi.org
 
 ---
-# Today: objectives & schedule  
+# `r paste0(mod3[mod3$uid == "mod3_h1_objectives", params$lang])`  
 
-**In this module we aim to help you:**  
-* Gain familiarity of {dplyr} functions used to clean public health data  
-* Apply a series of functions to a data frame using the pipe operator  
-* Begin writing an R script to analyze outbreak data  
+`r paste0(mod3[mod3$uid == "mod3_op_objectives", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_objectives_1", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_objectives_2", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_objectives_3", params$lang])`  
 
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
   ~Time, ~Location, ~Topic,
-  "10 minutes",      "Main",      "Review of previous module",
-  "30 minutes",     "Main",      "Intro to data cleaning",
-  "15 minutes",     "Main",      "Demo of data cleaning", 
-  "1h 30minutes",  "Breakouts",   "Exercise",
-  "30 minutes",     "Main",      "Plenary debrief"
+  str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_1_1", params$lang])}),      str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_2_1", params$lang])}),      str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_3_1", params$lang])}),
+  str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_1_2", params$lang])}),     str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_2_2", params$lang])}),      str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_3_2", params$lang])}),
+  str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_1_3", params$lang])}),     str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_2_3", params$lang])}),      str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_3_3", params$lang])}), 
+  str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_1_4", params$lang])}),  str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_2_4", params$lang])}),   str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_3_4", params$lang])}),
+  str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_1_5", params$lang])}),     str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_2_5", params$lang])}),      str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_3_5", params$lang])})
 )
 
 outline %>% 
@@ -151,48 +166,48 @@ outline %>%
   flextable::add_footer_lines("Breaks are incorporated above, but not shown as rows")
 ```
 
-**This is a *long* exercise, but very important.**  
+`r paste0(mod3[mod3$uid == "mod3_tx_objectives", params$lang])`  
 
 ???
 Note stretch breaks throughout.
 
 
 ---
-# Review of previous module  
+# `r paste0(mod3[mod3$uid == "mod3_h1_review", params$lang])`  
 
-- The versatility, community, and features of R  
-
---
-
-- R projects, `import()`, and relative file paths with {here}  
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_1", params$lang])`  
 
 --
 
-- Running commands, writing comments, saving objects  
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_2", params$lang])`  
 
 --
 
-- Operators like `<`  `>`  `==`  `%in%`  
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_3", params$lang])`  
 
 --
 
-- Functions, sometimes with multiple arguments  
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_4", params$lang])`  
 
 --
 
-- Reviewing a dataset `skim()`, `summary()`  
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_5", params$lang])`  
 
 --
 
-- Columns and objects have *classes* that can be checked with `class()`  
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_6", params$lang])`  
+
+--
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_7", params$lang])`  
 
 
 
 
 ---
-# Clean data, messy data   
+# `r paste0(mod3[mod3$uid == "mod3_h1_clean", params$lang])`   
 
-What is involved in "cleaning" a dataset?  
+`r paste0(mod3[mod3$uid == "mod3_tx_clean", params$lang])`  
 
 
 .pull-left[
@@ -208,19 +223,19 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 .pull-right[
 
-- Prepare for analysis and visualization  
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_1", params$lang])`  
 
-- Standardize column names 
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_2", params$lang])` 
 
-- Subset rows and columns  
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_3", params$lang])`  
 
-- Align spellings  
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_4", params$lang])`  
 
-- Create categorical and calculated variables  
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_5", params$lang])`  
 
-- Join with other data  
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_6", params$lang])`  
 
-- Remove duplicates... 
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_7", params$lang])` 
  
 ]
 
@@ -237,7 +252,7 @@ Ask the participants to quickly write what makes a dataset clean, in their view,
 ---
 class: inverse, center, middle
 
-## Cleaning data in R 
+## `r paste0(mod3[mod3$uid == "mod3_h1_cleanR", params$lang])` 
 
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
@@ -255,10 +270,10 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 class: medium-large-table
 
-# Review your data  
+# `r paste0(mod3[mod3$uid == "mod3_h1_reviewdata", params$lang])`  
 
-We will begin working with the *"surveillance_linelist_20141201.csv"*  
-We assigned it the name `surv_raw` when we imported it into R.    
+`r paste0(mod3[mod3$uid == "mod3_tx_reviewdata_1", params$lang])`  
+`r paste0(mod3[mod3$uid == "mod3_tx_reviewdata_2", params$lang])`    
 
 ```{r}
 head(surv_raw, 25) %>% 
@@ -284,9 +299,9 @@ Table shows just the first 25 rows, to load faster.
 
 ---
 
-# Demo dataset  
+# `r paste0(mod3[mod3$uid == "mod3_h1_demo", params$lang])`  
 
-Let's use a smaller version to practice with, and explore some core R functions
+`r paste0(mod3[mod3$uid == "mod3_tx_demo_1", params$lang])`
 ```{r, echo=F}
 demo <- surv_raw %>% 
      head(5) %>% 
@@ -301,11 +316,11 @@ demo %>%
 
 --
 
-We will name it "**`demo`**"
+`r paste0(mod3[mod3$uid == "mod3_tx_demo_2", params$lang])`
 
 ---
 
-# The {dplyr} package  
+# `r paste0(mod3[mod3$uid == "mod3_h1_dplyR", params$lang])`  
 
 .pull-left[
 ```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
@@ -320,16 +335,16 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 .pull-right[
 
 
-* The easiest and most versatile package for data cleaning  
+* `r paste0(mod3[mod3$uid == "mod3_bu_dplyR_1", params$lang])`  
 
-* This package is installed in a universe of {tidyverse} R packages  
+* `r paste0(mod3[mod3$uid == "mod3_bu_dplyR_2", params$lang])`  
 
-* The {tidyverse} has transformed R in the last 5 years  
+* `r paste0(mod3[mod3$uid == "mod3_bu_dplyR_3", params$lang])`  
 
 
 ]
 
-.footnote["dplyr" is shorthand for "data plier" - a plier is the handheld tool pictured above]
+.footnote[`r paste0(mod3[mod3$uid == "mod3_fn_dplyR", params$lang])`]
 
 ???
 Tidyverse has made R coding much more user-friendly, intuitive, and accessible to beginner coders  
@@ -337,26 +352,26 @@ Tidyverse has made R coding much more user-friendly, intuitive, and accessible t
 
 ---
 
-# The {dplyr} package  
+# `r paste0(mod3[mod3$uid == "mod3_h1_dplyR", params$lang])`  
 
-Some of the {dplyr} functions we will use:  
+`r paste0(mod3[mod3$uid == "mod3_tx_dplyR", params$lang])`  
 
 
-Function       | Utility                               
+`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_1", params$lang])`       | `r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2", params$lang])`                               
 ---------------|---------------------------------------
-`filter()`|subset rows
-`select()`|subset columns
-`rename()`|rename columns 
-`mutate()`|create and transform columns 
-`case_when()`|re-code values using logical criteria  
+`filter()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_1", params$lang])`
+`select()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_2", params$lang])`
+`rename()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_3", params$lang])` 
+`mutate()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_4", params$lang])` 
+`case_when()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_5", params$lang])`  
 
 
 
 ---
 
-# `filter()` rows  
+# `r paste0(mod3[mod3$uid == "mod3_h1_filter", params$lang])`  
 
-* 1st argument: a data frame
+* `r paste0(mod3[mod3$uid == "mod3_tx_filter_1", params$lang])`
 
 ```{r, eval=F, echo=T}
 filter(demo, ___)
@@ -364,7 +379,7 @@ filter(demo, ___)
 
 --
 
-* 2nd+ arguments: logical criteria to apply, to keep rows
+* `r paste0(mod3[mod3$uid == "mod3_tx_filter_2", params$lang])`
 
 ```{r eval=FALSE, echo=TRUE}
 filter(demo, age < 18)
@@ -379,16 +394,16 @@ filter(demo, age < 18, gender == "m")
 
 --
 
-The logic can get complex using `&` (AND), `|` (OR), and parentheses
+`r paste0(mod3[mod3$uid == "mod3_tx_filter_3", params$lang])`
 
 ```{r eval=FALSE, echo=TRUE}
 filter(demo, age < 18 & (gender == "m" | lab_confirmed == TRUE))
 ```
 
-.footnote[Note use of double equals == to test equivalence]
+.footnote[`r paste0(mod3[mod3$uid == "mod3_fn_filter", params$lang])`]
 ---
 
-# `filter()` rows  
+# `r paste0(mod3[mod3$uid == "mod3_h1_filter", params$lang])`  
 
 ```{r, eval=F, echo=T}
 # complete demo data
@@ -403,7 +418,7 @@ demo %>% knitr::kable()
 
 ---
 
-# `filter()` rows  
+# `r paste0(mod3[mod3$uid == "mod3_h1_filter", params$lang])`  
 
 
 ```{r eval = F, echo=T}
@@ -420,9 +435,9 @@ filter(demo, age < 18) %>% knitr::kable()
 
 ---
 
-# `select()` columns 
+# `r paste0(mod3[mod3$uid == "mod3_h1_select", params$lang])` 
 
-`select()` also expects a data frame as the first argument
+`r paste0(mod3[mod3$uid == "mod3_tx_select_1", params$lang])`
 
 --
 
@@ -440,9 +455,9 @@ demo %>% knitr::kable()
 
 ---
 
-# `select()` columns 
+# `r paste0(mod3[mod3$uid == "mod3_h1_select", params$lang])` 
 
-You can provide `select()` with column names to *keep*
+`r paste0(mod3[mod3$uid == "mod3_tx_select_2", params$lang])`
 
 ```{r, eval=F, echo=T}
 # select() to keep case_id and age columns only
@@ -456,9 +471,9 @@ select(demo, case_id, age) %>% knitr::kable()
 
 ---
 
-# `select()` columns 
+# `r paste0(mod3[mod3$uid == "mod3_h1_select", params$lang])` 
 
-You can provide `select()` with column names to *keep*
+`r paste0(mod3[mod3$uid == "mod3_tx_select_2", params$lang])`
 
 ```{r, eval=F, echo=T}
 # add gender column
@@ -473,9 +488,9 @@ select(demo, case_id, age, gender) %>% knitr::kable()
 
 ---
 
-# `select()` columns 
+# `r paste0(mod3[mod3$uid == "mod3_h1_select", params$lang])` 
 
-Or you can provide the columns to *remove* (-)
+`r paste0(mod3[mod3$uid == "mod3_tx_select_3", params$lang])`
 
 ```{r, eval=F, echo=T}
 # remove case_id and lab_confirmed columns from original dataset
@@ -492,24 +507,24 @@ select(demo, -case_id, -lab_confirmed) %>% knitr::kable()
 
 ---
 
-# `filter()` *and* `select()`?
+# `r paste0(mod3[mod3$uid == "mod3_h1_combine", params$lang])`
 
-Yes! You can do both (and many more) with the **%>%** "pipe operator".
+`r paste0(mod3[mod3$uid == "mod3_tx_combine_1", params$lang])`
 
 --
 
 .pull-left[
 
-Most data cleaning happens in a *sequence* of linked steps
+`r paste0(mod3[mod3$uid == "mod3_tx_combine_2", params$lang])`
 
-* Import  
-* Rename columns  
-* Filter rows  
-* Select columns  
-* Deduplicate  
-* Clean values...
+* `r paste0(mod3[mod3$uid == "mod3_bu_combine_1", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_combine_2", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_combine_3", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_combine_4", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_combine_5", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_combine_6", params$lang])`
 
-**You can "pipe" (pass) the dataset from one function to the next with the "pipe" operator `%>%`**
+`r paste0(mod3[mod3$uid == "mod3_tx_combine_3", params$lang])`
 ]
 
 
@@ -529,9 +544,9 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 
 ---
-# Piping data
+# `r paste0(mod3[mod3$uid == "mod3_h1_pipe", params$lang])`
 
-Previously, the 1st argument in `filter()` and in `select()` was the data frame
+`r paste0(mod3[mod3$uid == "mod3_tx_pipe_1", params$lang])`
 
 `filter(`**demo**`, age < 18)`
 
@@ -539,13 +554,13 @@ Previously, the 1st argument in `filter()` and in `select()` was the data frame
 --
 
 
-Using pipes, this is now written as:  
+`r paste0(mod3[mod3$uid == "mod3_tx_pipe_2", params$lang])`  
 
 **demo** `%>% filter(age < 18)`
 
 --
 
-You can pipe the data through *multiple* functions  
+`r paste0(mod3[mod3$uid == "mod3_tx_pipe_3", params$lang])`  
 `demo` **%>%** `filter(age < 18)` 
 
 
@@ -555,19 +570,19 @@ demo %>% filter(age < 18) %>% knitr::kable()
 
 
 ---
-# Piping data
+# `r paste0(mod3[mod3$uid == "mod3_h1_pipe", params$lang])`
 
-Previously, the 1st argument in `filter()` and in `select()` was the data frame
+`r paste0(mod3[mod3$uid == "mod3_tx_pipe_1", params$lang])`
 
 `filter(`**demo**`, age < 18)`
 
 
-Using pipes, this is now written as:  
+`r paste0(mod3[mod3$uid == "mod3_tx_pipe_2", params$lang])`  
 
 **demo** `%>% filter(age < 18)`
 
 
-You can pipe the data through *multiple* functions  
+`r paste0(mod3[mod3$uid == "mod3_tx_pipe_3", params$lang])`  
 
 `demo` **%>%** `filter(age < 18)` **%>%** `select(case_id, age, gender)`
 
@@ -578,25 +593,26 @@ demo %>% filter(age < 18) %>% select(case_id, age, gender) %>% knitr::kable()
 
 
 ---
-# Vertical coding style
+# `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
 
-It is better to write in a *vertical* style  
-Newlines and indent will not impact the code, but do make it more readable!
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
 
 ```{r, eval=F, echo=T}
 demo
 ```
 
 ```{r, eval=T, echo=F}
-demo %>% 
+demo %>%  
+  add_row(demo[5,]) %>% 
   knitr::kable() 
 ```
 
 ---
-# Vertical coding style
+# `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
 
-It is better to write in a *vertical* style  
-Newlines and indent will not impact the code, but do make it more readable!
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
 
 ```{r, eval=F, echo=T}
 demo %>% 
@@ -605,14 +621,15 @@ demo %>%
 
 ```{r, eval=T, echo=F}
 demo %>% 
+  add_row(demo[5,]) %>% 
   select(case_id, age, gender, lab_confirmed) %>%    # select columns
   knitr::kable() 
 ```
 ---
-# Vertical coding style
+# `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
 
-It is better to write in a *vertical* style:  
-Newlines and indent will not impact the code, but do make it more readable!
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
 
 
 ```{r, eval=F, echo=T}
@@ -623,16 +640,17 @@ demo %>%
 
 ```{r, eval=T, echo=F}
 demo %>% 
+  add_row(demo[5,]) %>% 
   select(case_id, age, gender, lab_confirmed) %>%    # select columns
   distinct() %>%                                     # de-duplicate
   knitr::kable() 
 ```
 
 ---
-# Vertical coding style
+# `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
 
-It is better to write in a *vertical* style:  
-Newlines and indent will not impact the code, but do make it more readable!
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
 
 
 ```{r, eval=F, echo=T}
@@ -644,6 +662,7 @@ demo %>%
 
 ```{r, eval=T, echo=F}
 demo %>% 
+  add_row(demo[5,]) %>% 
   select(case_id, age, gender, lab_confirmed) %>%    # select columns
   distinct() %>%                                     # de-duplicate
   filter(age < 18, lab_confirmed == TRUE) %>%        # only young children confirmed cases
@@ -653,10 +672,10 @@ demo %>%
 
 
 ---
-# Vertical coding style
+# `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
 
-It is better to write in a *vertical* style:  
-Newlines and indent will not impact the code, but do make it more readable!
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
 
 
 ```{r, eval=F, echo=T}
@@ -670,20 +689,21 @@ demo %>%
 
 ```{r, eval=T, echo=F}
 demo %>% 
+  add_row(demo[5,]) %>% 
   select(case_id, age, gender, lab_confirmed) %>%          
   distinct() %>%                                           
   filter(age < 18, lab_confirmed == TRUE) %>%              
   mutate(infant = ifelse(age < 1, "infant", "not infant")) %>% 
   knitr::kable()
 ```
-.footnote[Is there a pipe operator at the end of this workflow?]
+.footnote[`r paste0(mod3[mod3$uid == "mod3_fn_vertical_1", params$lang])`]
 
 
 ---
-# Vertical coding style
+# `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
 
-It is better to write in a *vertical* style:  
-Newlines and indent will not impact the code, but do make it more readable!
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
 
 
 ```{r, eval=F, echo=T}
@@ -696,6 +716,7 @@ demo %>%
 
 ```{r, eval=T, echo=F}
 demo %>% 
+  add_row(demo[5,]) %>% 
   select(case_id, age, gender, lab_confirmed) %>%          
   distinct() %>%                                           
   filter(age < 18, lab_confirmed == TRUE) %>%              
@@ -703,16 +724,16 @@ demo %>%
   knitr::kable()
 ```
 
-The pipes connect all these functions into one, linked command.
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_3", params$lang])`
 
-.footnote[How would you run this command in RStudio?]
+.footnote[`r paste0(mod3[mod3$uid == "mod3_fn_vertical_2", params$lang])`]
 
 
 
 ---
-# Clean column names  
+# `r paste0(mod3[mod3$uid == "mod3_h1_cleancol", params$lang])`  
 
-Let's print the column names in `demo` by piping to the function `names()`:  
+`r paste0(mod3[mod3$uid == "mod3_tx_cleancol_1", params$lang])`  
 
 ```{r, echo=T}
 demo %>% 
@@ -721,31 +742,31 @@ demo %>%
 
 --
 
-Pipe `demo` into `clean_names()` from {janitor} package to standardize  
+`r paste0(mod3[mod3$uid == "mod3_tx_cleancol_2", params$lang])`  
 
-* removes spaces and special characters  
-* all to lowercase  
+* `r paste0(mod3[mod3$uid == "mod3_bu_cleancol_1", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_cleancol_2", params$lang])`  
 
 ```{r, echo=T}
 demo %>% 
   clean_names() %>%     #<<
   names()
 ```
-(*see the change to final two columns*)  
+`r paste0(mod3[mod3$uid == "mod3_tx_cleancol_3", params$lang])`  
 
 --
 
-But how do we *edit* the column names?  
+`r paste0(mod3[mod3$uid == "mod3_tx_cleancol_4", params$lang])`  
 
 ---
 
-# Renaming columns
+# `r paste0(mod3[mod3$uid == "mod3_h1_rename", params$lang])`
 
-Typically we use `rename()`:  
+`r paste0(mod3[mod3$uid == "mod3_tx_rename_1", params$lang])`  
 
 --
 
-Write the NEW name and the OLD name as below:  
+`r paste0(mod3[mod3$uid == "mod3_tx_rename_2", params$lang])`  
 
 ```{r, echo=T}
 demo %>% 
@@ -760,9 +781,9 @@ demo %>%
 
 ---
 
-# Printing vs. saving  
+# `r paste0(mod3[mod3$uid == "mod3_h1_print", params$lang])`   
 
-Our pipes have only *printed* the modified `demo` - the data frame has **not** changed!  
+`r paste0(mod3[mod3$uid == "mod3_tx_print_1", params$lang])`  
 
 ```{r, echo=T, eval=F}
 demo %>%                    # PRINT only child cases
@@ -778,28 +799,28 @@ demo %>%                    # print only child cases
 --
 
 
-To save: add the assignment operator **<-** to define a new data frame.  
+`r paste0(mod3[mod3$uid == "mod3_tx_print_2", params$lang])`  
 
 ```{r pipe-assign, eval=F, echo=T}
 demo_children <- demo %>%
   filter(age < 18)
 ```
 
-(No output to the R console, but a new object in the Environment pane)  
+`r paste0(mod3[mod3$uid == "mod3_tx_print_3", params$lang])`  
 
 ???
 Note how the column names in `demo` are old! It's because our changes have not yet been saved.  
 
 ---
 
-# `mutate()` to create columns  
+# `r paste0(mod3[mod3$uid == "mod3_h1_mutate", params$lang])`  
  
-`mutate()` is used to *create* new columns
+`r paste0(mod3[mod3$uid == "mod3_tx_mutate_1", params$lang])`
 
 ```{r, results = "asis", echo = FALSE}
-"The syntax is: new column name = a function that creates the new values:" %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("function", color = "cornflowerblue") %>%
+str_glue({paste0(mod3[mod3$uid == "mod3_tx_mutate_3", params$lang])}) %>%
+  flair(str_glue({paste0(mod3[mod3$uid == "mod3_tx_mutate_4", params$lang])}), color = "deeppink") %>%
+  flair(str_glue({paste0(mod3[mod3$uid == "mod3_tx_mutate_5", params$lang])}), color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -820,15 +841,15 @@ decorate("mutate") %>%
 
 --
 
-`ifelse()` applies a logical criteria to each row, returns one value if true, and returns another value if false.  
+`r paste0(mod3[mod3$uid == "mod3_tx_mutate_2", params$lang])`  
 
 ---
 
-# `mutate()` to edit columns  
+# `r paste0(mod3[mod3$uid == "mod3_h1_mutate1", params$lang])`  
  
-`mutate()` is also used to *edit* existing columns, such as *recoding* values
+`r paste0(mod3[mod3$uid == "mod3_tx_mutate1_1", params$lang])`
 
-Below, `recode()` is used inside `mutate()` to recode the gender column  
+`r paste0(mod3[mod3$uid == "mod3_tx_mutate1_2", params$lang])`  
 
 --
 
@@ -845,20 +866,20 @@ demo %>%
 Explain that there are many nuances to case_when() which you will practice in the breakout exercise
 
 ---
-# What about dates?
+# `r paste0(mod3[mod3$uid == "mod3_h1_date", params$lang])`
 
-It is important that R understands dates correctly (not as character values!)  
+`r paste0(mod3[mod3$uid == "mod3_tx_date_1", params$lang])`  
 
 .pull-left[
 
-The easiest method is to use functions from the {lubridate} package  
+`r paste0(mod3[mod3$uid == "mod3_tx_date_2", params$lang])`  
 
-**End goal**:  
+`r paste0(mod3[mod3$uid == "mod3_op_date", params$lang])`  
 
-* YYYY-MM-DD  
-* `class()` of the column is "date" 
+* `r paste0(mod3[mod3$uid == "mod3_bu_date_2", params$lang])` 
+* `r paste0(mod3[mod3$uid == "mod3_bu_date_1", params$lang])` 
 
-More details in this [Epi R Handbook chapter](https://epirhandbook.com/en/working-with-dates.html)
+`r paste0(mod3[mod3$uid == "mod3_tx_date_3", params$lang])`
 
 ]
 
@@ -875,13 +896,13 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 
 ---
-# {lubridate} functions  
+# `r paste0(mod3[mod3$uid == "mod3_h1_lubridate", params$lang])`  
 
-Use the {lubridate} function that aligns with the *current format*:  
+`r paste0(mod3[mod3$uid == "mod3_tx_lubridate_1", params$lang])`  
 
-* `ymd()` for YYYY-MM-DD  
-* `dmy()` for DD-MM-YYYY  
-* `mdy()` for MM-DD-YYYY 
+* `r paste0(mod3[mod3$uid == "mod3_bu_lubridate_1", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_lubridate_2", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_lubridate_3", params$lang])` 
 
 --
 
@@ -910,7 +931,7 @@ demo %>%
 
 ]
 
-.footnote[Using the `tibble()` view, you can see the class of each column above the values]
+.footnote[`r paste0(mod3[mod3$uid == "mod3_fn_lubridate", params$lang])`]
 
 
 
@@ -919,7 +940,7 @@ class: inverse, center, middle
 
 
 
-## Exercise  
+## `r paste0(mod3[mod3$uid == "mod3_h2_exercise", params$lang])`  
 
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}

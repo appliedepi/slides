@@ -1,0 +1,309 @@
+---
+title: "Advanced statistics in R"
+subtitle: "Regression - univariable and stratified"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation 
+  caret,
+  lme4,
+  broom.mixed,
+  countdown
+)
+
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png",
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+  .tiny .remark-code { /*Change made here*/
+  font-size: 50% !important;
+}
+```
+
+
+```{r, echo=F, eval=T}
+set.seed(1)
+surv <- rio::import(xfun::relative_path(here::here("data", "linelist_combined_20141201.rds")))
+
+linelist <- surv %>%
+     mutate(outcome_death = ifelse(outcome == "Death", 1, 0)) %>%
+     filter(between(bmi, 10, 50))
+
+independent_variables <- c("age", "gender", "cough", "temp")
+dependent_variable <- "outcome_death"
+
+```
+
+# Regression
+
+.pull-left[
+Regression analysis is one of the most useful tools in our toolbox. It allows us to establish statistical relationships between an outcome and a variable, or variables, *in our dataset*. And this allows us to do a number of different things, such as...
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "regression", "regression_figure.png")))
+```
+]
+
+---
+
+# Regression
+
+- Testing a theory or association.
+- Predicting what could happen in a new dataset if the relationships remain the same.
+- Controlling for confounding.
+ - Are the relationships between the outcome and the predictor true? Or are they an artifact of another value we previously did not adjust for?
+ 
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "regression", "testing_test_tube.jpg")))
+```
+
+ 
+---
+
+# gtsummary
+
+There are many ways to carry out regressions in R, but here we will be using the package **gtsummary** as it allows us to quickly and efficiently analysis data and produce publication ready tables with ease. 
+
+```{r, eval = TRUE, echo = FALSE, out.width = "30%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "regression", "gt_logo.png")))
+```
+
+---
+
+# gtsummary syntax
+
+While these have numerous potential inputs (see `?tbl_uvregression` for examples for the *univariable* regression), we are primarily concerned with only four of them
+
+* `method = `
+  * The type of regression we want to run, set to `glm` for our purposes
+* `y = `
+  * The dependent (outcome) variable we want to estimate
+* `method.args = `
+  * The type of glm we want to run, for a logistic regression it would be `method.args = list(family = binomial)`
+* `exponentiate = `
+  * Whether or not we want to exponentiate the result to produce odds ratios rather than log odds (only useful for logistic regression)
+
+---
+
+# gtsummary syntax
+
+.pull-left[
+```{r, echo = T, eval = FALSE}
+linelist %>%
+  select(independent_variables, 
+         outcome_death) %>%
+     drop_na() %>%
+  tbl_uvregression(
+    method = ,                
+    y = ,                     
+    method.args = ,           
+    exponentiate =            
+  )
+
+```
+]
+
+---
+
+# Univariate regression
+
+.pull-left[
+```{r univariate_code_table, echo = T, eval = F}
+
+linelist %>%
+  select(independent_variables, 
+         outcome_death) %>% 
+     drop_na() %>%
+  tbl_uvregression(
+    method = glm,                
+    y = outcome_death,                     
+    method.args = list(
+         family = binomial
+         ),           
+    exponentiate = TRUE          
+  )
+
+```
+]
+
+.pull-right[
+```{r univariate_code_table-out, ref.label="univariate_code_table", echo=FALSE}
+```
+]
+
+---
+
+# Stratified regression
+
+Here we define stratified regression as the process of carrying out separate regression analyses on different "groups" of data. 
+
+We do this because we think there may be plausible reasons why relationships between the dependent and independent variables could be different between groups
+
+Can you think of any groups you might want to separate in your analysis? 
+
+---
+
+# Stratified regression
+
+.pull-left[
+In order to stratify our dataset, we need to use `filter()` to subset our dataset to the group we want. As an example we are going to look at `gender = male` and `gender = female` separately.
+
+Note that we are _removing_ gender after we filter. There is only one value and so the regression analysis will not show anything.
+]
+
+.tiny[
+.pull-right[
+```{r, echo = T, eval = T}
+male_regression <- linelist %>%
+  select(independent_variables, 
+         outcome_death) %>% 
+     filter(gender == "male") %>%
+     select(-gender) %>%
+     drop_na() %>%
+  tbl_uvregression(
+    method = glm,                
+    y = outcome_death,                     
+    method.args = list(
+         family = binomial
+         ),           
+    exponentiate = TRUE          
+  )
+
+female_regression <- linelist %>%
+  select(independent_variables, 
+         outcome_death) %>% 
+     filter(gender == "female") %>%
+     select(-gender) %>%
+     drop_na() %>%
+  tbl_uvregression(
+    method = glm,                
+    y = outcome_death,                     
+    method.args = list(
+         family = binomial
+         ),           
+    exponentiate = TRUE          
+  )
+
+```
+]
+]
+---
+
+# Comparing outputs
+
+We can then display these tables side by side to see if there is any change in variable relationships using `tbl_merge()`
+
+```{r, echo = T, eval = T}
+tbl_merge(tbls = list(male_regression, 
+                      female_regression),
+          tab_spanner = c("Male only", 
+                          "Female only"))
+```
+---
+
+# Simple!
+
+That's it for univariate and stratified regression. As you can see we only need a few commands to be able to carry out a regression analysis for our dataset!
+
+---
+
+# Ready or not, we are going to give it a try!
+
+Any questions?
+
+[Epi R Handbook](epirhandbook.com/)
+
+Course website (initial setup and slides access): [https://appliedepi.github.io/intro_course/](https://appliedepi.github.io/intro_course/)
+---
+
+
+
+
+
+
+

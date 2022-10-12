@@ -5,7 +5,6 @@
     <meta charset="utf-8" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
-    <link href="libs/tabwid/scrool.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
@@ -66,7 +65,7 @@ class: center, middle, inverse, title-slide
 
 # Introduction à R pour l'épidémiologie appliquée
 
-### Regroupement des données
+### Grouper des données
 
 contact@appliedepi.org
 
@@ -74,7 +73,7 @@ contact@appliedepi.org
 
 
 
-#  Regroupement des données
+#  Grouper des données
 
 
 &lt;img src="../../../images/grouping/Grouping_1500x500.png" width="100%" /&gt;
@@ -84,14 +83,13 @@ contact@appliedepi.org
 ---
 # Aujourd'hui : objectifs et calendrier  
 
-**Dans ce module, nous voulons vous aider:**  
-* Pratique de l'utilisation de {janitor} pour créer rapidement des tabulations simples  
-* Pratique de l'utilisation de {dplyr} pour résumer des données avec polyvalence  
-* Pratique de l'utilisation de {gtsummary} pour créer des tableaux prêts à être publiés  
-* Créez des tableaux de qualité imprimable et exportez-les au format PNG, Word, etc.  
+**Dans ce module, nous allons :**  
+* Utiliser le paquet {janitor} pour créer rapidement des tabulations simples  
+* Utiliser le paquet {dplyr} pour des résumés plus polyvalents  
+* Utliser le paquet {gtsummary} pour créer des tableaux prêts à être publiés  
+* Créer des tableaux de qualité d'impression et les exporter au format PNG, Word, etc.  
 
-
-&lt;template id="f6bb573f-26df-407b-aec1-8ab5f50dba21"&gt;&lt;style&gt;
+&lt;template id="6d3ab67d-5302-40b2-8ca5-fde1e1241f12"&gt;&lt;style&gt;
 .tabwid table{
   border-spacing:0px !important;
   border-collapse:collapse;
@@ -100,9 +98,11 @@ contact@appliedepi.org
   margin-right:auto;
   border-width: 0;
   display: table;
-  margin-top: 1.275em;
-  margin-bottom: 1.275em;
   border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
 }
 .tabwid_left table{
   margin-left:0;
@@ -125,18 +125,15 @@ contact@appliedepi.org
 .tabwid table tr {
 background-color: transparent;
 }
-&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-54908270{}.cl-548470de{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-548488bc{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-5484c886{width:132.4pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c8a4{width:369pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c8b8{width:74.3pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c8c2{width:369pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c8cc{width:74.3pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c8d6{width:132.4pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c8e0{width:369pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c8ea{width:74.3pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c8f4{width:132.4pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c8fe{width:132.4pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c908{width:369pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c91c{width:74.3pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c926{width:369pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c980{width:74.3pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5484c981{width:132.4pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-54908270'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5484c980"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c981"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c926"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5484c8b8"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c886"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Principal&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c8a4"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Révision du module précédent&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5484c8cc"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c8d6"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Principal&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c8c2"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Approches pour regrouper et résumer les données&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5484c8cc"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;45 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c8d6"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Groupes de discussion&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c8c2"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Démonstration et exercice : janitor&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5484c8cc"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;45 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c8d6"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Groupes de discussion&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c8c2"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Démonstration et exercice : dplyr&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5484c8cc"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;45 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c8d6"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Groupes de discussion&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c8c2"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Démonstration et exercice : gtsummary&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5484c8ea"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c8f4"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Principal&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5484c8e0"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Débriefing en plénière et démonstration flextable (si le temps le permet)&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-5484c91c"&gt;&lt;p class="cl-548488bc"&gt;&lt;span class="cl-548470de"&gt;Les ruptures sont incorporées ci-dessus, mais ne sont pas représentées sous forme de lignes.&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
-&lt;div class="flextable-shadow-host" id="2f73a60f-f17b-49ec-93e4-02dc70672996"&gt;&lt;/div&gt;
-&lt;script&gt;
-var dest = document.getElementById("2f73a60f-f17b-49ec-93e4-02dc70672996");
-var template = document.getElementById("f6bb573f-26df-407b-aec1-8ab5f50dba21");
-var caption = template.content.querySelector("caption");
-if(caption) {
-  caption.style.cssText = "display:block;text-align:center;";
-  var newcapt = document.createElement("p");
-  newcapt.appendChild(caption)
-  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+.katex-display {
+    margin: 0 0 !important;
 }
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-fcf7482e{}.cl-fceb456a{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-fcf028a0{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-fcf04196{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf04197{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041aa{width:5.338in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041b4{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041be{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041bf{width:5.338in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041c8{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041c9{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041d2{width:5.338in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041dc{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041dd{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041de{width:5.338in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041e6{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041e7{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fcf041f0{width:5.338in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-fcf7482e'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fcf04196"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf04197"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041aa"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fcf041b4"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041be"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041bf"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Revue du module précédent&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fcf041c8"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041c9"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041d2"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Approches pour aggréger et résumer les données&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fcf041c8"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;45 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041c9"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Exercice&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041d2"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Démonstration et exercice : janitor&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fcf041c8"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;45 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041c9"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Exercice&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041d2"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Démonstration et exercice : dplyr&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fcf041c8"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;45 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041c9"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Exercice&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041d2"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Démonstration et exercice : gtsummary&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fcf041dc"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041dd"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fcf041de"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Débriefing en plénière et démonstration de flextable (si le temps le permet)&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-fcf041e6"&gt;&lt;p class="cl-fcf028a0"&gt;&lt;span class="cl-fceb456a"&gt;Les pauses sont incorporées ci-dessus, mais pas montrées.&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="19a04cfd-cfbf-477a-a779-f2d621d0fed0"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("19a04cfd-cfbf-477a-a779-f2d621d0fed0");
+var template = document.getElementById("6d3ab67d-5302-40b2-8ca5-fde1e1241f12");
+var caption = template.content.querySelector("caption");
 var fantome = dest.attachShadow({mode: 'open'});
 var templateContent = template.content;
 fantome.appendChild(templateContent);
@@ -151,11 +148,11 @@ Note stretch breaks throughout.
 ---
 class: inverse, center, middle
 
-## {janitor} - vitesse  
+## {janitor} : la vitesse  
 
-## {tidyverse} - flexibilité  
+## {tidyverse} : la flexibilité  
 
-## {gtsummary} - beauté
+## {gtsummary} : la beauté
 
 
 
@@ -164,7 +161,7 @@ class: inverse, center, middle
 ---
 class: inverse, center, middle
 
-## {janitor} - vitesse  
+## {janitor} : la vitesse  
 
 &lt;img src="../../../images/grouping/simple_table.png" width="65%" /&gt;
 
@@ -192,14 +189,14 @@ surv %&gt;%
 
 ```
 ##        district   n     percent valid_percent
-##       Central I  30 0.055658627    0.05586592
-##      Central II  23 0.042671614    0.04283054
+##       Central I  31 0.057513915    0.05772812
+##      Central II  15 0.027829314    0.02793296
 ##          East I  25 0.046382189    0.04655493
 ##         East II  65 0.120593692    0.12104283
 ##        East III  10 0.018552876    0.01862197
-##  Mountain Rural 176 0.326530612    0.32774674
-##          West I  13 0.024118738    0.02420857
-##         West II 102 0.189239332    0.18994413
+##  Mountain Rural 180 0.333951763    0.33519553
+##          West I  14 0.025974026    0.02607076
+##         West II 104 0.192949907    0.19366853
 ##        West III  93 0.172541744    0.17318436
 ##            &lt;NA&gt;   2 0.003710575            NA
 ```
@@ -209,7 +206,7 @@ surv %&gt;%
 
 ---
 
-# Fonctions " adorn_()` ".  
+# Les fonctions `adorn_()`.  
 
 .pull-left[
 
@@ -227,14 +224,14 @@ surv %&gt;%
 
 ```
 ##        district   n     percent valid_percent
-##       Central I  30 0.055658627    0.05586592
-##      Central II  23 0.042671614    0.04283054
+##       Central I  31 0.057513915    0.05772812
+##      Central II  15 0.027829314    0.02793296
 ##          East I  25 0.046382189    0.04655493
 ##         East II  65 0.120593692    0.12104283
 ##        East III  10 0.018552876    0.01862197
-##  Mountain Rural 176 0.326530612    0.32774674
-##          West I  13 0.024118738    0.02420857
-##         West II 102 0.189239332    0.18994413
+##  Mountain Rural 180 0.333951763    0.33519553
+##          West I  14 0.025974026    0.02607076
+##         West II 104 0.192949907    0.19366853
 ##        West III  93 0.172541744    0.17318436
 ##            &lt;NA&gt;   2 0.003710575            NA
 ##           Total 539 1.000000000    1.00000000
@@ -247,7 +244,7 @@ surv %&gt;%
 
 ---
 
-# Fonctions " adorn_()` ".  
+# Les fonctions `adorn_()`.  
 
 .pull-left[
 
@@ -267,14 +264,14 @@ surv %&gt;%
 
 ```
 ##        district   n percent valid_percent
-##       Central I  30    5.6%          5.6%
-##      Central II  23    4.3%          4.3%
+##       Central I  31    5.8%          5.8%
+##      Central II  15    2.8%          2.8%
 ##          East I  25    4.6%          4.7%
 ##         East II  65   12.1%         12.1%
 ##        East III  10    1.9%          1.9%
-##  Mountain Rural 176   32.7%         32.8%
-##          West I  13    2.4%          2.4%
-##         West II 102   18.9%         19.0%
+##  Mountain Rural 180   33.4%         33.5%
+##          West I  14    2.6%          2.6%
+##         West II 104   19.3%         19.4%
 ##        West III  93   17.3%         17.3%
 ##            &lt;NA&gt;   2    0.4%             -
 ##           Total 539  100.0%        100.0%
@@ -286,7 +283,7 @@ surv %&gt;%
 
 ---
 
-# `tabyl()` tableau croisé   
+# Tableaux croisés avec `tabyl()`   
 
 
 .pull-left[
@@ -306,14 +303,14 @@ surv %&gt;%
 
 ```
 ##        district female male NA_
-##       Central I     15   14   1
-##      Central II     12   10   1
+##       Central I     15   15   1
+##      Central II     10    4   1
 ##          East I     11   12   2
 ##         East II     31   33   1
 ##        East III      3    6   1
-##  Mountain Rural     98   73   5
-##          West I      7    5   1
-##         West II     53   48   1
+##  Mountain Rural     99   76   5
+##          West I      8    5   1
+##         West II     53   50   1
 ##        West III     44   44   5
 ##            &lt;NA&gt;      1    1   0
 ```
@@ -324,7 +321,7 @@ surv %&gt;%
 
 ---
 
-# `tabyl()` tableau croisé   
+# Tableaux croisés avec `tabyl()`   
 
 
 .pull-left[
@@ -335,7 +332,7 @@ surv %&gt;%
 * tabyl(district, gender, show_na = FALSE)
 ```
 
-Supprimez les valeurs manquantes du tableau.  
+supprime aussi les valeurs manquantes du tableau  
 
 ]
 
@@ -345,14 +342,14 @@ Supprimez les valeurs manquantes du tableau.
 
 ```
 ##        district female male
-##       Central I     15   14
-##      Central II     12   10
+##       Central I     15   15
+##      Central II     10    4
 ##          East I     11   12
 ##         East II     31   33
 ##        East III      3    6
-##  Mountain Rural     98   73
-##          West I      7    5
-##         West II     53   48
+##  Mountain Rural     99   76
+##          West I      8    5
+##         West II     53   50
 ##        West III     44   44
 ```
 
@@ -362,7 +359,7 @@ Supprimez les valeurs manquantes du tableau.
 
 ---
 
-# `adorn_()` tableau croisé  
+# Tableau croisé et `adorn_()`  
 
 .pull-left[
 
@@ -373,7 +370,7 @@ surv %&gt;%
 * adorn_totals(where = "both")
 ```
 
-Ajoutez les totaux des lignes et des colonnes.  
+Ajoute les totaux des lignes et des colonnes.  
 
 ]
 
@@ -384,14 +381,14 @@ Ajoutez les totaux des lignes et des colonnes.
 
 ```
 ##        district female male Total
-##       Central I     15   14    29
-##      Central II     12   10    22
+##       Central I     15   15    30
+##      Central II     10    4    14
 ##          East I     11   12    23
 ##         East II     31   33    64
 ##        East III      3    6     9
-##  Mountain Rural     98   73   171
-##          West I      7    5    12
-##         West II     53   48   101
+##  Mountain Rural     99   76   175
+##          West I      8    5    13
+##         West II     53   50   103
 ##        West III     44   44    88
 ##           Total    274  245   519
 ```
@@ -400,7 +397,7 @@ Ajoutez les totaux des lignes et des colonnes.
 
 ---
 
-# `adorn_()` tableau croisé  
+# Tableau croisé et `adorn_()`  
 
 .pull-left[
 
@@ -413,7 +410,7 @@ surv %&gt;%
 * adorn_pct_formatting()
 ```
 
-Ajoutez des pourcentages formatés avec ces deux commandes.  
+Ajoute des pourcentages formatés (deux commandes).  
 
 ]
 
@@ -424,14 +421,14 @@ Ajoutez des pourcentages formatés avec ces deux commandes.
 
 ```
 ##        district female  male  Total
-##       Central I  51.7% 48.3% 100.0%
-##      Central II  54.5% 45.5% 100.0%
+##       Central I  50.0% 50.0% 100.0%
+##      Central II  71.4% 28.6% 100.0%
 ##          East I  47.8% 52.2% 100.0%
 ##         East II  48.4% 51.6% 100.0%
 ##        East III  33.3% 66.7% 100.0%
-##  Mountain Rural  57.3% 42.7% 100.0%
-##          West I  58.3% 41.7% 100.0%
-##         West II  52.5% 47.5% 100.0%
+##  Mountain Rural  56.6% 43.4% 100.0%
+##          West I  61.5% 38.5% 100.0%
+##         West II  51.5% 48.5% 100.0%
 ##        West III  50.0% 50.0% 100.0%
 ##           Total  52.8% 47.2% 100.0%
 ```
@@ -441,7 +438,7 @@ Ajoutez des pourcentages formatés avec ces deux commandes.
 
 ---
 
-# `adorn_()` tableau croisé  
+# Tableau croisé et `adorn_()`  
 
 .pull-left[
 
@@ -454,7 +451,7 @@ surv %&gt;%
 * adorn_pct_formatting(digits = 0)
 ```
 
-Définissez le nombre de chiffres décimaux.  
+Définit le nombre de décimales.  
 
 ]
 
@@ -465,14 +462,14 @@ Définissez le nombre de chiffres décimaux.
 
 ```
 ##        district female male Total
-##       Central I    52%  48%  100%
-##      Central II    55%  45%  100%
+##       Central I    50%  50%  100%
+##      Central II    71%  29%  100%
 ##          East I    48%  52%  100%
 ##         East II    48%  52%  100%
 ##        East III    33%  67%  100%
 ##  Mountain Rural    57%  43%  100%
-##          West I    58%  42%  100%
-##         West II    52%  48%  100%
+##          West I    62%  38%  100%
+##         West II    51%  49%  100%
 ##        West III    50%  50%  100%
 ##           Total    53%  47%  100%
 ```
@@ -487,7 +484,7 @@ This may look ugly, but you can make this into pretty image very easily
 
 # {flextable}
 
-Passez facilement le tableau à `qflextable()` pour l'imprimer joliment en html.  
+Passez le tableau à la fonction `qflextable()` pour un rendu html soigné.  
 
 .pull-left[
 
@@ -502,8 +499,7 @@ surv %&gt;%
 ]
 
 .pull-right[
-
-&lt;template id="2d6240cf-55cb-49c6-bfb6-92c914f03488"&gt;&lt;style&gt;
+&lt;template id="9a7d2f3e-ff86-46d2-88b0-fe93965361e7"&gt;&lt;style&gt;
 .tabwid table{
   border-spacing:0px !important;
   border-collapse:collapse;
@@ -512,9 +508,11 @@ surv %&gt;%
   margin-right:auto;
   border-width: 0;
   display: table;
-  margin-top: 1.275em;
-  margin-bottom: 1.275em;
   border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
 }
 .tabwid_left table{
   margin-left:0;
@@ -537,18 +535,15 @@ surv %&gt;%
 .tabwid table tr {
 background-color: transparent;
 }
-&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-556c03f4{}.cl-556395ca{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-5563a812{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-5563d968{width:53.5pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5563d972{width:44.4pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5563d97c{width:95.1pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5563d986{width:48.7pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5563d987{width:48.7pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5563d990{width:95.1pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5563d991{width:53.5pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5563d99a{width:44.4pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5563d9a4{width:95.1pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5563d9ae{width:53.5pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5563d9b8{width:44.4pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5563d9b9{width:48.7pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-556c03f4'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5563d9a4"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;district&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d9ae"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;female&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d9b8"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;male&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d9b9"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;Total&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5563d97c"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;Central I&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d968"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;52%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d972"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;48%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d986"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5563d97c"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;Central II&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d968"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;55%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d972"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;45%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d986"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5563d97c"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;East I&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d968"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;48%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d972"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;52%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d986"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5563d97c"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;East II&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d968"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;48%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d972"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;52%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d986"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5563d97c"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;East III&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d968"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;33%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d972"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;67%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d986"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5563d97c"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;Mountain Rural&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d968"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;57%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d972"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;43%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d986"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5563d97c"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;West I&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d968"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;58%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d972"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;42%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d986"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5563d97c"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;West II&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d968"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;52%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d972"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;48%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d986"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5563d97c"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;West III&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d968"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;50%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d972"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;50%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d986"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5563d990"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;Total&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d991"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;53%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d99a"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;47%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5563d987"&gt;&lt;p class="cl-5563a812"&gt;&lt;span class="cl-556395ca"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
-&lt;div class="flextable-shadow-host" id="93c56c18-2cc4-4576-a23b-63fd2bf51451"&gt;&lt;/div&gt;
-&lt;script&gt;
-var dest = document.getElementById("93c56c18-2cc4-4576-a23b-63fd2bf51451");
-var template = document.getElementById("2d6240cf-55cb-49c6-bfb6-92c914f03488");
-var caption = template.content.querySelector("caption");
-if(caption) {
-  caption.style.cssText = "display:block;text-align:center;";
-  var newcapt = document.createElement("p");
-  newcapt.appendChild(caption)
-  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+.katex-display {
+    margin: 0 0 !important;
 }
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-fdbf96ee{}.cl-fdb1e29c{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-fdb62afa{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-fdb640e4{width:1.321in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fdb640ee{width:0.744in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fdb640f8{width:0.616in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fdb640f9{width:0.676in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fdb640fa{width:1.321in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fdb64102{width:0.744in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fdb64103{width:0.616in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fdb6410c{width:0.676in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fdb6410d{width:1.321in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fdb6410e{width:0.744in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fdb64116{width:0.616in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fdb64117{width:0.676in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-fdbf96ee'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fdb640e4"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;district&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb640ee"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;female&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb640f8"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;male&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb640f9"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;Total&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fdb640fa"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;Central I&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64102"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;50%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64103"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;50%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb6410c"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fdb640fa"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;Central II&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64102"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;71%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64103"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;29%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb6410c"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fdb640fa"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;East I&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64102"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;48%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64103"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;52%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb6410c"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fdb640fa"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;East II&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64102"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;48%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64103"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;52%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb6410c"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fdb640fa"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;East III&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64102"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;33%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64103"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;67%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb6410c"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fdb640fa"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;Mountain Rural&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64102"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;57%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64103"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;43%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb6410c"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fdb640fa"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;West I&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64102"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;62%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64103"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;38%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb6410c"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fdb640fa"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;West II&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64102"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;51%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64103"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;49%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb6410c"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fdb640fa"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;West III&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64102"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;50%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64103"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;50%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb6410c"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fdb6410d"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;Total&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb6410e"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;53%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64116"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;47%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fdb64117"&gt;&lt;p class="cl-fdb62afa"&gt;&lt;span class="cl-fdb1e29c"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="878cb657-7574-43e4-8ba3-dc3e3ccda2e2"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("878cb657-7574-43e4-8ba3-dc3e3ccda2e2");
+var template = document.getElementById("9a7d2f3e-ff86-46d2-88b0-fe93965361e7");
+var caption = template.content.querySelector("caption");
 var fantome = dest.attachShadow({mode: 'open'});
 var templateContent = template.content;
 fantome.appendChild(templateContent);
@@ -556,7 +551,7 @@ fantome.appendChild(templateContent);
 
 ]
 
-.footnote[`qflextable()` signifie "flextable rapide".]
+.footnote[`qflextable()` est pour "quick flextable".]
 
 
 
@@ -568,7 +563,7 @@ fantome.appendChild(templateContent);
 ---
 class: inverse, center, middle
 
-## {tidyverse} - flexibilité  
+## {tidyverse} : la flexibilité  
 
 &lt;img src="../../../images/grouping/flexibility.png" width="65%" /&gt;
 
@@ -580,7 +575,7 @@ class: inverse, center, middle
 
 # Fonctions  
 
-Fonctions communes de regroupement/résumé, toutes issues du {tidyverse} :  
+Groupement / aggrégation / résummé des données avec les fonctions du {tidyverse} :  
 
 * `count()`  
 * `group_by()`  
@@ -593,7 +588,7 @@ Fonctions communes de regroupement/résumé, toutes issues du {tidyverse} :
 ---
 # `count()`  
 
-Passez les données dans `count()`, et fournissez un nom de colonne.  
+Passez un dataframe à `count()`, et fournissez un nom de colonne.  
 
 Cela renvoie le nombre de lignes par valeur unique (par groupe).  
 
@@ -623,7 +618,7 @@ Very quick and fast
 ---
 # `count()`  
 
-Vous pouvez inclure plusieurs colonnes de regroupement  
+Vous pouvez inclure plusieurs colonnes de groupement  
 
 --
 
@@ -662,7 +657,7 @@ Very quick and fast
 ---
 # group_by() et summarise()  
 
-Mais qu'en est-il si vous voulez plus que les comptes ?  
+Et si vous voulez plus que du décompte ?  
 
 --
 
@@ -678,7 +673,7 @@ Mais qu'en est-il si vous voulez plus que les comptes ?
 
 --
 
-`group_by()` et `summarise()` permettent de créer un **nouveau cadre de données récapitulatif** avec des **statistiques par groupe**.   
+`group_by()` et `summarise()` permettent de créer un **nouveau  résummé** avec des **statistiques par groupe**.   
 
 
 .footnote[`summarise()` et `summarize()` sont équivalents]  
@@ -695,33 +690,33 @@ surv %&gt;%
   group_by(hospital)
 ```
 
-Aucun changement perceptible dans l'ensemble de données *jusqu'à* ce qu'une autre fonction {dplyr} soit appliquée.  
+Aucun changement perceptible dans le dataframe *jusqu'à* ce qu'une autre fonction {dplyr} soit appliquée.  
 
 --
 
-S'il est imprimé, les `Groupes:` sont listés au-dessus des données.
+Si le dataframe est imprimé, les groupes sont listés au-dessus des données.
 
 
 ```
-## # A tibble: 539 x 29
+## # A tibble: 539 × 29
 ## # Groups:   hospital [6]
-##    case_id date_onset date_report diff    gender   age age_unit age_ye~1 age_cat hospi~2
-##    &lt;chr&gt;   &lt;date&gt;     &lt;date&gt;      &lt;drtn&gt;  &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;  
-##  1 86340d  2014-10-30 2014-10-31   1 days female     1 years           1 0-9     Port H~
-##  2 92d002  2014-08-16 2014-08-20   4 days female    16 years          16 10-19   &lt;NA&gt;   
-##  3 544bd1  2014-08-29 2014-08-30   1 days female    10 years          10 10-19   &lt;NA&gt;   
-##  4 6056ba  2014-10-20 2014-10-21   1 days female     0 years           0 0-9     &lt;NA&gt;   
-##  5 e64e04  2014-10-06 2014-10-10   4 days female     7 years           7 0-9     &lt;NA&gt;   
-##  6 5a65bb  2014-09-21 2014-09-22   1 days male       4 years           4 0-9     Port H~
-##  7 2ae019  2014-05-06 2014-05-11   5 days male      37 years          37 30-39   Other  
-##  8 7ca4c0  2014-09-29 2014-09-30   1 days male      11 years          11 10-19   Port H~
-##  9 30af4f  NA         2014-11-10  NA days female     6 years           6 0-9     Port H~
-## 10 a06123  2014-09-10 2014-09-15   5 days male      10 years          10 10-19   &lt;NA&gt;   
-## # ... with 529 more rows, 19 more variables: district &lt;chr&gt;, district_res &lt;chr&gt;,
+##    case_id date_onset date_report diff   gender   age age_u…¹ age_y…² age_cat hospi…³
+##    &lt;chr&gt;   &lt;date&gt;     &lt;date&gt;      &lt;drtn&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;  
+##  1 86340d  2014-10-30 2014-10-31   1 da… female     1 years         1 0-9     Port H…
+##  2 92d002  2014-08-16 2014-08-20   4 da… female    16 years        16 10-19   &lt;NA&gt;   
+##  3 544bd1  2014-08-29 2014-08-30   1 da… female    10 years        10 10-19   &lt;NA&gt;   
+##  4 6056ba  2014-10-20 2014-10-21   1 da… female     0 years         0 0-9     &lt;NA&gt;   
+##  5 e64e04  2014-10-06 2014-10-10   4 da… female     7 years         7 0-9     &lt;NA&gt;   
+##  6 5a65bb  2014-09-21 2014-09-22   1 da… male       4 years         4 0-9     Port H…
+##  7 2ae019  2014-05-06 2014-05-11   5 da… male      37 years        37 30-39   Other  
+##  8 7ca4c0  2014-09-29 2014-09-30   1 da… male      11 years        11 10-19   Port H…
+##  9 30af4f  NA         2014-11-10  NA da… female     6 years         6 0-9     Port H…
+## 10 a06123  2014-09-10 2014-09-15   5 da… male      10 years        10 10-19   &lt;NA&gt;   
+## # … with 529 more rows, 19 more variables: district &lt;chr&gt;, district_res &lt;chr&gt;,
 ## #   district_det &lt;chr&gt;, moved &lt;lgl&gt;, wt_kg &lt;int&gt;, ht_cm &lt;int&gt;, fever &lt;chr&gt;,
 ## #   chills &lt;chr&gt;, cough &lt;chr&gt;, aches &lt;chr&gt;, vomit &lt;chr&gt;, temp &lt;dbl&gt;, bmi &lt;dbl&gt;,
 ## #   admin3pcod &lt;chr&gt;, lab_confirmed &lt;lgl&gt;, lat &lt;dbl&gt;, lon &lt;dbl&gt;, epilink &lt;chr&gt;,
-## #   case_def &lt;chr&gt;, and abbreviated variable names 1: age_years, 2: hospital
+## #   case_def &lt;chr&gt;, and abbreviated variable names ¹​age_unit, ²​age_years, ³​hospital
 ```
 
 
@@ -735,11 +730,11 @@ Note the `groups: hospital`, at the top of the tibble
 ---
 # group_by() et summarise()  
 
-Dans `summarise()`, *créer des colonnes dans un **nouveau** jeu de données résumé.*  
+Dans `summarise()`, *définir des colonnes pour créer un **nouveau** dataframe résumé.*  
 
 --
 
-&lt;h4&gt;summarise(&lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;une fonction&lt;/span&gt; &lt;U+00E0&gt; appliquer &lt;U+00E0&gt; chaque groupe de lignes)&lt;/h4&gt;
+&lt;h4&gt;summarise(&lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;une fonction&lt;/span&gt; à appliquer à chaque groupe de lignes)&lt;/h4&gt;
 
 --
 
@@ -750,7 +745,7 @@ Dans `summarise()`, *créer des colonnes dans un **nouveau** jeu de données ré
 
 ```
 
-## # A tibble: 6 x 1
+## # A tibble: 6 × 1
 ##   hospital         
 ##   &lt;chr&gt;            
 ## 1 Central Hospital 
@@ -771,7 +766,7 @@ Dans `summarise()`, *créer des colonnes dans un **nouveau** jeu de données ré
 
 Within the parentheses, *list new columns for the **new**, summary dataset.*  
 
-&lt;h4&gt;summarise(&lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;une fonction&lt;/span&gt; &lt;U+00E0&gt; appliquer &lt;U+00E0&gt; chaque groupe de lignes)&lt;/h4&gt;
+&lt;h4&gt;summarise(&lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;une fonction&lt;/span&gt; à appliquer à chaque groupe de lignes)&lt;/h4&gt;
 
 
 
@@ -780,7 +775,7 @@ Within the parentheses, *list new columns for the **new**, summary dataset.*
 
 ```
 
-## # A tibble: 6 x 2
+## # A tibble: 6 × 2
 ##   hospital          n_rows
 ##   &lt;chr&gt;              &lt;int&gt;
 ## 1 Central Hospital      40
@@ -798,9 +793,9 @@ Within the parentheses, *list new columns for the **new**, summary dataset.*
 ---
 # group_by() et summarise()  
 
-Entre les parenthèses, *listez les nouvelles colonnes pour le **nouveau** ensemble de données récapitulatif.*  
+Entre les parenthèses, *définir les nouvelles colonnes pour le **nouveau** dataframe résummé.*  
 
-&lt;h4&gt;summarise(&lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;une fonction&lt;/span&gt; &lt;U+00E0&gt; appliquer &lt;U+00E0&gt; chaque groupe de lignes)&lt;/h4&gt;
+&lt;h4&gt;summarise(&lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;une fonction&lt;/span&gt; à appliquer à chaque groupe de lignes)&lt;/h4&gt;
 
 
 
@@ -809,7 +804,7 @@ Entre les parenthèses, *listez les nouvelles colonnes pour le **nouveau** ensem
 
 ```
 
-## # A tibble: 6 x 3
+## # A tibble: 6 × 3
 ##   hospital          n_rows age_avg
 ##   &lt;chr&gt;              &lt;int&gt;   &lt;dbl&gt;
 ## 1 Central Hospital      40    14.9
@@ -827,9 +822,9 @@ Entre les parenthèses, *listez les nouvelles colonnes pour le **nouveau** ensem
 ---
 # group_by() et summarise()  
 
-Entre les parenthèses, *créer des colonnes dans un **nouveau** ensemble de données résumées.*  
+Entre les parenthèses, *créer des colonnes dans un **nouveau** jeu de données résumées.*  
 
-&lt;h4&gt;summarise(&lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;une fonction&lt;/span&gt; &lt;U+00E0&gt; appliquer &lt;U+00E0&gt; chaque groupe de lignes)&lt;/h4&gt;
+&lt;h4&gt;summarise(&lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;une fonction&lt;/span&gt; à appliquer à chaque groupe de lignes)&lt;/h4&gt;
 
 
 
@@ -838,7 +833,7 @@ Entre les parenthèses, *créer des colonnes dans un **nouveau** ensemble de don
 
 ```
 
-## # A tibble: 6 x 4
+## # A tibble: 6 × 4
 ##   hospital          n_rows age_avg max_onset 
 ##   &lt;chr&gt;              &lt;int&gt;   &lt;dbl&gt; &lt;date&gt;    
 ## 1 Central Hospital      40    14.9 2014-11-24
@@ -856,9 +851,9 @@ Entre les parenthèses, *créer des colonnes dans un **nouveau** ensemble de don
 ---
 # group_by() et summarise()  
 
-Entre les parenthèses, *créer des colonnes dans un **nouveau** ensemble de données résumées.*   
+Entre les parenthèses, *créer des colonnes dans un **nouveau** jeu de données résumées.*   
 
-&lt;h4&gt;summarise(&lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;une fonction&lt;/span&gt; &lt;U+00E0&gt; appliquer &lt;U+00E0&gt; chaque groupe de lignes)&lt;/h4&gt;
+&lt;h4&gt;summarise(&lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;une fonction&lt;/span&gt; à appliquer à chaque groupe de lignes)&lt;/h4&gt;
 
 
 
@@ -867,7 +862,7 @@ Entre les parenthèses, *créer des colonnes dans un **nouveau** ensemble de don
 
 ```
 
-## # A tibble: 6 x 5
+## # A tibble: 6 × 5
 ##   hospital          n_rows age_avg max_onset  n_female
 ##   &lt;chr&gt;              &lt;int&gt;   &lt;dbl&gt; &lt;date&gt;        &lt;int&gt;
 ## 1 Central Hospital      40    14.9 2014-11-24       16
@@ -884,9 +879,9 @@ Entre les parenthèses, *créer des colonnes dans un **nouveau** ensemble de don
 ---
 # group_by() et summarise()  
 
-Entre les parenthèses, *créer des colonnes dans un **nouveau** ensemble de données résumées.*   
+Entre les parenthèses, *créer des colonnes dans un **nouveau** jeu de données résumées.*   
 
-&lt;h4&gt;summarise(&lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;une fonction&lt;/span&gt; &lt;U+00E0&gt; appliquer &lt;U+00E0&gt; chaque groupe de lignes)&lt;/h4&gt;
+&lt;h4&gt;summarise(&lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;une fonction&lt;/span&gt; à appliquer à chaque groupe de lignes)&lt;/h4&gt;
 
 
 
@@ -895,7 +890,7 @@ Entre les parenthèses, *créer des colonnes dans un **nouveau** ensemble de don
 
 ```
 
-## # A tibble: 6 x 6
+## # A tibble: 6 × 6
 ##   hospital          n_rows age_avg max_onset  n_female pct_female
 ##   &lt;chr&gt;              &lt;int&gt;   &lt;dbl&gt; &lt;date&gt;        &lt;int&gt; &lt;chr&gt;     
 ## 1 Central Hospital      40    14.9 2014-11-24       16 40%       
@@ -911,7 +906,7 @@ Entre les parenthèses, *créer des colonnes dans un **nouveau** ensemble de don
 
 # `arrange()`
 
-Trier le tableau en plaçant la ou les colonnes à trier dans `arrange()`.  
+Trier le tableau en passant la/les colonnes à trier à `arrange()`.  
 
 
 ```r
@@ -927,7 +922,7 @@ surv %&gt;%
 ```
 
 ```
-## # A tibble: 6 x 6
+## # A tibble: 6 × 6
 ##   hospital          n_rows age_avg max_onset  n_female pct_female
 ##   &lt;chr&gt;              &lt;int&gt;   &lt;dbl&gt; &lt;date&gt;        &lt;int&gt; &lt;chr&gt;     
 ## 1 SMMH                  29    15.9 2014-11-28       17 59%       
@@ -957,11 +952,11 @@ surv %&gt;%
     max_onset = max(date_onset, na.rm=T),        # latest onset date
     n_female = sum(gender == 'female', na.rm=T), # number female in group
     pct_female = percent(n_female / n_rows)) %&gt;% # percent female in group
-* arrange(desc(n_rows))
+* arrange(-n_rows)
 ```
 
 ```
-## # A tibble: 6 x 6
+## # A tibble: 6 × 6
 ##   hospital          n_rows age_avg max_onset  n_female pct_female
 ##   &lt;chr&gt;              &lt;int&gt;   &lt;dbl&gt; &lt;date&gt;        &lt;int&gt; &lt;chr&gt;     
 ## 1 Port Hospital        174    15.1 2014-11-28       95 55%       
@@ -978,7 +973,7 @@ surv %&gt;%
 
 # flextable
 
-Comme avec {janitor}, utilisez `qflextable()` pour obtenir rapidement un tableau HTML.  
+Comme avec {janitor}, utilisez `qflextable()` pour un beau tableau HTML.  
 
 
 ```r
@@ -990,12 +985,11 @@ surv %&gt;%
     max_onset = max(date_onset, na.rm=T),        # latest onset date
     n_female = sum(gender == 'female', na.rm=T), # number female in group
     pct_female = percent(n_female / n_rows)) %&gt;% # percent female in group
-  arrange(desc(n_rows)) %&gt;% 
+  arrange(-n_rows) %&gt;% 
 * qflextable()
 ```
 
-
-&lt;template id="7552fd8d-6ac1-4dd6-a7cf-970b9c4ea170"&gt;&lt;style&gt;
+&lt;template id="2b8e7ec1-c4b4-41b7-89d5-3cfab917feba"&gt;&lt;style&gt;
 .tabwid table{
   border-spacing:0px !important;
   border-collapse:collapse;
@@ -1004,9 +998,11 @@ surv %&gt;%
   margin-right:auto;
   border-width: 0;
   display: table;
-  margin-top: 1.275em;
-  margin-bottom: 1.275em;
   border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
 }
 .tabwid_left table{
   margin-left:0;
@@ -1029,18 +1025,15 @@ surv %&gt;%
 .tabwid table tr {
 background-color: transparent;
 }
-&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-56f3ae8e{}.cl-56ea54ec{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-56ea6702{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-56ea670c{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-56eaa2d0{width:74.3pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa2e4{width:56pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa2e5{width:66.4pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa2ee{width:65.8pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa2f8{width:98.8pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa302{width:76.8pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa303{width:56pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa30c{width:98.8pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa316{width:65.8pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa317{width:74.3pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa318{width:76.8pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa320{width:66.4pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa32a{width:66.4pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa334{width:76.8pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa33e{width:56pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa33f{width:74.3pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa340{width:98.8pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa348{width:65.8pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa349{width:66.4pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa352{width:76.8pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa35c{width:98.8pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa35d{width:65.8pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa35e{width:56pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa370{width:74.3pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa371{width:76.8pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa372{width:66.4pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa37a{width:56pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa384{width:98.8pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa385{width:65.8pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa38e{width:74.3pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa398{width:66.4pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa399{width:76.8pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa3a2{width:56pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa3a3{width:98.8pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa3ac{width:65.8pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-56eaa3b6{width:74.3pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-56f3ae8e'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-56eaa3a3"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;hospital&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa3a2"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;n_rows&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa398"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;age_avg&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa399"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;max_onset&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa3ac"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;n_female&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa3b6"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;pct_female&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-56eaa2f8"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;Port Hospital&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa2e4"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;174&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa2e5"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;15.08090&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa302"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;2014-11-28&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa2ee"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;95&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa2d0"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;55%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-56eaa30c"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa303"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;133&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa320"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;17.57143&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa318"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;2014-11-27&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa316"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;69&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa317"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;52%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-56eaa30c"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;Other&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa303"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;85&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa320"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;16.14759&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa318"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;2014-11-26&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa316"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;44&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa317"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;52%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-56eaa340"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;Military Hospital&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa33e"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;78&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa32a"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;14.96104&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa334"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;2014-11-25&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa348"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;34&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa33f"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;44%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-56eaa35c"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;Central Hospital&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa35e"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;40&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa349"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;14.89375&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa352"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;2014-11-24&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa35d"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;16&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa370"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;40%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-56eaa384"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;SMMH&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa37a"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;29&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa372"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;15.93103&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa371"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;2014-11-28&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa385"&gt;&lt;p class="cl-56ea670c"&gt;&lt;span class="cl-56ea54ec"&gt;17&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-56eaa38e"&gt;&lt;p class="cl-56ea6702"&gt;&lt;span class="cl-56ea54ec"&gt;59%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
-&lt;div class="flextable-shadow-host" id="1b2df408-7b85-465c-85c0-eba63138dbbd"&gt;&lt;/div&gt;
-&lt;script&gt;
-var dest = document.getElementById("1b2df408-7b85-465c-85c0-eba63138dbbd");
-var template = document.getElementById("7552fd8d-6ac1-4dd6-a7cf-970b9c4ea170");
-var caption = template.content.querySelector("caption");
-if(caption) {
-  caption.style.cssText = "display:block;text-align:center;";
-  var newcapt = document.createElement("p");
-  newcapt.appendChild(caption)
-  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+.katex-display {
+    margin: 0 0 !important;
 }
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-ff249d40{}.cl-ff1a1d5c{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-ff1e35ea{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-ff1e35f4{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-ff1e4d78{width:1.372in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4d82{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4d83{width:0.922in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4d8c{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4d8d{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4d96{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4d97{width:1.372in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4da0{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4daa{width:0.922in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4dab{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4dac{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4db4{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4dbe{width:1.372in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4dbf{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4dc0{width:0.922in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4dc8{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4dc9{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4dd2{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4dd3{width:1.372in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4ddc{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4de6{width:0.922in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4de7{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4df0{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4dfa{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4e04{width:1.372in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4e0e{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4e0f{width:0.922in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4e10{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4e18{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4e19{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4e1a{width:1.372in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4e22{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4e23{width:0.922in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4e2c{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4e2d{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ff1e4e36{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-ff249d40'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-ff1e4d78"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;hospital&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4d82"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;n_rows&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4d83"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;age_avg&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4d8c"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;max_onset&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4d8d"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;n_female&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4d96"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;pct_female&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-ff1e4d97"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;Port Hospital&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4da0"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;174&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4daa"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;15.08090&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dab"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;2014-11-28&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dac"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;95&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4db4"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;55%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-ff1e4dbe"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dbf"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;133&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dc0"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;17.57143&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dc8"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;2014-11-27&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dc9"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;69&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dd2"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;52%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-ff1e4dbe"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;Other&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dbf"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;85&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dc0"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;16.14759&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dc8"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;2014-11-26&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dc9"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;44&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dd2"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;52%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-ff1e4dd3"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;Military Hospital&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4ddc"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;78&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4de6"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;14.96104&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4de7"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;2014-11-25&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4df0"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;34&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4dfa"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;44%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-ff1e4e04"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;Central Hospital&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4e0e"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;40&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4e0f"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;14.89375&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4e10"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;2014-11-24&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4e18"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;16&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4e19"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;40%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-ff1e4e1a"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;SMMH&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4e22"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;29&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4e23"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;15.93103&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4e2c"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;2014-11-28&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4e2d"&gt;&lt;p class="cl-ff1e35f4"&gt;&lt;span class="cl-ff1a1d5c"&gt;17&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-ff1e4e36"&gt;&lt;p class="cl-ff1e35ea"&gt;&lt;span class="cl-ff1a1d5c"&gt;59%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="a5788c42-bcb2-4af8-8306-11bafe0d85e7"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("a5788c42-bcb2-4af8-8306-11bafe0d85e7");
+var template = document.getElementById("2b8e7ec1-c4b4-41b7-89d5-3cfab917feba");
+var caption = template.content.querySelector("caption");
 var fantome = dest.attachShadow({mode: 'open'});
 var templateContent = template.content;
 fantome.appendChild(templateContent);
@@ -1079,7 +1072,7 @@ fantome.appendChild(templateContent);
 ---
 class: inverse, center, middle
 
-## {gtsummary} - beauté  
+## {gtsummary} : la beauté  
 
 &lt;img src="../../../images/grouping/beauty.png" width="65%" /&gt;
 
@@ -1102,7 +1095,7 @@ surv %&gt;%
 
 Sélectionnez les colonnes à résumer.  
 Pour la démonstration :  
-* Colonne à un caractère (`hospital`)  
+* Une colonne de texte (`hospital`)  
 * Une colonne numérique (`age_years`)  
 
 ]
@@ -1126,7 +1119,7 @@ surv %&gt;%
 
 Sélectionnez les colonnes à résumer.  
 Pour la démonstration :  
-* Colonne à un caractère (`hospital`)  
+* Une colonne de texte (`hospital`)  
 * Une colonne numérique (`age_years`)   
 
 ]
@@ -1135,12 +1128,12 @@ Pour la démonstration :
 
 .pull-right[
 
-<div id="pjdrfsazwe" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="hnmzujfibk" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#pjdrfsazwe .gt_table {
+#hnmzujfibk .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1165,7 +1158,7 @@ Pour la démonstration :
   border-left-color: #D3D3D3;
 }
 
-#pjdrfsazwe .gt_heading {
+#hnmzujfibk .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1177,7 +1170,7 @@ Pour la démonstration :
   border-right-color: #D3D3D3;
 }
 
-#pjdrfsazwe .gt_title {
+#hnmzujfibk .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1189,7 +1182,7 @@ Pour la démonstration :
   border-bottom-width: 0;
 }
 
-#pjdrfsazwe .gt_subtitle {
+#hnmzujfibk .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1201,13 +1194,13 @@ Pour la démonstration :
   border-top-width: 0;
 }
 
-#pjdrfsazwe .gt_bottom_border {
+#hnmzujfibk .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#pjdrfsazwe .gt_col_headings {
+#hnmzujfibk .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1222,7 +1215,7 @@ Pour la démonstration :
   border-right-color: #D3D3D3;
 }
 
-#pjdrfsazwe .gt_col_heading {
+#hnmzujfibk .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1242,7 +1235,7 @@ Pour la démonstration :
   overflow-x: hidden;
 }
 
-#pjdrfsazwe .gt_column_spanner_outer {
+#hnmzujfibk .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1254,15 +1247,15 @@ Pour la démonstration :
   padding-right: 4px;
 }
 
-#pjdrfsazwe .gt_column_spanner_outer:first-child {
+#hnmzujfibk .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#pjdrfsazwe .gt_column_spanner_outer:last-child {
+#hnmzujfibk .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#pjdrfsazwe .gt_column_spanner {
+#hnmzujfibk .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1274,7 +1267,7 @@ Pour la démonstration :
   width: 100%;
 }
 
-#pjdrfsazwe .gt_group_heading {
+#hnmzujfibk .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1299,7 +1292,7 @@ Pour la démonstration :
   vertical-align: middle;
 }
 
-#pjdrfsazwe .gt_empty_group_heading {
+#hnmzujfibk .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1314,15 +1307,15 @@ Pour la démonstration :
   vertical-align: middle;
 }
 
-#pjdrfsazwe .gt_from_md > :first-child {
+#hnmzujfibk .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#pjdrfsazwe .gt_from_md > :last-child {
+#hnmzujfibk .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#pjdrfsazwe .gt_row {
+#hnmzujfibk .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1341,7 +1334,7 @@ Pour la démonstration :
   overflow-x: hidden;
 }
 
-#pjdrfsazwe .gt_stub {
+#hnmzujfibk .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1354,7 +1347,7 @@ Pour la démonstration :
   padding-right: 5px;
 }
 
-#pjdrfsazwe .gt_stub_row_group {
+#hnmzujfibk .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1368,11 +1361,11 @@ Pour la démonstration :
   vertical-align: top;
 }
 
-#pjdrfsazwe .gt_row_group_first td {
+#hnmzujfibk .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#pjdrfsazwe .gt_summary_row {
+#hnmzujfibk .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1382,16 +1375,16 @@ Pour la démonstration :
   padding-right: 5px;
 }
 
-#pjdrfsazwe .gt_first_summary_row {
+#hnmzujfibk .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#pjdrfsazwe .gt_first_summary_row.thick {
+#hnmzujfibk .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#pjdrfsazwe .gt_last_summary_row {
+#hnmzujfibk .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1401,7 +1394,7 @@ Pour la démonstration :
   border-bottom-color: #D3D3D3;
 }
 
-#pjdrfsazwe .gt_grand_summary_row {
+#hnmzujfibk .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1411,7 +1404,7 @@ Pour la démonstration :
   padding-right: 5px;
 }
 
-#pjdrfsazwe .gt_first_grand_summary_row {
+#hnmzujfibk .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1421,11 +1414,11 @@ Pour la démonstration :
   border-top-color: #D3D3D3;
 }
 
-#pjdrfsazwe .gt_striped {
+#hnmzujfibk .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#pjdrfsazwe .gt_table_body {
+#hnmzujfibk .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1434,7 +1427,7 @@ Pour la démonstration :
   border-bottom-color: #D3D3D3;
 }
 
-#pjdrfsazwe .gt_footnotes {
+#hnmzujfibk .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1448,7 +1441,7 @@ Pour la démonstration :
   border-right-color: #D3D3D3;
 }
 
-#pjdrfsazwe .gt_footnote {
+#hnmzujfibk .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -1457,7 +1450,7 @@ Pour la démonstration :
   padding-right: 5px;
 }
 
-#pjdrfsazwe .gt_sourcenotes {
+#hnmzujfibk .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1471,7 +1464,7 @@ Pour la démonstration :
   border-right-color: #D3D3D3;
 }
 
-#pjdrfsazwe .gt_sourcenote {
+#hnmzujfibk .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1479,64 +1472,64 @@ Pour la démonstration :
   padding-right: 5px;
 }
 
-#pjdrfsazwe .gt_left {
+#hnmzujfibk .gt_left {
   text-align: left;
 }
 
-#pjdrfsazwe .gt_center {
+#hnmzujfibk .gt_center {
   text-align: center;
 }
 
-#pjdrfsazwe .gt_right {
+#hnmzujfibk .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#pjdrfsazwe .gt_font_normal {
+#hnmzujfibk .gt_font_normal {
   font-weight: normal;
 }
 
-#pjdrfsazwe .gt_font_bold {
+#hnmzujfibk .gt_font_bold {
   font-weight: bold;
 }
 
-#pjdrfsazwe .gt_font_italic {
+#hnmzujfibk .gt_font_italic {
   font-style: italic;
 }
 
-#pjdrfsazwe .gt_super {
+#hnmzujfibk .gt_super {
   font-size: 65%;
 }
 
-#pjdrfsazwe .gt_footnote_marks {
+#hnmzujfibk .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#pjdrfsazwe .gt_asterisk {
+#hnmzujfibk .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#pjdrfsazwe .gt_indent_1 {
+#hnmzujfibk .gt_indent_1 {
   text-indent: 5px;
 }
 
-#pjdrfsazwe .gt_indent_2 {
+#hnmzujfibk .gt_indent_2 {
   text-indent: 10px;
 }
 
-#pjdrfsazwe .gt_indent_3 {
+#hnmzujfibk .gt_indent_3 {
   text-indent: 15px;
 }
 
-#pjdrfsazwe .gt_indent_4 {
+#hnmzujfibk .gt_indent_4 {
   text-indent: 20px;
 }
 
-#pjdrfsazwe .gt_indent_5 {
+#hnmzujfibk .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -1597,19 +1590,19 @@ surv %&gt;%
 * tbl_summary(by = gender)
 ```
 
-Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur les tableaux descriptifs](https://epirhandbook.com/en/descriptive-tables.html#tbl_gt).)
+Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur les tableaux descriptifs](https://epirhandbook.com/fr/descriptive-tables.html#tbl_gt).)
 ]
 
 --
 
 .pull-right[
 
-<div id="tgrivoqmiy" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="avzyrejqmp" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#tgrivoqmiy .gt_table {
+#avzyrejqmp .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1634,7 +1627,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-left-color: #D3D3D3;
 }
 
-#tgrivoqmiy .gt_heading {
+#avzyrejqmp .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1646,7 +1639,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-right-color: #D3D3D3;
 }
 
-#tgrivoqmiy .gt_title {
+#avzyrejqmp .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1658,7 +1651,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-bottom-width: 0;
 }
 
-#tgrivoqmiy .gt_subtitle {
+#avzyrejqmp .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1670,13 +1663,13 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-top-width: 0;
 }
 
-#tgrivoqmiy .gt_bottom_border {
+#avzyrejqmp .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#tgrivoqmiy .gt_col_headings {
+#avzyrejqmp .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1691,7 +1684,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-right-color: #D3D3D3;
 }
 
-#tgrivoqmiy .gt_col_heading {
+#avzyrejqmp .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1711,7 +1704,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   overflow-x: hidden;
 }
 
-#tgrivoqmiy .gt_column_spanner_outer {
+#avzyrejqmp .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1723,15 +1716,15 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   padding-right: 4px;
 }
 
-#tgrivoqmiy .gt_column_spanner_outer:first-child {
+#avzyrejqmp .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#tgrivoqmiy .gt_column_spanner_outer:last-child {
+#avzyrejqmp .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#tgrivoqmiy .gt_column_spanner {
+#avzyrejqmp .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1743,7 +1736,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   width: 100%;
 }
 
-#tgrivoqmiy .gt_group_heading {
+#avzyrejqmp .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1768,7 +1761,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   vertical-align: middle;
 }
 
-#tgrivoqmiy .gt_empty_group_heading {
+#avzyrejqmp .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1783,15 +1776,15 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   vertical-align: middle;
 }
 
-#tgrivoqmiy .gt_from_md > :first-child {
+#avzyrejqmp .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#tgrivoqmiy .gt_from_md > :last-child {
+#avzyrejqmp .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#tgrivoqmiy .gt_row {
+#avzyrejqmp .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1810,7 +1803,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   overflow-x: hidden;
 }
 
-#tgrivoqmiy .gt_stub {
+#avzyrejqmp .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1823,7 +1816,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   padding-right: 5px;
 }
 
-#tgrivoqmiy .gt_stub_row_group {
+#avzyrejqmp .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1837,11 +1830,11 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   vertical-align: top;
 }
 
-#tgrivoqmiy .gt_row_group_first td {
+#avzyrejqmp .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#tgrivoqmiy .gt_summary_row {
+#avzyrejqmp .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1851,16 +1844,16 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   padding-right: 5px;
 }
 
-#tgrivoqmiy .gt_first_summary_row {
+#avzyrejqmp .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#tgrivoqmiy .gt_first_summary_row.thick {
+#avzyrejqmp .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#tgrivoqmiy .gt_last_summary_row {
+#avzyrejqmp .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1870,7 +1863,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-bottom-color: #D3D3D3;
 }
 
-#tgrivoqmiy .gt_grand_summary_row {
+#avzyrejqmp .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1880,7 +1873,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   padding-right: 5px;
 }
 
-#tgrivoqmiy .gt_first_grand_summary_row {
+#avzyrejqmp .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1890,11 +1883,11 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-top-color: #D3D3D3;
 }
 
-#tgrivoqmiy .gt_striped {
+#avzyrejqmp .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#tgrivoqmiy .gt_table_body {
+#avzyrejqmp .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1903,7 +1896,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-bottom-color: #D3D3D3;
 }
 
-#tgrivoqmiy .gt_footnotes {
+#avzyrejqmp .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1917,7 +1910,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-right-color: #D3D3D3;
 }
 
-#tgrivoqmiy .gt_footnote {
+#avzyrejqmp .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -1926,7 +1919,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   padding-right: 5px;
 }
 
-#tgrivoqmiy .gt_sourcenotes {
+#avzyrejqmp .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1940,7 +1933,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-right-color: #D3D3D3;
 }
 
-#tgrivoqmiy .gt_sourcenote {
+#avzyrejqmp .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1948,64 +1941,64 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   padding-right: 5px;
 }
 
-#tgrivoqmiy .gt_left {
+#avzyrejqmp .gt_left {
   text-align: left;
 }
 
-#tgrivoqmiy .gt_center {
+#avzyrejqmp .gt_center {
   text-align: center;
 }
 
-#tgrivoqmiy .gt_right {
+#avzyrejqmp .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#tgrivoqmiy .gt_font_normal {
+#avzyrejqmp .gt_font_normal {
   font-weight: normal;
 }
 
-#tgrivoqmiy .gt_font_bold {
+#avzyrejqmp .gt_font_bold {
   font-weight: bold;
 }
 
-#tgrivoqmiy .gt_font_italic {
+#avzyrejqmp .gt_font_italic {
   font-style: italic;
 }
 
-#tgrivoqmiy .gt_super {
+#avzyrejqmp .gt_super {
   font-size: 65%;
 }
 
-#tgrivoqmiy .gt_footnote_marks {
+#avzyrejqmp .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#tgrivoqmiy .gt_asterisk {
+#avzyrejqmp .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#tgrivoqmiy .gt_indent_1 {
+#avzyrejqmp .gt_indent_1 {
   text-indent: 5px;
 }
 
-#tgrivoqmiy .gt_indent_2 {
+#avzyrejqmp .gt_indent_2 {
   text-indent: 10px;
 }
 
-#tgrivoqmiy .gt_indent_3 {
+#avzyrejqmp .gt_indent_3 {
   text-indent: 15px;
 }
 
-#tgrivoqmiy .gt_indent_4 {
+#avzyrejqmp .gt_indent_4 {
   text-indent: 20px;
 }
 
-#tgrivoqmiy .gt_indent_5 {
+#avzyrejqmp .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -2061,7 +2054,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
 
 # `tbl_summary()`  
 
-* Ajuster les étiquettes  
+* Ajuster les labels  
 
 .pull-left[
 
@@ -2076,19 +2069,19 @@ surv %&gt;%
          hospital = "Hospital"))     
 ```
 
-Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur les tableaux descriptifs](https://epirhandbook.com/en/descriptive-tables.html#tbl_gt).)
+Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur les tableaux descriptifs](https://epirhandbook.com/fr/descriptive-tables.html#tbl_gt).)
 ]
 
 --
 
 .pull-right[
 
-<div id="eofisoxkqq" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="wzuaeulsvv" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#eofisoxkqq .gt_table {
+#wzuaeulsvv .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -2113,7 +2106,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-left-color: #D3D3D3;
 }
 
-#eofisoxkqq .gt_heading {
+#wzuaeulsvv .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -2125,7 +2118,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-right-color: #D3D3D3;
 }
 
-#eofisoxkqq .gt_title {
+#wzuaeulsvv .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -2137,7 +2130,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-bottom-width: 0;
 }
 
-#eofisoxkqq .gt_subtitle {
+#wzuaeulsvv .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -2149,13 +2142,13 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-top-width: 0;
 }
 
-#eofisoxkqq .gt_bottom_border {
+#wzuaeulsvv .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#eofisoxkqq .gt_col_headings {
+#wzuaeulsvv .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2170,7 +2163,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-right-color: #D3D3D3;
 }
 
-#eofisoxkqq .gt_col_heading {
+#wzuaeulsvv .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2190,7 +2183,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   overflow-x: hidden;
 }
 
-#eofisoxkqq .gt_column_spanner_outer {
+#wzuaeulsvv .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2202,15 +2195,15 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   padding-right: 4px;
 }
 
-#eofisoxkqq .gt_column_spanner_outer:first-child {
+#wzuaeulsvv .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#eofisoxkqq .gt_column_spanner_outer:last-child {
+#wzuaeulsvv .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#eofisoxkqq .gt_column_spanner {
+#wzuaeulsvv .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2222,7 +2215,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   width: 100%;
 }
 
-#eofisoxkqq .gt_group_heading {
+#wzuaeulsvv .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2247,7 +2240,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   vertical-align: middle;
 }
 
-#eofisoxkqq .gt_empty_group_heading {
+#wzuaeulsvv .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2262,15 +2255,15 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   vertical-align: middle;
 }
 
-#eofisoxkqq .gt_from_md > :first-child {
+#wzuaeulsvv .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#eofisoxkqq .gt_from_md > :last-child {
+#wzuaeulsvv .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#eofisoxkqq .gt_row {
+#wzuaeulsvv .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2289,7 +2282,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   overflow-x: hidden;
 }
 
-#eofisoxkqq .gt_stub {
+#wzuaeulsvv .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2302,7 +2295,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   padding-right: 5px;
 }
 
-#eofisoxkqq .gt_stub_row_group {
+#wzuaeulsvv .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2316,11 +2309,11 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   vertical-align: top;
 }
 
-#eofisoxkqq .gt_row_group_first td {
+#wzuaeulsvv .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#eofisoxkqq .gt_summary_row {
+#wzuaeulsvv .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2330,16 +2323,16 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   padding-right: 5px;
 }
 
-#eofisoxkqq .gt_first_summary_row {
+#wzuaeulsvv .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#eofisoxkqq .gt_first_summary_row.thick {
+#wzuaeulsvv .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#eofisoxkqq .gt_last_summary_row {
+#wzuaeulsvv .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2349,7 +2342,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-bottom-color: #D3D3D3;
 }
 
-#eofisoxkqq .gt_grand_summary_row {
+#wzuaeulsvv .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2359,7 +2352,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   padding-right: 5px;
 }
 
-#eofisoxkqq .gt_first_grand_summary_row {
+#wzuaeulsvv .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2369,11 +2362,11 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-top-color: #D3D3D3;
 }
 
-#eofisoxkqq .gt_striped {
+#wzuaeulsvv .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#eofisoxkqq .gt_table_body {
+#wzuaeulsvv .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2382,7 +2375,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-bottom-color: #D3D3D3;
 }
 
-#eofisoxkqq .gt_footnotes {
+#wzuaeulsvv .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2396,7 +2389,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-right-color: #D3D3D3;
 }
 
-#eofisoxkqq .gt_footnote {
+#wzuaeulsvv .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -2405,7 +2398,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   padding-right: 5px;
 }
 
-#eofisoxkqq .gt_sourcenotes {
+#wzuaeulsvv .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2419,7 +2412,7 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   border-right-color: #D3D3D3;
 }
 
-#eofisoxkqq .gt_sourcenote {
+#wzuaeulsvv .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -2427,64 +2420,64 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
   padding-right: 5px;
 }
 
-#eofisoxkqq .gt_left {
+#wzuaeulsvv .gt_left {
   text-align: left;
 }
 
-#eofisoxkqq .gt_center {
+#wzuaeulsvv .gt_center {
   text-align: center;
 }
 
-#eofisoxkqq .gt_right {
+#wzuaeulsvv .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#eofisoxkqq .gt_font_normal {
+#wzuaeulsvv .gt_font_normal {
   font-weight: normal;
 }
 
-#eofisoxkqq .gt_font_bold {
+#wzuaeulsvv .gt_font_bold {
   font-weight: bold;
 }
 
-#eofisoxkqq .gt_font_italic {
+#wzuaeulsvv .gt_font_italic {
   font-style: italic;
 }
 
-#eofisoxkqq .gt_super {
+#wzuaeulsvv .gt_super {
   font-size: 65%;
 }
 
-#eofisoxkqq .gt_footnote_marks {
+#wzuaeulsvv .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#eofisoxkqq .gt_asterisk {
+#wzuaeulsvv .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#eofisoxkqq .gt_indent_1 {
+#wzuaeulsvv .gt_indent_1 {
   text-indent: 5px;
 }
 
-#eofisoxkqq .gt_indent_2 {
+#wzuaeulsvv .gt_indent_2 {
   text-indent: 10px;
 }
 
-#eofisoxkqq .gt_indent_3 {
+#wzuaeulsvv .gt_indent_3 {
   text-indent: 15px;
 }
 
-#eofisoxkqq .gt_indent_4 {
+#wzuaeulsvv .gt_indent_4 {
   text-indent: 20px;
 }
 
-#eofisoxkqq .gt_indent_5 {
+#wzuaeulsvv .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -2539,10 +2532,10 @@ Voir les conseils sur la personnalisation dans le [chapitre du manuel Epi R sur 
 ---
 class: inverse, center, middle
 
-## Lequel utiliser ?  
+## Quelle fonction utiliser ?  
 
 En R, vous avez de nombreux choix.  
-Mettez-vous à l'aise avec un outil qui fonctionne pour vous.  
+Apprenez un outil qui fonctionne pour vous.  
 
 &lt;img src="../../../images/grouping/choices.png" width="90%" /&gt;
 
