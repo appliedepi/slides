@@ -235,7 +235,9 @@ This allows us to account for *confounding* **and** *effect modification*.
 # Do's and do not's
 
 *The do's*
+
 Expert knowledge
+
 - Think about the research question you are trying to answer
  - Statistics should follow a theory not the other way round
 - If you, or the literature, thinks something is important add it!
@@ -246,10 +248,14 @@ Expert knowledge
 # Do's and do not's
 
 *The do not's*
+
 Stepwise variable selection
+
  - This is no longer recommended for several reasons
  - It can remove useful and retain useless variables due to coincidence rather than real world meaning.
+ 
 Screening using a univariate regression
+
 - Non-significant variables can still affect parameter estimates
 - This can reject important variables when there is confounding or effect modification
  
@@ -400,7 +406,7 @@ This is done in a slightly different way to our univariate regression. We will b
 
 #Carrying out multivariable regression
 
-```{r, echo = T, eval = T}
+```{r, echo = T, eval = F}
 
 multivariable_regression_table <- data_use %>%
      select(lasso_predictors_clean, 
@@ -410,7 +416,6 @@ multivariable_regression_table <- data_use %>%
      glm(formula = outcome_death ~.,     
          family = binomial) %>%            
      tbl_regression(exponentiate = TRUE)
-     
 
 ```
 
@@ -419,7 +424,84 @@ Talk through the stages, what formula means, what family means, remind them what
 
 ---
 
+#Carrying out multivariable regression
+
+```{r, echo = T, eval = F}
+
+multivariable_regression_table <- data_use %>%
+     select(lasso_predictors_clean, 
+            outcome_death,
+            temp,
+            age) %>%
+     glm(formula = outcome_death ~.,     
+         family = binomial) %>%            
+     tbl_regression(exponentiate = TRUE)
+
+#Create a table of counts
+cross_tab <- multivariable_regression_table$inputs$x$data %>%
+  tbl_summary(by = outcome_death)
+
+```
+
+???
+Talk through the stages, what formula means, what family means, remind them what exponentiate = TRUE means
+
+---
+
+#Carrying out multivariable regression
+
+```{r, echo = T, eval = F}
+
+multivariable_regression_table <- data_use %>%
+     select(lasso_predictors_clean, 
+            outcome_death,
+            temp,
+            age) %>%
+     glm(formula = outcome_death ~.,     
+         family = binomial) %>%            
+     tbl_regression(exponentiate = TRUE)
+
+#Create a table of counts
+cross_tab <- multivariable_regression_table$inputs$x$data %>%
+  tbl_summary(by = outcome_death)
+
+#Combine the regression table and the count table
+tbl_merge(list(cross_tab, multivariable_regression_table),
+          tab_spanner = c("Counts", "Multivariable regression"))
+     
+
+```
+
+???
+Talk through the stages, what formula means, what family means, remind them what exponentiate = TRUE means
+
+---
+#Carrying out multivariable regression
+
+```{r, echo = F, eval = T}
+
+multivariable_regression_table <- data_use %>%
+     select(lasso_predictors_clean, 
+            outcome_death,
+            temp,
+            age) %>%
+     glm(formula = outcome_death ~.,     
+         family = binomial) %>%            
+     tbl_regression(exponentiate = TRUE)
+
+cross_tab <- multivariable_regression_table$inputs$x$data %>%
+  tbl_summary(by = outcome_death)
+
+tbl_merge(list(cross_tab, multivariable_regression_table),
+          tab_spanner = c("Counts", "Multivariable regression"))
+     
+
+```
+
+---
 # Displaying results
+
+You can also use `tbl_merge` to compare and contrast your univariate and multivariable regression results.
 
 .tiny[
 ```{r, echo = F, eval = T, out.height = "300px", out.width = "700px"}
@@ -442,7 +524,12 @@ tbl_merge(tbls = list(univariate_regression_table, multivariable_regression_tabl
 
 # Displaying results
 
-```{r, echo = F, eval = T, out.height = "500px", out.width = "600px"}
+.pull-left[
+And you can create forest plots using `ggplot()`
+]
+
+.pull-right[
+```{r, echo = F, eval = T, out.height = "400px", out.width = "600px"}
 forest_plot_dataset <- bind_rows(univariate_regression_table$table_body %>%
                                        mutate(regression_type = "univariate"),
                              multivariable_regression_table$table_body %>%
@@ -467,12 +554,14 @@ ggplot(data = forest_plot_dataset %>%
                 linetype = "dashed")
 
 ```
-
+]
 ---
 
 # It's now time for you to try it out yourselves!
 
 Any questions?
+
+
 
 **Resources**
 

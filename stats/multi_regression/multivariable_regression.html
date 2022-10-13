@@ -165,7 +165,9 @@ This allows us to account for *confounding* **and** *effect modification*.
 # Do's and do not's
 
 *The do's*
+
 Expert knowledge
+
 - Think about the research question you are trying to answer
  - Statistics should follow a theory not the other way round
 - If you, or the literature, thinks something is important add it!
@@ -176,10 +178,14 @@ Expert knowledge
 # Do's and do not's
 
 *The do not's*
+
 Stepwise variable selection
+
  - This is no longer recommended for several reasons
  - It can remove useful and retain useless variables due to coincidence rather than real world meaning.
+ 
 Screening using a univariate regression
+
 - Non-significant variables can still affect parameter estimates
 - This can reject important variables when there is confounding or effect modification
  
@@ -358,9 +364,57 @@ Talk through the stages, what formula means, what family means, remind them what
 
 ---
 
-# Displaying results
+#Carrying out multivariable regression
 
-.tiny[
+
+```r
+multivariable_regression_table &lt;- data_use %&gt;%
+     select(lasso_predictors_clean, 
+            outcome_death,
+            temp,
+            age) %&gt;%
+     glm(formula = outcome_death ~.,     
+         family = binomial) %&gt;%            
+     tbl_regression(exponentiate = TRUE)
+
+#Create a table of counts
+cross_tab &lt;- multivariable_regression_table$inputs$x$data %&gt;%
+  tbl_summary(by = outcome_death)
+```
+
+???
+Talk through the stages, what formula means, what family means, remind them what exponentiate = TRUE means
+
+---
+
+#Carrying out multivariable regression
+
+
+```r
+multivariable_regression_table &lt;- data_use %&gt;%
+     select(lasso_predictors_clean, 
+            outcome_death,
+            temp,
+            age) %&gt;%
+     glm(formula = outcome_death ~.,     
+         family = binomial) %&gt;%            
+     tbl_regression(exponentiate = TRUE)
+
+#Create a table of counts
+cross_tab &lt;- multivariable_regression_table$inputs$x$data %&gt;%
+  tbl_summary(by = outcome_death)
+
+#Combine the regression table and the count table
+tbl_merge(list(cross_tab, multivariable_regression_table),
+          tab_spanner = c("Counts", "Multivariable regression"))
+```
+
+???
+Talk through the stages, what formula means, what family means, remind them what exponentiate = TRUE means
+
+---
+#Carrying out multivariable regression
+
 <div id="cmzourldoj" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
@@ -771,6 +825,523 @@ Talk through the stages, what formula means, what family means, remind them what
   <thead class="gt_col_headings">
     <tr>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" scope="col"><strong>Characteristic</strong></th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" scope="colgroup">
+        <span class="gt_column_spanner">Counts</span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="3" scope="colgroup">
+        <span class="gt_column_spanner">Multivariable regression</span>
+      </th>
+    </tr>
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col"><strong>0</strong>, N = 82<sup class="gt_footnote_marks">1</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col"><strong>1</strong>, N = 135<sup class="gt_footnote_marks">1</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col"><strong>OR</strong><sup class="gt_footnote_marks">2</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col"><strong>95% CI</strong><sup class="gt_footnote_marks">2</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col"><strong>p-value</strong></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_left">hospital</td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td></tr>
+    <tr><td class="gt_row gt_left">    Central Hospital</td>
+<td class="gt_row gt_center">8 (9.8%)</td>
+<td class="gt_row gt_center">12 (8.9%)</td>
+<td class="gt_row gt_center">—</td>
+<td class="gt_row gt_center">—</td>
+<td class="gt_row gt_center"></td></tr>
+    <tr><td class="gt_row gt_left">    Military Hospital</td>
+<td class="gt_row gt_center">22 (27%)</td>
+<td class="gt_row gt_center">24 (18%)</td>
+<td class="gt_row gt_center">0.54</td>
+<td class="gt_row gt_center">0.17, 1.61</td>
+<td class="gt_row gt_center">0.3</td></tr>
+    <tr><td class="gt_row gt_left">    Other</td>
+<td class="gt_row gt_center">22 (27%)</td>
+<td class="gt_row gt_center">22 (16%)</td>
+<td class="gt_row gt_center">0.52</td>
+<td class="gt_row gt_center">0.17, 1.55</td>
+<td class="gt_row gt_center">0.2</td></tr>
+    <tr><td class="gt_row gt_left">    Port Hospital</td>
+<td class="gt_row gt_center">24 (29%)</td>
+<td class="gt_row gt_center">69 (51%)</td>
+<td class="gt_row gt_center">1.53</td>
+<td class="gt_row gt_center">0.53, 4.24</td>
+<td class="gt_row gt_center">0.4</td></tr>
+    <tr><td class="gt_row gt_left">    SMMH</td>
+<td class="gt_row gt_center">6 (7.3%)</td>
+<td class="gt_row gt_center">8 (5.9%)</td>
+<td class="gt_row gt_center">0.85</td>
+<td class="gt_row gt_center">0.20, 3.67</td>
+<td class="gt_row gt_center">0.8</td></tr>
+    <tr><td class="gt_row gt_left">wt_kg</td>
+<td class="gt_row gt_center">61 (48, 70)</td>
+<td class="gt_row gt_center">59 (50, 65)</td>
+<td class="gt_row gt_center">0.96</td>
+<td class="gt_row gt_center">0.93, 1.00</td>
+<td class="gt_row gt_center">0.058</td></tr>
+    <tr><td class="gt_row gt_left">cough</td>
+<td class="gt_row gt_center">62 (76%)</td>
+<td class="gt_row gt_center">119 (88%)</td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td></tr>
+    <tr><td class="gt_row gt_left">    no</td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center">—</td>
+<td class="gt_row gt_center">—</td>
+<td class="gt_row gt_center"></td></tr>
+    <tr><td class="gt_row gt_left">    yes</td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center">2.24</td>
+<td class="gt_row gt_center">1.04, 4.89</td>
+<td class="gt_row gt_center">0.040</td></tr>
+    <tr><td class="gt_row gt_left">temp</td>
+<td class="gt_row gt_center">38.90 (38.40, 39.30)</td>
+<td class="gt_row gt_center">38.90 (38.40, 39.20)</td>
+<td class="gt_row gt_center">0.89</td>
+<td class="gt_row gt_center">0.64, 1.23</td>
+<td class="gt_row gt_center">0.5</td></tr>
+    <tr><td class="gt_row gt_left">age</td>
+<td class="gt_row gt_center">18 (11, 26)</td>
+<td class="gt_row gt_center">17 (10, 25)</td>
+<td class="gt_row gt_center">1.02</td>
+<td class="gt_row gt_center">0.98, 1.07</td>
+<td class="gt_row gt_center">0.3</td></tr>
+  </tbody>
+  
+  <tfoot class="gt_footnotes">
+    <tr>
+      <td class="gt_footnote" colspan="6"><sup class="gt_footnote_marks">1</sup> n (%); Median (IQR)</td>
+    </tr>
+    <tr>
+      <td class="gt_footnote" colspan="6"><sup class="gt_footnote_marks">2</sup> OR = Odds Ratio, CI = Confidence Interval</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+
+---
+# Displaying results
+
+You can also use `tbl_merge` to compare and contrast your univariate and multivariable regression results.
+
+.tiny[
+<div id="iqklwmqzjb" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#iqklwmqzjb .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#iqklwmqzjb .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#iqklwmqzjb .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#iqklwmqzjb .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#iqklwmqzjb .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#iqklwmqzjb .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#iqklwmqzjb .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#iqklwmqzjb .gt_group_heading {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#iqklwmqzjb .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#iqklwmqzjb .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#iqklwmqzjb .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#iqklwmqzjb .gt_row {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#iqklwmqzjb .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iqklwmqzjb .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#iqklwmqzjb .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#iqklwmqzjb .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iqklwmqzjb .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#iqklwmqzjb .gt_last_summary_row {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iqklwmqzjb .gt_first_grand_summary_row {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#iqklwmqzjb .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-left: 1px;
+  padding-right: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iqklwmqzjb .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iqklwmqzjb .gt_left {
+  text-align: left;
+}
+
+#iqklwmqzjb .gt_center {
+  text-align: center;
+}
+
+#iqklwmqzjb .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#iqklwmqzjb .gt_font_normal {
+  font-weight: normal;
+}
+
+#iqklwmqzjb .gt_font_bold {
+  font-weight: bold;
+}
+
+#iqklwmqzjb .gt_font_italic {
+  font-style: italic;
+}
+
+#iqklwmqzjb .gt_super {
+  font-size: 65%;
+}
+
+#iqklwmqzjb .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 75%;
+  vertical-align: 0.4em;
+}
+
+#iqklwmqzjb .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#iqklwmqzjb .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#iqklwmqzjb .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#iqklwmqzjb .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#iqklwmqzjb .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#iqklwmqzjb .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" scope="col"><strong>Characteristic</strong></th>
       <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="4" scope="colgroup">
         <span class="gt_column_spanner">Univariate</span>
       </th>
@@ -899,8 +1470,13 @@ Talk through the stages, what formula means, what family means, remind them what
 
 # Displaying results
 
-&lt;img src="multivariable_regression_files/figure-html/unnamed-chunk-14-1.png" width="600px" height="500px" /&gt;
+.pull-left[
+And you can create forest plots using `ggplot()`
+]
 
+.pull-right[
+&lt;img src="multivariable_regression_files/figure-html/unnamed-chunk-17-1.png" width="600px" height="400px" /&gt;
+]
 ---
 
 # It's now time for you to try it out yourselves!
