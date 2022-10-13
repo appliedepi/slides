@@ -132,21 +132,30 @@ theme_gtsummary_compact()
 
 # Multivariable regression
 
-Now that you are experts at conducting univariable regression in R, it is time to move onto multivariable regression!
+Now that you are experts at conducting univariate regression in R, it is time to move onto multivariable regression!
 
 ---
 
-# Multivariable regression - when univariable is just not enough
+# Multivariable regression - when univariate is just not enough
 
 Multivariable regression allows us to look at the relationship between our dependent variable and multiple independent variables. 
 
-It considers the relationship of each independent variable _in context_ with the dependent variable. This allows us to understand which of the variables could have a true association with the outcome once they are controlled for by other variables.
+Why multivariable?
 
+* It considers the relationship of each exposure _in context_ with the outcome
+* This allows us to understand which exposures have a *true association* with the outcome and are not just subject to an *effect modification*
+
+---
+
+# Effect modification
+
+Effect modification is
+ 
 ---
 
 # Confounding
 
-Multivariable regression estimates the association between the independent variable and the outcome by holding all other variables constant.
+Multivariable regression estimates the association between the exposures and the outcome by holding all other exposures constant.
 
 This allows us to account for *confounding*.
 
@@ -215,16 +224,16 @@ Do we carry out some sort of stepwise approach?
 
 *The do's*
 Expert knowledge
-- Think about the research question you are trying to answer, statistics should follow a theory now the other way round.
+- Think about the research question you are trying to answer, statistics should follow a theory not the other way round.
 - If you, or the literature, thinks something is important add it!
  - A non-significant result in these is a useful result
 
 *The do not's*
 Stepwise variable selection
  - This is no longer recommended for several reasons, but in summary it can remove useful and retain useless variables due to coincidence rather than real world meaning.
-Screening using a univariable regression
+Screening using a univariate regression
 - Non-significant variables can still affect parameter estimates, so it would be wrong to discard them
-- This can reject important variables when there is confounding
+- This can reject important variables when there is confounding or effect modification
  
 This is only a brief summary, please read further into the topic with this blog post for further information (https://towardsdatascience.com/stopping-stepwise-why-stepwise-selection-is-bad-and-what-you-should-use-instead-90818b3f52df)
 
@@ -286,7 +295,7 @@ Talk through this gif in the context of the last slide
 
 1) First we subset our data to the potential independent variables of interest, and the dependent variable.
 
-2) Then we use `train()` from **caret** to run the lasso regression (in caretwe specify `method = "glmnet"`) according to the conditions we specified with `trainControl()`
+2) Then we use `train()` from **caret** to run the lasso regression (in caret we specify `method = "glmnet"`) according to the conditions we specified with `trainControl()`
 
 ```{r, echo = T, eval = T}
 
@@ -338,26 +347,27 @@ lasso_predictors_clean
 ]
 ---
 
-# Expert knowledge is important
+# Expert knowledge (biological plausibility) is important
 
 Are we done now, did lasso solve our model building?
 
 ---
 
-# Expert knowledge is important
+# Expert knowledge (plausibility) is important
 
 Are we done now, did lasso solve our model building?
 
 <font size="46">No!</font>
 
-If there is a variable that you think should be included, include it!
+If there is a variable that you think should be included (based on biological plausibility or a previously established association), include it!
+
 ---
 
 # Carrying out our multivariable regression
 
 Now we are ready to carry out our multivariable regression!
 
-This is done in a slightly different way to our univariable regression. We will be using **base** R's `glm()` function and then tidying up the outputs using the function `tbl_regression` from **gtsummary**.
+This is done in a slightly different way to our univariate regression. We will be using **base** R's `glm()` function and then tidying up the outputs using the function `tbl_regression` from **gtsummary**.
 
 ---
 
@@ -386,7 +396,7 @@ Talk through the stages, what formula means, what family means, remind them what
 
 .smaller[
 ```{r, echo = F, eval = T, out.height = "400px", out.width = "700px"}
-univariable_regression_table <- data_use %>%
+univariate_regression_table <- data_use %>%
     select(c(lasso_predictors_clean, 
              outcome_death,
              temp,
@@ -397,8 +407,8 @@ univariable_regression_table <- data_use %>%
     method.args = list(family = binomial),
     exponentiate = TRUE)
 
-tbl_merge(tbls = list(univariable_regression_table, multivariable_regression_table),
-          tab_spanner = c("Univariable", "Multivariable"))
+tbl_merge(tbls = list(univariate_regression_table, multivariable_regression_table),
+          tab_spanner = c("univariate", "Multivariable"))
 ```
 ]
 ---
@@ -406,10 +416,10 @@ tbl_merge(tbls = list(univariable_regression_table, multivariable_regression_tab
 # Displaying results
 
 ```{r, echo = F, eval = T, out.height = "500px", out.width = "600px"}
-forest_plot_dataset <- bind_rows(univariable_regression_table$table_body %>%
+forest_plot_dataset <- bind_rows(univariate_regression_table$table_body %>%
                                        mutate(regression_type = "univariate"),
                              multivariable_regression_table$table_body %>%
-                                  mutate(regression_type = "multivariate"))
+                                  mutate(regression_type = "multivariable"))
 
 #Now we create the forest plot
 ggplot(data = forest_plot_dataset %>%
@@ -425,7 +435,7 @@ ggplot(data = forest_plot_dataset %>%
      labs(y = "Variable", 
           x = "Odds ratio", 
           color = "Regression type",
-          subtitle = "Odds ratio estimates for predictors of Ebola death\nfrom uni- and multivariate regression") +
+          subtitle = "Odds ratio estimates for predictors of Ebola death\nfrom uni- and multivariable regression") +
      geom_vline(xintercept = 1, 
                 linetype = "dashed")
 
@@ -437,9 +447,15 @@ ggplot(data = forest_plot_dataset %>%
 
 Any questions?
 
+**Resources**
+Course website (initial setup and slides access): [https://appliedepi.github.io/intro_course/](https://appliedepi.github.io/intro_course/)
+
 [Epi R Handbook](epirhandbook.com/)
 
-Course website (initial setup and slides access): [https://appliedepi.github.io/intro_course/](https://appliedepi.github.io/intro_course/)
+Applied Epi Community
+A great resource for asking questions and help!
+https://community.appliedepi.org/
+
 ---
 
 

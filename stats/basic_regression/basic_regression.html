@@ -14,7 +14,7 @@ class: center, middle, inverse, title-slide
 # Advanced statistics in R
 ]
 .subtitle[
-## Regression - univariable and stratified
+## Regression - uniexposure and stratified
 ]
 .author[
 ### 
@@ -58,7 +58,7 @@ class: center, middle, inverse, title-slide
 # Regression
 
 .pull-left[
-Regression analysis is one of the most useful tools in our toolbox. It allows us to establish statistical relationships between an outcome and a variable, or variables, *in our dataset*. And this allows us to do a number of different things, such as...
+Regression analysis is one of the most useful tools in our toolbox. It allows us to establish statistical relationships between an outcome and an exposure, or exposures, *in our dataset*. And this allows us to do a number of different things, such as...
 ]
 
 .pull-right[
@@ -71,7 +71,7 @@ Regression analysis is one of the most useful tools in our toolbox. It allows us
 
 - Testing a theory or association.
 - Predicting what could happen in a new dataset if the relationships remain the same.
-- Controlling for confounding.
+- Controlling for confounding and effect modification.
  - Are the relationships between the outcome and the predictor true? Or are they an artifact of another value we previously did not adjust for?
  
 &lt;img src="../../images/regression/testing_test_tube.jpg" width="50%" /&gt;
@@ -89,12 +89,12 @@ There are many ways to carry out regressions in R, but here we will be using the
 
 # gtsummary syntax
 
-While these have numerous potential inputs (see `?tbl_uvregression` for examples for the *univariable* regression), we are primarily concerned with only four of them
+While these have numerous potential inputs (see `?tbl_uvregression` for examples for the *uniexposure* regression), we are primarily concerned with only four of them
 
 * `method = `
   * The type of regression we want to run, set to `glm` for our purposes
 * `y = `
-  * The dependent (outcome) variable we want to estimate
+  * The dependent (outcome) exposure we want to estimate
 * `method.args = `
   * The type of glm we want to run, for a logistic regression it would be `method.args = list(family = binomial)`
 * `exponentiate = `
@@ -108,9 +108,9 @@ While these have numerous potential inputs (see `?tbl_uvregression` for examples
 
 ```r
 linelist %&gt;%
-  select(independent_variables, 
-         outcome_death) %&gt;%
-     drop_na() %&gt;%
+  select(independent_exposures,   #The exposures we want to investigate
+         outcome_death) %&gt;%       #The outcome
+     drop_na() %&gt;%                #We can only use complete data, so we remove the rows with NA values
   tbl_uvregression(
     method = ,                
     y = ,                     
@@ -128,16 +128,16 @@ linelist %&gt;%
 
 ```r
 linelist %&gt;%
-  select(independent_variables, 
-         outcome_death) %&gt;% 
-     drop_na() %&gt;%
+  select(independent_exposures,   #The exposures we want to investigate
+         outcome_death) %&gt;%       #The outcome
+     drop_na() %&gt;%                #We can only use complete data, so we remove the rows with NA values
   tbl_uvregression(
-    method = glm,                
-    y = outcome_death,                     
+    method = glm,                 #This indicates we want to use a generalized linear model     
+    y = outcome_death,            #The outcome                
     method.args = list(
-         family = binomial
+         family = binomial        #The distribution of the data we are fitting to
          ),           
-    exponentiate = TRUE          
+    exponentiate = TRUE           #For logistic regression if we want the log odds we need to specify this     
   )
 ```
 ]
@@ -154,7 +154,7 @@ linelist %&gt;%
   margin-left: auto;
   margin-right: auto;
   color: #333333;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: normal;
   font-style: normal;
   background-color: #FFFFFF;
@@ -283,8 +283,8 @@ linelist %&gt;%
 }
 
 #ydgabwknrs .gt_group_heading {
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
   color: #333333;
@@ -331,8 +331,8 @@ linelist %&gt;%
 }
 
 #ydgabwknrs .gt_row {
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
   margin: 10px;
@@ -384,8 +384,8 @@ linelist %&gt;%
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
 }
@@ -400,8 +400,8 @@ linelist %&gt;%
 }
 
 #ydgabwknrs .gt_last_summary_row {
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
   border-bottom-style: solid;
@@ -413,15 +413,15 @@ linelist %&gt;%
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
 }
 
 #ydgabwknrs .gt_first_grand_summary_row {
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
   border-top-style: double;
@@ -459,8 +459,8 @@ linelist %&gt;%
 #ydgabwknrs .gt_footnote {
   margin: 0px;
   font-size: 90%;
-  padding-left: 1px;
-  padding-right: 1px;
+  padding-left: 4px;
+  padding-right: 4px;
   padding-left: 5px;
   padding-right: 5px;
 }
@@ -481,8 +481,8 @@ linelist %&gt;%
 
 #ydgabwknrs .gt_sourcenote {
   font-size: 90%;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 4px;
+  padding-bottom: 4px;
   padding-left: 5px;
   padding-right: 5px;
 }
@@ -570,12 +570,12 @@ linelist %&gt;%
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">female</td>
+    <tr><td class="gt_row gt_left">    female</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">male</td>
+    <tr><td class="gt_row gt_left">    male</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">0.81</td>
 <td class="gt_row gt_center">0.50, 1.29</td>
@@ -585,12 +585,12 @@ linelist %&gt;%
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">no</td>
+    <tr><td class="gt_row gt_left">    no</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">yes</td>
+    <tr><td class="gt_row gt_left">    yes</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">1.92</td>
 <td class="gt_row gt_center">1.01, 3.68</td>
@@ -617,7 +617,7 @@ linelist %&gt;%
 
 Here we define stratified regression as the process of carrying out separate regression analyses on different "groups" of data. 
 
-We do this because we think there may be plausible reasons why relationships between the dependent and independent variables could be different between groups
+We do this because we think there may be plausible reasons why relationships between the dependent and independent exposures could be different between groups
 
 Can you think of any groups you might want to separate in your analysis? 
 
@@ -626,6 +626,12 @@ Can you think of any groups you might want to separate in your analysis?
 # Stratified regression
 
 .pull-left[
+
+* `filter()` our dataset to the group we want
+ - `gender = male` and `gender = female`
+* We then _remove_ gender after we filter
+ - There is only one value per regression
+
 In order to stratify our dataset, we need to use `filter()` to subset our dataset to the group we want. As an example we are going to look at `gender = male` and `gender = female` separately.
 
 Note that we are _removing_ gender after we filter. There is only one value and so the regression analysis will not show anything.
@@ -636,33 +642,33 @@ Note that we are _removing_ gender after we filter. There is only one value and 
 
 ```r
 male_regression &lt;- linelist %&gt;%
-  select(independent_variables, 
-         outcome_death) %&gt;% 
-     filter(gender == "male") %&gt;%
-     select(-gender) %&gt;%
-     drop_na() %&gt;%
+  select(independent_exposures,    #The exposures we want to investigate
+         outcome_death) %&gt;%        #The outcome
+     filter(gender == "male") %&gt;%  #The exposure we want to subset by
+     select(-gender) %&gt;%           #We remove the column we are subsetting by
+     drop_na() %&gt;%                 #We can only use complete data, so we remove the rows with NA values
   tbl_uvregression(
-    method = glm,                
-    y = outcome_death,                     
+    method = glm,                  #This indicates we want to use a generalized linear model 
+    y = outcome_death,             #The outcome     
     method.args = list(
-         family = binomial
+         family = binomial         #The distribution of the data we are fitting to
          ),           
-    exponentiate = TRUE          
+    exponentiate = TRUE            #For logistic regression if we want the log odds we need to specify this
   )
 
 female_regression &lt;- linelist %&gt;%
-  select(independent_variables, 
-         outcome_death) %&gt;% 
-     filter(gender == "female") %&gt;%
-     select(-gender) %&gt;%
-     drop_na() %&gt;%
+  select(independent_exposures,    #The exposures we want to investigate
+         outcome_death) %&gt;%        #The outcome
+     filter(gender == "female") %&gt;%  #The exposure we want to subset by
+     select(-gender) %&gt;%           #We remove the column we are subsetting by
+     drop_na() %&gt;%                 #We can only use complete data, so we remove the rows with NA values
   tbl_uvregression(
-    method = glm,                
-    y = outcome_death,                     
+    method = glm,                  #This indicates we want to use a generalized linear model 
+    y = outcome_death,             #The outcome     
     method.args = list(
-         family = binomial
+         family = binomial         #The distribution of the data we are fitting to
          ),           
-    exponentiate = TRUE          
+    exponentiate = TRUE            #For logistic regression if we want the log odds we need to specify this
   )
 ```
 ]
@@ -671,7 +677,7 @@ female_regression &lt;- linelist %&gt;%
 
 # Comparing outputs
 
-We can then display these tables side by side to see if there is any change in variable relationships using `tbl_merge()`
+We can then display these tables side by side to see if there is any change in exposure relationships using `tbl_merge()`
 
 
 ```r
@@ -692,7 +698,7 @@ tbl_merge(tbls = list(male_regression,
   margin-left: auto;
   margin-right: auto;
   color: #333333;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: normal;
   font-style: normal;
   background-color: #FFFFFF;
@@ -821,8 +827,8 @@ tbl_merge(tbls = list(male_regression,
 }
 
 #auujvnjgio .gt_group_heading {
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
   color: #333333;
@@ -869,8 +875,8 @@ tbl_merge(tbls = list(male_regression,
 }
 
 #auujvnjgio .gt_row {
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
   margin: 10px;
@@ -922,8 +928,8 @@ tbl_merge(tbls = list(male_regression,
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
 }
@@ -938,8 +944,8 @@ tbl_merge(tbls = list(male_regression,
 }
 
 #auujvnjgio .gt_last_summary_row {
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
   border-bottom-style: solid;
@@ -951,15 +957,15 @@ tbl_merge(tbls = list(male_regression,
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
 }
 
 #auujvnjgio .gt_first_grand_summary_row {
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
   border-top-style: double;
@@ -997,8 +1003,8 @@ tbl_merge(tbls = list(male_regression,
 #auujvnjgio .gt_footnote {
   margin: 0px;
   font-size: 90%;
-  padding-left: 1px;
-  padding-right: 1px;
+  padding-left: 4px;
+  padding-right: 4px;
   padding-left: 5px;
   padding-right: 5px;
 }
@@ -1019,8 +1025,8 @@ tbl_merge(tbls = list(male_regression,
 
 #auujvnjgio .gt_sourcenote {
   font-size: 90%;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding-top: 4px;
+  padding-bottom: 4px;
   padding-left: 5px;
   padding-right: 5px;
 }
@@ -1128,7 +1134,7 @@ tbl_merge(tbls = list(male_regression,
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">no</td>
+    <tr><td class="gt_row gt_left">    no</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center">—</td>
@@ -1137,7 +1143,7 @@ tbl_merge(tbls = list(male_regression,
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">yes</td>
+    <tr><td class="gt_row gt_left">    yes</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">2.07</td>
 <td class="gt_row gt_center">0.90, 4.93</td>
