@@ -5,14 +5,17 @@ author: "March 2022"
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
   xaringan::moon_reader:
-    seal: TRUE
+    seal: false
     lib_dir: libs
     nature:
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
     css: xaringan-themer.css
+params:
+  lang: "en"
 ---
+class: center, middle, inverse, title-slide
 
 ```{r, eval=F, echo=F, include=F}
 # Must do in order to render.
@@ -61,6 +64,16 @@ pacman::p_load_gh(
 
 # data prep --------------------------------------------------------------------
 surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic") %>%
+  clean_names()
+
+mod10 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod10", col_types = "c") %>%
+  clean_names()
 ```
 
 ```{r  xaringan-themer, include = FALSE}
@@ -103,88 +116,94 @@ style_mono_accent(
   }
 ```
 
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
 
-# Today: objectives & schedule  
+### `r paste0(mod10[mod10$uid == "mod10_h1_subtitle", params$lang])`
 
-**In this module we aim to help you:**  
+contact@appliedepi.org
+---
 
-* Apply your learning to a new dataset, without code solutions readily available  
+# `r paste0(mod10[mod10$uid == "mod10_h1_objectives", params$lang])`  
 
---
+`r paste0(mod10[mod10$uid == "mod10_op_objectives", params$lang])`  
 
-* See outputs and replicate them using R  
-
---
-
-* Write original R code that is understandable by someone else  
+* `r paste0(mod10[mod10$uid == "mod10_bu_objectives_1", params$lang])`  
 
 --
 
-* Review another person's original code  
+* `r paste0(mod10[mod10$uid == "mod10_bu_objectives_2", params$lang])`  
 
 --
 
-* Complete an end-course feedback survey  
+* `r paste0(mod10[mod10$uid == "mod10_bu_objectives_3", params$lang])`  
+
+--
+
+* `r paste0(mod10[mod10$uid == "mod10_bu_objectives_4", params$lang])`  
+
+--
+
+* `r paste0(mod10[mod10$uid == "mod10_bu_objectives_5", params$lang])`  
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
   ~Time, ~Location, ~Topic,
-  "15 minutes",     "Main",      "Introduce the COVID-19 case study",
-  "2 hours",        "Individual","COVID-19 case study",
-  "45 minutes",     "Main",      "Partner code review",
-  "5 minutes",      "Main",      "Closing",
-  "15 minutes",     "Main",      "Feedback survey"
+  str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_1_1", params$lang])}),     str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_2_1", params$lang])}),      str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_3_1", params$lang])}),
+  str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_1_2", params$lang])}),        str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_2_2", params$lang])}),str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_3_2", params$lang])}),
+  str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_1_3", params$lang])}),     str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_2_3", params$lang])}),      str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_3_3", params$lang])}),
+  str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_1_4", params$lang])}),      str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_2_4", params$lang])}),      str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_3_4", params$lang])}),
+  str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_1_5", params$lang])}),     str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_2_5", params$lang])}),      str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_3_5", params$lang])})
 )
 
 outline %>% 
   flextable::qflextable() %>% 
-  flextable::add_footer_lines("Breaks are incorporated above, but not shown as rows")
+  flextable::add_footer_lines(str_glue({paste0(mod10[mod10$uid == "mod10_fn_objectives", params$lang])}))
 ```
 
 
 ---
 
-# COVID-19 report
+# `r paste0(mod10[mod10$uid == "mod10_h1_report", params$lang])`
 
-Fulton County, GA
+`r paste0(mod10[mod10$uid == "mod10_tx_report_1", params$lang])`
 
-You will have 2 hours to replicate the report  
-
-
----
-
-# COVID-19 Data
-
-Scrambled and anonymized  
-
-- Linelist  
-- City populations in Fulton County  
+`r paste0(mod10[mod10$uid == "mod10_tx_report_2", params$lang])`  
 
 
 ---
 
-# Support available  
+# `r paste0(mod10[mod10$uid == "mod10_h1_data", params$lang])`
 
-- Instructors will be available in breakouts room  
-- Each will handle different parts of the report, so go to the room that most fits your question  
+`r paste0(mod10[mod10$uid == "mod10_tx_data_1", params$lang])`  
 
-
----
-# Have fun  
-
-This is not a test. Do the best you can. Enjoy reviewing about all that you have learned.  
+- `r paste0(mod10[mod10$uid == "mod10_bu_data_1", params$lang])`  
+- `r paste0(mod10[mod10$uid == "mod10_bu_data_2", params$lang])`  
 
 
 ---
-# Code review  
 
-When we re-convene, we will split into partners (randomly-assigned) and you can review the other person's code.  
+# `r paste0(mod10[mod10$uid == "mod10_h1_support", params$lang])`  
 
-We will provide a brief guide on how to review code.  
+- `r paste0(mod10[mod10$uid == "mod10_bu_support_1", params$lang])`  
+- `r paste0(mod10[mod10$uid == "mod10_bu_support_2", params$lang])`  
 
 
 ---
-# Instructor feedback  
+# `r paste0(mod10[mod10$uid == "mod10_h1_fun", params$lang])`  
 
-Our instructors will review your work after the course and provide you feedback by email.  
+`r paste0(mod10[mod10$uid == "mod10_tx_fun", params$lang])`  
+
+
+---
+# `r paste0(mod10[mod10$uid == "mod10_h1_review", params$lang])`  
+
+`r paste0(mod10[mod10$uid == "mod10_tx_review_1", params$lang])`  
+
+`r paste0(mod10[mod10$uid == "mod10_tx_review_2", params$lang])`  
+
+
+---
+# `r paste0(mod10[mod10$uid == "mod10_h1_feedback", params$lang])`  
+
+`r paste0(mod10[mod10$uid == "mod10_tx_feedback", params$lang])`  
 

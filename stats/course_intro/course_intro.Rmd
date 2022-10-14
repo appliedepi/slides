@@ -1,0 +1,491 @@
+---
+title: "Advanced statistics in R"
+subtitle: "Exploring the data and basic hypothesis testing"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation 
+  countdown
+)
+
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png",
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+```{r, echo=F, eval=T}
+set.seed(1)
+linelist <- rio::import(xfun::relative_path(here::here("data", "linelist_combined_20141201.rds")))
+linelist$fake_data_gender_bias <- NA
+linelist$fake_data_gender_bias[which(linelist$gender == "male")] <- rnorm(sum(which(linelist$gender == "male")), 0.725, 0.1)
+linelist$fake_data_gender_bias[which(linelist$gender == "female")] <- rnorm(sum(which(linelist$gender == "female")), 0.575, 0.1)
+
+fake_data <- data.frame(outcome_measure = 1:25,
+                        variable = c(sample(1:100, 25, replace = T),
+                                     sample(1:100, 25, replace = T),
+                                     sort(sample(1:50, 25, replace = T)),
+                                     sample(1:100, 25, replace = T)),
+                        group = rep(c("A", "B", "C", "D"), each = 25))
+
+
+
+```
+
+# Thank you for joining us  
+
+Brief introductions from the instructors  
+
+**Thank you for your service** *to your community in these busy times for public health. We are glad that you are taking the time to learn R with us.*  
+
+
+
+???
+Do a brief round of introductions  
+
+
+
+
+---
+# Why use R for statistical analysis?
+
+## Efficient
+
+- Once you have written the code once, there is no need to point and click and re-do analysis with updated data, you can reuse your old code! Which means that R is...
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "efficient_image.PNG")))
+```
+
+???
+Mention marketable skill as well as technically for epidemic response
+
+---
+# Why use R for statistical analysis?
+
+## Reproducible  
+
+We can re-run the same code and get the same outcome, or use new data and see how findings have changed. Because it is written as a script it is reproducible, and...
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "clone_image.jpg")))
+```
+
+
+---
+# Why use R for statistical analysis?
+
+## Shareable  
+
+You can share scripts and other people can produce the same findings and results as you. This makes it easy to produce automated reports and share the work between people.
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "shareable_image.png")))
+```
+
+---
+# Why use R for statistical analysis?
+.pull-left[
+## Easy (once you learn the syntax!)  
+
+We know that R can be scary (it was for us too when we first learned it!), but once you learn the basics, and how to apply these to statistics within R, you can very quickly produce indepth analysis of data in an efficient, effective and reproducible way! 
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "easy_image.jpg")))
+```
+]
+
+
+---
+# Learning curve 
+
+R has become easier to learn in the last 5 years
+
+.pull-left[
+- Friendlier user interface (RStudio)
+- Simpler syntax ("tidyverse")
+- Free resources & interactive tutorials available  
+    - **Epidemiologist R Handbook**
+    - **R 4 Data Science**
+    - **R epidemiology case studies**
+]
+
+.pull-right[
+
+```{r difficulty_plot, warning = FALSE, message = FALSE}
+exp <- function(x){x^2}
+lgr <- function(x){log(x) + 4}
+num <- 10000
+linwid <- 2
+ggplot() + 
+  geom_function(fun = exp,
+                n = num, 
+                size = linwid,
+                aes(colour = "Excel")) +
+  geom_function(fun = lgr, 
+                n = num, 
+                size = linwid,
+                aes(colour = "R")) + 
+  scale_y_continuous(expand = c(0, 0), 
+                     limits = c(0, 10)) + 
+  scale_x_continuous(expand = c(0, 0), 
+                     limits = c(0, 5)) + 
+  labs(x = "Code complexity", 
+       y = "Task difficulty") + 
+  theme_classic(base_size = 24) + 
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(), 
+        legend.position = "bottom", 
+        legend.title = element_blank())
+```
+
+]
+
+???
+- There is a bit of a learning curve - as with any software.  
+- But we are here to get you over that initial hump so you can keep developing. 
+
+---
+# User community 
+
+```{r, eval = TRUE, echo = FALSE, out.width = "125%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "user_community.png")))
+```
+
+
+???
+- **The internet is your friend.**  
+- Once you get to grips with the basics - people answer literally any question on **stackoverflow!**  
+- **Epi R Handbook**  
+
+---
+
+# What statistical analysis can we carry out in R?
+
+.pull-left[
+All of them! 
+
+R is a statistical programming language with a wealth of inbuilt functions and external packages to carry out any analysis you can imagine.
+
+The difficult part is knowing which packages to use and where!
+- That's what this course is here to help with
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "statistics_image.jpg")))
+```
+]
+
+---
+# This course is about translating your statistics knowledge, not teaching statistics
+
+There is not enough time in a week to teach both statistics and R, and so we will be focusing on taking your existing knowledge and showing you how to apply this to R.
+
+---
+# What we will be covering
+
+- Exploring your data and basic hypothesis testing.
+- Univariate, Stratified and Multivariate regression (with a focus on logistic regression).
+- How to make publication ready tables and plots to communicate your regression results.
+- Rmarkdown, combining your new knowledge with Rmarkdown to generate a document detailing your statistical analysis.
+
+---
+
+# Learning outcomes
+
+By the end of this course, you should be able to:
+
+- Generate histograms of your data and explore the correlation between variables
+- Carry out the appropriate statistical tests needed to analyse your data and produce publication quality tables
+- Undertake univariate and stratified regression, interpret the results and produce figures
+- Understand how to carry out variable selection and run multivariate regression analysis, with and without interaction terms and random effects
+
+---
+
+# Importance of exploring the data first
+
+.pull-left[
+We cannot overstate the importance of understanding your data *before* carrying out more advanced statistical analysis.
+
+Without understanding the data, its distributions and relations between variables, we may use the wrong statistical tool, make the wrong assumptions, and derive the wrong conclusions.
+
+Look out for lurking danger!
+
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "crocodile_swamp.png")))
+```
+
+]
+
+---
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+ggplot(data = linelist, aes(x = fake_data_gender_bias)) + 
+     geom_histogram() +
+     theme_bw() +
+     labs(x = "Variable", y = "Count", fill = "Gender")
+     
+```
+
+---
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+ggplot(data = linelist, aes(x = fake_data_gender_bias, 
+                        fill = gender)) + 
+     geom_histogram(position = "identity", alpha = 0.5) +
+     theme_bw() +
+     labs(x = "Variable", y = "Count", fill = "Gender") +
+     theme(legend.position = "bottom")
+     
+```
+---
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+
+ggplot(data = fake_data, aes(x = variable, y = outcome_measure)) +
+     geom_point() +
+     theme_bw() +
+     labs(x = "Variable", y = "Outcome", fill = "Group") +
+     geom_smooth(method = "lm")
+     
+```
+
+---
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+
+ggplot(data = fake_data, aes(x = variable, y = outcome_measure, color = group)) +
+     geom_point() +
+     theme_bw() +
+     labs(x = "Variable", y = "Outcome", fill = "Group") +
+     geom_smooth(method = "lm") +
+     theme(legend.position = "bottom")
+     
+```
+---
+
+# Basic hypothesis testing
+
+What do we mean by basic hypothesis testing?
+
+- We use this term to indicate the use of a test that explores the relationship between an outcome and a variable and returns an indication (a p-value) of whether or not there is a relationship.
+- This includes T-tests, Shapiro-Wilk tests, Wilcoxon rank sum tests, Kruskal-Wallis, Chi-squared, etc
+
+These are often a useful first step in statistically evaluating the data and set up the stage for further investigating relationships between outcomes and variables.
+
+---
+
+# How do we carry out and incorporate statistical tests in R?
+
+Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%>%`!
+
+It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
+```{r, eval = F, echo = T}
+linelist %>%
+    select(gender, outcome, vomit, cough) %>%
+    tbl_summary(by = outcome) %>%
+    add_p() 
+```
+
+---
+
+# gtsummary
+
+There are many different ways of carrying out statistical tests in R, and a variety of pros and cons for deciding between packages (and base R).
+
+However, in this course we will be focussing on the package **gtsummary** as it allows us to carry out these tests with a few simple commands, and produces publication ready tables with ease.
+
+---
+
+# gtsummary
+
+For these simple statistical tests, we can use the function `tbl_summary()` and `add_p()` to customise the data we input, the statistics we want output, and the test we want carried out in a few short lines.
+
+Here we select a few columns and explore their relationship with outcome
+```{r, echo = T, eval = T}
+
+linelist %>%
+         select(outcome, vomit, cough) %>%
+     tbl_summary(
+     by = outcome
+     ) %>%   
+     add_p() 
+
+```
+
+Remember we can use `?tbl_summary` in order to explore a full range of the available inputs.
+
+---
+
+# gtsummary
+
+The default test carried out is the Chi-squared test, but if we want to carry out another analysis, we simply update the `add_p()` section.
+
+```{r, echo = T, eval  = T}
+
+linelist %>% 
+     select(outcome, wt_kg) %>%
+     tbl_summary(
+          by = outcome
+     ) %>%
+     add_p(wt_kg ~ "t.test")
+
+```
+
+For a full list of tests please see `?add_p.tbl_summary`
+
+---
+#Adding in descriptive statistics
+
+We can then further update the information in the table by adding in descriptive statistics. We do this by adding an argument into `tbl_summary()`.
+
+```{r, echo = T, eval = T}
+linelist %>% 
+     select(outcome, wt_kg) %>%
+     tbl_summary(
+          statistic = wt_kg ~ "{mean} ({sd})",
+          by = outcome
+     ) %>%
+     add_p(wt_kg ~ "t.test")
+```
+
+---
+
+# Ready to try it out?
+
+[Epi R Handbook](https://epirhandbook.com/)
+
+Course website (initial setup and slides access): [https://appliedepi.github.io/intro_course/](https://appliedepi.github.io/intro_course/)
+---

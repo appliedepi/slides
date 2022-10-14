@@ -1,0 +1,450 @@
+---
+title: "Advanced statistics in R"
+subtitle: "Regression - variable selection and multivariable regression"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan,
+               glmnet)
+
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation 
+  caret,
+  lme4,
+  broom.mixed,
+  countdown
+)
+
+library(countdown)
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png",
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+    .tiny .remark-code { /*Change made here*/
+  font-size: 50% !important;
+    }
+    .teenytiny .remark-code { /*Change made here*/
+  font-size: 25% !important;
+    }
+    .giant .remark-code { /*Change made here*/
+  font-size: 150% !important;
+    }
+    .smaller .remark-code { /*Change made here*/
+  font-size: 75% !important;
+    }
+  
+```
+
+
+```{r, echo=F, eval=T}
+set.seed(1)
+surv <- rio::import(xfun::relative_path(here::here("data", "linelist_combined_20141201.rds")))
+
+linelist <- surv %>%
+     mutate(outcome_death = ifelse(outcome == "Death", 1, 0)) %>%
+     filter(between(bmi, 10, 50))
+
+#This makes our tables compact so they dont get to large on slides
+theme_gtsummary_compact()
+
+```
+
+# Multivariable regression
+
+Now that you are experts at conducting univariable regression in R, it is time to move onto multivariable regression!
+
+---
+
+# Multivariable regression - when univariable is just not enough
+
+Multivariable regression allows us to look at the relationship between our dependent variable and multiple independent variables. 
+
+It considers the relationship of each independent variable _in context_ with the dependent variable. This allows us to understand which of the variables could have a true association with the outcome once they are controlled for by other variables.
+
+---
+
+# Confounding
+
+Multivariable regression estimates the association between the independent variable and the outcome by holding all other variables constant.
+
+This allows us to account for *confounding*.
+
+---
+
+# Confounding
+
+A confounder is a variable that influences both the dependent variable and the independent variable, causing a spurious association.
+
+```{r, eval = TRUE, echo = FALSE, out.width = "125%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "regression", "confounder_wikipedia.png")))
+```
+https://upload.wikimedia.org/wikipedia/commons/5/53/Comparison_confounder_mediator.svg
+
+
+---
+
+# Confounding
+
+So icecream is causing sharks to bite humans?
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "regression", "icecream_sharks.png")))
+```
+
+---
+
+# Terms to know
+
+* Cross validation: A method of model validation which uses different portions of the data to train and test the model. 
+     This is done to understand how well the model works in practice, rather than just on the data it is trained on.
+     
+* In sample: The data the model is trained on.
+
+* Out of sample: The data the model is predicted to.
+
+---
+
+# Variable selection
+
+How do we know what to put into our model?
+
+Do we put in all the data?
+
+Do we include only what we _know_ is likely to be useful?
+
+Do we carry out some sort of stepwise approach?
+
+---
+
+# Variable selection
+
+How do we know what to put into our model?
+
+Do we put in all the data?
+
+Do we include only what we _know_ is likely to be useful?
+
+Do we carry out some sort of stepwise approach?
+
+**We should avoid all of these!**
+
+---
+
+# Do's and do not's
+
+*The do's*
+Expert knowledge
+- Think about the research question you are trying to answer, statistics should follow a theory now the other way round.
+- If you, or the literature, thinks something is important add it!
+ - A non-significant result in these is a useful result
+
+*The do not's*
+Stepwise variable selection
+ - This is no longer recommended for several reasons, but in summary it can remove useful and retain useless variables due to coincidence rather than real world meaning.
+Screening using a univariable regression
+- Non-significant variables can still affect parameter estimates, so it would be wrong to discard them
+- This can reject important variables when there is confounding
+ 
+This is only a brief summary, please read further into the topic with this blog post for further information (https://towardsdatascience.com/stopping-stepwise-why-stepwise-selection-is-bad-and-what-you-should-use-instead-90818b3f52df)
+
+---
+
+# Lasso variable selection
+
+If you are presented with a large number of variables, and there is some uncertainty in what is important, you can use a technique called Lasso (Least Absolute Shrinkage and Selection Operator) regression.
+
+Lasso regression works by testing variable and data combinations to create a model which has the **least** difference in predictions between the **in-sample** and the **out-of-sample** datasets.
+
+This (generally) gives us a model that predicts well to new data sources (out of sample).
+
+---
+
+#Lasso variable selection
+
+1) First we set up the lasso regression using the function `trainControl()` from the **caret** package.
+
+```{r, echo = T, eval = T}
+fitControl <- trainControl(
+     method = "repeatedcv",  
+     number = 5,     
+     repeats = 10)  
+```
+
+???
+Talk through each of method/number/repeats
+
+method - This stands for repeated cross validation, the process of taking out a "chunk" of the dataset and trying to predict it using the rest of the dataset. This is done to make sure the model is not overfitting
+
+number - Split the data into 5 sections (20% removed each time) - the smaller the number the larger the "chunks" in the dataset. This makes the fitting harder to do, but can help increase the validity of predictions
+
+repeats - Repeat 10 times with different "cuts" of the data to ensure the result we get is a true relationship and not just do to a "lucky" or "unlucky" split of the data
+
+---
+
+# Cross validation
+
+```{r, echo = T, eval = T}
+fitControl <- trainControl(
+     method = "repeatedcv",  
+     number = 5,     
+     repeats = 10)  
+```
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "regression", "KfoldCV.gif")))
+```
+
+???
+
+Talk through this gif in the context of the last slide
+
+---
+
+# Run the lasso regression
+
+1) First we subset our data to the potential independent variables of interest, and the dependent variable.
+
+2) Then we use `train()` from **caret** to run the lasso regression (in caretwe specify `method = "glmnet"`) according to the conditions we specified with `trainControl()`
+
+```{r, echo = T, eval = T}
+
+data_use <- linelist %>%
+    select(gender, 
+           age, 
+           hospital:bmi, 
+           blood_ct, 
+           outcome_death) %>%
+     drop_na()
+
+lasso_fit <- train(form = outcome_death ~ .,
+                   data = data_use,
+                   method = "glmnet",
+                   trControl = fitControl)
+
+```
+
+---
+
+# Lasso results
+
+Then we use the function `predictors()` from **caret** to 
+
+```{r, echo = T, eval = T}
+lasso_predictors_raw <- predictors(lasso_fit)
+
+lasso_predictors_raw
+```
+
+???
+Talk through these predictors and why some have "hospital" in front of them (factor and then the level that is important)
+
+---
+
+# Lasso results
+
+We can then process these to get them ready for use using `str_extract()` from the **stringi** package.
+
+This takes our results and removes everything _not_ found in the column names in our dataset.
+
+.smaller[
+```{r, echo = T, eval = T}
+lasso_predictors_clean <- str_extract(string = lasso_predictors_raw,
+                                      pattern = paste(colnames(data_use),   
+                                             collapse = "|"))
+lasso_predictors_clean
+```
+]
+---
+
+# Expert knowledge is important
+
+Are we done now, did lasso solve our model building?
+
+---
+
+# Expert knowledge is important
+
+Are we done now, did lasso solve our model building?
+
+<font size="46">No!</font>
+
+If there is a variable that you think should be included, include it!
+---
+
+# Carrying out our multivariable regression
+
+Now we are ready to carry out our multivariable regression!
+
+This is done in a slightly different way to our univariable regression. We will be using **base** R's `glm()` function and then tidying up the outputs using the function `tbl_regression` from **gtsummary**.
+
+---
+
+#Carrying out multivariable regression
+
+```{r, echo = T, eval = T}
+
+multivariable_regression_table <- data_use %>%
+     select(lasso_predictors_clean, 
+            outcome_death,
+            temp,
+            age) %>%
+     glm(formula = outcome_death ~.,
+         family = binomial) %>%
+     tbl_regression(exponentiate = TRUE)
+     
+
+```
+
+???
+Talk through the stages, what formula means, what family means, remind them what exponentiate = TRUE means
+
+---
+
+# Displaying results
+
+.smaller[
+```{r, echo = F, eval = T, out.height = "400px", out.width = "700px"}
+univariable_regression_table <- data_use %>%
+    select(c(lasso_predictors_clean, 
+             outcome_death,
+             temp,
+             age)) %>%
+    tbl_uvregression(
+    method = glm,
+    y = outcome_death,
+    method.args = list(family = binomial),
+    exponentiate = TRUE)
+
+tbl_merge(tbls = list(univariable_regression_table, multivariable_regression_table),
+          tab_spanner = c("Univariable", "Multivariable"))
+```
+]
+---
+
+# Displaying results
+
+```{r, echo = F, eval = T, out.height = "500px", out.width = "600px"}
+forest_plot_dataset <- bind_rows(univariable_regression_table$table_body %>%
+                                       mutate(regression_type = "univariate"),
+                             multivariable_regression_table$table_body %>%
+                                  mutate(regression_type = "multivariate"))
+
+#Now we create the forest plot
+ggplot(data = forest_plot_dataset %>%
+            filter(!is.na(estimate)), 
+       aes(x = estimate,
+           y = label,
+           xmin = conf.low,
+           xmax = conf.high,
+           color = regression_type)) +
+     geom_point(position = position_dodge(width = 0.5)) +
+     geom_errorbarh(position = position_dodge(width = 0.5)) +
+     theme_bw() +
+     labs(y = "Variable", 
+          x = "Odds ratio", 
+          color = "Regression type",
+          subtitle = "Odds ratio estimates for predictors of Ebola death\nfrom uni- and multivariate regression") +
+     geom_vline(xintercept = 1, 
+                linetype = "dashed")
+
+```
+
+---
+
+# It's now time for you to try it out yourselves!
+
+Any questions?
+
+[Epi R Handbook](epirhandbook.com/)
+
+Course website (initial setup and slides access): [https://appliedepi.github.io/intro_course/](https://appliedepi.github.io/intro_course/)
+---
+
+
+
+
+
+
+

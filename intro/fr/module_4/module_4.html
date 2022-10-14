@@ -6,7 +6,6 @@
     <meta name="author" content="2022" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
-    <link href="libs/tabwid/scrool.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
@@ -70,29 +69,17 @@ class: inverse, center, middle, title-slide
 
 contact@appliedepi.org
 
----
-
-.pull-left[
-## Données ordonnées 
-]
-
-.pull-right[
-
-&lt;img src="../../../images/data_cleaning/tidy_shelves.png" width="85%" /&gt;
-
-]
 
 ---
 # Aujourd'hui : objectifs et calendrier  
 
-**Dans ce module, nous voulons vous aider:**  
-* Se familiariser avec les fonctions {dplyr} utilisées pour nettoyer les données de santé publique  
-* Appliquer une série de fonctions à un cadre de données en utilisant l'opérateur pipe.  
-* Commencez à écrire un script R pour analyser les données de l'épidémie.  
+**Dans ce module, nous voulons vous aider à :**  
+* Vous familiariser avec les fonctions {dplyr} utilisées pour nettoyer les données de santé publique  
+* Appliquer une série de fonctions à un dataframe en utilisant l'opérateur pipe.  
+* Commencer à écrire un script R pour analyser les données de l'épidémie.  
 
 
-
-&lt;template id="e8019e6b-9f99-4dbe-bc5c-89e3e9a6966a"&gt;&lt;style&gt;
+&lt;template id="aa24fb13-2e22-435e-bae9-e73829beab91"&gt;&lt;style&gt;
 .tabwid table{
   border-spacing:0px !important;
   border-collapse:collapse;
@@ -101,9 +88,11 @@ contact@appliedepi.org
   margin-right:auto;
   border-width: 0;
   display: table;
-  margin-top: 1.275em;
-  margin-bottom: 1.275em;
   border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
 }
 .tabwid_left table{
   margin-left:0;
@@ -126,18 +115,15 @@ contact@appliedepi.org
 .tabwid table tr {
 background-color: transparent;
 }
-&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-803f482e{}.cl-80352092{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-803537da{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-80356a3e{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a48{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a52{width:155.7pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a53{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a54{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a5c{width:155.7pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a5d{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a66{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a67{width:155.7pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a70{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a71{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a72{width:155.7pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a7a{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a84{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a85{width:155.7pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a86{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a8e{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-80356a8f{width:155.7pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-803f482e'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-80356a8e"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-80356a86"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-80356a8f"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-80356a48"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;10 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-80356a3e"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-80356a52"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Review of previous module&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-80356a53"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-80356a54"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-80356a5c"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Tidy data and data cleaning&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-80356a53"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-80356a54"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-80356a5c"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Demo - data cleaning&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-80356a66"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;1h 30minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-80356a5d"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Breakouts&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-80356a67"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-80356a71"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-80356a70"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-80356a72"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Plenary debrief&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-80356a7a"&gt;&lt;p class="cl-803537da"&gt;&lt;span class="cl-80352092"&gt;Breaks are incorporated above, but not shown as rows&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
-&lt;div class="flextable-shadow-host" id="3e51cf38-ee13-46dd-b480-7b65c4ef9a86"&gt;&lt;/div&gt;
-&lt;script&gt;
-var dest = document.getElementById("3e51cf38-ee13-46dd-b480-7b65c4ef9a86");
-var template = document.getElementById("e8019e6b-9f99-4dbe-bc5c-89e3e9a6966a");
-var caption = template.content.querySelector("caption");
-if(caption) {
-  caption.style.cssText = "display:block;text-align:center;";
-  var newcapt = document.createElement("p");
-  newcapt.appendChild(caption)
-  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+.katex-display {
+    margin: 0 0 !important;
 }
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-fac908a8{}.cl-fabb8df4{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-fac029f4{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-fac06946{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac06964{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac0696e{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac06978{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac06982{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac06983{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac0698c{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac0698d{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac06996{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac06997{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac069a0{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac069a1{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac069aa{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac069b4{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac069b5{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac069be{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac069bf{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fac069c8{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-fac908a8'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fac06946"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fac06964"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fac0696e"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fac06978"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fac06982"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fac06983"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;Review of previous module&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fac0698c"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fac0698d"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fac06996"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;Demo - logical recoding&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fac06997"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;1h 30minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fac069a0"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;Breakouts&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fac069a1"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;Exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fac069aa"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fac069b4"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fac069b5"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;Plenary debrief&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-fac069be"&gt;&lt;p class="cl-fac029f4"&gt;&lt;span class="cl-fabb8df4"&gt;Breaks are incorporated above, but not shown as rows&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="4ccf164c-8131-4e83-be56-702a1d889ad8"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("4ccf164c-8131-4e83-be56-702a1d889ad8");
+var template = document.getElementById("aa24fb13-2e22-435e-bae9-e73829beab91");
+var caption = template.content.querySelector("caption");
 var fantome = dest.attachShadow({mode: 'open'});
 var templateContent = template.content;
 fantome.appendChild(templateContent);
@@ -150,33 +136,7 @@ Note stretch breaks throughout.
 
 
 ---
-# Révision du module précédent  
-
-- La polyvalence, la communauté et les fonctionnalités de R  
-
---
-
-- Projets R, `import()`, et chemins de fichiers relatifs avec {here}.  
-
---
-
-- Exécuter des commandes, écrire des commentaires, sauvegarder des objets  
-
---
-
-- Les opérateurs comme `&lt;` `&gt;` `==` `%in%`  
-
---
-
-- Fonctions, parfois avec plusieurs arguments  
-
---
-
-- Examen d'un ensemble de données `skim()`, `summary()`.  
-
---
-
-- Les colonnes et les objets ont des *classes* qui peuvent être vérifiées avec `class()`.  
+# Revue du module précédent  
 
 
 
@@ -244,7 +204,7 @@ Utilisons une version plus petite pour nous entraîner, et explorons quelques fo
 
 --
 
-Nous allons le nommer  **demo**.
+Nommons le  **demo**.
 
 ---
 
@@ -255,8 +215,8 @@ Certaines des fonctions {dplyr} que nous utiliserons :
 
 Fonction       | Utilitaire                               
 ---------------|---------------------------------------
-`filter()`|lignes de sous-ensemble
-`select()`|colonnes de sous-ensemble
+`filter()`|sélectionner des lines
+`select()`|sélectionner des colonnes
 `rename()`|renommer les colonnes 
 `mutate()`|créer et transformer des colonnes 
 `case_when()`|recoder les valeurs en utilisant des critères logiques   
@@ -267,9 +227,9 @@ Fonction       | Utilitaire
 
 ---
 
-# Impression ou sauvegarde ?   
+# Impression ou création d'objet ?   
 
-Nos tuyaux ont seulement *imprimé* le `demo` modifié - la trame de données n'a **pas** changé ! 
+Nos pipes ont seulement *affiché* `demo` modifié , le dataframe n'a **pas** changé ! 
 
 
 ```r
@@ -311,7 +271,7 @@ demo %&gt;%                    # PRINT only cases over 10 years
 --
 
 
-Pour sauvegarder : ajoutez l'opérateur d'affectation **&lt;-** pour définir un nouveau cadre de données. 
+Pour sauvegarder : ajoutez l'opérateur d'assignation **&lt;-** pour définir un nouveau dataframe. 
 
 
 ```r
@@ -362,31 +322,31 @@ Explain that there are many nuances to case_when() which you will practice in th
 
 # `ifelse()` pour une logique simple  
  
-`ifelse()` dans `mutate()` est utilisé pour appliquer une logique de recodage simple.  
+`ifelse()` dans `mutate()` est utilisé pour appliquer un recodage simple.  
 
-&lt;h4&gt;La syntaxe est la suivante : &lt;span style='color:deeppink'&gt;&lt;span style='color:cornflowerblue'&gt;nouveau nom de colonne&lt;/span&gt;&lt;/span&gt; = une fonction qui crée les nouvelles valeurs :&lt;/h4&gt;
+&lt;h4&gt;Syntaxe : &lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = une &lt;span style='color:cornflowerblue'&gt;fonction&lt;/span&gt; qui crée les nouvelles valeurs :&lt;/h4&gt;
 
 --
 
 
 
 
-&lt;code class ='r hljs remark-code'&gt;demo %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;mutate(&lt;span style='color:deeppink'&gt;adult&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;ifelse(age &gt;= 18, TRUE, FALSE)&lt;/span&gt;) # creates new T/F column&lt;/code&gt;
+&lt;code class ='r hljs remark-code'&gt;demo %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;mutate(&lt;span style='color:deeppink'&gt;adult&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;ifelse(age &gt;= 18, 'yes', 'no')&lt;/span&gt;) # creates new T/F column&lt;/code&gt;
 
 ```
 
 ##   case_id age gender lab_confirmed fever epilink adult
-## 1  694928  23      m         FALSE   yes      no  TRUE
-## 2  86340d   1      f          TRUE   yes     yes FALSE
-## 3  92d002  16      f          TRUE   yes     yes FALSE
-## 4  544bd1  10      f          TRUE   yes     yes FALSE
-## 5  6056ba   0      f          TRUE   yes     yes FALSE
+## 1  694928  23      m         FALSE   yes      no   yes
+## 2  86340d   1      f          TRUE   yes     yes    no
+## 3  92d002  16      f          TRUE   yes     yes    no
+## 4  544bd1  10      f          TRUE   yes     yes    no
+## 5  6056ba   0      f          TRUE   yes     yes    no
 
 ```
 
 --
 
-`ifelse()` applique un critère logique à chaque ligne, renvoie une valeur si elle est vraie, et renvoie une autre valeur si elle est fausse.  
+`ifelse()` applique un critère logique à chaque ligne, renvoie une valeur si elle est vraie, et une autre valeur si elle est fausse.  
 
 
 
@@ -398,7 +358,7 @@ Explain that there are many nuances to case_when() which you will practice in th
 
 --
 
-&lt;h4&gt;La syntaxe de case_when() est la suivante : &lt;span style='color:orange'&gt;critères logiques pour la ligne&lt;/span&gt; &lt;span style='color:deeppink'&gt;~&lt;/span&gt; résultat s'il est atteint&lt;/h4&gt;
+&lt;h4&gt;Syntaxe de case_when() : &lt;span style='color:orange'&gt;critères logiques pour la ligne&lt;/span&gt; &lt;span style='color:deeppink'&gt;~&lt;/span&gt; résultat s'il est atteint&lt;/h4&gt;
 
 
 
@@ -416,7 +376,6 @@ Explain that there are many nuances to case_when() which you will practice in th
 
 ```
 
-`case_when()` est utilisé pour tester une série de critères logiques sur chaque ligne, et assigner une nouvelle valeur correspondante.  
 `case_when()` est utilisé pour tester une série de critères logiques sur chaque ligne, et assigner une nouvelle valeur correspondante.  
 
 ???

@@ -6,7 +6,6 @@
     <meta name="author" content="2022" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
-    <link href="libs/tabwid/scrool.css" rel="stylesheet" />
     <script src="libs/htmlwidgets/htmlwidgets.js"></script>
     <link href="libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
     <script src="libs/datatables-binding/datatables.js"></script>
@@ -20,24 +19,8 @@
   </head>
   <body>
     <textarea id="source">
+
 class: center, middle, inverse, title-slide
-
-.title[
-# Introduction to R for Applied Epidemiology
-]
-.subtitle[
-## <br>Cleaning data with R
-]
-.author[
-### 2022
-]
-.date[
-### <a href="mailto:contact@appliedepi.org">contact@appliedepi.org</a>
-]
-
----
-
-class: inverse, center, middle
 
 
 
@@ -89,6 +72,11 @@ class: inverse, center, middle
 
 
 
+# Introduction to R for Applied Epidemiology
+
+### Data cleaning with R (Part 1)
+
+contact@appliedepi.org
 
 ---
 # Today: objectives &amp; schedule  
@@ -99,8 +87,7 @@ class: inverse, center, middle
 * Begin writing an R script to analyze outbreak data  
 
 
-
-&lt;template id="415822c3-7199-4654-a8f3-650d9eb60058"&gt;&lt;style&gt;
+&lt;template id="3708bf68-79b3-4aff-991d-ebb125f7b897"&gt;&lt;style&gt;
 .tabwid table{
   border-spacing:0px !important;
   border-collapse:collapse;
@@ -109,9 +96,11 @@ class: inverse, center, middle
   margin-right:auto;
   border-width: 0;
   display: table;
-  margin-top: 1.275em;
-  margin-bottom: 1.275em;
   border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
 }
 .tabwid_left table{
   margin-left:0;
@@ -134,18 +123,15 @@ class: inverse, center, middle
 .tabwid table tr {
 background-color: transparent;
 }
-&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-7b1ddda0{}.cl-7b15a19e{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-7b15b3d2{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-7b15e992{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9a6{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9a7{width:152.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9a8{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9b0{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9b1{width:152.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9ba{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9c4{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9c5{width:152.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9c6{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9ce{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9d8{width:152.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9d9{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9e2{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9e3{width:152.6pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9ec{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9ed{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9f6{width:152.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15e9f7{width:70.1pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15ea00{width:86.6pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7b15ea01{width:152.6pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-7b1ddda0'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-7b15ea00"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-7b15e9f7"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-7b15ea01"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-7b15e9a6"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;10 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-7b15e992"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-7b15e9a7"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Review of previous module&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-7b15e9a8"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-7b15e9b0"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-7b15e9b1"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Intro to data cleaning&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-7b15e9ba"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-7b15e9c4"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-7b15e9c5"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Demo of data cleaning&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-7b15e9ce"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;1h 30minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-7b15e9c6"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Breakouts&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-7b15e9d8"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-7b15e9e2"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-7b15e9d9"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-7b15e9e3"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Plenary debrief&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-7b15e9ec"&gt;&lt;p class="cl-7b15b3d2"&gt;&lt;span class="cl-7b15a19e"&gt;Breaks are incorporated above, but not shown as rows&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
-&lt;div class="flextable-shadow-host" id="7960dcac-34a3-47fa-b4f8-6bd4a35ee83e"&gt;&lt;/div&gt;
-&lt;script&gt;
-var dest = document.getElementById("7960dcac-34a3-47fa-b4f8-6bd4a35ee83e");
-var template = document.getElementById("415822c3-7199-4654-a8f3-650d9eb60058");
-var caption = template.content.querySelector("caption");
-if(caption) {
-  caption.style.cssText = "display:block;text-align:center;";
-  var newcapt = document.createElement("p");
-  newcapt.appendChild(caption)
-  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+.katex-display {
+    margin: 0 0 !important;
 }
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-9172dad2{}.cl-9167d31c{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-916c5ef0{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-916c757a{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c757b{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c7584{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c758e{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c7598{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c7599{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75a2{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75ac{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75ad{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75b6{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75c0{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75c1{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75ca{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75d4{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75d5{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75d6{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75de{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75df{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75e8{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75e9{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-916c75f2{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-9172dad2'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-916c757a"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-916c757b"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-916c7584"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-916c758e"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;10 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-916c7598"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-916c7599"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Review of previous module&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-916c75a2"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-916c75ac"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-916c75ad"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Intro to data cleaning&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-916c75b6"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-916c75c0"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-916c75c1"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Demo of data cleaning&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-916c75ca"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;1h 30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-916c75d4"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Breakouts&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-916c75d5"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-916c75d6"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-916c75de"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-916c75df"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Plenary debrief&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-916c75e8"&gt;&lt;p class="cl-916c5ef0"&gt;&lt;span class="cl-9167d31c"&gt;Breaks are incorporated above, but not shown as rows&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="6e46f828-8db2-4401-b619-64e279adf6c1"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("6e46f828-8db2-4401-b619-64e279adf6c1");
+var template = document.getElementById("3708bf68-79b3-4aff-991d-ebb125f7b897");
+var caption = template.content.querySelector("caption");
 var fantome = dest.attachShadow({mode: 'open'});
 var templateContent = template.content;
 fantome.appendChild(templateContent);
@@ -250,8 +236,8 @@ class: medium-large-table
 We will begin working with the *"surveillance_linelist_20141201.csv"*  
 We assigned it the name `surv_raw` when we imported it into R.    
 
-<div id="htmlwidget-b0a80e82c7ebd4993fad" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-b0a80e82c7ebd4993fad">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25"],[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],["694928","86340d","92d002","544bd1","6056ba","eb5aeb","e64e04","5a65bb","2ae019","7ca4c0","699d82","30af4f","a06123","27c07d","8f654c","dc1730","9b5dec","f8cd8f","e4bee8","f23f4e","6e9925","668458","7bb784","d74a9e","2772c3"],["11/9/2014","10/30/2014","8/16/2014","8/29/2014","10/20/2014","10/28/2014","10/6/2014","9/21/2014","5/6/2014","9/29/2014","11/27/2014","","9/10/2014","9/12/2014","10/19/2014","9/26/2014","9/7/2014","10/18/2014","6/22/2014","9/14/2014","9/9/2014","10/21/2014","10/21/2014","11/12/2014","10/24/2014"],["m","f","f","f","f","f","f","m","m","m","m","f","m","m","f","m","m","f","f","m","f","m","m","m","m"],[23,1,16,10,0,8,7,4,37,11,27,6,10,20,6,13,22,11,3,60,26,19,9,18,2],["","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","months","years","years"],["Other","Port Hospital","","","","Port Hospital","","Port Hospital","Other","Port Hospital","Port Hospital","Port Hospital","","Other","Military Hospital","Central Hospital","St. Mark's Maternity Hospital (SMMH)","Port Hospital","Other","Other","Other","St. Mark's Maternity Hospital (SMMH)","Central Hospital","Other",""],[70,18,59,39,-11,34,32,41,81,56,76,30,55,72,37,62,60,47,30,84,69,68,79,59,30],[147,29,133,106,24,104,91,74,167,163,178,75,125,151,86,148,159,114,63,245,148,153,175,153,67],["yes","yes","yes","yes","yes","yes","no","yes","yes","yes","yes","no","yes","yes","yes","","yes","no","yes","yes","yes","no","yes","yes","yes"],["no","no","no","no","yes","no","no","yes","no","no","yes","no","no","yes","no","","no","no","no","no","no","yes","no","no","no"],["yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","no","yes","no","","yes","yes","yes","no","no","yes","yes","yes","yes"],["no","no","no","no","no","no","yes","no","no","no","no","no","no","yes","no","","no","no","no","no","no","no","no","no","no"],["no","no","yes","yes","yes","yes","yes","yes","no","no","no","yes","no","no","yes","","yes","yes","no","yes","yes","no","no","yes","no"],[39.2,39.4,39.3,39.3,38.6,38.2,36.5,39.1,39.5,38.9,39.4,37.5,38,38.8,39.2,36.2,38.2,37.5,39.1,38.9,39.1,37.2,38.7,38.9,39.8],[32.39390994,214.0309156,33.35406185,34.70986116,-190.9722222,31.43491124,38.64267601,74.87216947,29.04370899,21.07719523,23.98687034,53.33333333,35.2,31.57756239,50.02704164,28.30533236,23.7332384,36.16497384,75.58578987,13.9941691,31.50109569,29.0486565,25.79591837,25.20398137,66.83002896],["","Mountain Rural","Mountain Rural","East II","West III","West III","Mountain Rural","Mountain Rural","West III","West III","Mountain Rural","West I","Mountain Rural","West II","West II","West III","West II","West II","Central I","Central II","West I","West III","Mountain Rural","East II","Mountain Rural"],["SL040102","SL040102","SL040102","SL040204","SL040208","SL040208","SL040102","SL040102","SL040208","SL040208","SL040102","SL040206","SL040102","SL040207","SL040207","SL040208","SL040207","SL040207","SL040201","SL040202","SL040206","SL040208","SL040102","SL040204","SL040102"],["Central II","Central II","Mountain Rural","East II","West III","West III","Mountain Rural","Mountain Rural","West III","West III","Mountain Rural","West I","Mountain Rural","West II","West II","West III","West II","West II","Central I","Central II","Central II","West III","Mountain Rural","East II","Central II"],[false,true,true,true,true,false,true,true,true,true,false,true,true,true,true,false,true,true,true,true,false,true,true,true,true],["11/9/2014","10/31/2014","8/20/2014","8/30/2014","10/21/2014","11/1/2014","10/10/2014","9/22/2014","5/11/2014","9/30/2014","11/28/2014","11/10/2014","9/15/2014","9/15/2014","10/19/2014","9/27/2014","9/11/2014","10/19/2014","6/25/2014","9/18/2014","9/10/2014","10/23/2014","10/22/2014","11/12/2014","10/25/2014"],[8.453538572,8.470122275,8.454882422,8.484896061,8.467532548,8.452985424,8.474794458,8.462900412,8.452506081,8.456236008,8.465821021,8.47847955,8.469755298,8.461030291,8.465708204,8.456338428,8.466538458,8.467451204,8.47847094,8.487316046,8.483711029,8.462788073,8.463369754,8.482723023,8.462216115],[-13.20963625,-13.21314431,-13.21094789,-13.22525323,-13.26645243,-13.26243993,-13.22028905,-13.21564488,-13.26809408,-13.26695002,-13.21178312,-13.24747771,-13.21416774,-13.23493492,-13.23316849,-13.26466626,-13.23375243,-13.23348154,-13.22992349,-13.23619714,-13.24692135,-13.26936217,-13.21540756,-13.212511,-13.22137963],["no","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>row_num<\/th>\n      <th>case_id<\/th>\n      <th>onset date<\/th>\n      <th>gender<\/th>\n      <th>age<\/th>\n      <th>age unit<\/th>\n      <th>hospital<\/th>\n      <th>wt (kg)<\/th>\n      <th>ht (cm)<\/th>\n      <th>fever<\/th>\n      <th>chills<\/th>\n      <th>cough<\/th>\n      <th>aches<\/th>\n      <th>vomit<\/th>\n      <th>temp<\/th>\n      <th>bmi<\/th>\n      <th>adm3_name_res<\/th>\n      <th>admin3pcod<\/th>\n      <th>adm3_name_det<\/th>\n      <th>lab_confirmed<\/th>\n      <th>date of report<\/th>\n      <th>lat<\/th>\n      <th>lon<\/th>\n      <th>epilink<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollY":300,"scrollX":600,"pageLength":25,"fontSize":"25%","dom":"ti","ordering":false,"rownames":false,"options":{"pageLength":5,"scrollX":true},"class":"white-space: nowrap","columnDefs":[{"className":"dt-right","targets":[1,5,8,9,15,16,22,23]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-e41ade9486d22dfa1a00" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-e41ade9486d22dfa1a00">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25"],[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],["694928","86340d","92d002","544bd1","6056ba","eb5aeb","e64e04","5a65bb","2ae019","7ca4c0","699d82","30af4f","a06123","27c07d","8f654c","dc1730","9b5dec","f8cd8f","e4bee8","f23f4e","6e9925","668458","7bb784","d74a9e","2772c3"],["11/9/2014","10/30/2014","8/16/2014","8/29/2014","10/20/2014","10/28/2014","10/6/2014","9/21/2014","5/6/2014","9/29/2014","11/27/2014","","9/10/2014","9/12/2014","10/19/2014","9/26/2014","9/7/2014","10/18/2014","6/22/2014","9/14/2014","9/9/2014","10/21/2014","10/21/2014","11/12/2014","10/24/2014"],["m","f","f","f","f","f","f","m","m","m","m","f","m","m","f","m","m","f","f","m","f","m","m","m","m"],[23,1,16,10,0,8,7,4,37,11,27,6,10,20,6,13,22,11,3,60,26,19,9,18,2],["","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","months","years","years"],["Other","Port Hospital","","","","Port Hospital","","Port Hospital","Other","Port Hospital","Port Hospital","Port Hospital","","Other","Military Hospital","Central Hospital","St. Mark's Maternity Hospital (SMMH)","Port Hospital","Other","Other","Other","St. Mark's Maternity Hospital (SMMH)","Central Hospital","Other",""],[70,18,59,39,-11,34,32,41,81,56,76,30,55,72,37,62,60,47,30,84,69,68,79,59,30],[147,29,133,106,24,104,91,74,167,163,178,75,125,151,86,148,159,114,63,245,148,153,175,153,67],["yes","yes","yes","yes","yes","yes","no","yes","yes","yes","yes","no","yes","yes","yes","","yes","no","yes","yes","yes","no","yes","yes","yes"],["no","no","no","no","yes","no","no","yes","no","no","yes","no","no","yes","no","","no","no","no","no","no","yes","no","no","no"],["yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","no","yes","no","","yes","yes","yes","no","no","yes","yes","yes","yes"],["no","no","no","no","no","no","yes","no","no","no","no","no","no","yes","no","","no","no","no","no","no","no","no","no","no"],["no","no","yes","yes","yes","yes","yes","yes","no","no","no","yes","no","no","yes","","yes","yes","no","yes","yes","no","no","yes","no"],[39.2,39.4,39.3,39.3,38.6,38.2,36.5,39.1,39.5,38.9,39.4,37.5,38,38.8,39.2,36.2,38.2,37.5,39.1,38.9,39.1,37.2,38.7,38.9,39.8],[32.39390994,214.0309156,33.35406185,34.70986116,-190.9722222,31.43491124,38.64267601,74.87216947,29.04370899,21.07719523,23.98687034,53.33333333,35.2,31.57756239,50.02704164,28.30533236,23.7332384,36.16497384,75.58578987,13.9941691,31.50109569,29.0486565,25.79591837,25.20398137,66.83002896],["","Mountain Rural","Mountain Rural","East II","West III","West III","Mountain Rural","Mountain Rural","West III","West III","Mountain Rural","West I","Mountain Rural","West II","West II","West III","West II","West II","Central I","Central II","West I","West III","Mountain Rural","East II","Mountain Rural"],["SL040102","SL040102","SL040102","SL040204","SL040208","SL040208","SL040102","SL040102","SL040208","SL040208","SL040102","SL040206","SL040102","SL040207","SL040207","SL040208","SL040207","SL040207","SL040201","SL040202","SL040206","SL040208","SL040102","SL040204","SL040102"],["Central II","Central II","Mountain Rural","East II","West III","West III","Mountain Rural","Mountain Rural","West III","West III","Mountain Rural","West I","Mountain Rural","West II","West II","West III","West II","West II","Central I","Central II","Central II","West III","Mountain Rural","East II","Central II"],[false,true,true,true,true,false,true,true,true,true,false,true,true,true,true,false,true,true,true,true,false,true,true,true,true],["11/9/2014","10/31/2014","8/20/2014","8/30/2014","10/21/2014","11/1/2014","10/10/2014","9/22/2014","5/11/2014","9/30/2014","11/28/2014","11/10/2014","9/15/2014","9/15/2014","10/19/2014","9/27/2014","9/11/2014","10/19/2014","6/25/2014","9/18/2014","9/10/2014","10/23/2014","10/22/2014","11/12/2014","10/25/2014"],[8.453538572,8.470122275,8.454882422,8.484896061,8.467532548,8.452985424,8.474794458,8.462900412,8.452506081,8.456236008,8.465821021,8.47847955,8.469755298,8.461030291,8.465708204,8.456338428,8.466538458,8.467451204,8.47847094,8.487316046,8.483711029,8.462788073,8.463369754,8.482723023,8.462216115],[-13.20963625,-13.21314431,-13.21094789,-13.22525323,-13.26645243,-13.26243993,-13.22028905,-13.21564488,-13.26809408,-13.26695002,-13.21178312,-13.24747771,-13.21416774,-13.23493492,-13.23316849,-13.26466626,-13.23375243,-13.23348154,-13.22992349,-13.23619714,-13.24692135,-13.26936217,-13.21540756,-13.212511,-13.22137963],["no","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>row_num<\/th>\n      <th>case_id<\/th>\n      <th>onset date<\/th>\n      <th>gender<\/th>\n      <th>age<\/th>\n      <th>age unit<\/th>\n      <th>hospital<\/th>\n      <th>wt (kg)<\/th>\n      <th>ht (cm)<\/th>\n      <th>fever<\/th>\n      <th>chills<\/th>\n      <th>cough<\/th>\n      <th>aches<\/th>\n      <th>vomit<\/th>\n      <th>temp<\/th>\n      <th>bmi<\/th>\n      <th>adm3_name_res<\/th>\n      <th>admin3pcod<\/th>\n      <th>adm3_name_det<\/th>\n      <th>lab_confirmed<\/th>\n      <th>date of report<\/th>\n      <th>lat<\/th>\n      <th>lon<\/th>\n      <th>epilink<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollY":300,"scrollX":600,"pageLength":25,"fontSize":"25%","dom":"ti","ordering":false,"rownames":false,"options":{"pageLength":5,"scrollX":true},"class":"white-space: nowrap","columnDefs":[{"className":"dt-right","targets":[1,5,8,9,15,16,22,23]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 
 ???
 Table shows just the first 25 rows, to load faster.  
@@ -376,7 +362,7 @@ Function       | Utility
 
 # `filter()` rows  
 
-* 1st argument: a data frame
+* * 1st argument: a data frame
 
 
 ```r
@@ -385,7 +371,7 @@ filter(demo, ___)
 
 --
 
-* 2nd+ arguments: logical criteria to apply, to keep rows
+* * 2nd+ arguments: logical criteria to apply, to keep rows
 
 
 ```r
@@ -1013,6 +999,15 @@ demo
    &lt;td style="text-align:right;"&gt; -11 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 24 &lt;/td&gt;
   &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 6056ba &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; f &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 10/20/2014 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -11 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24 &lt;/td&gt;
+  &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 
@@ -1068,12 +1063,18 @@ demo %&gt;%
    &lt;td style="text-align:left;"&gt; f &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
   &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 6056ba &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; f &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+  &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 ---
 # Vertical coding style
 
-It is better to write in a *vertical* style:  
+It is better to write in a *vertical* style  
 Newlines and indent will not impact the code, but do make it more readable!
 
 
@@ -1130,7 +1131,7 @@ demo %&gt;%
 ---
 # Vertical coding style
 
-It is better to write in a *vertical* style:  
+It is better to write in a *vertical* style  
 Newlines and indent will not impact the code, but do make it more readable!
 
 
@@ -1184,7 +1185,7 @@ demo %&gt;%
 ---
 # Vertical coding style
 
-It is better to write in a *vertical* style:  
+It is better to write in a *vertical* style  
 Newlines and indent will not impact the code, but do make it more readable!
 
 
@@ -1244,7 +1245,7 @@ demo %&gt;%
 ---
 # Vertical coding style
 
-It is better to write in a *vertical* style:  
+It is better to write in a *vertical* style  
 Newlines and indent will not impact the code, but do make it more readable!
 
 
@@ -1374,7 +1375,7 @@ demo %&gt;%
 
 ---
 
-# Printing vs. saving  
+# Printing vs. saving   
 
 Our pipes have only *printed* the modified `demo` - the data frame has **not** changed!  
 
@@ -1525,8 +1526,8 @@ The easiest method is to use functions from the {lubridate} package
 
 **End goal**:  
 
-* YYYY-MM-DD  
 * `class()` of the column is "date" 
+* YYYY-MM-DD 
 
 More details in this [Epi R Handbook chapter](https://epirhandbook.com/en/working-with-dates.html)
 

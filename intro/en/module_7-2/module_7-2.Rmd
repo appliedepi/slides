@@ -5,15 +5,17 @@ author: "2022"
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
   xaringan::moon_reader:
-    seal: TRUE
+    seal: false
     lib_dir: libs
     nature:
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
     css: xaringan-themer.css
+params:
+  lang: "en"
 ---
-class: inverse, center, middle
+class: center, middle, inverse, title-slide
 
 
 ```{r, eval=F, echo=F, include=F}
@@ -59,6 +61,16 @@ pacman::p_load(
 # data prep --------------------------------------------------------------------
 # linelist_raw <- rio::import(here::here("data", "linelist_raw.xlsx"))
 surv <- rio::import(here::here("data", "linelist_combined_20141201.rds"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic") %>%
+  clean_names()
+
+mod7_2 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod7_2", col_types = "c") %>%
+  clean_names()
 ```
 
 ```{r  xaringan-themer, include = FALSE}
@@ -101,12 +113,17 @@ style_mono_accent(
   }
 ```
 
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
+
+### `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_subtitle", params$lang])`
+
+contact@appliedepi.org
+---
 
 
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_intro", params$lang])`
 
-# Restructuring data
-
-*pivoting, reshaping, melting, casting, transforming...* dataframes
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_intro", params$lang])`
 
 ```{r, eval = TRUE, echo = FALSE, out.height = "100%"}
 # Using here() alone won't work because Rmd folder becomes the rendering root.
@@ -117,28 +134,28 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 ---
 
-# What is pivoting?
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivot", params$lang])`
 
-* *Excel pivot tables* are a way of summarizing and aggregating data
-
---
-
-* In R, **pivoting** a dataframe has a **different meaning**
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivot_1", params$lang])`
 
 --
 
-* Think of it as *restructuring*, or *reshaping* the dataframe
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivot_2", params$lang])`
 
 --
 
-* We will use the `pivot_wider()` and `pivot_longer()` functions from the {tidyr} package
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivot_3", params$lang])`
 
 --
 
-* You will often see examples using alternative functions from other packages: 
-     * `melt()` and `cast()` from {reshape2}
-     * `gather()` and `spread()` ancestors of the {tidyr} `pivot_()` functions  
-     * `melt()` and `dcast()` from {data.table}
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivot_4", params$lang])`
+
+--
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivot_5", params$lang])` 
+     * `r paste0(mod7_2[mod7_2$uid == "mod7_2_sb_pivot_1", params$lang])`
+     * `r paste0(mod7_2[mod7_2$uid == "mod7_2_sb_pivot_2", params$lang])`  
+     * `r paste0(mod7_2[mod7_2$uid == "mod7_2_sb_pivot_3", params$lang])`
      
      
      
@@ -147,21 +164,21 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 
 ---
-# Tidy data
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_tidydata", params$lang])`
 
-Do you remember the 3 principles of "tidy data"?  
-
---
-
-1. Each **value** must have its own **cell**
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_op_tidydata", params$lang])`  
 
 --
 
-2. Each **variable** must have its own **column**
+1. `r paste0(mod7_2[mod7_2$uid == "mod7_2_nu_tidydata_1", params$lang])`
 
 --
 
-3. Each **observation** must have its own **row**  
+2. `r paste0(mod7_2[mod7_2$uid == "mod7_2_nu_tidydata_2", params$lang])`
+
+--
+
+3. `r paste0(mod7_2[mod7_2$uid == "mod7_2_nu_tidydata_3", params$lang])`  
 
 
 
@@ -172,38 +189,38 @@ Do you remember the 3 principles of "tidy data"?
 
 ---
 
-# Terminology  
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_terminology", params$lang])`  
 
-Structurally, "data frames" in R consist of **columns** and **rows**.  
-
---
-
-However, **"variables"** and **"observations"** are more *abstract* concepts:  
-
-* **Variables** measure one *underlying attribute* (age, outcome, or date of onset)  
-* **Observations** relate to a *unit of analysis*  
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_terminology_1", params$lang])`  
 
 --
 
-Ideally, they align: **columns = variables** and **rows = observations**  
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_terminology_2", params$lang])`  
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_terminology_1", params$lang])`  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_terminology_2", params$lang])`  
+
+--
+
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_terminology_3", params$lang])`  
 
 ```{r, eval = TRUE, echo = FALSE, out.height = "65%"}
 # Using here() alone won't work because Rmd folder becomes the rendering root.
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
-knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_image.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", paste0("tidy_image_", params$lang, ".png"))))
 ```
 
-.footnote[Image source: [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)]
+.footnote[`r paste0(mod7_2[mod7_2$uid == "mod7_2_fn_terminology", params$lang])`]
 
 
 
 
 
 ---
-# Pivot longer  
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivotlong", params$lang])`  
 .pull-left[
-Data entry is often in “wide” format  
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_pivotlong_1", params$lang])`  
 ```{r}
 example <- tribble(
      ~country, ~`1999`, ~`2000`,     ~`2001`,  ~`2002`, 
@@ -215,14 +232,14 @@ example %>%
   knitr::kable()
 ```
 
-* A subject’s characteristics are stored in a single row  
-* Useful for presentation  
-* **Not** ideal for some types of analysis.
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_1", params$lang])`  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_2", params$lang])`  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_3", params$lang])`
 ]
 
 --
 .pull-right[
-**Easier to analyse in "long" format**  
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_pivotlong_2", params$lang])`  
 ```{r}
 example %>%
   pivot_longer(cols=2:5, names_to="year", values_to = "cases") %>% 
@@ -243,9 +260,9 @@ example %>%
 
 
 ---
-# {ggplot2} example
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_ggplot2", params$lang])`
 
-How to plot cases over time for the three countries?  
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_ggplot2", params$lang])`  
 
 ```{r}
 example %>%
@@ -264,7 +281,7 @@ ggplot(data = example,
 
 
 ---
-# Pivot longer
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivotlong", params$lang])`
 
 .pull-left[
 ```{r}
@@ -279,14 +296,14 @@ example %>%
   #flextable::color(i = 1:3, j = 1:5, "white", part = "body")    # white text
 ```
 
-* These **column names will be pivoted**  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_4", params$lang])`  
 
 ]
 
 
 
 ---
-# Pivot longer
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivotlong", params$lang])`
 
 .pull-left[
 ```{r}
@@ -301,14 +318,14 @@ example %>%
   #flextable::color(i = 1:3, j = 1:5, "white", part = "body")    # white text
 ```
 
-* These **values will be re-arranged**    
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_5", params$lang])`    
 
 ]
 
 
 
 ---
-# Pivot longer
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivotlong", params$lang])`
 
 .pull-left[
 ```{r}
@@ -323,14 +340,14 @@ example %>%
   #flextable::color(i = 1:3, j = 1:5, "white", part = "body")    # white text
 ```
 
-* These **identifiers will be replicated**  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_6", params$lang])`  
 
 ]
 
 
 
 ---
-# Pivot longer  
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivotlong", params$lang])`  
 
 .pull-left[
 ```{r}
@@ -349,8 +366,8 @@ example %>%
 knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "pivot_command.png")))
 ```
 
-* List the columns to pivot  
-* Provide 2 **new column names**  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_7", params$lang])`  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_8", params$lang])`  
 
 ]
 
@@ -406,7 +423,7 @@ decorate("pivot") %>%
 
 
 ---
-# ggplot command
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_ggcommand", params$lang])`
 
 .pull-left[
 ```{r, eval=F, echo=T}
@@ -447,14 +464,14 @@ example %>%
 
 
 ---
-# Pivoting wider  
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivotwide", params$lang])`  
 
-We won't cover pivoting wider in this course, because it is not as frequently used. 
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_pivotwide_1", params$lang])` 
 
-You can explore several examples in these Epi R Handbook chapters:  
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_pivotwide_2", params$lang])`  
 
-* [Pivoting data](https://epirhandbook.com/en/pivoting-data.html#long-to-wide)  
-* [Descriptive tables with {dplyr}](https://epirhandbook.com/en/descriptive-tables.html#tbls_pivot_wider)  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotwide_1", params$lang])`  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotwide_1", params$lang])`  
 
 ```{r, eval = TRUE, echo = FALSE, out.height = "100%"}
 # Using here() alone won't work because Rmd folder becomes the rendering root.
@@ -467,5 +484,5 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 
 ---
-# Exercise  
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_exercise", params$lang])`  
 
