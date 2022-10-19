@@ -165,13 +165,13 @@ The difficult part is knowing which packages to use and where!
 ---
 # This course is about translating your statistics knowledge, not teaching statistics
 
-There is not enough time in a week to teach both statistics and R, and so we will be focusing on taking your existing knowledge and showing you how to apply this to R.
+Teaching statistics and R at the same time would require far longer than we have for a short course. We will be focusing on taking your existing knowledge and showing you how to apply this to R.
 
 ---
 # What we will be covering
 
 - Exploring your data and basic hypothesis testing.
-- Univariate, Stratified and Multivariate regression (with a focus on logistic regression).
+- Univariate, Stratified and Multivariable regression (with a focus on logistic regression).
 - How to make publication ready tables and plots to communicate your regression results.
 - Rmarkdown, combining your new knowledge with Rmarkdown to generate a document detailing your statistical analysis.
 
@@ -184,7 +184,7 @@ By the end of this course, you should be able to:
 - Generate histograms of your data and explore the correlation between variables
 - Carry out the appropriate statistical tests needed to analyse your data and produce publication quality tables
 - Undertake univariate and stratified regression, interpret the results and produce figures
-- Understand how to carry out variable selection and run multivariate regression analysis, with and without interaction terms and random effects
+- Understand how to carry out variable selection and run multivariable regression analysis, with and without interaction terms and random effects
 
 ---
 
@@ -206,41 +206,26 @@ Look out for lurking danger!
 
 ---
 
-&lt;img src="course_intro_files/figure-html/unnamed-chunk-12-1.png" width="75%" /&gt;
+&lt;img src="course_intro_files/figure-html/unnamed-chunk-11-1.png" width="75%" /&gt;
 
 ---
 
+&lt;img src="course_intro_files/figure-html/unnamed-chunk-12-1.png" width="75%" /&gt;
+---
 &lt;img src="course_intro_files/figure-html/unnamed-chunk-13-1.png" width="75%" /&gt;
+
 ---
 &lt;img src="course_intro_files/figure-html/unnamed-chunk-14-1.png" width="75%" /&gt;
-
----
-&lt;img src="course_intro_files/figure-html/unnamed-chunk-15-1.png" width="75%" /&gt;
 ---
 
 # Basic hypothesis testing
 
 What do we mean by basic hypothesis testing?
 
-- We use this term to indicate the use of a test that explores the relationship between an outcome and a variable and returns an indication (a p-value) of whether or not there is a relationship.
+- We use this term to indicate the use of a test that explores the relationship between an outcome and an exposure and returns an indication (a p-value) of whether or not there is a relationship.
 - This includes T-tests, Shapiro-Wilk tests, Wilcoxon rank sum tests, Kruskal-Wallis, Chi-squared, etc
 
 These are often a useful first step in statistically evaluating the data and set up the stage for further investigating relationships between outcomes and variables.
-
----
-
-# How do we carry out and incorporate statistical tests in R?
-
-Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%&gt;%`!
-
-It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
-
-```r
-linelist %&gt;%
-    select(gender, outcome, vomit, cough) %&gt;%
-    tbl_summary(by = outcome) %&gt;%
-    add_p() 
-```
 
 ---
 
@@ -249,6 +234,20 @@ linelist %&gt;%
 There are many different ways of carrying out statistical tests in R, and a variety of pros and cons for deciding between packages (and base R).
 
 However, in this course we will be focussing on the package **gtsummary** as it allows us to carry out these tests with a few simple commands, and produces publication ready tables with ease.
+
+---
+# How do we carry out and incorporate statistical tests in R?
+
+Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%&gt;%`!
+
+It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
+
+```r
+linelist %&gt;%
+    select(outcome, vomit, cough) %&gt;%
+    tbl_summary(by = outcome) %&gt;%
+    add_p() 
+```
 
 ---
 
@@ -687,7 +686,7 @@ linelist %&gt;%
 <td class="gt_row gt_center">126 (55%)</td>
 <td class="gt_row gt_center">94 (53%)</td>
 <td class="gt_row gt_center">0.8</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">Unknown</td>
+    <tr><td class="gt_row gt_left">    Unknown</td>
 <td class="gt_row gt_center">11</td>
 <td class="gt_row gt_center">9</td>
 <td class="gt_row gt_center"></td></tr>
@@ -695,7 +694,7 @@ linelist %&gt;%
 <td class="gt_row gt_center">205 (89%)</td>
 <td class="gt_row gt_center">143 (81%)</td>
 <td class="gt_row gt_center">0.025</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">Unknown</td>
+    <tr><td class="gt_row gt_left">    Unknown</td>
 <td class="gt_row gt_center">11</td>
 <td class="gt_row gt_center">9</td>
 <td class="gt_row gt_center"></td></tr>
@@ -1150,7 +1149,7 @@ linelist %&gt;%
 <td class="gt_row gt_center">55 (42, 63)</td>
 <td class="gt_row gt_center">54 (41, 65)</td>
 <td class="gt_row gt_center">0.7</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">Unknown</td>
+    <tr><td class="gt_row gt_left">    Unknown</td>
 <td class="gt_row gt_center">3</td>
 <td class="gt_row gt_center">0</td>
 <td class="gt_row gt_center"></td></tr>
@@ -1605,7 +1604,7 @@ linelist %&gt;%
 <td class="gt_row gt_center">52 (17)</td>
 <td class="gt_row gt_center">53 (18)</td>
 <td class="gt_row gt_center">0.7</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">Unknown</td>
+    <tr><td class="gt_row gt_left">    Unknown</td>
 <td class="gt_row gt_center">3</td>
 <td class="gt_row gt_center">0</td>
 <td class="gt_row gt_center"></td></tr>
@@ -1626,9 +1625,20 @@ linelist %&gt;%
 
 # Ready to try it out?
 
-[Epi R Handbook](https://epirhandbook.com/)
+Any questions?
+
+
+
+**Resources**
 
 Course website (initial setup and slides access): [https://appliedepi.github.io/intro_course/](https://appliedepi.github.io/intro_course/)
+
+[Epi R Handbook](epirhandbook.com/)
+
+Applied Epi Community
+A great resource for asking questions and help!
+https://community.appliedepi.org/
+
 ---
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
