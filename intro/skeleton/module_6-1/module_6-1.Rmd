@@ -663,10 +663,12 @@ theme_grey(base_size = 16)
 ------------------------------------------------------------------------|--------------------------------------------------------------------
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_3", params$lang])`|`geom_histogram()`  
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_4", params$lang])`|`geom_point()`
-]
 
 .footnote[`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_geometry", params$lang])`
 ]  
+
+]
+
 
 
 .pull-right[
@@ -719,10 +721,10 @@ cowplot::plot_grid(histogram, points,
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_5", params$lang])`|`geom_lines()`  
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_6", params$lang])`|`geom_bar()` or `geom_col()`  
 
+.footnote[`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_geometry", params$lang])`]
 
 ]
 
-.footnote[`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_geometry", params$lang])`]
 
 
 .pull-right[
@@ -777,9 +779,11 @@ cowplot::plot_grid(lines, bars,
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_8", params$lang])`|`geom_violin())` 
 
 
+.footnote[`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_geometry", params$lang])`]
+
 ]
 
-.footnote[`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_geometry", params$lang])`]
+
 
 .pull-right[
 
@@ -933,7 +937,25 @@ geom_point()
 
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_indent_2", params$lang])`
 
-```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+```{r, echo = params$lang == "en", eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,        # use case linelist
+  mapping = aes(      # make aesthetic mappings for all geoms
+    x = age_years,    # assign x-axis to age column
+    y = ht_cm)) +     # assign y-axis to height
+geom_point()          # display data as points
+```
+
+```{r, echo = params$lang == "fr", eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,        # utiliser le cas linelist
+  mapping = aes(      # faire des mappings esthétiques pour tous les géomètres
+    x = age_years,    # assigner la colonne d'âge à l'axe des x 
+    y = ht_cm)) +     # assigner la colonne d'hauteur à l'axe des y 
+geom_point()          # afficher les données sous forme de points
+```
+
+```{r, echo = params$lang == "ru", eval = FALSE, tidy = FALSE}
 ggplot(
   data = surv,        # use case linelist
   mapping = aes(      # make aesthetic mappings for all geoms
@@ -1018,12 +1040,42 @@ class: medium-text
 
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_op_example_1", params$lang])`
 
-```{r, message=F, warning=F}
+```{r,eval = params$lang == "en", message=F, warning=F}
 
 color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
   geom_point(color = "purple")+
   theme_minimal(base_size = 16)+
   labs(title = "Using color = 'purple'")
+
+color_hospital <- ggplot() + theme_void()
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r, eval = params$lang == "fr", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilisant color = 'purple' ")
+
+color_hospital <- ggplot() + theme_void()
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r, eval = "params$lang == "ru", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using color = 'purple' (mauve)")
 
 color_hospital <- ggplot() + theme_void()
 
@@ -1069,7 +1121,45 @@ class: medium-text
 
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_op_example_1", params$lang])`
 
-```{r, message=F, warning=F}
+```{r, eval = params$lang == "en", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using color = 'purple'")
+
+color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(aes(color = hospital))+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using aes(color = hospital)")
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+
+```{r, eval = params$lang == "fr", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilisant color = 'purple' (mauve)")
+
+color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(aes(color = hospital))+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilisant aes(color = hospital)")
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+
+```{r, eval = params$lang == "ru", message=F, warning=F}
 
 color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
   geom_point(color = "purple")+
@@ -1125,7 +1215,49 @@ class: medium-text
 
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_op_example_2", params$lang])` 
 
-```{r, message=F, warning=F}
+```{r, eval = params$lang == "en", message=F, warning=F}
+
+fill_purple <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(fill = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using fill = 'purple'")
+
+
+fill_hospital <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(aes(fill = hospital))+
+    theme_minimal(base_size = 16)+
+  labs(title = "Using aes(fill = hospital)")
+
+cowplot::plot_grid(
+                  fill_purple, fill_hospital,
+                   
+                   nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r,eval = params$lang == "fr", message=F, warning=F}
+
+fill_purple <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(fill = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilisant fill = 'purple' (mauve)")
+
+
+fill_hospital <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(aes(fill = hospital))+
+    theme_minimal(base_size = 16)+
+  labs(title = "Utilisant aes(fill = hospital)")
+
+cowplot::plot_grid(
+                  fill_purple, fill_hospital,
+                   
+                   nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r, eval = params$lang == "ru", message=F, warning=F}
 
 fill_purple <- ggplot(data = surv, aes(x = date_onset))+
   geom_histogram(fill = "purple")+
