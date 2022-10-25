@@ -1,6 +1,6 @@
 ---
 title: "Advanced statistics in R"
-subtitle: "Regression - univariable and stratified"
+subtitle: "Regression - univariate and stratified"
 author: ""
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
@@ -54,7 +54,9 @@ pacman::p_load(
   caret,
   lme4,
   broom.mixed,
-  countdown
+  countdown,
+  epitabulate,
+  epikit
 )
 
 ```
@@ -112,15 +114,19 @@ linelist <- surv %>%
      mutate(outcome_death = ifelse(outcome == "Death", 1, 0)) %>%
      filter(between(bmi, 10, 50))
 
-independent_variables <- c("age", "gender", "cough", "temp")
-dependent_variable <- "outcome_death"
+independent_exposures <- c("age", "gender", "cough", "temp")
+outcome <- "outcome_death"
 
 ```
 
 # Regression
 
 .pull-left[
-Regression analysis is one of the most useful tools in our toolbox. It allows us to establish statistical relationships between an outcome and a variable, or variables, *in our dataset*. And this allows us to do a number of different things, such as...
+Regression analysis is one of the most useful tools in our toolbox. 
+
+It allows us to establish statistical relationships between an outcome and an exposure, or exposures, *in our dataset*. 
+
+And this allows us to do a number of different things, such as...
 ]
 
 .pull-right[
@@ -135,14 +141,14 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "regression", "
 
 - Testing a theory or association.
 - Predicting what could happen in a new dataset if the relationships remain the same.
-- Controlling for confounding.
- - Are the relationships between the outcome and the predictor true? Or are they an artifact of another value we previously did not adjust for?
+- Controlling for confounding and effect modification.
+ - Are the relationships between the outcome and the predictor true? 
+ - Or are they an artifact of another value we previously did not adjust for?
  
 ```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
 knitr::include_graphics(xfun::relative_path(here::here("images", "regression", "testing_test_tube.jpg")))
 ```
 
- 
 ---
 
 # gtsummary
@@ -157,12 +163,12 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "regression", "
 
 # gtsummary syntax
 
-While these have numerous potential inputs (see `?tbl_uvregression` for examples for the *univariable* regression), we are primarily concerned with only four of them
+While these have numerous potential inputs (see `?tbl_uvregression` for examples for the *univariate* regression), we are primarily concerned with only four of them
 
 * `method = `
   * The type of regression we want to run, set to `glm` for our purposes
 * `y = `
-  * The dependent (outcome) variable we want to estimate
+  * The dependent (outcome) exposure we want to estimate
 * `method.args = `
   * The type of glm we want to run, for a logistic regression it would be `method.args = list(family = binomial)`
 * `exponentiate = `
@@ -175,9 +181,9 @@ While these have numerous potential inputs (see `?tbl_uvregression` for examples
 .pull-left[
 ```{r, echo = T, eval = FALSE}
 linelist %>%
-  select(independent_variables, 
-         outcome_death) %>%
-     drop_na() %>%
+  select(independent_exposures,   #The exposures we want to investigate
+         outcome_death) %>%       #The outcome
+     drop_na() %>%                #We can only use complete data, so we remove the rows with NA values
   tbl_uvregression(
     method = ,                
     y = ,                     
@@ -196,16 +202,16 @@ linelist %>%
 ```{r univariate_code_table, echo = T, eval = F}
 
 linelist %>%
-  select(independent_variables, 
-         outcome_death) %>% 
-     drop_na() %>%
+  select(independent_exposures,   #The exposures we want to investigate
+         outcome_death) %>%       #The outcome
+     drop_na() %>%                #We can only use complete data, so we remove the rows with NA values
   tbl_uvregression(
-    method = glm,                
-    y = outcome_death,                     
+    method = glm,                 #This indicates we want to use a generalized linear model     
+    y = outcome_death,            #The outcome                
     method.args = list(
-         family = binomial
+         family = binomial        #The distribution of the data we are fitting to
          ),           
-    exponentiate = TRUE          
+    exponentiate = TRUE           #For logistic regression if we want the log odds we need to specify this     
   )
 
 ```
@@ -222,7 +228,7 @@ linelist %>%
 
 Here we define stratified regression as the process of carrying out separate regression analyses on different "groups" of data. 
 
-We do this because we think there may be plausible reasons why relationships between the dependent and independent variables could be different between groups
+We do this because we think there may be plausible reasons why relationships between the dependent and independent exposures could be different between groups
 
 Can you think of any groups you might want to separate in your analysis? 
 
@@ -230,53 +236,54 @@ Can you think of any groups you might want to separate in your analysis?
 
 # Stratified regression
 
-.pull-left[
-In order to stratify our dataset, we need to use `filter()` to subset our dataset to the group we want. As an example we are going to look at `gender = male` and `gender = female` separately.
+* `filter()` our dataset to the group we want
+ - `gender = male` and `gender = female`
+* We then _remove_ gender after we filter
+ - We are subsetting the data so each regression only has the `gender` data of the subset
 
-Note that we are _removing_ gender after we filter. There is only one value and so the regression analysis will not show anything.
-]
 
+---
+
+# Stratified regression
 .tiny[
-.pull-right[
 ```{r, echo = T, eval = T}
 male_regression <- linelist %>%
-  select(independent_variables, 
-         outcome_death) %>% 
-     filter(gender == "male") %>%
-     select(-gender) %>%
-     drop_na() %>%
+  select(independent_exposures,    #The exposures we want to investigate
+         outcome_death) %>%        #The outcome
+     filter(gender == "male") %>%  #The exposure we want to subset by
+     select(-gender) %>%           #We remove the column we are subsetting by
+     drop_na() %>%                 #We can only use complete data, so we remove the rows with NA values
   tbl_uvregression(
-    method = glm,                
-    y = outcome_death,                     
+    method = glm,                  #This indicates we want to use a generalized linear model 
+    y = outcome_death,             #The outcome     
     method.args = list(
-         family = binomial
+         family = binomial         #The distribution of the data we are fitting to
          ),           
-    exponentiate = TRUE          
+    exponentiate = TRUE            #For logistic regression if we want the log odds we need to specify this
   )
 
 female_regression <- linelist %>%
-  select(independent_variables, 
-         outcome_death) %>% 
-     filter(gender == "female") %>%
-     select(-gender) %>%
-     drop_na() %>%
+  select(independent_exposures,    #The exposures we want to investigate
+         outcome_death) %>%        #The outcome
+     filter(gender == "female") %>%  #The exposure we want to subset by
+     select(-gender) %>%           #We remove the column we are subsetting by
+     drop_na() %>%                 #We can only use complete data, so we remove the rows with NA values
   tbl_uvregression(
-    method = glm,                
-    y = outcome_death,                     
+    method = glm,                  #This indicates we want to use a generalized linear model 
+    y = outcome_death,             #The outcome     
     method.args = list(
-         family = binomial
+         family = binomial         #The distribution of the data we are fitting to
          ),           
-    exponentiate = TRUE          
+    exponentiate = TRUE            #For logistic regression if we want the log odds we need to specify this
   )
 
 ```
-]
 ]
 ---
 
 # Comparing outputs
 
-We can then display these tables side by side to see if there is any change in variable relationships using `tbl_merge()`
+We can then display these tables side by side to see if there is any change in exposure assocation using `tbl_merge()`
 
 ```{r, echo = T, eval = T}
 tbl_merge(tbls = list(male_regression, 
@@ -286,19 +293,29 @@ tbl_merge(tbls = list(male_regression,
 ```
 ---
 
-# Simple!
+# Ready or not, we are going to give it a try!
 
-That's it for univariate and stratified regression. As you can see we only need a few commands to be able to carry out a regression analysis for our dataset!
+That's it for univariate and stratified regression. 
 
+As you can see we only need a few commands to be able to carry out a regression analysis for our dataset!
 ---
 
 # Ready or not, we are going to give it a try!
 
 Any questions?
 
-[Epi R Handbook](epirhandbook.com/)
+
+
+**Resources**
 
 Course website (initial setup and slides access): [https://appliedepi.github.io/intro_course/](https://appliedepi.github.io/intro_course/)
+
+[Epi R Handbook](epirhandbook.com/)
+
+Applied Epi Community
+A great resource for asking questions and help!
+https://community.appliedepi.org/
+
 ---
 
 
