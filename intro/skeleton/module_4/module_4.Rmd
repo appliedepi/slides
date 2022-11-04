@@ -224,8 +224,18 @@ demo %>%
 
 `r paste0(mod4[mod4$uid == "mod4_tx_print_1", params$lang])` 
 
-```{r, echo=T, eval=F}
+```{r, echo=params$lang == "en", eval=F}
 demo %>%                    # PRINT only cases over 10 years
+  filter(age > 10)
+```
+
+```{r, echo=params$lang == "fr", eval=F}
+demo %>%                    # IMPRIMER seulement les cas plus que 10 ans
+  filter(age > 10)
+```
+
+```{r, echo=params$lang == "ru", eval=F}
+demo %>%                    # ПРИНТ только случаи старше 10 лет
   filter(age > 10)
 ```
 
@@ -262,7 +272,31 @@ Note how the column names in `demo` are old! It's because our changes have not y
 
 
 
-```{r, echo=TRUE, eval=TRUE}
+```{r, echo=params$lang == "en", eval=FALSE}
+demo %>% 
+  mutate(gender = recode(gender,   # re-define gender as: 
+    'm' = 'male',                  # when "m", change to "male"   
+    'f' = 'female'))               # when "f", change to "female"
+```
+
+
+```{r, echo=params$lang == "fr", eval=TRUE}
+demo %>% 
+  mutate(gender = recode(gender,   # redéfinir le sexe: 
+    'm' = 'male',                  # ou 'm' devient 'male'
+    'f' = 'female'))               # ou "f" devient "female"
+```
+
+
+```{r, echo=params$lang == "ru", eval=TRUE}
+demo %>% 
+  mutate(gender = recode(gender,   # переопределить пол как: 
+    'm' = 'male',                  # когда "m", меняется на "male", m меняется на мужской 
+    'f' = 'female'))               # когда "f", меняется на "female", f меняется на женский
+```
+
+
+```{r, echo=FALSE, eval=TRUE}
 demo %>% 
   mutate(gender = recode(gender,   # re-define gender as: 
     'm' = 'male',                  # when "m", change to "male"   
@@ -290,13 +324,39 @@ str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_3", params$lang])}) %>%
 
 --
 
-```{r mutate, include = F}
+```{r mutate_en, include = FALSE}
 demo %>% 
   mutate(adult = ifelse(age >= 18, 'yes', 'no')) # creates new T/F column
 ```
 
-```{r mutate_flair, echo=F}
-decorate("mutate") %>%
+
+```{r mutate_fr, include = FALSE}
+demo %>% 
+  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # crée une nouvelle colonne vrai-faux
+```
+
+
+```{r mutate_ru, include = FALSE}
+demo %>% 
+  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # создает новый столбец типа истина-ложь
+```
+
+```{r mutate_flair_en, echo=F, eval = params$lang == "en"}
+decorate("mutate_en") %>%
+  flair("adult", color = "deeppink") %>%
+  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r mutate_flair_fr, echo=F, eval = params$lang == "fr"}
+decorate("mutate_fr") %>%
+  flair("adult", color = "deeppink") %>%
+  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r mutate_flair_ru, echo=F, eval = params$lang == "ru"}
+decorate("mutate_ru") %>%
   flair("adult", color = "deeppink") %>%
   flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
   knit_print.with_flair()
