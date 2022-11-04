@@ -1,7 +1,6 @@
 ---
 title: "Introduction to R for<br>Applied Epidemiology"
 subtitle: "Routine reports with {rmarkdown}"
-author: "March 2022"
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
   xaringan::moon_reader:
@@ -48,6 +47,7 @@ pacman::p_load(
   janitor,    # data cleaning and tables
   lubridate,  # working with dates
   sf,         # spatial
+  scales,     # comma
   epikit,     # helpers
   ggspatial,  # spatial
   kableExtra, # for output tables
@@ -67,7 +67,7 @@ surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds
 
 gen <- googlesheets4::read_sheet(
   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
-  range = "generic") %>%
+  range = "generic", col_types = "c") %>%
   clean_names()
 
 mod9 <- googlesheets4::read_sheet(
@@ -81,7 +81,7 @@ mod9 <- googlesheets4::read_sheet(
 ## define presentation colours (theme) using {xaringanthemer} package 
 ## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
 
-## epirhandbook logo colours: 
+## epirhandbook logo colors: 
   ## blue: "#00538c"
   ## green: "#007732"
   ## lighter green: "#48a878"
@@ -411,9 +411,8 @@ Note that it starts and ends with three dashes, and that placement of spaces and
 - `r paste0(mod9[mod9$uid == "mod9_bu_chunk_2", params$lang])`
 
 `````
-```{r importing-data, eval=TRUE}`r ''`
+```{r}`r ''`
 # import data
-
 surv_raw <- import(here("data", "surveillance_linelist_20141201.csv))
 ```
 `````  
@@ -424,7 +423,7 @@ surv_raw <- import(here("data", "surveillance_linelist_20141201.csv))
 --
 
 `````
-```{r, eval=TRUE}`r ''`
+```{r}`r ''`
 # clean data
 surv <- surv %>% 
   clean_names() %>% 
@@ -448,7 +447,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", pa
 
 
 `````
-```{r importing-data, eval=TRUE}`r ''`  
+```{r}`r ''`  
 # import data
 surv_raw <- import(here("data", "surveillance_linelist_20141201.csv))
 ```
@@ -519,6 +518,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", pa
 epikit::fmt_count(surv, is.na(date_onset))
 ```
 
+
 ```{r, eval=params$lang == "en", echo=params$lang == "en"}
 str_glue("{fmt_count(surv, is.na(date_onset))} are missing date of onset and not shown.")
 ```
@@ -529,8 +529,27 @@ str_glue("{fmt_count(surv, is.na(date_onset))} cas n'ont pas de date d'apparitio
 
 ```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
 str_glue("{fmt_count(surv, is.na(date_onset))} случаев дата начала заболевания отсутствует и не показана.")
+
+
+--
+
+{scales}
+
+
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
+str_glue("There were {comma(sum(as.numeric(surv$diff), na.rm=T))} total delay days between symptom onset and report.")
+
 ```
 
+```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
+str_glue("Il y avait {comma(sum(as.numeric(surv$diff), na.rm=T))} jours de retard total entre l'apparition des symptômes et la déclaration.")
+
+```
+
+```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
+str_glue("Между началом симптомов и сообщением о них прошло {comma(sum(as.numeric(surv$diff), na.rm=T))} всего дней задержки.")
+
+```
 
 ---
 # `r paste0(mod9[mod9$uid == "mod9_h1_heading", params$lang])`  
@@ -618,8 +637,8 @@ Please see the Handbook for options to create a "Report factory" where it become
 title: "Surveillance report"
 output: html_document
 params:
- date: 2021-04-10
- hospital: Central Hospital
+ date: "2021-04-10"
+ hospital: "Central Hospital"
 ---
 ```
 
@@ -635,15 +654,52 @@ params:
 
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_1.png")))
 ```
 
 
 
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_params", params$lang])`
+
+
+`r paste0(mod9[mod9$uid == "mod9_tx_params_3", params$lang])`  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_2.png")))
+```
 
 
 
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_params", params$lang])`
 
+
+`r paste0(mod9[mod9$uid == "mod9_tx_params_3", params$lang])`  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_3.png")))
+```
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_params", params$lang])`
+
+.pull-left[
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_menu_1.png")))
+```
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_menu_2.png")))
+```
+
+]
 
 ---
 # `r paste0(mod9[mod9$uid == "mod9_h1_template", params$lang])`  

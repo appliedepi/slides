@@ -1,0 +1,209 @@
+---
+title: "Introduction to R for<br>Applied Epidemiology"
+subtitle: "COVID-19 case study"
+author: "March 2022"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "en"
+---
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  sf,         # spatial
+  ggspatial,  # spatial
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation
+  tidyverse  # data management and visualization
+
+)
+
+## load packages from github
+pacman::p_load_gh(
+     "R4IDSR/epichecks"   # bivariate colour maps 
+)
+
+
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic") %>%
+  clean_names()
+
+mod10 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod10", col_types = "c") %>%
+  clean_names()
+```
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
+
+### `r paste0(mod10[mod10$uid == "mod10_h1_subtitle", params$lang])`
+
+contact@appliedepi.org
+---
+
+# `r paste0(mod10[mod10$uid == "mod10_h1_objectives", params$lang])`  
+
+`r paste0(mod10[mod10$uid == "mod10_op_objectives", params$lang])`  
+
+* `r paste0(mod10[mod10$uid == "mod10_bu_objectives_1", params$lang])`  
+
+--
+
+* `r paste0(mod10[mod10$uid == "mod10_bu_objectives_2", params$lang])`  
+
+--
+
+* `r paste0(mod10[mod10$uid == "mod10_bu_objectives_3", params$lang])`  
+
+--
+
+* `r paste0(mod10[mod10$uid == "mod10_bu_objectives_4", params$lang])`  
+
+--
+
+* `r paste0(mod10[mod10$uid == "mod10_bu_objectives_5", params$lang])`  
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_1_1", params$lang])}),     str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_2_1", params$lang])}),      str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_3_1", params$lang])}),
+  str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_1_2", params$lang])}),        str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_2_2", params$lang])}),str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_3_2", params$lang])}),
+  str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_1_3", params$lang])}),     str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_2_3", params$lang])}),      str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_3_3", params$lang])}),
+  str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_1_4", params$lang])}),      str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_2_4", params$lang])}),      str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_3_4", params$lang])}),
+  str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_1_5", params$lang])}),     str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_2_5", params$lang])}),      str_glue({paste0(mod10[mod10$uid == "mod10_tb_objectives_3_5", params$lang])})
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines(str_glue({paste0(mod10[mod10$uid == "mod10_fn_objectives", params$lang])}))
+```
+
+
+---
+
+# `r paste0(mod10[mod10$uid == "mod10_h1_report", params$lang])`
+
+`r paste0(mod10[mod10$uid == "mod10_tx_report_1", params$lang])`
+
+`r paste0(mod10[mod10$uid == "mod10_tx_report_2", params$lang])`  
+
+
+---
+
+# `r paste0(mod10[mod10$uid == "mod10_h1_data", params$lang])`
+
+`r paste0(mod10[mod10$uid == "mod10_tx_data_1", params$lang])`  
+
+- `r paste0(mod10[mod10$uid == "mod10_bu_data_1", params$lang])`  
+- `r paste0(mod10[mod10$uid == "mod10_bu_data_2", params$lang])`  
+
+
+---
+
+# `r paste0(mod10[mod10$uid == "mod10_h1_support", params$lang])`  
+
+- `r paste0(mod10[mod10$uid == "mod10_bu_support_1", params$lang])`  
+- `r paste0(mod10[mod10$uid == "mod10_bu_support_2", params$lang])`  
+
+
+---
+# `r paste0(mod10[mod10$uid == "mod10_h1_fun", params$lang])`  
+
+`r paste0(mod10[mod10$uid == "mod10_tx_fun", params$lang])`  
+
+
+---
+# `r paste0(mod10[mod10$uid == "mod10_h1_review", params$lang])`  
+
+`r paste0(mod10[mod10$uid == "mod10_tx_review_1", params$lang])`  
+
+`r paste0(mod10[mod10$uid == "mod10_tx_review_2", params$lang])`  
+
+
+---
+# `r paste0(mod10[mod10$uid == "mod10_h1_feedback", params$lang])`  
+
+`r paste0(mod10[mod10$uid == "mod10_tx_feedback", params$lang])`  
+

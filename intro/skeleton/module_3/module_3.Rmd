@@ -13,7 +13,7 @@ output:
       countIncrementalSlides: false
     css: xaringan-themer.css
 params:
-  lang: "fr"
+  lang: "en"
 ---
 class: center, middle, inverse, title-slide
 
@@ -127,7 +127,7 @@ surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv")
 
 gen <- googlesheets4::read_sheet(
   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
-  range = "generic") %>%
+  range = "generic", col_types = "c") %>%
   clean_names()
 
 mod3 <- googlesheets4::read_sheet(
@@ -163,7 +163,7 @@ outline <- dplyr::tribble(
 
 outline %>% 
   flextable::qflextable() %>% 
-  flextable::add_footer_lines(str_glue({paste0(mod1[mod1$uid == "mod3_tb_session_4_1", params$lang])}))
+  flextable::add_footer_lines(str_glue({paste0(mod3[mod3$uid == "mod3_tb_session_4_1", params$lang])}))
 ```
 
 `r paste0(mod3[mod3$uid == "mod3_tx_objectives", params$lang])`  
@@ -1016,21 +1016,21 @@ decorate("mutate") %>%
 
 
 
-```{r mutate2, echo=params$lang == "en", eval=params$lang == "en"}
+```{r echo=params$lang == "en", eval=params$lang == "en"}
 demo %>% 
   mutate(gender = recode(gender,   #re-define gender as: 
     'm' = 'male',                  # when "m", change to "male"   
     'f' = 'female'))               # when "f", change to "female"
 ```
 
-```{r mutate2, echo=params$lang == "fr", eval=params$lang == "fr"}
+```{r echo=params$lang == "fr", eval=params$lang == "fr"}
 demo %>% 
   mutate(gender = recode(gender,   # redéfinir le genre comme : 
     'm' = 'male',                  # quand 'm', devient 'male'   
     'f' = 'female'))               # quand "f", devient 'female'
 ```
 
-```{r mutate2, echo=params$lang == "ru", eval=param$lang == "ru"}
+```{r echo=params$lang == "ru", eval=params$lang == "ru"}
 demo %>% 
   mutate(gender = recode(gender,   # переопределите пол как:
     'm' = 'male',                  # когда "m", меняется на "male", m меняется на мужской 

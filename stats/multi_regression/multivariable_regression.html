@@ -67,23 +67,40 @@ class: center, middle, inverse, title-slide
 
 # Multivariable regression
 
-Now that you are experts at conducting univariable regression in R, it is time to move onto multivariable regression!
+Now that you are experts at conducting univariate regression in R, it is time to move onto multivariable regression!
 
 ---
 
-# Multivariable regression - when univariable is just not enough
+# Multivariable regression - when univariate is just not enough
 
 Multivariable regression allows us to look at the relationship between our dependent variable and multiple independent variables. 
 
-It considers the relationship of each independent variable _in context_ with the dependent variable. This allows us to understand which of the variables could have a true association with the outcome once they are controlled for by other variables.
+Why multivariable?
+
+* It considers the relationship of each exposure _in context_ with the outcome
+* This allows us to understand which exposures have a *true association* with the outcome and are not just subject to an *effect modification*
 
 ---
 
-# Confounding
+# Effect modification and confounding
 
-Multivariable regression estimates the association between the independent variable and the outcome by holding all other variables constant.
+Effect modification is when the **magnitude** of the effect of an exposure on an outcome differs by another exposure.
 
-This allows us to account for *confounding*.
+Confounding is when another exposure is related to both the exposure and the outcome, but **it does not lie on the causative pathway**.
+
+Can we think of any examples of effect modification and confounding?
+
+---
+
+# Effect modification
+
+Effect modification is all about stratification.
+
+Which of these are examples of effect modification?
+
+- When a drug works on females but does not work on males
+- Those who are exposed to asbestos **and** smoke have higher risks of lung cancer
+- Alcohol consumption is associated with lung cancer, those who drink alcohol are more likely to smoke
 
 ---
 
@@ -104,39 +121,31 @@ So icecream is causing sharks to bite humans?
 &lt;img src="../../images/regression/icecream_sharks.png" width="100%" /&gt;
 
 ---
+# Effect modification and confounding
 
-# Terms to know
+Multivariable regression estimates the association between the exposures and the outcome by holding all other exposures constant.
 
-* Cross validation: A method of model validation which uses different portions of the data to train and test the model. 
-     This is done to understand how well the model works in practice, rather than just on the data it is trained on.
-     
-* In sample: The data the model is trained on.
-
-* Out of sample: The data the model is predicted to.
+This allows us to account for *confounding* **and** *effect modification*.
 
 ---
 
-# Variable selection
+# What do we put into our model?
 
-How do we know what to put into our model?
+* Do we put in all the data?
 
-Do we put in all the data?
+* Do we include only what we _know_ is likely to be useful?
 
-Do we include only what we _know_ is likely to be useful?
-
-Do we carry out some sort of stepwise approach?
+* Do we carry out some sort of stepwise approach?
 
 ---
 
-# Variable selection
+# What do we put into our model?
 
-How do we know what to put into our model?
+* Do we put in all the data?
 
-Do we put in all the data?
+* Do we include only what we _know_ is likely to be useful?
 
-Do we include only what we _know_ is likely to be useful?
-
-Do we carry out some sort of stepwise approach?
+* Do we carry out some sort of stepwise approach?
 
 **We should avoid all of these!**
 
@@ -145,19 +154,55 @@ Do we carry out some sort of stepwise approach?
 # Do's and do not's
 
 *The do's*
+
 Expert knowledge
-- Think about the research question you are trying to answer, statistics should follow a theory now the other way round.
+
+- Think about the research question you are trying to answer
+ - Statistics should follow a theory not the other way round
 - If you, or the literature, thinks something is important add it!
  - A non-significant result in these is a useful result
 
+---
+
+# Do's and do not's
+
 *The do not's*
+
 Stepwise variable selection
- - This is no longer recommended for several reasons, but in summary it can remove useful and retain useless variables due to coincidence rather than real world meaning.
-Screening using a univariable regression
-- Non-significant variables can still affect parameter estimates, so it would be wrong to discard them
-- This can reject important variables when there is confounding
+
+ - This is no longer recommended for several reasons
+ - It can remove useful and retain useless variables due to coincidence rather than real world meaning.
+ 
+Screening using a univariate regression
+
+- Non-significant variables can still affect parameter estimates
+- This can reject important variables when there is confounding or effect modification
  
 This is only a brief summary, please read further into the topic with this blog post for further information (https://towardsdatascience.com/stopping-stepwise-why-stepwise-selection-is-bad-and-what-you-should-use-instead-90818b3f52df)
+
+---
+
+# Overfitting
+
+This is where the model "memorises" a pattern rather than "learns" it. 
+
+This can give us a model that performs very well on the dataset that it has been given, but very poorly on a new dataset.
+
+---
+
+# Overfitting
+
+&lt;img src="../../images/regression/overfitting.png" width="100%" /&gt;
+https://www.educative.io/api/edpresso/shot/6668977167138816/image/5033807687188480
+---
+
+# Overfitting 
+
+Even if we are not predicting our model to a new dataset, we want to know that the conclusions our model is coming to are valid.
+
+To do this we want to **train** our model on one subset of data, and **test** our model on a different subset of data.
+
+If we find the same associations in both datasets we can have more confidence that we have found a real association.
 
 ---
 
@@ -167,7 +212,14 @@ If you are presented with a large number of variables, and there is some uncerta
 
 Lasso regression works by testing variable and data combinations to create a model which has the **least** difference in predictions between the **in-sample** and the **out-of-sample** datasets.
 
-This (generally) gives us a model that predicts well to new data sources (out of sample).
+---
+
+# Lasso variable selection
+
+[Occam's razor (the law of parsimony)](https://en.wikipedia.org/wiki/Occam%27s_razor) - Do not make something more complicated that is necessary.
+
+A simple model is a good model
+ - As long as it can still adequately explain our research questions.
 
 ---
 
@@ -175,14 +227,15 @@ This (generally) gives us a model that predicts well to new data sources (out of
 
 1) First we set up the lasso regression using the function `trainControl()` from the **caret** package.
 
+.smaller[
 
 ```r
 fitControl &lt;- trainControl(
-     method = "repeatedcv",  
-     number = 5,     
-     repeats = 10)  
+     method = "repeatedcv", # We want to use repeated cross validation
+     number = 5,            # Divide the dataset into 5 sections to train and test
+     repeats = 10)          # Repeat this with 10 "cuts" of data
 ```
-
+]
 ???
 Talk through each of method/number/repeats
 
@@ -196,14 +249,15 @@ repeats - Repeat 10 times with different "cuts" of the data to ensure the result
 
 # Cross validation
 
+.smaller[
 
 ```r
 fitControl &lt;- trainControl(
-     method = "repeatedcv",  
-     number = 5,     
-     repeats = 10)  
+     method = "repeatedcv", # We want to use repeated cross validation
+     number = 5,            # Divide the dataset into 5 sections to train and test
+     repeats = 10)          # Repeat this with 10 "cuts" of data
 ```
-
+]
 
 &lt;img src="../../images/regression/KfoldCV.gif" width="100%" /&gt;
 
@@ -217,24 +271,25 @@ Talk through this gif in the context of the last slide
 
 1) First we subset our data to the potential independent variables of interest, and the dependent variable.
 
-2) Then we use `train()` from **caret** to run the lasso regression (in caretwe specify `method = "glmnet"`) according to the conditions we specified with `trainControl()`
+2) Then we use `train()` from **caret** to run the lasso regression (in caret we specify `method = "glmnet"`) according to the conditions we specified with `trainControl()`
 
+.smaller[
 
 ```r
 data_use &lt;- linelist %&gt;%
-    select(gender, 
-           age, 
+    select(gender,                           #These are the exposures
+           age,                              #want to investigate
            hospital:bmi, 
            blood_ct, 
            outcome_death) %&gt;%
-     drop_na()
+     drop_na()                                #We can only use complete rows
 
-lasso_fit &lt;- train(form = outcome_death ~ .,
+lasso_fit &lt;- train(form = outcome_death ~ .,  
                    data = data_use,
-                   method = "glmnet",
-                   trControl = fitControl)
+                   method = "glmnet",       #This is the caret name for lasso 
+                   trControl = fitControl)  #This is the training method we specified
 ```
-
+]
 ---
 
 # Lasso results
@@ -249,15 +304,9 @@ lasso_predictors_raw
 ```
 
 ```
-##  [1] "hospitalMilitary Hospital" "hospitalOther"            
-##  [3] "hospitalPort Hospital"     "districtEast I"           
-##  [5] "districtEast II"           "districtWest II"          
-##  [7] "district_resCentral II"    "district_resEast I"       
-##  [9] "district_resEast II"       "district_resWest I"       
-## [11] "district_resWest II"       "district_detEast I"       
-## [13] "district_detEast II"       "district_detWest II"      
-## [15] "wt_kg"                     "feveryes"                 
-## [17] "coughyes"
+## [1] "hospitalMilitary Hospital" "hospitalOther"            
+## [3] "hospitalPort Hospital"     "wt_kg"                    
+## [5] "coughyes"
 ```
 
 ???
@@ -281,33 +330,32 @@ lasso_predictors_clean
 ```
 
 ```
-##  [1] "hospital" "hospital" "hospital" "district" "district" "district"
-##  [7] "district" "district" "district" "district" "district" "district"
-## [13] "district" "district" "wt_kg"    "fever"    "cough"
+## [1] "hospital" "hospital" "hospital" "wt_kg"    "cough"
 ```
 ]
 ---
 
-# Expert knowledge is important
+# Expert knowledge (biological plausibility) is important
 
 Are we done now, did lasso solve our model building?
 
 ---
 
-# Expert knowledge is important
+# Expert knowledge (biological plausibility) is important
 
 Are we done now, did lasso solve our model building?
 
 &lt;font size="46"&gt;No!&lt;/font&gt;
 
-If there is a variable that you think should be included, include it!
+If there is a variable that you think should be included (based on biological plausibility or a previously established association), include it!
+
 ---
 
 # Carrying out our multivariable regression
 
 Now we are ready to carry out our multivariable regression!
 
-This is done in a slightly different way to our univariable regression. We will be using **base** R's `glm()` function and then tidying up the outputs using the function `tbl_regression` from **gtsummary**.
+This is done in a slightly different way to our univariate regression. We will be using **base** R's `glm()` function and then tidying up the outputs using the function `tbl_regression` from **gtsummary**.
 
 ---
 
@@ -320,8 +368,8 @@ multivariable_regression_table &lt;- data_use %&gt;%
             outcome_death,
             temp,
             age) %&gt;%
-     glm(formula = outcome_death ~.,
-         family = binomial) %&gt;%
+     glm(formula = outcome_death ~.,     
+         family = binomial) %&gt;%            
      tbl_regression(exponentiate = TRUE)
 ```
 
@@ -330,9 +378,57 @@ Talk through the stages, what formula means, what family means, remind them what
 
 ---
 
-# Displaying results
+#Carrying out multivariable regression
 
-.smaller[
+
+```r
+multivariable_regression_table &lt;- data_use %&gt;%
+     select(lasso_predictors_clean, 
+            outcome_death,
+            temp,
+            age) %&gt;%
+     glm(formula = outcome_death ~.,     
+         family = binomial) %&gt;%            
+     tbl_regression(exponentiate = TRUE)
+
+#Create a table of counts
+cross_tab &lt;- data_use %&gt;%
+  tbl_summary(by = outcome_death)
+```
+
+???
+Talk through the stages, what formula means, what family means, remind them what exponentiate = TRUE means
+
+---
+
+#Carrying out multivariable regression
+
+
+```r
+multivariable_regression_table &lt;- data_use %&gt;%
+     select(lasso_predictors_clean, 
+            outcome_death,
+            temp,
+            age) %&gt;%
+     glm(formula = outcome_death ~.,     
+         family = binomial) %&gt;%            
+     tbl_regression(exponentiate = TRUE)
+
+#Create a table of counts
+cross_tab &lt;- multivariable_regression_table$inputs$x$data %&gt;%
+  tbl_summary(by = outcome_death)
+
+#Combine the regression table and the count table
+tbl_merge(list(cross_tab, multivariable_regression_table),
+          tab_spanner = c("Counts", "Multivariable regression"))
+```
+
+???
+Talk through the stages, what formula means, what family means, remind them what exponentiate = TRUE means
+
+---
+#Carrying out multivariable regression
+
 <div id="cmzourldoj" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
@@ -743,8 +839,525 @@ Talk through the stages, what formula means, what family means, remind them what
   <thead class="gt_col_headings">
     <tr>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" scope="col"><strong>Characteristic</strong></th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" scope="colgroup">
+        <span class="gt_column_spanner">Counts</span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="3" scope="colgroup">
+        <span class="gt_column_spanner">Multivariable regression</span>
+      </th>
+    </tr>
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col"><strong>0</strong>, N = 82<sup class="gt_footnote_marks">1</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col"><strong>1</strong>, N = 135<sup class="gt_footnote_marks">1</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col"><strong>OR</strong><sup class="gt_footnote_marks">2</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col"><strong>95% CI</strong><sup class="gt_footnote_marks">2</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col"><strong>p-value</strong></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_left">hospital</td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td></tr>
+    <tr><td class="gt_row gt_left">    Central Hospital</td>
+<td class="gt_row gt_center">8 (9.8%)</td>
+<td class="gt_row gt_center">12 (8.9%)</td>
+<td class="gt_row gt_center">—</td>
+<td class="gt_row gt_center">—</td>
+<td class="gt_row gt_center"></td></tr>
+    <tr><td class="gt_row gt_left">    Military Hospital</td>
+<td class="gt_row gt_center">22 (27%)</td>
+<td class="gt_row gt_center">24 (18%)</td>
+<td class="gt_row gt_center">0.54</td>
+<td class="gt_row gt_center">0.17, 1.61</td>
+<td class="gt_row gt_center">0.3</td></tr>
+    <tr><td class="gt_row gt_left">    Other</td>
+<td class="gt_row gt_center">22 (27%)</td>
+<td class="gt_row gt_center">22 (16%)</td>
+<td class="gt_row gt_center">0.52</td>
+<td class="gt_row gt_center">0.17, 1.55</td>
+<td class="gt_row gt_center">0.2</td></tr>
+    <tr><td class="gt_row gt_left">    Port Hospital</td>
+<td class="gt_row gt_center">24 (29%)</td>
+<td class="gt_row gt_center">69 (51%)</td>
+<td class="gt_row gt_center">1.53</td>
+<td class="gt_row gt_center">0.53, 4.24</td>
+<td class="gt_row gt_center">0.4</td></tr>
+    <tr><td class="gt_row gt_left">    SMMH</td>
+<td class="gt_row gt_center">6 (7.3%)</td>
+<td class="gt_row gt_center">8 (5.9%)</td>
+<td class="gt_row gt_center">0.85</td>
+<td class="gt_row gt_center">0.20, 3.67</td>
+<td class="gt_row gt_center">0.8</td></tr>
+    <tr><td class="gt_row gt_left">wt_kg</td>
+<td class="gt_row gt_center">61 (48, 70)</td>
+<td class="gt_row gt_center">59 (50, 65)</td>
+<td class="gt_row gt_center">0.96</td>
+<td class="gt_row gt_center">0.93, 1.00</td>
+<td class="gt_row gt_center">0.058</td></tr>
+    <tr><td class="gt_row gt_left">cough</td>
+<td class="gt_row gt_center">62 (76%)</td>
+<td class="gt_row gt_center">119 (88%)</td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td></tr>
+    <tr><td class="gt_row gt_left">    no</td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center">—</td>
+<td class="gt_row gt_center">—</td>
+<td class="gt_row gt_center"></td></tr>
+    <tr><td class="gt_row gt_left">    yes</td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center">2.24</td>
+<td class="gt_row gt_center">1.04, 4.89</td>
+<td class="gt_row gt_center">0.040</td></tr>
+    <tr><td class="gt_row gt_left">temp</td>
+<td class="gt_row gt_center">38.90 (38.40, 39.30)</td>
+<td class="gt_row gt_center">38.90 (38.40, 39.20)</td>
+<td class="gt_row gt_center">0.89</td>
+<td class="gt_row gt_center">0.64, 1.23</td>
+<td class="gt_row gt_center">0.5</td></tr>
+    <tr><td class="gt_row gt_left">age</td>
+<td class="gt_row gt_center">18 (11, 26)</td>
+<td class="gt_row gt_center">17 (10, 25)</td>
+<td class="gt_row gt_center">1.02</td>
+<td class="gt_row gt_center">0.98, 1.07</td>
+<td class="gt_row gt_center">0.3</td></tr>
+  </tbody>
+  
+  <tfoot class="gt_footnotes">
+    <tr>
+      <td class="gt_footnote" colspan="6"><sup class="gt_footnote_marks">1</sup> n (%); Median (IQR)</td>
+    </tr>
+    <tr>
+      <td class="gt_footnote" colspan="6"><sup class="gt_footnote_marks">2</sup> OR = Odds Ratio, CI = Confidence Interval</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+
+---
+# Displaying results
+
+You can also use `tbl_merge` to compare and contrast your univariate and multivariable regression results.
+
+.tiny[
+<div id="iqklwmqzjb" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#iqklwmqzjb .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#iqklwmqzjb .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#iqklwmqzjb .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#iqklwmqzjb .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#iqklwmqzjb .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#iqklwmqzjb .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#iqklwmqzjb .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#iqklwmqzjb .gt_group_heading {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#iqklwmqzjb .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#iqklwmqzjb .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#iqklwmqzjb .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#iqklwmqzjb .gt_row {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#iqklwmqzjb .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iqklwmqzjb .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#iqklwmqzjb .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#iqklwmqzjb .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iqklwmqzjb .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#iqklwmqzjb .gt_last_summary_row {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iqklwmqzjb .gt_first_grand_summary_row {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#iqklwmqzjb .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-left: 1px;
+  padding-right: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iqklwmqzjb .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#iqklwmqzjb .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iqklwmqzjb .gt_left {
+  text-align: left;
+}
+
+#iqklwmqzjb .gt_center {
+  text-align: center;
+}
+
+#iqklwmqzjb .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#iqklwmqzjb .gt_font_normal {
+  font-weight: normal;
+}
+
+#iqklwmqzjb .gt_font_bold {
+  font-weight: bold;
+}
+
+#iqklwmqzjb .gt_font_italic {
+  font-style: italic;
+}
+
+#iqklwmqzjb .gt_super {
+  font-size: 65%;
+}
+
+#iqklwmqzjb .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 75%;
+  vertical-align: 0.4em;
+}
+
+#iqklwmqzjb .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#iqklwmqzjb .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#iqklwmqzjb .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#iqklwmqzjb .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#iqklwmqzjb .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#iqklwmqzjb .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" scope="col"><strong>Characteristic</strong></th>
       <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="4" scope="colgroup">
-        <span class="gt_column_spanner">Univariable</span>
+        <span class="gt_column_spanner">Univariate</span>
       </th>
       <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="3" scope="colgroup">
         <span class="gt_column_spanner">Multivariable</span>
@@ -769,7 +1382,7 @@ Talk through the stages, what formula means, what family means, remind them what
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">Central Hospital</td>
+    <tr><td class="gt_row gt_left">    Central Hospital</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center">—</td>
@@ -777,150 +1390,46 @@ Talk through the stages, what formula means, what family means, remind them what
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">Military Hospital</td>
+    <tr><td class="gt_row gt_left">    Military Hospital</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">0.73</td>
 <td class="gt_row gt_center">0.24, 2.09</td>
 <td class="gt_row gt_center">0.6</td>
-<td class="gt_row gt_center">0.57</td>
-<td class="gt_row gt_center">0.17, 1.82</td>
+<td class="gt_row gt_center">0.54</td>
+<td class="gt_row gt_center">0.17, 1.61</td>
 <td class="gt_row gt_center">0.3</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">Other</td>
+    <tr><td class="gt_row gt_left">    Other</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">0.67</td>
 <td class="gt_row gt_center">0.22, 1.93</td>
 <td class="gt_row gt_center">0.5</td>
-<td class="gt_row gt_center">0.47</td>
-<td class="gt_row gt_center">0.14, 1.52</td>
+<td class="gt_row gt_center">0.52</td>
+<td class="gt_row gt_center">0.17, 1.55</td>
 <td class="gt_row gt_center">0.2</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">Port Hospital</td>
+    <tr><td class="gt_row gt_left">    Port Hospital</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">1.92</td>
 <td class="gt_row gt_center">0.68, 5.22</td>
 <td class="gt_row gt_center">0.2</td>
-<td class="gt_row gt_center">1.52</td>
-<td class="gt_row gt_center">0.50, 4.51</td>
-<td class="gt_row gt_center">0.5</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">SMMH</td>
+<td class="gt_row gt_center">1.53</td>
+<td class="gt_row gt_center">0.53, 4.24</td>
+<td class="gt_row gt_center">0.4</td></tr>
+    <tr><td class="gt_row gt_left">    SMMH</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">0.89</td>
 <td class="gt_row gt_center">0.22, 3.63</td>
 <td class="gt_row gt_center">0.9</td>
-<td class="gt_row gt_center">1.07</td>
-<td class="gt_row gt_center">0.23, 5.00</td>
-<td class="gt_row gt_center">>0.9</td></tr>
-    <tr><td class="gt_row gt_left">district</td>
-<td class="gt_row gt_center">217</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">Central I</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center">—</td>
-<td class="gt_row gt_center">—</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center">—</td>
-<td class="gt_row gt_center">—</td>
-<td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">Central II</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center">1.91</td>
-<td class="gt_row gt_center">0.32, 15.6</td>
-<td class="gt_row gt_center">0.5</td>
-<td class="gt_row gt_center">2.81</td>
-<td class="gt_row gt_center">0.41, 26.7</td>
-<td class="gt_row gt_center">0.3</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">East I</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center">7.00</td>
-<td class="gt_row gt_center">1.00, 143</td>
-<td class="gt_row gt_center">0.091</td>
-<td class="gt_row gt_center">7.50</td>
-<td class="gt_row gt_center">0.96, 161</td>
-<td class="gt_row gt_center">0.092</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">East II</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center">1.67</td>
-<td class="gt_row gt_center">0.47, 5.92</td>
-<td class="gt_row gt_center">0.4</td>
-<td class="gt_row gt_center">1.55</td>
-<td class="gt_row gt_center">0.40, 6.05</td>
-<td class="gt_row gt_center">0.5</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">East III</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center">0.95</td>
-<td class="gt_row gt_center">0.13, 8.67</td>
-<td class="gt_row gt_center">>0.9</td>
-<td class="gt_row gt_center">0.82</td>
-<td class="gt_row gt_center">0.10, 8.13</td>
-<td class="gt_row gt_center">0.9</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">Mountain Rural</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center">0.81</td>
-<td class="gt_row gt_center">0.27, 2.33</td>
-<td class="gt_row gt_center">0.7</td>
-<td class="gt_row gt_center">0.93</td>
-<td class="gt_row gt_center">0.28, 2.95</td>
-<td class="gt_row gt_center">>0.9</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">West I</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center">2.55</td>
-<td class="gt_row gt_center">0.29, 55.4</td>
-<td class="gt_row gt_center">0.4</td>
-<td class="gt_row gt_center">3.08</td>
-<td class="gt_row gt_center">0.31, 74.6</td>
-<td class="gt_row gt_center">0.4</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">West II</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center">0.83</td>
-<td class="gt_row gt_center">0.26, 2.49</td>
-<td class="gt_row gt_center">0.7</td>
-<td class="gt_row gt_center">0.80</td>
-<td class="gt_row gt_center">0.23, 2.59</td>
-<td class="gt_row gt_center">0.7</td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">West III</td>
-<td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">0.85</td>
-<td class="gt_row gt_center">0.25, 2.83</td>
-<td class="gt_row gt_center">0.8</td>
-<td class="gt_row gt_center">1.00</td>
-<td class="gt_row gt_center">0.26, 3.73</td>
-<td class="gt_row gt_center">>0.9</td></tr>
+<td class="gt_row gt_center">0.20, 3.67</td>
+<td class="gt_row gt_center">0.8</td></tr>
     <tr><td class="gt_row gt_left">wt_kg</td>
 <td class="gt_row gt_center">217</td>
 <td class="gt_row gt_center">0.98</td>
 <td class="gt_row gt_center">0.96, 1.00</td>
 <td class="gt_row gt_center">0.12</td>
-<td class="gt_row gt_center">0.97</td>
-<td class="gt_row gt_center">0.93, 1.01</td>
-<td class="gt_row gt_center">0.10</td></tr>
-    <tr><td class="gt_row gt_left">fever</td>
-<td class="gt_row gt_center">217</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">no</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center">—</td>
-<td class="gt_row gt_center">—</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center">—</td>
-<td class="gt_row gt_center">—</td>
-<td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">yes</td>
-<td class="gt_row gt_center"></td>
-<td class="gt_row gt_center">0.84</td>
-<td class="gt_row gt_center">0.37, 1.82</td>
-<td class="gt_row gt_center">0.7</td>
-<td class="gt_row gt_center">0.67</td>
-<td class="gt_row gt_center">0.14, 3.22</td>
-<td class="gt_row gt_center">0.6</td></tr>
+<td class="gt_row gt_center">0.96</td>
+<td class="gt_row gt_center">0.93, 1.00</td>
+<td class="gt_row gt_center">0.058</td></tr>
     <tr><td class="gt_row gt_left">cough</td>
 <td class="gt_row gt_center">217</td>
 <td class="gt_row gt_center"></td>
@@ -929,7 +1438,7 @@ Talk through the stages, what formula means, what family means, remind them what
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">no</td>
+    <tr><td class="gt_row gt_left">    no</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center">—</td>
@@ -937,22 +1446,22 @@ Talk through the stages, what formula means, what family means, remind them what
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center">—</td>
 <td class="gt_row gt_center"></td></tr>
-    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">yes</td>
+    <tr><td class="gt_row gt_left">    yes</td>
 <td class="gt_row gt_center"></td>
 <td class="gt_row gt_center">2.40</td>
 <td class="gt_row gt_center">1.16, 5.02</td>
 <td class="gt_row gt_center">0.018</td>
-<td class="gt_row gt_center">2.39</td>
-<td class="gt_row gt_center">1.07, 5.48</td>
-<td class="gt_row gt_center">0.036</td></tr>
+<td class="gt_row gt_center">2.24</td>
+<td class="gt_row gt_center">1.04, 4.89</td>
+<td class="gt_row gt_center">0.040</td></tr>
     <tr><td class="gt_row gt_left">temp</td>
 <td class="gt_row gt_center">217</td>
 <td class="gt_row gt_center">0.92</td>
 <td class="gt_row gt_center">0.67, 1.25</td>
 <td class="gt_row gt_center">0.6</td>
-<td class="gt_row gt_center">0.99</td>
-<td class="gt_row gt_center">0.54, 1.82</td>
-<td class="gt_row gt_center">>0.9</td></tr>
+<td class="gt_row gt_center">0.89</td>
+<td class="gt_row gt_center">0.64, 1.23</td>
+<td class="gt_row gt_center">0.5</td></tr>
     <tr><td class="gt_row gt_left">age</td>
 <td class="gt_row gt_center">217</td>
 <td class="gt_row gt_center">0.99</td>
@@ -975,18 +1484,31 @@ Talk through the stages, what formula means, what family means, remind them what
 
 # Displaying results
 
-&lt;img src="multivariable_regression_files/figure-html/unnamed-chunk-14-1.png" width="600px" height="500px" /&gt;
+.pull-left[
+And you can create forest plots using `ggplot()`
+]
 
+.pull-right[
+&lt;img src="multivariable_regression_files/figure-html/unnamed-chunk-18-1.png" width="600px" height="400px" /&gt;
+]
 ---
 
 # It's now time for you to try it out yourselves!
 
 Any questions?
 
-[Epi R Handbook](epirhandbook.com/)
+
+
+**Resources**
 
 Course website (initial setup and slides access): [https://appliedepi.github.io/intro_course/](https://appliedepi.github.io/intro_course/)
----
+
+[Epi R Handbook](epirhandbook.com/)
+
+Applied Epi Community
+https://community.appliedepi.org/
+
+
 
 
 

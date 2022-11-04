@@ -64,20 +64,19 @@ class: center, middle, inverse, title-slide
 
 # Introduction à R pour l'épidémiologie appliquée
 
-### Introduction à la visualisation de données avec {ggplot2}.
+### Introduction à la visualisation de données avec {ggplot2}
 
 contact@appliedepi.org
 ---
 
-# Aujourd'hui : objectifs et calendrier
+# Objectifs et calendrier
 
-**Dans ce module, nous voulons vous aider:**
-* Comprendre la {ggplot2} "Grammaire des graphiques"
-* Construire des diagrammes simples en boîte, en nuage de points, en barres et des histogrammes.
-* Ajustez les échelles, les thèmes et les étiquettes des graphiques.
+**Dans ce module, nous apprendrons à :**
+* Comprendre la "grammaire des graphiques" utilisée par {ggplot2}
+* Construire des graphiques en boîte, en batons, en points, et des histogrammes.
+* Ajuster les échelles, les thèmes et les étiquettes des graphiques.
 
-
-&lt;template id="694882bf-ef9a-48a7-93f7-047c393af37c"&gt;&lt;style&gt;
+&lt;template id="225aa96c-cc43-4163-9064-109e3df755a6"&gt;&lt;style&gt;
 .tabwid table{
   border-spacing:0px !important;
   border-collapse:collapse;
@@ -116,17 +115,16 @@ background-color: transparent;
 .katex-display {
     margin: 0 0 !important;
 }
-&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-032a0e66{}.cl-031e95fe{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-03231c3c{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-03233492{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0323349c{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0323349d{width:2.908in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334a6{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334a7{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334b0{width:2.908in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334b1{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334c4{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334c5{width:2.908in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334ce{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334cf{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334d8{width:2.908in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334e2{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334e3{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334ec{width:2.908in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334ed{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334ee{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334f6{width:2.908in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-032334f7{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-03233500{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-03233501{width:2.908in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0323350a{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-03233514{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-03233515{width:2.908in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-032a0e66'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-03233492"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-0323349c"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-0323349d"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-032334a6"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-032334a7"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-032334b0"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;{ggplot2} 'Grammar of graphics' syntax&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-032334b1"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;10 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-032334c4"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-032334c5"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Live demonstration&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-032334ce"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;1h 30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-032334cf"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Breakouts&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-032334d8"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Exercise: simple plots&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-032334e2"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-032334e3"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-032334ec"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Scales, themes, and labels&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-032334ed"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;1 hour&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-032334ee"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Breakouts&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-032334f6"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Fine-tuning plots&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-032334f7"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;10 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-03233500"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-03233501"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Plenary debrief&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-0323350a"&gt;&lt;p class="cl-03231c3c"&gt;&lt;span class="cl-031e95fe"&gt;Breaks are incorporated above, but not shown as rows&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
-&lt;div class="flextable-shadow-host" id="53f0852f-9ad8-44e2-9535-d58773509cb5"&gt;&lt;/div&gt;
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-dafc500a{}.cl-daed6e3c{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-daf3d98e{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-daf4100c{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf41020{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf4102a{width:3.74in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf4102b{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf41034{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf41035{width:3.74in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf4103e{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf41048{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf41052{width:3.74in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf41053{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf4105c{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf41066{width:3.74in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf41067{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf41070{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf4107a{width:3.74in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf4107b{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf41084{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf4108e{width:3.74in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf4108f{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf41098{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-daf41099{width:3.74in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-dafc500a'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-daf4100c"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf41020"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf4102a"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-daf4102b"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf41034"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf41035"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;ggplot2 Syntaxe de la 'Grammaire des Graphiques'&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-daf4103e"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;10 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf41048"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf41052"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Démonstration en direct&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-daf41053"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;1h30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf4105c"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Exercice&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf41066"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Exercice : graphiques simples&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-daf41067"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf41070"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf4107a"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Échelles, thèmes et étiquettes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-daf41053"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;1 hour&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf4105c"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Exercice&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf41066"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Ajustement des graphiques&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-daf4107b"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;10 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf41084"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-daf4108e"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Débriefing en plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-daf4108f"&gt;&lt;p class="cl-daf3d98e"&gt;&lt;span class="cl-daed6e3c"&gt;Les pauses sont incorporées ci-dessus, mais pas montrées.&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="225a2e5f-a89f-42de-b70e-500e63f7237b"&gt;&lt;/div&gt;
 &lt;script&gt;
-var dest = document.getElementById("53f0852f-9ad8-44e2-9535-d58773509cb5");
-var template = document.getElementById("694882bf-ef9a-48a7-93f7-047c393af37c");
+var dest = document.getElementById("225a2e5f-a89f-42de-b70e-500e63f7237b");
+var template = document.getElementById("225aa96c-cc43-4163-9064-109e3df755a6");
 var caption = template.content.querySelector("caption");
 var fantome = dest.attachShadow({mode: 'open'});
 var templateContent = template.content;
 fantome.appendChild(templateContent);
 &lt;/script&gt;
-
 
 
 
@@ -144,18 +142,18 @@ class: inverse, center, middle
 
 
 ---
-# Options de visualisation dans R
+# Pourquoi utiliser ggplot ?
 
-Aujourd'hui, nous nous concentrons sur {ggplot2} car il.. :
+Nous nous concentrons sur {ggplot2} car ce paquet :
 
 * est bon pour l'exploration rapide de données multidimensionnelles
-* produit des sorties finales de très **haute qualité
-* a une grammaire bien structurée =&gt; **haute cohérence**
-* est accompagné de nombreux paquets qui étendent les fonctionnalités
+* produit des sorties finales de très **haute qualité**
+* a une syntaxe bien structurée =&gt; **haute cohérence**
+* a de nombreux paquets dérivés qui étendent ses fonctionnalités
 
-Consultez la [galerie de graphiques R] (https://www.r-graph-gallery.com/ggplot2-package.html) pour vous inspirer.
+Consultez la [galerie de graphiques R](https://www.r-graph-gallery.com/ggplot2-package.html) pour vous inspirer.
 
-.footnote[Les autres options de traçage comprennent [**base** R](https://towardsdatascience.com/base-plotting-in-r-eb365da06b22), [**réseau**](https://www.statmethods.net/advgraphs/trellis.html) et [**plotly**](https://plotly.com/r/).
+.footnote[Les autres options de visualisation comprennent [**base** R](https://towardsdatascience.com/base-plotting-in-r-eb365da06b22), [**lattice**](https://www.statmethods.net/advgraphs/trellis.html) et [**plotly**](https://plotly.com/r/).
 ]  
 
 
@@ -163,7 +161,7 @@ Consultez la [galerie de graphiques R] (https://www.r-graph-gallery.com/ggplot2-
 
 
 ---
-# A-t-il été réalisé avec ggplot ?
+# Crée avec ggplot ou non ?
 
 
 &lt;img src="../../../images/ggplot_intro/clustering.png" width="100%" /&gt;
@@ -171,7 +169,7 @@ Consultez la [galerie de graphiques R] (https://www.r-graph-gallery.com/ggplot2-
 
 
 ---
-# A-t-il été réalisé avec ggplot ?
+# Crée avec ggplot ou non ?
 
 
 &lt;img src="../../../images/ggplot_intro/dumbbell_chart.png" width="50%" /&gt;
@@ -179,7 +177,7 @@ Consultez la [galerie de graphiques R] (https://www.r-graph-gallery.com/ggplot2-
 
 
 ---
-# A-t-il été réalisé avec ggplot ?
+# Crée avec ggplot ou non ?
 
 
 &lt;img src="../../../images/ggplot_intro/map.png" width="50%" /&gt;
@@ -187,7 +185,7 @@ Consultez la [galerie de graphiques R] (https://www.r-graph-gallery.com/ggplot2-
 
 
 ---
-# A-t-il été réalisé avec ggplot ?
+# Crée avec ggplot ou non ?
 
 
 &lt;img src="../../../images/ggplot_intro/bike_london.png" width="100%" /&gt;
@@ -195,7 +193,7 @@ Consultez la [galerie de graphiques R] (https://www.r-graph-gallery.com/ggplot2-
 
 
 ---
-# A-t-il été réalisé avec ggplot ?
+# Crée avec ggplot ou non ?
 
 
 &lt;img src="../../../images/ggplot_intro/swiss_map.png" width="90%" /&gt;
@@ -203,7 +201,7 @@ Consultez la [galerie de graphiques R] (https://www.r-graph-gallery.com/ggplot2-
 
 
 ---
-# A-t-il été réalisé avec ggplot ?
+# Crée avec ggplot ou non ?
 
 
 &lt;img src="../../../images/ggplot_intro/phylo_tree.png" width="60%" /&gt;
@@ -211,14 +209,14 @@ Consultez la [galerie de graphiques R] (https://www.r-graph-gallery.com/ggplot2-
 
 
 ---
-# A-t-il été réalisé avec ggplot ?
+# Crée avec ggplot ou non ?
 
 
 &lt;img src="../../../images/ggplot_intro/uk_geography.jpg" width="100%" /&gt;
 
 
 ---
-# A-t-il été réalisé avec ggplot ?
+# Crée avec ggplot ou non ?
 
 
 &lt;img src="../../../images/ggplot_intro/art_ggplot.png" width="50%" /&gt;
@@ -226,7 +224,7 @@ Consultez la [galerie de graphiques R] (https://www.r-graph-gallery.com/ggplot2-
 
 
 ---
-# A-t-il été réalisé avec ggplot ?
+# Crée avec ggplot ou non ?
 
 
 &lt;img src="../../../images/ggplot_intro/van_gogh.jpg" width="80%" /&gt;
@@ -239,23 +237,23 @@ Consultez la [galerie de graphiques R] (https://www.r-graph-gallery.com/ggplot2-
 
 --
 
-- Le *package* {ggplot2} est l'outil de visualisation de données le plus populaire de R.
+- Le *paquet* {ggplot2} est l'outil de visualisation de données le plus populaire de R.
 
 --
 
-- Sa fonction `ggplot()` est au coeur du paquetage.
+- Le paquet est centré autour de la fonction `ggplot()`.
 
 --
 
-- Cette approche est connue sous le nom de "ggplotting".
+- On parle parfois de "ggplotting"...
 
 --
 
-- Les figures qui en résultent sont parfois affectueusement appelées "ggplots".
+- Les figures qui en résultent sont souvent surnomées des "ggplots".
 
 --
 
-**ggplot2** bénéficie d'une grande variété de packages R supplémentaires qui étendent ses fonctionnalités, tels que **gganimate**, **ggthemr**, **ggdendro**, **gghighlight**, **ggforce**...
+{ggplot2} est accompagné de nombreux paquets qui étendent ses fonctionnalités, tels que {gganimate}, {ggthemr}, {ggdendro}, {gghighlight}, {ggforce}...
 
 .footnote[
 *Question bonus : *Que représente le "gg" dans ces noms ?
@@ -269,37 +267,37 @@ Consultez la [galerie de graphiques R] (https://www.r-graph-gallery.com/ggplot2-
 
 
 ---
-# Grammaire du graphisme
+# Grammaire des graphiques
 
-Construisez un objet de tracé en "ajoutant" des commandes les unes aux autres qui spécifient les couches du tracé et les éléments de conception.
+Un graphe est construit en "additionant" (`+`) des commandes les unes à la suite des autres, pour spécifier différentes "couches" du graphique et sa structure.
 
-
---
-
-L'ordre des couches sera généralement le suivant :
-
-1) *Ouvrez le graphique avec la commande `ggplot()` et spécifiez l'ensemble de données.
 
 --
 
-2) **Colonnes de données "cartographiques "** aux caractéristiques "esthétiques" du graphique telles que les axes, la couleur, la taille, la forme, le remplissage et la transparence.
+L'ordre des couches est généralement le suivant :
+
+1) **Créer un graphe** avec la commande `ggplot()` et spécifiez le jeu de données
 
 --
 
-3) **Ajouter (`+`) des couches "geom "** qui visualisent les données géométriquement sous forme de formes.
+2) **Associer les colonnes de données** aux caractéristiques "esthétiques" (attribus) du graphique : axes, couleur, taille, forme, remplissage, transparence
 
 --
 
-4) **Modifier les "échelles "**, telles qu'une échelle de couleurs ou les ruptures de l'axe des y.
+3) **Ajouter (`+`) des couches "geom"** qui affichent les données avec des formes géométriques.
 
 --
 
-5) **Ajouter des éléments de conception de tracés "thématiques "** tels que les étiquettes d'axe, le titre, la légende, les polices, les tailles de texte, les thèmes d'arrière-plan ou la rotation des axes.
+4) **Modifier les "échelles"** telles que l'échelle de couleurs ou des axes
 
 --
 
-Ces couches sont "ajoutées" séquentiellement avec les symboles **`+`**.
-Les commandes **ggplot2** peuvent être assez longues !
+5) **Modifier l'apparence du graphique (thème)** : étiquettes, titre, légende, polices et taille du texte, couleur d'arrière plan, rotation des axes
+
+--
+
+Les couches sont "ajoutées" séquentiellement avec le symbole **`+`**.
+Les commandes **{ggplot2}** peuvent être assez longues !
 
 
 ???
@@ -312,7 +310,7 @@ Remember that although the commands may be long, it is infinitely easier to edit
 
 
 ---
-# Ouvrir la parcelle
+# Création du graphique
 
 .pull-left[
 
@@ -340,7 +338,7 @@ Piping is useful to make one-time changes to a dataset prior to plotting.
 
 
 ---
-# Ajouter les données
+# Ajout des données
 
 .pull-left[
 
@@ -349,9 +347,9 @@ Piping is useful to make one-time changes to a dataset prior to plotting.
 ggplot(data = surv)                   
 ```
 
-Affecte le  à utiliser.
+Spécifie le dataframe à utiliser
 
-Vous pouvez aussi utiliser l'opérateur pipe `%&gt;%` pour "pipe" un  *dans `ggplot()`.
+Vous pouvez aussi utiliser l'opérateur pipe `%&gt;%` pour "piper" un dataframe  *dans* `ggplot()`.
 
 
 ```r
@@ -375,7 +373,7 @@ Piping is useful to make one-time changes to a dataset prior to plotting.
 
 
 ---
-# Ajouter les données
+# Ajout des données
 
 .pull-left[
 
@@ -385,9 +383,9 @@ ggplot(
   data = surv)                   
 ```
 
-Les retours à la ligne et les retraits n'auront pas d'incidence sur l'exécution du code.
+Les retours à la ligne et les indentations n'affectent pas l'exécution du code.
 
-Ils peuvent rendre les commandes plus longues plus faciles à lire...
+Mais ils rendent les commandes longues plus faciles à lire...
 
 
 ]
@@ -405,7 +403,7 @@ Piping is useful to make one-time changes to a dataset prior to plotting.
 
 
 ---
-# Mappings avec `aes()`
+# Définir l'esthétique avec `aes()`
 
 .pull-left[
 
@@ -418,7 +416,7 @@ ggplot(
 
 L'"esthétique" d'un graphique est constituée de caractéristiques telles que la position, la couleur, la forme...
 
-`mapping = aes()` fait correspondre les "esthétiques" aux colonnes des données.
+`mapping = aes()` fait correspondre des caractéristiques/attribus "esthétiques" aux colonnes des données.
 
 ]
 
@@ -435,7 +433,7 @@ ggplot commands tend to get very vertical (long)
 
 
 ---
-# Mappings avec `aes()`
+# Définir l'esthétique avec `aes()`
 
 .pull-left[
 
@@ -448,9 +446,9 @@ ggplot(
    ))               
 ```
 
-Les mappages esthétiques sont placés dans `aes()`.
+L'assignation des colonnes aux attribus se fait dans la fonction `aes()`.
 
-Les deux mappings de base sont les axes vers les colonnes, via :
+Les deux correspondances ("mapping") de base sont les axes &lt;-&gt; colonnes :
 `x = `   
 
 
@@ -468,7 +466,7 @@ ggplot commands tend to get very vertical (long)
 
 
 ---
-# Mappings avec `aes()`
+# Définir l'esthétique avec `aes()`
 
 .pull-left[
 
@@ -481,9 +479,9 @@ ggplot(
 *  y = ht_cm))
 ```
 
-Les mappages esthétiques sont placés dans `aes()`.
+L'assignation des colonnes aux attribus se fait dans la fonction `aes()`.
 
-Les deux mappings de base sont les axes vers les colonnes, via :
+Les deux correspondances ("mapping") de base sont les axes &lt;-&gt; colonnes :
 `x = ` et `y = `
 
 
@@ -502,7 +500,7 @@ ggplot commands tend to get very vertical (long)
 
 
 ---
-# Ajouter la géométrie
+# Ajout des formes géométriques
 
 .pull-left[
 
@@ -534,20 +532,22 @@ avec un **`+`** à la commande `ggplot()`.
 
 
 ---
-# Géométries
+# Couches "géom"
 
 .pull-left[
 
-Parmi les "géométries" classiques, on trouve :
+Parmi les "geoms" classiques, on trouve :
 
-Géométries   |Géom
+Géométrie   |Geom
 ------------------------------------------------------------------------|--------------------------------------------------------------------
 Histogrammes|`geom_histogram()`  
 Points|`geom_point()`
-]
 
 .footnote[Liste complète [ici](https://ggplot2.tidyverse.org/reference/)
 ]  
+
+]
+
 
 
 .pull-right[
@@ -561,21 +561,21 @@ Points|`geom_point()`
 
 
 ---
-# Géométries
+# Couches "géom"
 
 .pull-left[
 
-Parmi les "géométries" classiques, on trouve :
+Parmi les "geoms" classiques, on trouve :
 
-Géométries   |Géom
+Géométrie   |Geom
 ------------------------------------------------------------------------|--------------------------------------------------------------------
 Lignes|`geom_lines()`  
 Barreaux|`geom_bar()` or `geom_col()`  
 
+.footnote[Liste complète [ici](https://ggplot2.tidyverse.org/reference/)]
 
 ]
 
-.footnote[Liste complète [ici](https://ggplot2.tidyverse.org/reference/)]
 
 
 .pull-right[
@@ -587,21 +587,23 @@ Barreaux|`geom_bar()` or `geom_col()`
 
 
 ---
-# Géométries
+# Couches "géom"
 
 .pull-left[
 
-Parmi les "géométries" classiques, on trouve :
+Parmi les "geoms" classiques, on trouve :
 
-Géométries   |Géom
+Géométrie   |Geom
 ------------------------------------------------------------------------|--------------------------------------------------------------------
-Boxplots|`geom_boxplot()`  
+Boîte à moustache|`geom_boxplot()`  
 Graphiques en violon|`geom_violin())` 
 
 
+.footnote[Liste complète [ici](https://ggplot2.tidyverse.org/reference/)]
+
 ]
 
-.footnote[Liste complète [ici](https://ggplot2.tidyverse.org/reference/)]
+
 
 .pull-right[
 
@@ -617,7 +619,7 @@ Graphiques en violon|`geom_violin())`
 
 
 ---
-# Ajouter des géomètres
+# Ajout des geom
 
 .pull-left[
 
@@ -631,7 +633,7 @@ ggplot(
 *geom_point()
 ```
 
-Avec les axes maintenant cartographiés, `geom_point()` affiche les données sous forme de points.
+Les axes étant déjà spécifiés, `geom_point()` affiche les données sous forme de points.
 
 ]
 
@@ -648,7 +650,7 @@ Avec les axes maintenant cartographiés, `geom_point()` affiche les données sou
 
 
 ---
-# Ajouter des géomètres
+# Ajout des geom
 
 .pull-left[
 
@@ -663,9 +665,9 @@ geom_point() +
 *geom_smooth()
 ```
 
-Nous pouvons ajouter des géomètres supplémentaires au graphe actuel avec `+`.
+Nous pouvons ajouter des geom supplémentaires au graphe actuel avec `+`.
 
-*Les géomètres apparaissent dans l'ordre où ils sont écrits* : la ligne lissée apparaît au-dessus des points
+*Les geom apparaissent dans l'ordre où ils sont écrits* : la courbe lissée apparaît au-dessus des points
 
 ]
 
@@ -674,7 +676,7 @@ Nous pouvons ajouter des géomètres supplémentaires au graphe actuel avec `+`.
 &lt;img src="module_6-1_files/figure-html/unnamed-chunk-37-1.png" width="504" /&gt;
 ] 
 
-.footnote[`geom_smooth()` donne des moyennes conditionnelles lissées, aidant à montrer les tendances en présence d'un "sur-traçage" (voir [documentation](https://ggplot2.tidyverse.org/reference/geom_smooth.html)).]
+.footnote[`geom_smooth()` génère une courbe en utilisant un modèle additif généralisé (voir [documentation](https://ggplot2.tidyverse.org/reference/geom_smooth.html)).]
 
 
 ???
@@ -686,9 +688,9 @@ Nous pouvons ajouter des géomètres supplémentaires au graphe actuel avec `+`.
 
 
 ---
-# Une note rapide sur les indentations
+# Une note rapide sur l'indentation
 
-Les indentations, espaces et nouvelles lignes n'ont pas d'impact sur l'exécution du code, et peuvent être modifiées pour améliorer la lisibilité.
+Les indentations, espaces et retours à la ligne n'ont pas d'impact sur l'exécution du code, et peuvent être utilisés pour améliorer la lisibilité.
 
 
 ```r
@@ -697,7 +699,7 @@ ggplot(data = surv, mapping = aes(x = age_years, y = ht_cm))+geom_point()
 
 --
 
-est la même chose que:
+est la même chose que :
 
 
 ```r
@@ -708,17 +710,21 @@ geom_point()
 
 --
 
-est la même chose que:
+est la même chose que :
+
+
 
 
 ```r
 ggplot(
-  data = surv,        # use case linelist
-  mapping = aes(      # make aesthetic mappings for all geoms
-    x = age_years,    # assign x-axis to age column
-    y = ht_cm)) +     # assign y-axis to height
-geom_point()          # display data as points
+  data = surv,        # utiliser le cas linelist
+  mapping = aes(      # faire des mappings esthétiques pour tous les géomètres
+    x = age_years,    # assigner la colonne d'âge à l'axe des x 
+    y = ht_cm)) +     # assigner la colonne d'hauteur à l'axe des y 
+geom_point()          # afficher les données sous forme de points
 ```
+
+
 
 
 
@@ -745,18 +751,18 @@ class: large-table
 
 # Autres aspects esthétiques
 
-En dehors des axes, d'autres "esthétiques" courantes incluent:
+En dehors des axes, d'autres caractéristiques esthétiques courantes incluent :
 
-Arguments|Contrôles
+Arguments|Contrôle
 -------------------------------------------------------------------|--------------------------------------------------------------------
-`shape`      |Affichage du point sous forme de point, étoile, triangle, carré...
-`fill`       |La couleur *intérieure* (par exemple de la barre ou du boxplot)
-`color`      |La couleur *extérieure* ou de la barre, du boxplot - OU du point
-`size`       |L'épaisseur du trait, la taille du point...
+`shape`      |Affichage sous forme de point, étoile, triangle, carré...
+`fill`       |Couleur de *remplissage* (par exemple de la barre ou du boxplot)
+`color`      |Couleur de la *bordure* (de la barre, du boxplot) OU couleur du point
+`size`       |Epaisseur du trait, taille du point...
 `alpha`      |Transparence : 0 (invisible) à 1 (opaque)
-`width`      |Largeur des barres du "bar plot
+`width`      |Largeur des barres des diagrammes en batons
 `linetype`   |Soit solide, tiret, pointillé, etc.
-`binwidth`   |Largeur des cases de l'histogramme
+`binwidth`   |Largeur des classes de l'histogramme
   
 
 
@@ -772,16 +778,16 @@ Each geom accepts certain aesthetics, like `binwidth=` for `geom_histogram()`
 
 class: medium-text
 
-# Affectation des esthétiques
+# Définir les caractéristiques esthétiques
 
 
 .pull-left[
 
-L'esthétique peut être assignée à l'un ou l'autre des éléments suivants:
+Les attribus esthétiques peuvent être soit :
 
-* **Valeurs statiques** : `color = "purple"`
-  - Assignés *externes* `aes()`
-  - Même affichage pour toutes les données
+* Des **valeurs statiques** : `color = "purple"`
+  - Assignation *en dehors* d'`aes()`
+  - La même pour toutes les données
 
 &lt;/br&gt;
 &lt;/br&gt;
@@ -796,7 +802,11 @@ L'esthétique peut être assignée à l'un ou l'autre des éléments suivants:
 
 Quelques exemples
 
-&lt;img src="module_6-1_files/figure-html/unnamed-chunk-41-1.png" width="504" /&gt;
+
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-44-1.png" width="504" /&gt;
+
+
 
 ]
 
@@ -806,16 +816,16 @@ Quelques exemples
 
 class: medium-text
 
-# Affectation des esthétiques
+# Définir les caractéristiques esthétiques
 
 
 .pull-left[
 
-L'esthétique peut être assignée à l'un ou l'autre des éléments suivants:
+Les attribus esthétiques peuvent être soit :
 
-* **Valeurs statiques** : `color = "purple"`
-  - Assignés *externes* `aes()`
-  - Même affichage pour toutes les données
+* Des **valeurs statiques** : `color = "purple"`
+  - Assignation *en dehors* d'`aes()`
+  - La même pour toutes les données
 
 &lt;/br&gt;
 &lt;/br&gt;
@@ -823,8 +833,8 @@ L'esthétique peut être assignée à l'un ou l'autre des éléments suivants:
 &lt;/br&gt;
 
 * **Une colonne de données** : `aes(color = hospital)`
-  - Affecté *inside* `aes()`
-  - Affiche les données sous forme de "groupes"
+  - Assignation *dans* `aes()`
+  - Affiche les données en "groupes"
   
 
 ]
@@ -834,7 +844,13 @@ L'esthétique peut être assignée à l'un ou l'autre des éléments suivants:
 
 Quelques exemples
 
-&lt;img src="module_6-1_files/figure-html/unnamed-chunk-42-1.png" width="504" /&gt;
+
+
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-47-1.png" width="504" /&gt;
+
+
+
 
 ]
 
@@ -846,16 +862,16 @@ Quelques exemples
 
 class: medium-text
 
-# Affectation des esthétiques
+# Définir les caractéristiques esthétiques
 
 
 .pull-left[
 
-L'esthétique peut être assignée à l'un ou l'autre des éléments suivants:
+Les attribus esthétiques peuvent être soit :
 
-* **Valeurs statiques** : `color = "purple"`
-  - Assignés *externes* `aes()`
-  - Même affichage pour toutes les données
+* Des **valeurs statiques** : `color = "purple"`
+  - Assignation *en dehors* d'`aes()`
+  - La même pour toutes les données
   
 &lt;/br&gt;
 &lt;/br&gt;
@@ -863,8 +879,8 @@ L'esthétique peut être assignée à l'un ou l'autre des éléments suivants:
 &lt;/br&gt;
 
 * **Une colonne de données** : `aes(color = hospital)`
-  - Affecté *inside* `aes()`
-  - Affiche les données sous forme de "groupes"
+  - Assignation *dans* `aes()`
+  - Affiche les données en "groupes"
   
 
 ]
@@ -874,7 +890,11 @@ L'esthétique peut être assignée à l'un ou l'autre des éléments suivants:
 
 Plus d'exemples : 
 
-&lt;img src="module_6-1_files/figure-html/unnamed-chunk-43-1.png" width="504" /&gt;
+
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-50-1.png" width="504" /&gt;
+
+
 
 ]
 
@@ -900,7 +920,7 @@ ggplot(
 ```
 
 
-Une esthétique est *statique* si elle applique le même affichage à tous les points de données du géomètre ou du graphique. Les esthétiques statiques sont définies *en dehors* de `aes()` à une valeur *numérique ou de caractère*.
+Une esthétique est *statique* si elle applique le même affichage à toutes les données du geom ou du graphe. Elle est assignée *en dehors* de `aes()` à une valeur *numérique ou de texte*.
 
 Autres exemples :
 `size = 3`  
@@ -911,7 +931,7 @@ Autres exemples :
 
 .pull-right[
 
-&lt;img src="module_6-1_files/figure-html/unnamed-chunk-45-1.png" width="504" /&gt;
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-53-1.png" width="504" /&gt;
 ] 
 
 
@@ -936,11 +956,11 @@ geom_point()
 ```
 
 
-*L'esthétique dynamique est associée à un nom de colonne.
+*L'esthétique dynamique* est associée à un nom de colonne.
 
 Cela crée des "groupes" et génère une légende.
 
-Cette affectation se fait *à l'intérieur* de `aes()`.
+L'assignation se fait *à l'intérieur* de `aes()`.
 
 Ci-dessus, `color=` est associé à la colonne `hospital`.
 
@@ -948,7 +968,7 @@ Ci-dessus, `color=` est associé à la colonne `hospital`.
 
 .pull-right[
 
-&lt;img src="module_6-1_files/figure-html/unnamed-chunk-47-1.png" width="504" /&gt;
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-55-1.png" width="504" /&gt;
 ]
 
 ???
@@ -985,10 +1005,10 @@ Ci-dessus, `size = 7` et `alpha = 0.7` sont assignés statiquement, en dehors de
 
 .pull-right[
 
-&lt;img src="module_6-1_files/figure-html/unnamed-chunk-49-1.png" width="504" /&gt;
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-57-1.png" width="504" /&gt;
 ]
 
-.footnote[En savoir plus sur l'esthétique de ggplot [ici](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html)
+.footnote[En savoir plus sur les attribus esthétiques dans ggplot [ici](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html)
 ]  
 
 
@@ -1017,12 +1037,12 @@ geom_histogram() +
 *facet_wrap(~hospital)
 ```
 
-Les facettes sont des "petits-multiples" :
-des parcelles pour une valeur unique
+Les facettes sont des "petits-multiples":
+des mini graphes par valeur de...
 
-Elles peuvent être utilisées pour afficher des groupes dans les données.
+Elles sont utilisées pour afficher des groupes dans les données.
 
-La fonction `facet_wrap()` produit une facette
+La fonction `facet_wrap()` produit une mini graphique (facette)
 par valeur unique de la colonne.
 
 Placez un "~" devant le nom de la colonne.
@@ -1034,7 +1054,7 @@ Placez un "~" devant le nom de la colonne.
 
 .pull-right[
 
-&lt;img src="module_6-1_files/figure-html/unnamed-chunk-51-1.png" width="504" /&gt;
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-59-1.png" width="504" /&gt;
 
 ]
 
@@ -1060,7 +1080,7 @@ geom_histogram() +
             scales = "free_y")
 ```
 
-Axes auto-échelonnés "libres" avec `scales=`
+"Libérez" les axes avec `scales=`
 - "free_y"  
 - "free_x"   
 - "free" (both x and y)  
@@ -1068,14 +1088,14 @@ Axes auto-échelonnés "libres" avec `scales=`
 ] 
 
 .footnote[
-Prévenez votre public si vous utilisez des axes gratuits !
+Avertissez vos lecteurs lorsque les axes n'ont pas la même taille dans les différentes facettes !
 Essayez aussi `ncol=` et `nrow=`.
 
 ]
 
 
 .pull-right[
-&lt;img src="module_6-1_files/figure-html/unnamed-chunk-53-1.png" width="504" /&gt;
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-61-1.png" width="504" /&gt;
 
 ]
 
@@ -1092,7 +1112,7 @@ Essayez aussi `ncol=` et `nrow=`.
 
 Les paquets d'extension de ggplot comme {gghighlight} sont utiles.
 
-`gghighlight()` peut montrer une "ombre" derrière chaque facette.
+`gghighlight()` peut afficher une "ombre" derrière chaque facette.
 
 
 ```r
@@ -1110,7 +1130,7 @@ facet_wrap(~ hospital) +
 
 
 .pull-right[
-&lt;img src="module_6-1_files/figure-html/unnamed-chunk-55-1.png" width="504" /&gt;
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-63-1.png" width="504" /&gt;
 
 ]
 
@@ -1124,7 +1144,7 @@ facet_wrap(~ hospital) +
 
 .pull-left[
 
-Ajoutez `gghighlight()` à d'autres graphes, et spécifiez des valeurs spécifiques à mettre en évidence.
+Mettre en évidence des valeurs spécifiques avec `gghighlight()` :
 
 
 ```r
@@ -1154,7 +1174,7 @@ surv %&gt;%
 
 
 .pull-right[
-&lt;img src="module_6-1_files/figure-html/unnamed-chunk-57-1.png" width="504" /&gt;
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-65-1.png" width="504" /&gt;
 
 ]
 
@@ -1169,7 +1189,7 @@ Here we create data frame of cases per week per hospital, and plot with `geom_li
 
 # Remerciements
 
-Images ggplot de:
+Images ggplot de :
 
 * http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html  
 * https://jcheshire.com/r-spatial-data-hints/great-maps-ggplot2/
@@ -1182,7 +1202,7 @@ class: inverse, center, middle
 
 
 
-## Breakout
+## Exercices
 
 
 &lt;img src="../../../images/breakout/Safety Match - COVID artwork.png" width="50%" /&gt;
