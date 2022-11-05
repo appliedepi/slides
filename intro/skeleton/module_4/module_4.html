@@ -63,23 +63,23 @@ class: inverse, center, middle, title-slide
 
 
 
-# Introduction to R for Applied Epidemiology
+# Введение в R для прикладной эпидемиологии
 
-### Data cleaning with R (part 2)
+### Вычистка данных с помощью R (часть 2)
 
 contact@appliedepi.org
 
 
 ---
-# Today: objectives &amp; schedule  
+# Сегодня: цели и расписание  
 
-**In this module we aim to help you:**  
-* Gain familiarity of {dplyr} functions used to clean public health data  
-* Apply a series of functions to a data frame using the pipe operator  
-* Begin writing an R script to analyze outbreak data  
+**В этом модуле мы стремимся помочь вам:**  
+* Ознакомиться с функциями {dplyr}, используемыми для вычистки данных общественного здравоохранения  
+* Применить серию функций к датафрейму с помощью оператора канала  
+* Начните писать скрипт R для анализа данных вспышек  
 
 
-&lt;template id="3af343cb-c405-4a8b-a3dd-012b092fb924"&gt;&lt;style&gt;
+&lt;template id="e11c077b-3f7e-485e-8bc1-314cccc14a21"&gt;&lt;style&gt;
 .tabwid table{
   border-spacing:0px !important;
   border-collapse:collapse;
@@ -118,33 +118,33 @@ background-color: transparent;
 .katex-display {
     margin: 0 0 !important;
 }
-&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-144d476a{}.cl-14422e84{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-1446976c{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-1446aed2{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446aedc{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446aedd{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446aee6{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446aee7{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446aef0{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446aefa{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446af04{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446af0e{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446af0f{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446af18{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446af19{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446af22{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446af2c{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446af2d{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446af36{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446af37{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1446af38{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-144d476a'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-1446aed2"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-1446aedc"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-1446aedd"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-1446aee6"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-1446aee7"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-1446aef0"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;Review of previous module&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-1446aefa"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-1446af04"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-1446af0e"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;Demo - logical coding&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-1446af0f"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;1h30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-1446af18"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-1446af19"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;Exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-1446af22"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-1446af2c"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;Breakouts&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-1446af2d"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;Plenary debrief&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-1446af36"&gt;&lt;p class="cl-1446976c"&gt;&lt;span class="cl-14422e84"&gt;Take breaks as you wish during the exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
-&lt;div class="flextable-shadow-host" id="cce949ba-ced1-41ec-815f-a1b1bcd2f281"&gt;&lt;/div&gt;
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-64449134{}.cl-6437fc58{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-643d438e{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-643d5efa{width:1.329in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-643d5f0e{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-643d5f0f{width:3.208in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-643d5f18{width:1.329in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-643d5f19{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-643d5f22{width:3.208in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-643d5f2c{width:1.329in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-643d5f2d{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-643d5f2e{width:3.208in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-643d5f36{width:1.329in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-643d5f40{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-643d5f41{width:3.208in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-64449134'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-643d5efa"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-643d5f0e"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-643d5f0f"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-643d5f18"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;15 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-643d5f19"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-643d5f22"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;Повторение предыдущего модуля&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-643d5f18"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;15 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-643d5f19"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-643d5f22"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;Демонстрация - логическое кодирование&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-643d5f18"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;1 час 30 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-643d5f19"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-643d5f22"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;Упражнение&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-643d5f2c"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;30 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-643d5f2d"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;Сессионные залы&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-643d5f2e"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;Общее обсуждение&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-643d5f36"&gt;&lt;p class="cl-643d438e"&gt;&lt;span class="cl-6437fc58"&gt;Делайте перерывы по своему усмотрению во время выполнения упражнения&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="31ba68fb-1044-40b0-9ff2-0572d2d025b8"&gt;&lt;/div&gt;
 &lt;script&gt;
-var dest = document.getElementById("cce949ba-ced1-41ec-815f-a1b1bcd2f281");
-var template = document.getElementById("3af343cb-c405-4a8b-a3dd-012b092fb924");
+var dest = document.getElementById("31ba68fb-1044-40b0-9ff2-0572d2d025b8");
+var template = document.getElementById("e11c077b-3f7e-485e-8bc1-314cccc14a21");
 var caption = template.content.querySelector("caption");
 var fantome = dest.attachShadow({mode: 'open'});
 var templateContent = template.content;
 fantome.appendChild(templateContent);
 &lt;/script&gt;
 
-**This is a *long* exercise, but very important.**  
+**Это *длинное* упражнение, но очень важное*.  
 
 ???
 Note stretch breaks throughout.
 
 
 ---
-# Review of previous module  
+# Повторение предыдущего модуля  
 
 
 
 ---
 
-# Demo dataset  
+# Демонстрационный набор данных  
 
-Let's use a smaller version to practice with, and explore some core R functions
+Давайте воспользуемся меньшей версией для практики и изучим некоторые основные функции R
 
 
 &lt;table&gt;
@@ -204,22 +204,24 @@ Let's use a smaller version to practice with, and explore some core R functions
 
 --
 
-We will name it "**`demo`**"
+Мы назовем его "**`demo`**".
 
 ---
 
-# The {dplyr} package  
+# Пакет {dplyr}  
 
-Some of the {dplyr} functions we will use:  
+Некоторые из функций {dplyr}, которые мы будем использовать:  
 
 
-Function       | Utility                               
+Функция       | Утилита                               
 ---------------|---------------------------------------
-`filter()`|subset rows
-`select()`|subset columns
-`rename()`|rename columns 
-`mutate()`|create and transform columns 
-`case_when()`|re-code values using logical criteria   
+`mutate()`|создание и преобразование столбцов  
+`ifelse()`|простое логическое перекодирование значений  
+`case_when()`|сложное логическое перекодирование ценностей   
+`age_categories()`|создание колонки возрастной категории   
+`coalesce()`|приоритизация значений   
+`select()`|подмножество столбцов  
+
 
 
 
@@ -227,13 +229,17 @@ Function       | Utility
 
 ---
 
-# Printing vs. saving   
+# Печать или сохранение   
 
-Our pipes have only *printed* the modified `demo` - the data frame has **not** changed! 
+Наши каналы только *печатают* модифицированный `demo` - датафрейм **не** изменился! 
+
+
+
+
 
 
 ```r
-demo %&gt;%                    # PRINT only cases over 10 years
+demo %&gt;%                    # ПРИНТ только случаи старше 10 лет
   filter(age &gt; 10)
 ```
 
@@ -271,7 +277,7 @@ demo %&gt;%                    # PRINT only cases over 10 years
 --
 
 
-To save: add the assignment operator **&lt;-** to define a new data frame. 
+Для сохранения: добавьте оператор присваивания **&lt;-** для определения нового датафрейма. 
 
 
 ```r
@@ -279,29 +285,35 @@ demo_over10 &lt;- demo %&gt;%
   filter(age &gt; 10)
 ```
 
-(No output to the R console, but a new object in the Environment pane)  
+(Нет вывода в консоль R, но появился новый объект в панели Окружающей среды)  
 
 ???
 Note how the column names in `demo` are old! It's because our changes have not yet been saved.  
 
 ---
 
-# `mutate()` to edit columns  
+# `mutate()` для редактирования столбцов  
  
-`mutate()` is also used to *edit* existing columns, such as *recoding* values
+`mutate()` также используется для *редактирования* существующих столбцов, например, для *перекодировки* значений
 
-Below, `recode()` is used inside `mutate()` to recode the gender column  
+`recode()` используется внутри `mutate()` для перекодировки столбца gender  
 
 --
 
 
 
 
+
+
+
+
+
+
 ```r
 demo %&gt;% 
-  mutate(gender = recode(gender,   # re-define gender as: 
-    'm' = 'male',                  # when "m", change to "male"   
-    'f' = 'female'))               # when "f", change to "female"
+  mutate(gender = recode(gender,   # переопределить пол как: 
+    "m" = "male",                  # когда "m", меняется на "male", m меняется на мужской 
+    "f" = "female"))               # когда "f", меняется на "female", f меняется на женский
 ```
 
 ```
@@ -313,6 +325,8 @@ demo %&gt;%
 ## 5  6056ba   0 female          TRUE   yes     yes
 ```
 
+
+
 ???
 Explain that there are many nuances to case_when() which you will practice in the breakout exercise
 
@@ -320,18 +334,28 @@ Explain that there are many nuances to case_when() which you will practice in th
 
 ---
 
-# `ifelse()` for simple logic  
+# `ifelse()` для простой логики  
  
-`ifelse()` within `mutate()` is used to apply simple recoding logic  
+`ifelse()` внутри `mutate()` используется для применения простой логики перекодировки  
 
-&lt;h4&gt;The syntax is: &lt;span style='color:deeppink'&gt;new column name&lt;/span&gt; = a &lt;span style='color:cornflowerblue'&gt;function&lt;/span&gt; that creates the new values:&lt;/h4&gt;
+&lt;h4&gt;Синтаксис следующий: &lt;span style='color:deeppink'&gt;имя нового столбца&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;функция&lt;/span&gt;, которая создает новые значения:&lt;/h4&gt;
 
 --
 
 
 
 
-&lt;code class ='r hljs remark-code'&gt;demo %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;mutate(&lt;span style='color:deeppink'&gt;adult&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;ifelse(age &gt;= 18, 'yes', 'no')&lt;/span&gt;) # creates new T/F column&lt;/code&gt;
+
+
+
+
+
+
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;demo %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;mutate(&lt;span style='color:deeppink'&gt;adult&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;ifelse(age &gt;= 18, 'yes', 'no')&lt;/span&gt;) # создает новый столбец типа истина-ложь&lt;/code&gt;
 
 ```
 
@@ -346,19 +370,19 @@ Explain that there are many nuances to case_when() which you will practice in th
 
 --
 
-`ifelse()` applies a logical criteria to each row, returns one value if true, and returns another value if false.  
+`ifelse()` применяет логический критерий к каждой строке, возвращает одно значение, если оно истинно, и возвращает другое значение, если ложно.  
 
 
 
 ---
 
-# Use `case_when()` for complex logic  
+# Используйте `case_when()` для сложной логики  
  
-`case_when()` is used to test a series of logical criteria against each row, and assign a corresponding new value. 
+`case_when()` используется для проверки ряда логических критериев для каждой строки и присвоения соответствующего нового значения. 
 
 --
 
-&lt;h4&gt;The case_when() syntax is: &lt;span style='color:orange'&gt;logical criteria for row&lt;/span&gt; &lt;span style='color:deeppink'&gt;~&lt;/span&gt; &lt;span style='color:cornflowerblue'&gt;outcome if met&lt;/span&gt;&lt;/h4&gt;
+&lt;h4&gt;Синтаксис case_when() следующий: &lt;span style='color:orange'&gt;логические критерии для строки&lt;/span&gt; &lt;span style='color:deeppink'&gt;~&lt;/span&gt; результат, если они выполнены&lt;/h4&gt;
 
 
 
@@ -377,7 +401,7 @@ Explain that there are many nuances to case_when() which you will practice in th
 ```
 
 
-Every row in the dataset is evaluated for the criteria (from top-to-bottom). 
+Каждая строка в наборе данных оценивается по критериям (сверху вниз). 
 
 
 
@@ -393,7 +417,7 @@ class: inverse, center, middle
 
 
 
-## Exercise  
+## Упражнение  
 
 
 &lt;img src="../../../images/breakout/COVID dominoes.png" width="100%" /&gt;
