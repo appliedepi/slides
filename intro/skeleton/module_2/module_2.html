@@ -37,33 +37,30 @@ class: center, middle, inverse, title-slide
 &lt;/style&gt;
 
 
-# Введение в R для прикладной эпидемиологии
+# Introduction to R for Applied Epidemiology
 
-### Импорт данных, управление проектами и упорядоченные данные
+### Data import, project management, and tidy data
 
 contact@appliedepi.org
 
 ---
-# Повтор предыдущей сессии   
+# Review of previous session   
 
 ???
 If 5-day course, pause here and give demo of the initial setup and tutorials.  
 
 
 ---
-# Данная сессия: цели и расписание  
+# This session: objectives &amp; schedule  
 
-**В этом модуле мы стремимся помочь вам:**  
-* Узнать о простом способе организации файлов в проекте RStudio   
-* Узнать как легко импортировать данные с помощью {rio} и {here}  
-* Импорт и просмотр данных в R  
-* Принципы упорядоченных данных и советы по правильному формату данных  
-
-
+**In this module we aim to help you:**  
+* Learn an easy way to organize files in an RStudio project   
+* How to import data easily with {rio} and {here}  
+* Importing and reviewing data in R  
+* Principles of tidy data and tips for proper data format  
 
 
-
-&lt;template id="48a193c1-f2e0-460f-94af-6724c87395da"&gt;&lt;style&gt;
+&lt;template id="a93fffd0-b9dc-47d9-a81b-5deb18f37d87"&gt;&lt;style&gt;
 .tabwid table{
   border-spacing:0px !important;
   border-collapse:collapse;
@@ -102,16 +99,19 @@ background-color: transparent;
 .katex-display {
     margin: 0 0 !important;
 }
-&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-5bdd6afc{}.cl-5bbcb5be{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-5bcc0352{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-5bcc7cec{width:0.919in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d0a{width:1.161in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d14{width:5.102in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d1e{width:0.919in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d32{width:1.161in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d3c{width:5.102in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d46{width:0.919in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d50{width:1.161in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d51{width:5.102in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d5a{width:0.919in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d6e{width:1.161in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d6f{width:5.102in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d78{width:0.919in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d82{width:1.161in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d96{width:5.102in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7d97{width:0.919in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7daa{width:1.161in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5bcc7db4{width:5.102in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-5bdd6afc'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5bcc7cec"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5bcc7d0a"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5bcc7d14"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5bcc7d1e"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;15 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5bcc7d32"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5bcc7d3c"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Повторение предыдущей сессии&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5bcc7d46"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;15 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5bcc7d50"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5bcc7d51"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Обзор проектов RStudio, импорта данных и упорядоченных данных&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5bcc7d1e"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;15 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5bcc7d32"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5bcc7d3c"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Демо&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5bcc7d5a"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;2 часа&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5bcc7d6e"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Упражнение&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5bcc7d6f"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Файлы, проекты, импорт, просмотр и форматы данных&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5bcc7d78"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;20 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5bcc7d82"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5bcc7d96"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Общее обсуждение&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-5bcc7d97"&gt;&lt;p class="cl-5bcc0352"&gt;&lt;span class="cl-5bbcb5be"&gt;Делайте перерывы по своему усмотрению во время выполнения упражнения&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
-&lt;div class="flextable-shadow-host" id="bc528494-cc8b-4588-b300-53ff7d7e1f04"&gt;&lt;/div&gt;
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-4132e152{}.cl-4124cbda{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-412998e0{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-4129b118{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b12c{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b136{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b137{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b140{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b141{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b14a{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b14b{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b154{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b155{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b15e{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b168{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b169{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b172{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b173{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b17c{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b17d{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b186{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b187{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b190{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4129b191{width:4.064in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-4132e152'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-4129b118"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4129b12c"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4129b136"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-4129b137"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4129b140"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4129b141"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Review of previous session&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-4129b14a"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4129b14b"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4129b154"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Overview of RStudio projects, data import, and tidy data&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-4129b155"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4129b15e"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4129b168"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Demo&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-4129b169"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;2 hours&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4129b172"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4129b173"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Files, projects, importing, reviewing, and data formats&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-4129b17c"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4129b17d"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4129b186"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Plenary debrief&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-4129b187"&gt;&lt;p class="cl-412998e0"&gt;&lt;span class="cl-4124cbda"&gt;Take breaks as you wish during the exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="75fcb065-8800-4b1e-a093-50d1fad791ec"&gt;&lt;/div&gt;
 &lt;script&gt;
-var dest = document.getElementById("bc528494-cc8b-4588-b300-53ff7d7e1f04");
-var template = document.getElementById("48a193c1-f2e0-460f-94af-6724c87395da");
+var dest = document.getElementById("75fcb065-8800-4b1e-a093-50d1fad791ec");
+var template = document.getElementById("a93fffd0-b9dc-47d9-a81b-5deb18f37d87");
 var caption = template.content.querySelector("caption");
 var fantome = dest.attachShadow({mode: 'open'});
 var templateContent = template.content;
 fantome.appendChild(templateContent);
 &lt;/script&gt;
+
+
+
 
 
 ???
@@ -120,42 +120,42 @@ Note stretch breaks throughout.
 
 
 ---
-# Управление файлами  
+# File management  
 
-R - это не только кодирование, вы также должны знать, как организовать свои файлы.  
+R is not just about coding - you must know how to organize your files too.  
 
-В прошлом пользователи R часто расстраивались из-за невозможности импортировать свои данные в R.  
+In the past, R users were often frustrated by not being able to import their data into R.  
 --
 
-За последние 3-5 лет несколько усовершенствований облегчили этот процесс:  
+In the last 3-5 years, several advancements have made this process easier:  
 
-* **Пакет {rio}** для импорта данных  
-* **"Проекты RStudio"** для хранения файлов  
-* **Пакет {here}** для путей к файлам  
+* **The {rio} package** for importing data  
+* **"RStudio projects"** for holding files  
+* **The {here} package** for file paths  
 
-Знание деталей того, как они работают, не так важно.  
-Но знайте, что совместное использование этих трех инструментов позволяет избежать большой головной боли.  
+Knowing the details of how they work is not so important.  
+But know that using these three tools together prevents a lot of headache.  
 
 
 
 
 ---
-# Импорт данных с помощью {rio}  
+# Importing data with {rio}  
 
-Импорт данных в R **раньше был** сложным  
+Importing data into R **used to be** painful  
 
-нужно было запоминать по одной функции для каждого типа файлов: `read.csv()`, `read_excel()`, `read_xlsx()`...  
+You had to remember one function for each type of file: `read.csv()`, `read_excel()`, `read_xlsx()`...  
 
 --
 
-Пакет {rio} упрощает эту задачу с помощью всего одной функции: **`import()`**.  
+The {rio} package makes it easy with only one function: **`import()`**  
 
 ```{eval=F}
 import("surveillance_linelist_20141201.csv")
 ```
 
 .pull-left[
-"rio" - это сокращение от  
+"rio" is shorthand for  
 "R inputs/outputs"  
 ]
 
@@ -167,27 +167,27 @@ import("surveillance_linelist_20141201.csv")
 
 
 ---
-# Пути к файлам  
+# File paths  
 
 .pull-left[
 
-Пути к файлам указывают R, где искать файл.  
+File paths tell R where to look for a file.  
 
 ]
 
 .pull-right[
 
 * 📁 C:Users  
-  * 📂 Laura  
-      * 📁 Documents  
+  * 📁 Laura  
+      * 📂 Documents  
           * 📂 intro_course  
-               * 📄 **linelist.csv**
-               * 📝 **analysis.R**
+               * 📜 **linelist.csv**
+               * 📜 **analysis.R**
 
 
 ]
 
-Этот путь говорит, что нужно начать с C: и перейти к папкам "Users", "Laura", "Documents"...  
+This path says to start at C: and go to the folders "Users", "Laura", "Documents"...  
 
 
 ```r
@@ -195,32 +195,32 @@ import("C:\Users\Laura\Documents\intro_course\data\clean\linelist.csv")
 ```
 
 --
-Но будет ли этот "абсолютный" путь к файлу работать на *вашем* компьютере? Скорее всего, нет, потому что у вас нет папки "Laura".  
+But will this "absolute" file path work on *your* computer? Mostly likely not, because you do not have a "Laura" folder.  
 
 --
 
-"Проекты RStudio" позволяют переносить анализы с одного компьютера на другой.  
+"RStudio projects" allow analyses to be portable between computers.  
 
 
 
 ---
-# Проекты RStudio  
+# RStudio projects  
 
 
 
 .pull-left[
 
-Проект RStudio - это автономная и портативная рабочая среда R.  
+An RStudio project is a self-contained and portable R working environment.  
 
-Это папка со всеми файлами, связанными с конкретным проектом:  
-* Файлы данных  
-* R скрипты  
-* Выходные данные  
-* и т.д.
+It is a folder with all the files associated with a distinct project:  
+* Data files  
+* R scripts  
+* Outputs  
+* etc.
 
-Это значительно облегчает вашу жизнь.  
+This makes your life immensely easier.  
 
-Проект представлен файлом .Rproj в папке.  
+The project is represented by a .Rproj file in the folder.  
 
 ]
 
@@ -236,11 +236,11 @@ You can zip the folder and share it with a colleague, it can be hosted on a shar
 
 
 ---
-# Проекты RStudio  
+# RStudio projects  
 
 .pull-left[
 
-При использовании проектов R путь к файлам *до* папки проекта R является гибким.  
+Using R projects, the file path *before* the R project folder is flexible.  
 
 ]
 
@@ -248,21 +248,21 @@ You can zip the folder and share it with a colleague, it can be hosted on a shar
 
 * 📂 intro_course (R project folder)  
      * intro_course.Rproj  
-     * 📄 **linelist.csv**
-     * 📝 **my_analysis.R**
+     * 📝 **linelist.csv**
+     * 📜 **my_analysis.R**
 ]
 
 --
 
-Команда **`import("linelist.csv")`**, используемая в проекте R...  
+The command **`import("linelist.csv")`** used in an R project...  
 
-...создает этот путь к файлу на компьютере Лауры:  
+...produces this file path on Laura's computer:  
 
 `"C:\Users\Laura\Documents\`**intro_course\linelist.csv"**  
 
 --
 
-...и производит *это* на компьютере Mac Раджива:  
+...and produces *this* on Rajiv's Mac computer:  
 
 `"home/Rajiv/docs/`**intro_course/linelist.csv"**  
 
@@ -276,21 +276,21 @@ You can zip the folder and share it with a colleague, it can be hosted on a shar
 
 .pull-left[
 
-Если ваш скрипт и данные находятся в разных подпапках, это может вызвать проблемы.  
+If your script and data are in different subfolders, it can cause problems.  
 
-Например, если вы переместите свой скрипт, путь к файлам с данными может нарушиться.  
+E.g. if you move your script, the file path to the data can break.  
 
 
 ]
 
 .pull-right[
 
-* 📁 intro_course (R project folder)  
+* 📂 intro_course (R project folder)  
      * intro_course.Rproj  
      * .here  
      * 📂 scripts
-          * 📝 **my_analysis.R**
-     * 📁 data  
+          * 📄 **my_analysis.R**
+     * 📂 data  
           * 📁 clean  
                * 📃 **linelist.csv**
 
@@ -299,16 +299,16 @@ You can zip the folder and share it with a colleague, it can be hosted on a shar
 
 --
 
-При использовании {here} пути к файлам всегда начинаются от **корневой (верхней) папки проекта** ("относительный").  
-**При запуске из любого** места в проекте R, по этому пути будет найден linelist.csv  
+Using {here}, file paths always start from the project **root (top) folder** ("relative").  
+**Run from any** location within the R project, this path will find the linelist.csv  
 
-**`here("data", "clean", "linelist.csv")`*.  
+**`here("data", "clean", "linelist.csv")`**  
 
 
 
 
 ---
-# Проекты, {here}, и {rio} вместе  
+# Projects, {here}, &amp; {rio} together  
 
 
 ```r
@@ -317,7 +317,7 @@ import(here("data", "clean", "linelist.csv"))
 
 .pull-left[
 
-Наконец, комбинируя `import()` и `here()` в проекте RStudio, мы создаем команду, которая действительно универсальна.  
+Finally, by combining `import()` and `here()` in an RStudio project, we create a command that is truly versatile.  
 
 ]
 
@@ -328,7 +328,7 @@ import(here("data", "clean", "linelist.csv"))
      * intro_course.Rproj  
      * .here  
      * 📁 scripts
-          * 📃 **my_analysis.R**
+          * 📝 **my_analysis.R**
      * 📁 data  
           * 📁 clean  
                * 📜 **linelist.csv**
@@ -338,50 +338,50 @@ import(here("data", "clean", "linelist.csv"))
 
 
 .footnote[
-См. раздел [EpiRHandbook о данном пакете] (https://epirhandbook.com/import-and-export.html?q=here#here) и раздел [EpiRHandbook об импорте данных] (https://epirhandbook.com/en/import-and-export.html).  
+See the [EpiRHandbook section on here package](https://epirhandbook.com/import-and-export.html?q=here#here) and on [EpiRHandbook section on importing data](https://epirhandbook.com/en/import-and-export.html)  
 ]
 
 ---
-# Обзор вашего набора данных  
+# Reviewing your dataset  
 
-После импорта в R, на что вы обращаете внимание при первоначальном просмотре данных?  
+Once imported into R, what do you look for when initially reviewing your data?  
 
 
 ---
 
-# Импортирование демо-версии  
+# Importing demo  
 
 
 ---
 class: inverse, center, middle
 
-## Упорядоченные данные  
+## Tidy data  
 
 &lt;img src="../../../images/data_cleaning/tidy_shelves.png" width="85%" /&gt;
 
 
 
 ---
-# Упорядоченные данные  
+# Tidy data  
 
-Чистые данные также должны быть "упорядоченными". Ниже приведены 3 основных принципа "упорядоченных данных":  
-
---
-
-1. Каждое **значение** должно иметь свою **ячейку**.  
+Clean data should also be "tidy". Below are 3 core principles of "tidy data":  
 
 --
 
-2. Каждая **переменная** должна иметь свой **столбец**.  
+1. Each **value** must have its own **cell**  
 
 --
 
-3. Каждое **наблюдение** должно иметь свою собственную **строку**.  
+2. Each **variable** must have its own **column**  
+
+--
+
+3. Each **observation** must have its own **row**  
 
 
 
 
-.footnote[Источник : [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)  
+.footnote[Source : [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)  
 ]
 
 ???
@@ -390,13 +390,13 @@ class: inverse, center, middle
 
 
 ---
-# Значения в собственной ячейке  
+# Values in their own cell  
 
 
 
 .pull-left[
 
-**Хаотичные:** Какие изменения сделали бы этот набор данных более упорядоченным?  
+**Messy:** What changes would make this dataset more tidy?  
 
 
 &lt;table&gt;
@@ -432,7 +432,7 @@ class: inverse, center, middle
 
 .pull-right[
 
-**Упорядоченные:** Возраст и единица возраста разделены на отдельные ячейки  
+**Tidy:** Age and the age unit are separated into distinct cells  
 
 &lt;table&gt;
  &lt;thead&gt;
@@ -476,31 +476,31 @@ Let's start with an easy one...
 
 ---
 
-# Терминология  
+# Terminology  
 
-Структурно "датафреймы" в R состоят из **столбцов** и **строк**.  
-
---
-
-Однако **"переменные "** и **"наблюдения "** являются более *абстрактными* понятиями:  
-
-* **Переменные** измеряют один *основной атрибут* (возраст, исход или дату появления симптомов).  
-* **Наблюдения** относятся к *единице анализа*.  
+Structurally, "data frames" in R consist of **columns** and **rows**.  
 
 --
 
-В идеале они сопоставлены: **столбцы = переменные** и **строки = наблюдения**.  
+However, **"variables"** and **"observations"** are more *abstract* concepts:  
 
-&lt;img src="../../../images/data_cleaning/tidy_image_ru.png" width="754" height="65%" /&gt;
+* **Variables** measure one *underlying attribute* (age, outcome, or date of onset)  
+* **Observations** relate to a *unit of analysis*  
 
-.footnote[Источник изображения: [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)]
+--
+
+Ideally, they align: **columns = variables** and **rows = observations**  
+
+&lt;img src="../../../images/data_cleaning/tidy_image_en.png" width="853" height="65%" /&gt;
+
+.footnote[Image source: [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)]
 
 
 
 
 
 ---
-# Но это не всегда понятно...  
+# But it is not always clear...  
 
 .pull-left[
 
@@ -535,10 +535,10 @@ Let's start with an easy one...
 &lt;/tbody&gt;
 &lt;/table&gt;
 
-* Является ли "January" переменной?  
-* Где находится переменная "month"?  
-* Есть ли у него свой столбец?  
-* Является ли каждое наблюдение строкой?  
+* Is "January" a variable?  
+* Where is the variable "month"?  
+* Does it have its own column?  
+* Is each observation a row?  
 
 
 ]
@@ -613,7 +613,7 @@ Let's start with an easy one...
 class: inverse, center, middle
 
 
-## Упражнение  
+## Exercise  
 
 
 &lt;img src="../../../images/breakout/teamwork2.png" width="50%" /&gt;

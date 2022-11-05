@@ -211,6 +211,17 @@ Note stretch breaks throughout.
 
 
 .pull-left[
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_broom.png")))
+```
+]
+
+--
+
+.pull-right[
 
 - `r paste0(mod3[mod3$uid == "mod3_bu_clean_1", params$lang])`  
 
@@ -228,21 +239,12 @@ Note stretch breaks throughout.
  
 ]
 
---
 
-.pull-right[
-```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
-# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
-# It dynamically creates the ../../etc filepath.
-
-knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_broom.png")))
-```
-]
 
 .footnote[]
 
 ???
-Ask the participants to quickly write what makes a dataset clean, in their view, in the chat
+Ask the participants what steps they take to clean datasets
 
 
 ---
@@ -302,6 +304,9 @@ Table shows just the first 25 rows, to load faster.
 demo <- surv_raw %>% 
      head(5) %>% 
      select(case_id, age, gender, lab_confirmed, `onset date`, `wt (kg)`, `ht (cm)`)
+
+demo <- demo %>% 
+  add_row(demo[4,], .before = 5)
 ```
 
 ```{r, eval=T}
@@ -348,18 +353,16 @@ Tidyverse has made R coding much more user-friendly, intuitive, and accessible t
 
 ---
 
-# `r paste0(mod3[mod3$uid == "mod3_h1_dplyR", params$lang])`  
-
-`r paste0(mod3[mod3$uid == "mod3_tx_dplyR", params$lang])`  
-
+# `r paste0(mod3[mod3$uid == "mod3_h1_functions", params$lang])`  
 
 `r paste0(mod3[mod3$uid == "mod3_tb_dplyR_1", params$lang])`       | `r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2", params$lang])`                               
 ---------------|---------------------------------------
 `filter()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_1", params$lang])`
 `select()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_2", params$lang])`
+`clean_names()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_5", params$lang])`  
 `rename()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_3", params$lang])` 
 `mutate()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_4", params$lang])` 
-`case_when()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_5", params$lang])`  
+`mdy()`, `dmy()`, `ymd()` |`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_6", params$lang])` 
 
 
 
@@ -525,7 +528,7 @@ select(demo, case_id, age, gender)
 ```
 
 ```{r, eval=F, echo=params$lang == "ru"}
-# add gender column
+# добавить колонку "пол
 select(demo, case_id, age, gender)
 ```
 
@@ -551,7 +554,7 @@ select(demo, -case_id, -lab_confirmed)
 ```
 
 ```{r, eval=F, echo=params$lang == "ru"}
-# remove case_id and lab_confirmed columns from original dataset
+#удалить столбцы case_id и lab_confirmed из исходного набора данных
 select(demo, -case_id, -lab_confirmed)
 ```
 
@@ -662,7 +665,7 @@ demo
 
 ```{r, eval=T, echo=F}
 demo %>%  
-  add_row(demo[5,]) %>% 
+  #add_row(demo[5,]) %>% 
   knitr::kable() 
 ```
 
@@ -684,12 +687,12 @@ demo %>%
 
 ```{r, eval=F, echo=params$lang == "ru"}
 demo %>% 
-  select(case_id, age, gender, lab_confirmed)        # select columns
+  select(case_id, age, gender, lab_confirmed)        # выбрать столбцы
 ```
 
 ```{r, eval=T, echo=F}
 demo %>% 
-  add_row(demo[5,]) %>% 
+  #add_row(demo[5,]) %>% 
   select(case_id, age, gender, lab_confirmed) %>%    # select columns
   knitr::kable() 
 ```
@@ -714,13 +717,13 @@ demo %>%
 
 ```{r, eval=F, echo=params$lang == "ru"}
 demo %>% 
-  select(case_id, age, gender, lab_confirmed) %>%    # select columns
-  distinct()                                         # de-duplicate
+  select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
+  distinct()                                         # де-дублировать
 ```
 
 ```{r, eval=T, echo=F}
 demo %>% 
-  add_row(demo[5,]) %>% 
+  #add_row(demo[5,]) %>% 
   select(case_id, age, gender, lab_confirmed) %>%    # select columns
   distinct() %>%                                     # de-duplicate
   knitr::kable() 
@@ -749,14 +752,14 @@ demo %>%
 
 ```{r, eval=F, echo=params$lang== "ru"}
 demo %>% 
-  select(case_id, age, gender, lab_confirmed) %>%    # select columns
-  distinct() %>%                                     # de-duplicate
-  filter(age < 18, lab_confirmed == TRUE)            # only young children confirmed cases
+  select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
+  distinct()  %>%                                    # де-дублировать
+  filter(age < 18, lab_confirmed == TRUE)            #подтвержденные случаи заболевания только у детей младшего возраста
 ```
 
 ```{r, eval=T, echo=F}
 demo %>% 
-  add_row(demo[5,]) %>% 
+  #add_row(demo[5,]) %>% 
   select(case_id, age, gender, lab_confirmed) %>%    # select columns
   distinct() %>%                                     # de-duplicate
   filter(age < 18, lab_confirmed == TRUE) %>%        # only young children confirmed cases
@@ -769,15 +772,14 @@ demo %>%
 # `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
 
 `r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
-`r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
 
 
 ```{r, eval=F, echo=params$lang == "en"}
 demo %>% 
-  select(case_id, age, gender, lab_confirmed) %>%               
-  distinct() %>%                                                
-  filter(age < 18, lab_confirmed == TRUE) %>%                   
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))       
+  select(case_id, age, gender, lab_confirmed) %>%         # select columns
+  distinct() %>%                                            # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE) %>%               # only young children confirmed cases      
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # create a column      
  
 ```
 
@@ -792,22 +794,23 @@ demo %>%
 
 ```{r, eval=F, echo=params$lang == "ru"}
 demo %>% 
-  select(case_id, age, gender, lab_confirmed) %>%               
-  distinct() %>%                                                
-  filter(age < 18, lab_confirmed == TRUE) %>%                   
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))       
+  select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
+  distinct()  %>%                                    # де-дублировать
+  filter(age < 18, lab_confirmed == TRUE) %>%        #подтвержденные случаи заболевания только у детей младшего возраста%>%                   
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # создать столбец
  
 ```
 
 ```{r, eval=T, echo=F}
 demo %>% 
-  add_row(demo[5,]) %>% 
+  #add_row(demo[5,]) %>% 
   select(case_id, age, gender, lab_confirmed) %>%          
   distinct() %>%                                           
   filter(age < 18, lab_confirmed == TRUE) %>%              
   mutate(infant = ifelse(age < 1, "infant", "not infant")) %>% 
   knitr::kable()
 ```
+
 .footnote[`r paste0(mod3[mod3$uid == "mod3_fn_vertical_1", params$lang])`]
 
 
@@ -815,8 +818,6 @@ demo %>%
 # `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
 
 `r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
-`r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
-
 
 ```{r, eval=F, echo=params$lang == "en"}
 demo %>% 
@@ -847,7 +848,7 @@ demo %>%
 
 ```{r, eval=T, echo=F}
 demo %>% 
-  add_row(demo[5,]) %>% 
+  #add_row(demo[5,]) %>% 
   select(case_id, age, gender, lab_confirmed) %>%          
   distinct() %>%                                           
   filter(age < 18, lab_confirmed == TRUE) %>%              
@@ -899,7 +900,7 @@ demo %>%
 
 `r paste0(mod3[mod3$uid == "mod3_tx_rename_2", params$lang])`  
 
-```{r, echo=params$lang == "en"}
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
 demo %>% 
   clean_names() %>% 
   rename(
@@ -909,7 +910,7 @@ demo %>%
   names()
 ```
 
-```{r, echo=params$lang == "fr"}
+```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
 demo %>% 
   clean_names() %>% 
   rename(
@@ -919,11 +920,11 @@ demo %>%
   names()
 ```
 
-```{r, echo=params$lang == "ru"}
+```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
 demo %>% 
   clean_names() %>% 
   rename(
-       # Nouveau  = Ancien
+       # Новый  = Старый
        age_years  = age,                    #<<
        date_onset = onset_date) %>%         #<<
   names()
@@ -947,7 +948,7 @@ demo %>%                    # IMPRIMER uniquement les cas d'enfants
 ```
 
 ```{r, echo=params$lang == "ru", eval=F}
-demo %>%                    # PRINT only child cases
+demo %>%                   # ПРИНТ только детские случаи
   filter(age < 18)
 ```
 
@@ -1032,9 +1033,9 @@ demo %>%
 
 ```{r echo=params$lang == "ru", eval=params$lang == "ru"}
 demo %>% 
-  mutate(gender = recode(gender,   #re-define gender as: 
-    'm' = 'male',                  # when "m", change to "male"   
-    'f' = 'female'))               # when "f", change to "female"
+  mutate(gender = recode(gender,   # переопределите пол как:
+    'm' = 'male',                  # когда "m", меняется на "male", m меняется на мужской 
+    'f' = 'female'))               # когда "f", меняется на "female", f меняется на женский
 ```
 
 ???

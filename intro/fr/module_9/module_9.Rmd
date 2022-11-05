@@ -360,7 +360,9 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "1
 `r paste0(mod9[mod9$uid == "mod9_tx_component_1", params$lang])`
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "2_defaultRMD.png")))
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("2_defaultRMD_", params$lang, ".png"))))
+
 ```
 
 
@@ -371,7 +373,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "2
 `r paste0(mod9[mod9$uid == "mod9_tx_component_2", params$lang])`  
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "rmarkdown_translation.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("rmarkdown_translation_", params$lang, ".png"))))
 ```
 
 
@@ -437,7 +439,7 @@ surv <- surv %>%
 `r paste0(mod9[mod9$uid == "mod9_tx_chunk_1", params$lang])`  
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "6_Rmdexample.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("6_Rmdexample_", params$lang, ".png"))))
 ```
 
 ---
@@ -482,13 +484,13 @@ Chunk names cannot contain spaces
 `r paste0(mod9[mod9$uid == "mod9_tx_inline_1", params$lang])`  
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "verbatim_inline_1_1.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("verbatim_inline_1_1_", params$lang, ".png"))))
 ```
 
 `r paste0(mod9[mod9$uid == "mod9_tx_inline_2", params$lang])`  
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "verbatim_inline_1_2.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("verbatim_inline_1_2_", params$lang, ".png"))))
 ```
 
 
@@ -498,13 +500,13 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "v
 `r paste0(mod9[mod9$uid == "mod9_tx_inline_1", params$lang])`  
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "verbatim_inline_2_1.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("verbatim_inline_2_1_", params$lang, ".png"))))
 ```
 
 `r paste0(mod9[mod9$uid == "mod9_tx_inline_2", params$lang])`  
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "verbatim_inline_2_2.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("verbatim_inline_2_2_", params$lang, ".png"))))
 ```
 
 ---
@@ -516,10 +518,17 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "v
 epikit::fmt_count(surv, is.na(date_onset))
 ```
 
---
 
-```{r, eval=TRUE, echo=TRUE}
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
 str_glue("{fmt_count(surv, is.na(date_onset))} are missing date of onset and not shown.")
+```
+
+```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
+str_glue("{fmt_count(surv, is.na(date_onset))} cas n'ont pas de date d'apparition et ne sont pas présentés ici.")
+```
+
+```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
+str_glue("{fmt_count(surv, is.na(date_onset))} случаев дата начала заболевания отсутствует и не показана.")
 ```
 
 --
@@ -527,10 +536,20 @@ str_glue("{fmt_count(surv, is.na(date_onset))} are missing date of onset and not
 {scales}
 
 
-```{r, eval=TRUE, echo=TRUE}
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
 str_glue("There were {comma(sum(as.numeric(surv$diff), na.rm=T))} total delay days between symptom onset and report.")
+
 ```
 
+```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
+str_glue("Il y avait {comma(sum(as.numeric(surv$diff), na.rm=T))} jours de retard total entre l'apparition des symptômes et la déclaration.")
+
+```
+
+```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
+str_glue("Между началом симптомов и сообщением о них прошло {comma(sum(as.numeric(surv$diff), na.rm=T))} всего дней задержки.")
+
+```
 
 ---
 # `r paste0(mod9[mod9$uid == "mod9_h1_heading", params$lang])`  
@@ -538,7 +557,7 @@ str_glue("There were {comma(sum(as.numeric(surv$diff), na.rm=T))} total delay da
 - `r paste0(mod9[mod9$uid == "mod9_bu_heading", params$lang])`
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "2_text.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("2_text_", params$lang, ".png"))))
 ```
 
 
@@ -569,7 +588,7 @@ Cell D   |Cell E    |Cell F
 `r paste0(mod9[mod9$uid == "mod9_tx_source", params$lang])`  
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "source_mode.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("source_mode_", params$lang, ".png"))))
 ```
 
 ---
@@ -579,7 +598,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "s
 
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "visual_mode.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("visual_mode_", params$lang, ".png"))))
 ```
 
 ???
