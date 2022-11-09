@@ -155,23 +155,21 @@ contact@appliedepi.org
 * `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_aim_2", params$lang])`
 * `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_aim_3", params$lang])`
 
-
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
   ~Time, ~Location, ~Topic,
-  "20 minutes",    "Main",      "{ggplot2} 'Grammar of graphics' syntax",
-  "10 minutes",    "Main",      "Live demonstration",
-  "1h 30 minutes", "Breakouts", "Exercise: simple plots",
-  "20 minutes",    "Main",      "Scales, themes, and labels",
-  "1 hour",        "Breakouts", "Fine-tuning plots",
-  "10 minutes",    "Main",      "Plenary debrief"
+  str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_1_1", params$lang])}),     str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_2_1", params$lang])}),      str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_3_1", params$lang])}),
+  str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_1_2", params$lang])}),     str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_2_2", params$lang])}),      str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_3_2", params$lang])}),
+  str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_1_3", params$lang])}),     str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_2_3", params$lang])}), str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_3_3", params$lang])}),
+  str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_1_4", params$lang])}),     str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_2_4", params$lang])}), str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_3_4", params$lang])}),
+  str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_1_5", params$lang])}),     str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_2_5", params$lang])}), str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_3_5", params$lang])}),
+  str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_1_6", params$lang])}),     str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_2_6", params$lang])}),      str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_3_6", params$lang])})
 )
 
 outline %>% 
   flextable::qflextable() %>% 
-  flextable::add_footer_lines("Breaks are incorporated above, but not shown as rows")
+  flextable::add_footer_lines(str_glue({paste0(mod6_1[mod6_1$uid == "mod6_fn_objectives", params$lang])}))
 ```
-
 
 
 
@@ -957,11 +955,11 @@ geom_point()          # afficher les données sous forme de points
 
 ```{r, echo = params$lang == "ru", eval = FALSE, tidy = FALSE}
 ggplot(
-  data = surv,        # use case linelist
-  mapping = aes(      # make aesthetic mappings for all geoms
-    x = age_years,    # assign x-axis to age column
-    y = ht_cm)) +     # assign y-axis to height
-geom_point()          # display data as points
+  data = surv,     # использование линейного списка
+  mapping = aes(   # создаем эстетические отображения для всех геомов
+    x = age_years, # присвоить ось x столбцу возраста
+    y = ht_cm)) +  # присвоить ось y росту
+geom_point()       # отображение данных в виде точек
 ```
 
 
@@ -1075,7 +1073,7 @@ cowplot::plot_grid(color_purple, color_hospital,
 color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
   geom_point(color = "purple")+
   theme_minimal(base_size = 16)+
-  labs(title = "Using color = 'purple' (mauve)")
+  labs(title = "Использование цвета = 'purple' (сиреневый)")
 
 color_hospital <- ggplot() + theme_void()
 
@@ -1164,12 +1162,12 @@ cowplot::plot_grid(color_purple, color_hospital,
 color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
   geom_point(color = "purple")+
   theme_minimal(base_size = 16)+
-  labs(title = "Using color = 'purple'")
+  labs(title = "Использование цвета = 'purple' (сиреневый)")
 
 color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
   geom_point(aes(color = hospital))+
   theme_minimal(base_size = 16)+
-  labs(title = "Using aes(color = hospital)")
+  labs(title = "Использование aes(color = hospital), больница")
 
 cowplot::plot_grid(color_purple, color_hospital,
                   nrow = 2, rel_widths = c(2,2))
@@ -1262,13 +1260,13 @@ cowplot::plot_grid(
 fill_purple <- ggplot(data = surv, aes(x = date_onset))+
   geom_histogram(fill = "purple")+
   theme_minimal(base_size = 16)+
-  labs(title = "Using fill = 'purple'")
+  labs(title = "Использование fill = 'purple' (сиреневый)")
 
 
 fill_hospital <- ggplot(data = surv, aes(x = date_onset))+
   geom_histogram(aes(fill = hospital))+
     theme_minimal(base_size = 16)+
-  labs(title = "Using aes(fill = hospital)")
+  labs(title = "Использование aes(fill= hospital), больница")
 
 cowplot::plot_grid(
                   fill_purple, fill_hospital,
@@ -1506,13 +1504,33 @@ geom_histogram() +
 
 
 .pull-right[
-```{r }
+```{r, eval = params$lang == "en", echo = F }
 ggplot(data = surv,
        mapping = aes(x = date_onset)) +
 geom_histogram() +
 facet_wrap(~hospital,
            scales = "free_y") +
 labs(caption = "Note the free y-axis")+
+theme_grey(base_size = 16)
+```
+
+```{r, eval = params$lang == "fr", echo = F}
+ggplot(data = surv,
+       mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~hospital,
+           scales = "free_y") +
+labs(caption = "Notez l'axe y libre")+
+theme_grey(base_size = 16)
+```
+
+```{r, eval = params$lang == "ru", echo = F }
+ggplot(data = surv,
+       mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~hospital,
+           scales = "free_y") +
+labs(caption = "Обратите внимание на свободную ось y")+
 theme_grey(base_size = 16)
 ```
 
