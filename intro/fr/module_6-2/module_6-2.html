@@ -71,28 +71,28 @@ contact@appliedepi.org
 ---
 # Grammaire des graphiques  
 
-Revenons à la séquence qui construit un ggplot.
+Rappel sur la construction d'un ggplot :
 --
 
-L'ordre des couches ressemble généralement à ceci :
+Ordre typique des couches :
 
-1) ✅ **Créer un graphe**
-
---
-
-2) ✅ **Associer les colonnes de données** aux caractéristiques "esthétiques" (attribus) du graphique
+1) ✅ **Création du graphe vide**
 
 --
 
-3) ✅ **Ajouter (`+`) des couches "geom"**
+2) ✅ **Assignation des colonnes de données aux caractéristiques "esthétiques" (attribus) du graphique**
 
 --
 
-4) ✅ **Modifier les "échelles"** telles que l'échelle de couleurs ou des axes
+3) ✅ **Ajout des couches "geom (`+`)"**
 
 --
 
-5) ✅ **Modifier l'apparence du graphique (thème)**: étiquettes, titre, légende, polices et taille du texte, couleur d'arrière plan, rotation des axes
+4) ✅ **Modification des "échelles"** (couleurs, axes...)
+
+--
+
+5) ✅ **Modification de l'apparence du graphique (thème)** : étiquettes, titre, légende, polices, taille du texte, couleur d'arrière plan, rotation des axes
 
 
 ???
@@ -117,12 +117,12 @@ class: inverse, center, middle
 
 
 ---
-# Échelles - vue d'ensemble
+# Échelles
 
-Les commandes d'échelle remplacent les valeurs par défaut pour la façon dont l'esthétique est affichée, telles que :
-* *Quelles* couleurs ou formes afficher
-* *Comment* les dates ou les proportions sont écrites dans les étiquettes des axes.
-* Le min/max et la fréquence des ticks sur les axes
+Les commandes d'échelle modifient les esthétiques :
+* Couleurs ou formes
+* Format des dates ou des proportions sur les axes
+* Min/max et fréquence des tirets sur les axes
 
 --
 
@@ -170,12 +170,12 @@ Les commandes d'échelle remplacent les valeurs par défaut pour la façon dont 
 ---
 # Exemples d'échelles  
 
-Quelques exemples de commandes d'échelle :
+Exemples de commandes :
 
-Vous voulez ajuster|Commande d'échelle
+Vous voulez ajuster|Code
 --------------------|-------------------
 axes des y continu |`scale_y_continuous()`
-axes de la date |`scale_x_date()`  
+axe des x représente des dates |`scale_x_date()`  
 axes des x catégorique |`scale_x_discrete()`  
 remplissage, continu |`scale_fill_continuous()`
 remplissage, continu |`scale_fill_gradient()`  
@@ -185,7 +185,7 @@ couleur, attribution manuelle |`scale_color_manual()`
 
 
 ---
-# Échelles - par défaut
+# Échelles : par défaut
 
 .pull-left[
 
@@ -200,7 +200,7 @@ geom_bar()
 ```
 
 
-Ci-dessus, le remplissage d'un graphique à barres utilise les **couleurs et les ruptures d'axe par défaut** : 
+Ci-dessus, le remplissage des barres utilise les **couleurs et les axes par défaut** : 
 
 ]
 
@@ -214,7 +214,7 @@ Ci-dessus, le remplissage d'un graphique à barres utilise les **couleurs et les
 Ignore the overlapping x-axis labels, for code simplicity we are not adjusting these in this slide.  
 
 ---
-# Échelles - remplissage ajusté  
+# Échelles : modifiées  
 
 .pull-left[
 
@@ -233,8 +233,8 @@ geom_bar() +
 *    "female"   = "aquamarine"))
 ```
 
-Dans `scale_fill_manual()`, nous fournissons des affectations **manuelles** 
-dans un vecteur `c()`.  
+Dans `scale_fill_manual()`, nous définissions les couleurs **manuellement** 
+avec un vecteur `c()`.  
 
 
 .footnote[Utilisez *na.value = "grey "* pour les valeurs manquantes. 
@@ -254,7 +254,7 @@ Discuss the na.value= arguments in most scale commands, and the difference betwe
 
 
 ---
-# Échelles - colorbrewer 
+# Palette colorbrewer 
 
 .pull-left[
 
@@ -272,7 +272,7 @@ geom_bar() +
 *   na.value = "grey50")
 ```
 
-Utilisez `scale_fill_brewer()` pour des palettes agréables  
+Utilisez `scale_fill_brewer()` pour de palettes prédéfinies  
 
 
 .footnote[Utilisez *na.value = "grey "* pour les valeurs manquantes. 
@@ -291,7 +291,7 @@ Briefly mention the `na.value=` arguments in most scale commands, and the differ
 
 
 ---
-# Échelles - axe d'y ajusté 
+# Ajuster l'axe des y 
 
 .pull-left[
 
@@ -313,7 +313,7 @@ scale_fill_manual(
 *               by = 10))
 ```
 
-Dans `scale_y_continuous()` nous ajustons les ruptures de l'axe en utilisant `seq()` pour définir une séquence numérique. 
+Dans `scale_y_continuous()` nous changeons les tirets de l'axe avec `seq()` pour définir une séquence numérique. 
 
 ]
 
@@ -328,7 +328,7 @@ Dans `scale_y_continuous()` nous ajustons les ruptures de l'axe en utilisant `se
 
 
 ---
-# Échelles - axes commencent à 0  
+# Axes commencent à 0  
 
 .pull-left[
 
@@ -367,7 +367,7 @@ Dans les commandes `scale_x_` ou `scale_y_`, utilisez `expand = c(0,0)` pour sup
 
 
 ---
-# Échelles - étiquettes de date  
+# Le cas des dates  
 
 .pull-left[
 
@@ -379,7 +379,7 @@ ggplot(
 geom_histogram()
 ```
 
-L'échelle par défaut des axes de date varie en fonction de la plage de vos données.  
+Par défaut, l'échelle des axes de date varie en fonction de la plage de vos données.  
 
 ]
 
@@ -398,9 +398,11 @@ L'échelle par défaut des axes de date varie en fonction de la plage de vos don
 
 
 ---
-# Échelles - étiquettes de date 
+# Le cas des dates : choix des étiquettes 
 
 .pull-left[  
+
+
 
 
 ```r
@@ -409,20 +411,22 @@ ggplot(
   mapping = aes(x = date_onset)) +
 geom_histogram() +
 *scale_x_date(
-*  date_breaks = "2 months")
+*  date_breaks = "2 months") #2 mois
 ```
+
+
 
 Ajustez les étiquettes des axes avec `scale_x_date()`. 
 
-Utilisez des valeurs `date_breaks=` "1 semaine", "2 semaines", ou "3 mois". 
+Utilisez des valeurs `date_breaks=` "1 week", "2 weeks", ou "3 months". 
 
-Ces valeurs ajustent seulement les étiquettes des axes, pas les bandes de l'hostogramme !
+Ces valeurs ajustent les **étiquettes** des axes, pas la largeur des barres !
 
 ]
 
 .pull-right[
 
-&lt;img src="module_6-2_files/figure-html/unnamed-chunk-34-1.png" width="504" /&gt;
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-36-1.png" width="504" /&gt;
 
 ]
 
@@ -437,7 +441,7 @@ For tips on geom_histogram() bins, see Epi R Handbook epicurves page
 
 
 ---
-# Échelles - étiquettes de date 
+# Le cas des dates : format des étiquettes 
 
 .pull-left[
 
@@ -466,7 +470,7 @@ Spécifiez le format des étiquettes de date dans `date_labels=` en utilisant
 
 .pull-right[
 
-&lt;img src="module_6-2_files/figure-html/unnamed-chunk-36-1.png" width="504" /&gt;
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-38-1.png" width="504" /&gt;
 
 ]
 
@@ -479,9 +483,11 @@ Spécifiez le format des étiquettes de date dans `date_labels=` en utilisant
 
 
 ---
-# Échelles - étiquettes efficaces 
+# Le cas des dates : étiquettes automatiques 
 
 .pull-left[
+
+
 
 
 ```r
@@ -490,11 +496,13 @@ ggplot(
   mapping = aes(x = date_onset)) +
 geom_histogram() +
 scale_x_date(
-* date_breaks = "2 weeks",
+* date_breaks = "2 weeks", # 2 semaines
 * labels = label_date_short() )
 ```
 
-Ou, simplement assigner `labels=` à `label_date_short()` de [{scales}](https://scales.r-lib.org/)  
+
+
+On peut assigner `labels=` à `label_date_short()` de [{scales}](https://scales.r-lib.org/)  
 
 L'année n'est pas répétée sur chaque étiquette. 
 
@@ -502,7 +510,7 @@ L'année n'est pas répétée sur chaque étiquette.
 
 .pull-right[
 
-&lt;img src="module_6-2_files/figure-html/unnamed-chunk-38-1.png" width="504" /&gt;
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-42-1.png" width="504" /&gt;
 
 ]
 
@@ -548,7 +556,7 @@ scale_fill_brewer(type = "qual",
 
 .pull-right[
 
-&lt;img src="module_6-2_files/figure-html/unnamed-chunk-41-1.png" width="504" /&gt;
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-45-1.png" width="504" /&gt;
 ]
 
 
@@ -594,7 +602,7 @@ Utilisez `labs()` etmodifiez le titre de la légende via l'esthétique qui a cr�
 
 
 
-&lt;img src="module_6-2_files/figure-html/unnamed-chunk-46-1.png" width="504" /&gt;
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-50-1.png" width="504" /&gt;
 
 
 ]
@@ -617,7 +625,7 @@ str_glue("Données à partir de {Sys.Date()}")
 ```
 
 ```
-## Données à partir de 2022-10-29
+## Données à partir de 2022-11-06
 ```
 
 
@@ -665,15 +673,15 @@ class: inverse, center, middle
 
 # Thèmes  
 
-Les thèmes sont des caractéristiques de l'apparence du graphique pas associé aux données, par exemple : 
+Les thèmes modifient l'apparence du graphique, indépendament des données. Par exemple : 
 
-* L'arrière-plan du canevas du graphe 
+* L'arrière-plan du graphe 
 * La taille, la couleur et l'orientation du texte  
-* Position de la légende 
+* La position de la légende 
 
 --
 
-Avec la puissance de {ggplot2} vous pouvez faire de très petits ajustements  
+{ggplot2} permet un contrôle très fin  
 
 ... si vous le souhaitez.  
 
@@ -705,7 +713,7 @@ Essayez l'argument `base_size = 16` pour augmenter rapidement la taille du texte
 
 .pull-right[
 
-&lt;img src="module_6-2_files/figure-html/unnamed-chunk-56-1.png" width="504" /&gt;
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-60-1.png" width="504" /&gt;
 
 
 
@@ -718,20 +726,20 @@ Essayez l'argument `base_size = 16` pour augmenter rapidement la taille du texte
 
 Faites des micro-ajustements dans `theme()`.  
 
-Fournissez des arguments pour chaque petit changement que vous voulez faire, par exemple :  
+Fournissez des arguments pour chaque changement que vous voulez faire, par exemple :  
 
-Composant du graphe        | Argument de thème 
+Composant du graphe        | Argument 
 -----------------------------------------------------------------------------------------------|---------------  
 position de la légende       |`legend.position = `  
 direction de la légende (horizontale ou verticale)       | `legend.direction = `  
 
 --
 
-Ces arguments peuvent être *très très* spécifiques :   
+Ces arguments peuvent être *très* spécifiques :   
 
-Composant du graphe        | Argument de thème 
+Composant du graphe        | Argument 
 -----------------------------------------------------------------------------------------------|---------------  
-Longueur des ticks de l'axe des X        |`axis.ticks.length.x = `  
+Longueur des tirets de l'axe des X        |`axis.ticks.length.x = `  
 
 Il y a des centaines d'options.  
 
@@ -744,7 +752,7 @@ Think of all the minute adjustments that you make when creating a plot in Excel.
 
 .pull-left[
 
-Faites des micro-ajustements dans `theme()`. 
+Faites les ajustements dans `theme()`. 
 
 
 
@@ -782,7 +790,7 @@ La syntaxe demande de la pratique, voir [cette liste](https://ggplot2.tidyverse.
 
 
 
-&lt;img src="module_6-2_files/figure-html/unnamed-chunk-61-1.png" width="504" /&gt;
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-65-1.png" width="504" /&gt;
 
 
 ]
@@ -796,9 +804,9 @@ Remember to add them AFTER any complete themes.
 
 
 ---
-# Thèmes - `element_text()` 
+# Thèmes :  `element_text()` 
 
-Si vous changez le *texte*, les micro-ajustements doivent souvent être faits *dans* `element_text()`. 
+Les modifications du *texte* sont souvent faites *dans* `element_text()`. 
 
 
 ```r

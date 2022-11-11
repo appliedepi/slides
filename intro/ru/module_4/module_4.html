@@ -63,23 +63,23 @@ class: inverse, center, middle, title-slide
 
 
 
-# Introduction à R pour l'épidémiologie appliquée
+# Введение в R для прикладной эпидемиологии
 
-### Nettoyage de données avec R (partie 2)
+### Вычистка данных с помощью R (часть 2)
 
 contact@appliedepi.org
 
 
 ---
-# Objectifs et calendrier  
+# Цели и расписание  
 
-**Dans ce module, nous voulons vous aider à :**  
-* Vous familiariser avec les fonctions {dplyr} utilisées pour nettoyer les données de santé publique  
-* Appliquer une série de fonctions à un dataframe en utilisant l'opérateur pipe.  
-* Commencer à écrire un script R pour analyser les données de l'épidémie.  
+**В этом модуле мы стремимся помочь вам:**  
+* Ознакомиться с функциями {dplyr}, используемыми для вычистки данных общественного здравоохранения  
+* Применить серию функций к датафрейму с помощью оператора канала  
+* Начните писать скрипт R для анализа данных вспышек  
 
 
-&lt;template id="3a362c72-857c-4fd6-85ed-c6187f9b9eaf"&gt;&lt;style&gt;
+&lt;template id="1e243499-1832-4a07-8e9b-ba0923c77060"&gt;&lt;style&gt;
 .tabwid table{
   border-spacing:0px !important;
   border-collapse:collapse;
@@ -118,33 +118,33 @@ background-color: transparent;
 .katex-display {
     margin: 0 0 !important;
 }
-&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-2df2590e{}.cl-2de7c41c{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-2dec22a0{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-2dec3826{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec3830{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec3831{width:2.205in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec383a{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec3844{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec3845{width:2.205in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec384e{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec384f{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec3858{width:2.205in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec3859{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec3862{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec386c{width:2.205in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec386d{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec3876{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec3877{width:2.205in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec3880{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec3881{width:0.871in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2dec388a{width:2.205in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-2df2590e'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-2dec3826"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-2dec3830"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-2dec3831"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-2dec383a"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-2dec3844"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-2dec3845"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;Revue du module précédent&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-2dec384e"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-2dec384f"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-2dec3858"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;Demo - codage logique&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-2dec3859"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;1h30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-2dec3862"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;Exercice&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-2dec386c"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;Exercice&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-2dec386d"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-2dec3876"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;Plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-2dec3877"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;Débriefing en plénière&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-2dec3880"&gt;&lt;p class="cl-2dec22a0"&gt;&lt;span class="cl-2de7c41c"&gt;Faites des pauses comme vous le souhaitez pendant l'exercice&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
-&lt;div class="flextable-shadow-host" id="c705a1cc-93a1-4cf3-b44c-ea65f48d2cf6"&gt;&lt;/div&gt;
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-5dd820d8{}.cl-5dcd3542{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-5dd19286{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-5dd1a758{width:1.329in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5dd1a762{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5dd1a76c{width:3.208in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5dd1a776{width:1.329in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5dd1a780{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5dd1a781{width:3.208in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5dd1a78a{width:1.329in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5dd1a79e{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5dd1a79f{width:3.208in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5dd1a7a8{width:1.329in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5dd1a7a9{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5dd1a7b2{width:3.208in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-5dd820d8'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5dd1a758"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5dd1a762"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5dd1a76c"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5dd1a776"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;15 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5dd1a780"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5dd1a781"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;Повторение предыдущего модуля&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5dd1a776"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;15 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5dd1a780"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5dd1a781"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;Демонстрация - логическое кодирование&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5dd1a776"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;1 час 30 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5dd1a780"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5dd1a781"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;Упражнение&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-5dd1a78a"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;30 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5dd1a79e"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;Сессионные залы&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-5dd1a79f"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;Общее обсуждение&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-5dd1a7a8"&gt;&lt;p class="cl-5dd19286"&gt;&lt;span class="cl-5dcd3542"&gt;Делайте перерывы по своему усмотрению во время выполнения упражнения&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="4f613a87-85bf-4320-8238-ce011b7e406f"&gt;&lt;/div&gt;
 &lt;script&gt;
-var dest = document.getElementById("c705a1cc-93a1-4cf3-b44c-ea65f48d2cf6");
-var template = document.getElementById("3a362c72-857c-4fd6-85ed-c6187f9b9eaf");
+var dest = document.getElementById("4f613a87-85bf-4320-8238-ce011b7e406f");
+var template = document.getElementById("1e243499-1832-4a07-8e9b-ba0923c77060");
 var caption = template.content.querySelector("caption");
 var fantome = dest.attachShadow({mode: 'open'});
 var templateContent = template.content;
 fantome.appendChild(templateContent);
 &lt;/script&gt;
 
-**C'est un exercice *long*, mais très important.**  
+**Это *длинное* упражнение, но очень важное*.  
 
 ???
 Note stretch breaks throughout.
 
 
 ---
-# Revue du module précédent  
+# Повторение предыдущего модуля  
 
 
 
 ---
 
-# Jeu de données de démonstration  
+# Демонстрационный набор данных  
 
-Utilisons une version plus petite pour nous entraîner, et explorons quelques fonctions R de base.
+Давайте воспользуемся меньшей версией для практики и изучим некоторые основные функции R
 
 
 &lt;table&gt;
@@ -204,22 +204,24 @@ Utilisons une version plus petite pour nous entraîner, et explorons quelques fo
 
 --
 
-Nommons le  **demo**.
+Мы назовем его "**`demo`**".
 
 ---
 
-# Le paquet {dplyr}  
+# Пакет {dplyr}  
 
-Certaines des fonctions {dplyr} que nous utiliserons :  
+Некоторые из функций {dplyr}, которые мы будем использовать:  
 
 
-Fonction       | Utilitaire                               
+Функция       | Утилита                               
 ---------------|---------------------------------------
-`filter()`|sélectionner des lines
-`select()`|sélectionner des colonnes
-`rename()`|renommer les colonnes 
-`mutate()`|créer et transformer des colonnes 
-`case_when()`|recoder les valeurs en utilisant des critères logiques   
+`mutate()`|создание и преобразование столбцов  
+`ifelse()`|простое логическое перекодирование значений  
+`case_when()`|сложное логическое перекодирование ценностей   
+`age_categories()`|создание колонки возрастной категории   
+`coalesce()`|приоритизация значений   
+`select()`|подмножество столбцов  
+
 
 
 
@@ -227,13 +229,17 @@ Fonction       | Utilitaire
 
 ---
 
-# Impression ou création d'objet ?   
+# Печать или сохранение   
 
-Nos pipes ont seulement *affiché* `demo` modifié , le dataframe n'a **pas** changé ! 
+Наши каналы только *печатают* модифицированный `demo` - датафрейм **не** изменился! 
+
+
+
+
 
 
 ```r
-demo %&gt;%                    # PRINT only cases over 10 years
+demo %&gt;%                    # ПРИНТ только случаи старше 10 лет
   filter(age &gt; 10)
 ```
 
@@ -271,7 +277,7 @@ demo %&gt;%                    # PRINT only cases over 10 years
 --
 
 
-Pour sauvegarder : ajoutez l'opérateur d'assignation **&lt;-** pour définir un nouveau dataframe. 
+Для сохранения: добавьте оператор присваивания **&lt;-** для определения нового датафрейма. 
 
 
 ```r
@@ -279,29 +285,35 @@ demo_over10 &lt;- demo %&gt;%
   filter(age &gt; 10)
 ```
 
-(Pas de sortie dans la console R, mais un nouvel objet dans le panneau Environnement)  
+(Нет вывода в консоль R, но появился новый объект в панели Окружающей среды)  
 
 ???
 Note how the column names in `demo` are old! It's because our changes have not yet been saved.  
 
 ---
 
-# `mutate()` pour modifier les colonnes  
+# `mutate()` для редактирования столбцов  
  
-`mutate()` est aussi utilisé pour *modifier* des colonnes existantes, comme *recoder* des valeurs
+`mutate()` также используется для *редактирования* существующих столбцов, например, для *перекодировки* значений
 
-Ci-dessous, `recode()` est utilisé à l'intérieur de `mutate()` pour recoder la colonne du sexe.  
+`recode()` используется внутри `mutate()` для перекодировки столбца gender  
 
 --
 
 
 
 
+
+
+
+
+
+
 ```r
 demo %&gt;% 
-  mutate(gender = recode(gender,   # re-define gender as: 
-    'm' = 'male',                  # when "m", change to "male"   
-    'f' = 'female'))               # when "f", change to "female"
+  mutate(gender = recode(gender,   # переопределить пол как: 
+    "m" = "male",                  # когда "m", меняется на "male", m меняется на мужской 
+    "f" = "female"))               # когда "f", меняется на "female", f меняется на женский
 ```
 
 ```
@@ -313,6 +325,8 @@ demo %&gt;%
 ## 5  6056ba   0 female          TRUE   yes     yes
 ```
 
+
+
 ???
 Explain that there are many nuances to case_when() which you will practice in the breakout exercise
 
@@ -320,18 +334,28 @@ Explain that there are many nuances to case_when() which you will practice in th
 
 ---
 
-# `ifelse()` pour une logique simple  
+# `ifelse()` для простой логики  
  
-`ifelse()` dans `mutate()` est utilisé pour appliquer un recodage simple.  
+`ifelse()` внутри `mutate()` используется для применения простой логики перекодировки  
 
-&lt;h4&gt;Syntaxe : &lt;span style='color:deeppink'&gt;nouveau nom de colonne&lt;/span&gt; = une &lt;span style='color:cornflowerblue'&gt;fonction&lt;/span&gt; qui crée les nouvelles valeurs :&lt;/h4&gt;
+&lt;h4&gt;Синтаксис следующий: &lt;span style='color:deeppink'&gt;имя нового столбца&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;функция&lt;/span&gt;, которая создает новые значения:&lt;/h4&gt;
 
 --
 
 
 
 
-&lt;code class ='r hljs remark-code'&gt;demo %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;mutate(&lt;span style='color:deeppink'&gt;adult&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;ifelse(age &gt;= 18, 'yes', 'no')&lt;/span&gt;) # creates new T/F column&lt;/code&gt;
+
+
+
+
+
+
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;demo %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;mutate(&lt;span style='color:deeppink'&gt;adult&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;ifelse(age &gt;= 18, 'yes', 'no')&lt;/span&gt;) # создает новый столбец типа истина-ложь&lt;/code&gt;
 
 ```
 
@@ -346,19 +370,19 @@ Explain that there are many nuances to case_when() which you will practice in th
 
 --
 
-`ifelse()` applique un critère logique à chaque ligne, renvoie une valeur si elle est vraie, et une autre valeur si elle est fausse.  
+`ifelse()` применяет логический критерий к каждой строке, возвращает одно значение, если оно истинно, и возвращает другое значение, если ложно.  
 
 
 
 ---
 
-# Utiliser `case_when()` pour une logique complexe  
+# Используйте `case_when()` для сложной логики  
  
-`case_when()` est utilisé pour tester une série de critères logiques sur chaque ligne, et assigner une nouvelle valeur correspondante. 
+`case_when()` используется для проверки ряда логических критериев для каждой строки и присвоения соответствующего нового значения. 
 
 --
 
-&lt;h4&gt;Syntaxe de case_when() : &lt;span style='color:orange'&gt;critères logiques pour la ligne&lt;/span&gt; &lt;span style='color:deeppink'&gt;~&lt;/span&gt; résultat s'il est atteint&lt;/h4&gt;
+&lt;h4&gt;Синтаксис case_when() следующий: &lt;span style='color:orange'&gt;логические критерии для строки&lt;/span&gt; &lt;span style='color:deeppink'&gt;~&lt;/span&gt; результат, если они выполнены&lt;/h4&gt;
 
 
 
@@ -377,7 +401,7 @@ Explain that there are many nuances to case_when() which you will practice in th
 ```
 
 
-Chaque ligne du jeu de données est évaluée selon les critères (de haut en bas). 
+Каждая строка в наборе данных оценивается по критериям (сверху вниз). 
 
 
 
@@ -393,7 +417,7 @@ class: inverse, center, middle
 
 
 
-## Exercice  
+## Упражнение  
 
 
 &lt;img src="../../../images/breakout/COVID dominoes.png" width="100%" /&gt;
