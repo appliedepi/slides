@@ -962,6 +962,15 @@ ggplot(
 geom_point()       # отображение данных в виде точек
 ```
 
+```{r, echo = params$lang == "es", eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,        # caso de uso lista de líneas
+  mapping = aes(      # hacer mapeos estéticos para todos los geoms
+    x = age_years,    # asignar el eje x a la columna de edad
+    y = ht_cm)) +     # asignar el eje y a la altura
+geom_point()          # mostrar los datos en forma de puntos
+```
+
 
 
 ???
@@ -1073,7 +1082,22 @@ cowplot::plot_grid(color_purple, color_hospital,
 color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
   geom_point(color = "purple")+
   theme_minimal(base_size = 16)+
-  labs(title = "Использование цвета = 'purple' (сиреневый)")
+  labs(title = "Использование цвета = 'purple'")
+
+color_hospital <- ggplot() + theme_void()
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r,eval = params$lang == "es", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilizar el color = 'purple' (púrpura)")
 
 color_hospital <- ggplot() + theme_void()
 
@@ -1168,6 +1192,24 @@ color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
   geom_point(aes(color = hospital))+
   theme_minimal(base_size = 16)+
   labs(title = "Использование aes(color = hospital), больница")
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r, eval = params$lang == "es", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilizar el color = 'purple' (púrpura)")
+
+color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(aes(color = hospital))+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilizar aes(color = hospital)")
 
 cowplot::plot_grid(color_purple, color_hospital,
                   nrow = 2, rel_widths = c(2,2))
@@ -1276,6 +1318,26 @@ cowplot::plot_grid(
 
 ```
 
+```{r, eval = params$lang == "es", message=F, warning=F}
+
+fill_purple <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(fill = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilizar fill = 'purple' (púrpura)")
+
+
+fill_hospital <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(aes(fill = hospital))+
+    theme_minimal(base_size = 16)+
+  labs(title = "Utilizar aes(fill = hospital)")
+
+cowplot::plot_grid(
+                  fill_purple, fill_hospital,
+                   
+                   nrow = 2, rel_widths = c(2,2))
+
+
+```
 ]
 
 
@@ -1531,6 +1593,16 @@ geom_histogram() +
 facet_wrap(~hospital,
            scales = "free_y") +
 labs(caption = "Обратите внимание на свободную ось y")+
+theme_grey(base_size = 16)
+```
+
+```{r, eval = params$lang == "es", echo = F }
+ggplot(data = surv,
+       mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~hospital,
+           scales = "free_y") +
+labs(caption = "Obsérvese el eje y libre")+
 theme_grey(base_size = 16)
 ```
 
