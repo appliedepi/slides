@@ -220,7 +220,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_scales_
 
 --
 
-```{r, results = "asis", echo = FALSE}
+```{r,eval = params$lang == "en", results = "asis", echo = FALSE}
 "Generic formula: scale_aesthetic_method()" %>%
   flair("scale", color = "darkgreen") %>%
   flair("aesthetic", color = "cornflowerblue") %>%  
@@ -239,7 +239,16 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_scales_
 ```
 
 ```{r, eval = params$lang == "ru", results = "asis", echo = FALSE}
-"Formule générique: scale_aesthetic_method()" %>%
+"Общая формула: scale_aesthetic_method()" %>%
+  flair("scale", color = "darkgreen") %>%
+  flair("aesthetic", color = "cornflowerblue") %>%  
+  flair("method", color = "deeppink") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r,eval = params$lang == "es", results = "asis", echo = FALSE}
+"Fórmula genérica: scale_aesthetic_method()" %>%
   flair("scale", color = "darkgreen") %>%
   flair("aesthetic", color = "cornflowerblue") %>%  
   flair("method", color = "deeppink") %>%
@@ -270,7 +279,18 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_scales_
 
 
 ```{r, eval = params$lang == "ru", results = "asis", echo = FALSE}
-"1) scale_ : ce prefixe ne change jamais" %>%
+"1) scale_: этот префикс никогда не меняется" %>%
+  flair("scale", color = "darkgreen") %>%
+  flair("aesthetic", color = "cornflowerblue") %>%  
+  flair("method", color = "deeppink") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+
+
+```{r, eval = params$lang == "es", results = "asis", echo = FALSE}
+"1) scale_ : este prefijo nunca cambia" %>%
   flair("scale", color = "darkgreen") %>%
   flair("aesthetic", color = "cornflowerblue") %>%  
   flair("method", color = "deeppink") %>%
@@ -298,7 +318,17 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_scales_
 ```
 
 ```{r, eval = params$lang == "ru", results = "asis", echo = FALSE}
-"2) aesthetic: _fill_ or _color_ or _x_ or _y_ etc." %>%
+"2) aesthetic: _fill_ или _color_ или _x_ или _y_ и т.д." %>%
+  flair("scale", color = "darkgreen") %>%
+  flair("aesthetic", color = "cornflowerblue") %>%  
+  flair("method", color = "deeppink") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+
+```{r, eval = params$lang == "ru", results = "asis", echo = FALSE}
+"2) aesthetic: _fill_ o _color_ или _x_ o _y_ etc." %>%
   flair("scale", color = "darkgreen") %>%
   flair("aesthetic", color = "cornflowerblue") %>%  
   flair("method", color = "deeppink") %>%
@@ -327,7 +357,16 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_scales_
 ```
 
 ```{r, eval = params$lang == "ru", results = "asis", echo = FALSE}
-"3) method: _continuous() or _discrete() or _manual() or _date() etc." %>%
+"3) method: _continuous() или _discrete() или _manual() or _date() и т.д." %>%
+  flair("scale", color = "darkgreen") %>%
+  flair("aesthetic", color = "cornflowerblue") %>%  
+  flair("method", color = "deeppink") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r, eval = params$lang == "es", results = "asis", echo = FALSE}
+"3) method: _continuous() o _discrete() или _manual() o _date() etc." %>%
   flair("scale", color = "darkgreen") %>%
   flair("aesthetic", color = "cornflowerblue") %>%  
   flair("method", color = "deeppink") %>%
@@ -355,7 +394,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_scales_
   cat()
 ```
 
-```{r, eval = params$lang == "en", results = "asis", echo = FALSE}
+```{r, results = "asis", echo = FALSE}
 "scale_x_manual()" %>%
   flair("scale", color = "darkgreen") %>%
   flair("x", color = "cornflowerblue") %>%  
@@ -699,6 +738,16 @@ geom_histogram() +
 
 ```
 
+```{r, eval=F, echo=params$lang == "es"}
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+*scale_x_date(
+*  date_breaks = "2 months") #2 meses
+
+```
+
 `r paste0(mod6_2[mod6_2$uid == "mod6_2_tx_scalesBreaks_1", params$lang])` 
 
 `r paste0(mod6_2[mod6_2$uid == "mod6_2_tx_scalesBreaks_2", params$lang])` 
@@ -819,6 +868,17 @@ ggplot(
 geom_histogram() +
 scale_x_date(
 * date_breaks = "2 weeks", # 2 недели
+* labels = label_date_short() )
+
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+scale_x_date(
+* date_breaks = "2 weeks", #2 semanas
 * labels = label_date_short() )
 
 ```
@@ -978,6 +1038,28 @@ scale_fill_brewer(type = "qual",
 ) +
 ```
 
+```{r, echo = params$lang == "es", eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = date_onset,
+    fill = hospital)) +
+geom_histogram() +
+scale_x_date(
+  date_breaks = "2 weeks",
+  labels = label_date_short() )+
+scale_fill_brewer(type = "qual",
+                  na.value = "grey50")+
+*labs(
+*  title = "Curva epidémica del brote de ébola",
+*  subtitle = "Casos confirmados, 2014",
+*  x = "Fecha",
+*  y = "Número de casos",
+*  caption = "Datos ficticios sobre el ébola",
+*  fill = "Hospital"
+) +
+```
+
 
 `r paste0(mod6_2[mod6_2$uid == "mod6_2_tx_plotLabel_1", params$lang])``r paste0(mod6_2[mod6_2$uid == "mod6_2_tx_plotLabel_2", params$lang])`  
 
@@ -1053,6 +1135,30 @@ labs(
 ) +
 theme_grey(base_size = 18)
 ```
+
+```{r , echo = FALSE, eval = params$lang == "es", tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = date_onset,
+    fill = hospital)) +
+geom_histogram() +
+scale_x_date(
+  date_breaks = "2 weeks",
+  labels = label_date_short() )+
+scale_fill_brewer(type = "qual",
+                  na.value = "grey50")+
+labs(
+  title = "Curva epidémica del brote de ébola",
+  subtitle = "Casos confirmados, 2014",
+  x = "Fecha",
+  y = "Número de casos",
+  caption = "Datos ficticios sobre el ébola",
+  fill = "Hospital"
+) +
+theme_grey(base_size = 18)
+```
+
 ]
 
 
@@ -1077,6 +1183,10 @@ str_glue("Données à partir de {Sys.Date()}")
 str_glue("Данные по состоянию на {Sys.Date()}")
 ```
 
+```{r, eval=params$lang == "en", echo=params$lang == "es"}
+str_glue("Datos a partir de {Sys.Date()}")
+```
+
 --
 
 ```{r, eval=params$lang == "en", echo=params$lang == "en"}
@@ -1089,6 +1199,10 @@ str_glue("La date d'apparition est manquante pour {fmt_count(surv, is.na(date_on
 
 ```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
 str_glue("{fmt_count(surv, is.na(date_onset))} случаи с отсутствующим началом и не показаны")
+```
+
+```{r, eval=params$lang == "es", echo=params$lang == "es"}
+str_glue("{fmt_count(surv, is.na(date_onset))} casos que faltan para el inicio y no se muestran")
 ```
 
 
@@ -1365,6 +1479,29 @@ theme_minimal(base_size = 16) +
 * axis.title.y = element_text(angle = 90))
 ```
 
+```{r, echo = params$lang == "es", eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+    color = gender),    
+    alpha = 0.3) +
+geom_point() +
+labs(
+  title = "Altura por edad",
+  x = "Edad (años)",
+  y = "Altura (cm)",
+  color = "Género")+
+theme_minimal(base_size = 16) +
+*theme(
+* legend.position = "bottom",
+* plot.title = element_text(
+*   color = "red",
+*   face = "bold"),
+* axis.title.y = element_text(angle = 90))
+```
+
 ]
 
 .pull-right[
@@ -1439,6 +1576,30 @@ labs(
                               face = "bold"),
     axis.title.y = element_text(angle = 0))
 ```
+
+```{r , echo = FALSE, eval = params$lang == "es", tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+    color = gender),    
+    alpha = 0.3) +
+geom_point() +
+labs(
+  title = "Altura por edad",
+  x = "Edad (años)",
+  y = "Altura (cm)",
+  color = "Género")+
+  theme_minimal(base_size = 16)+
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(color = "red",
+                              size = 20,
+                              face = "bold"),
+    axis.title.y = element_text(angle = 0))
+```
+
 ]
 
 ???
