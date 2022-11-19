@@ -419,6 +419,10 @@ filter(demo, ___)
 filter(demo, ___)
 ```
 
+```{r, eval=F, echo=params$lang == "es"}
+# datos completos de la demostración
+filter(demo, ___)
+```
 
 ```{r, eval=T, echo=F}
 demo %>% knitr::kable()
@@ -448,6 +452,10 @@ filter(demo, age < 18)
 filter(demo, age < 18)
 ```
 
+```{r eval = F, echo=params$lang == "es"}
+# filtro aplicado  
+filter(demo, age < 18)
+```
 
 ```{r eval = T, echo=F}
 filter(demo, age < 18) %>% knitr::kable()
@@ -479,6 +487,11 @@ select(demo, ___)
 select(demo, ___)
 ```
 
+```{r, eval=F, echo=params$lang == "es"}
+# datos completos de la demostración
+select(demo, ___)
+```
+
 --
 
 ```{r, eval=T, echo=F}
@@ -507,6 +520,11 @@ select(demo, case_id, age)
 select(demo, case_id, age)
 ```
 
+```{r, eval=F, echo=params$lang == "es"}
+# select() para mantener sólo las columnas case_id y age
+select(demo, case_id, age)
+```
+
 ```{r, eval=T, echo=F}
 select(demo, case_id, age) %>% knitr::kable()
 ```
@@ -529,6 +547,11 @@ select(demo, case_id, age, gender)
 
 ```{r, eval=F, echo=params$lang == "ru"}
 # добавить колонку "пол
+select(demo, case_id, age, gender)
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+# añadir la columna de género
 select(demo, case_id, age, gender)
 ```
 
@@ -555,6 +578,11 @@ select(demo, -case_id, -lab_confirmed)
 
 ```{r, eval=F, echo=params$lang == "ru"}
 #удалить столбцы case_id и lab_confirmed из исходного набора данных
+select(demo, -case_id, -lab_confirmed)
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+# eliminar las columnas case_id y lab_confirmed del conjunto de datos original
 select(demo, -case_id, -lab_confirmed)
 ```
 
@@ -689,6 +717,12 @@ demo %>%
   select(case_id, age, gender, lab_confirmed)        # выбрать столбцы
 ```
 
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed)        # seleccionar columnas
+```
+
 ```{r, eval= params$lang == "en", echo=F}
 demo %>% 
   #add_row(demo[5,]) %>% 
@@ -707,6 +741,13 @@ demo %>%
 demo %>% 
   add_row(demo[5,]) %>% 
   select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
+  knitr::kable() 
+```
+
+```{r, eval= params$lang == "es", echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # de-duplicar
   knitr::kable() 
 ```
 ---
@@ -731,6 +772,12 @@ demo %>%
 demo %>% 
   select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
   distinct()                                         # де-дублировать
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # seleccionar columnas
+  distinct()                                         # de-duplicar
 ```
 
 ```{r, eval=T, echo=F}
@@ -766,6 +813,13 @@ demo %>%
   select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
   distinct()  %>%                                    # де-дублировать
   filter(age < 18, lab_confirmed == TRUE)            #подтвержденные случаи заболевания только у маленьких детей
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # seleccionar columnas
+  distinct() %>%                                     # de-duplicar
+  filter(age < 18, lab_confirmed == TRUE)            # sólo los casos confirmados de niños pequeños
 ```
 
 ```{r, eval=T, echo=F}
@@ -812,6 +866,15 @@ demo %>%
  
 ```
 
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # seleccionar columnas
+  distinct() %>%                                     # de-duplicar
+  filter(age < 18, lab_confirmed == TRUE) %>%        # casos confirmados sólo en niños pequeños      
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # crear una columna      
+ 
+```
+
 ```{r, eval=T, echo=F}
 demo %>% 
   #add_row(demo[5,]) %>% 
@@ -832,10 +895,10 @@ demo %>%
 
 ```{r, eval=F, echo=params$lang == "en"}
 demo %>% 
-  select(case_id, age, gender, lab_confirmed) %>%               
-  distinct() %>%                                                
-  filter(age < 18, lab_confirmed == TRUE) %>%                   
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))       
+  select(case_id, age, gender, lab_confirmed) %>%            # select columns   
+  distinct() %>%                                             # de-duplicate   
+  filter(age < 18, lab_confirmed == TRUE) %>%                # only children cases   
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))   # create a column    
  
 ```
 
@@ -850,10 +913,19 @@ demo %>%
 
 ```{r, eval=F, echo=params$lang == "ru"}
 demo %>% 
-  select(case_id, age, gender, lab_confirmed) %>%               
-  distinct() %>%                                                
-  filter(age < 18, lab_confirmed == TRUE) %>%                   
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))       
+  select(case_id, age, gender, lab_confirmed) %>%                # выбрать столбцы
+  distinct() %>%                                                 # де-дублировать
+  filter(age < 18, lab_confirmed == TRUE) %>%                    # подтвержденные случаи заболевания только у детей младшего возраста
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))       # создать столбец
+ 
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%                # seleccionar columnas
+  distinct() %>%                                                 # de-duplicar
+  filter(age < 18, lab_confirmed == TRUE) %>%                    # casos confirmados sólo en niños pequeños
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))       # crear una columna
  
 ```
 
@@ -941,6 +1013,16 @@ demo %>%
   names()
 ```
 
+```{r, eval=params$lang == "es", echo=params$lang == "es"}
+demo %>% 
+  clean_names() %>% 
+  rename(
+       # NUEVO      = ANTIGUO
+       age_years  = age,                    #<<
+       date_onset = onset_date) %>%         #<<
+  names()
+```
+
 
 ---
 
@@ -963,8 +1045,13 @@ demo %>%                   # ПЕЧАТАТЬ только детские слу
   filter(age < 18)
 ```
 
+```{r, echo=params$lang == "es", eval=F}
+demo %>%                    # PRINT only child cases
+  filter(age < 18)
+```
+
 ```{r, echo=F, eval=T}
-demo %>%                    # print only child cases
+demo %>%                    # Imprime sólo los casos de niños
   filter(age < 18) %>% 
   knitr::kable()
 ```
@@ -1047,6 +1134,13 @@ demo %>%
   mutate(gender = recode(gender,   # переопределите пол как:
     'm' = 'male',                  # когда "m", меняется на "male"
     'f' = 'female'))               # когда "f", меняется на "female"
+```
+
+```{r echo=params$lang == "es", eval=params$lang == "es"}
+demo %>% 
+  mutate(gender = recode(gender,   # redefinir el género como 
+    'm' = 'male',                  # cuando "m", cambiar a "masculino"   
+    'f' = 'female'))               # cuando "f", cambiar a "mujer"
 ```
 
 ???

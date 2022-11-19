@@ -62,37 +62,37 @@ class: center, middle, inverse, title-slide
 }
 &lt;/style&gt;
 
-# Введение в R для прикладной эпидемиологии
+# Introduction to R for Applied Epidemiology
 
-### {ggplot2} - Шкалы, темы и подписи
+### {ggplot2} - Scales, themes, and labels
 
 contact@appliedepi.org
 
 ---
-# Грамматика графики  
+# Grammar of Graphics  
 
-Давайте вернемся к той последовательности, которая строит ggplot:
+Let's return to that sequence that builds a ggplot.
 --
 
-Порядок слоев обычно выглядит следующим образом:
+The order of layers will usually look like this:
 
-1) ✅ **"Откройте" график**
-
---
-
-2) ✅ **"Назначьте" столбцы данных**.
+1) ✅ **"Open" the plot**
 
 --
 
-3) ✅ **Добавьте (`+`) слои "geom"**.
+2) ✅ **"Map" data columns**
 
 --
 
-4) ✅ **Модифицируйте "шкалы"**, например, цветовую шкалу или разрывы оси y.
+3) ✅ **Add (`+`) “geom” layers**
 
 --
 
-5) ✅ **Добавьте "тематические" элементы оформления графика**, такие как подписи осей, заголовок, надпись, шрифты, размеры текста, темы фона или поворот осей.
+4) ✅ **Modify "scales"**, such as a color scale or y-axis breaks
+
+--
+
+5) ✅ **Add "theme" plot design elements** such as axis labels, title, caption, fonts, text sizes, background themes, or axes rotation
 
 
 ???
@@ -107,7 +107,7 @@ Remember that although the commands may be long, it is infinitely easier to edit
 ---
 class: inverse, center, middle
 
-## Шкалы в {ggplot2}
+## Scales in {ggplot2}
 
 
 &lt;img src="../../../images/ggplot_scales_themes/scales.png" width="50%" /&gt;
@@ -117,32 +117,18 @@ class: inverse, center, middle
 
 
 ---
-# Шкалы - обзор
+# Scales - overview
 
-Команды шкал заменяют стандартные настройки отображения эстетики, такие как:
-* *Какие* цвета или формы отображать
-* *Как* дата или пропорции записываются в подписях осей
-* Минимальное/максимальное значение и частота разрывов осей
-
---
-
-
-
-
-
-&lt;h4&gt;Общая формула: &lt;span style='color:darkgreen'&gt;scale&lt;/span&gt;_&lt;span style='color:cornflowerblue'&gt;aesthetic&lt;/span&gt;_&lt;span style='color:deeppink'&gt;method&lt;/span&gt;()&lt;/h4&gt;
-
-
+Scale commands replace defaults for how aesthetics are displayed such as:
+* *Which* colors or shapes to display
+* *How* date or proportions are written in axis labels
+* The min/max and frequency of axes breaks
 
 --
 
+&lt;h4&gt;Generic formula: &lt;span style='color:darkgreen'&gt;scale&lt;/span&gt;_&lt;span style='color:cornflowerblue'&gt;aesthetic&lt;/span&gt;_&lt;span style='color:deeppink'&gt;method&lt;/span&gt;()&lt;/h4&gt;
 
 
-
-
-
-
-&lt;h4&gt;1) &lt;span style='color:darkgreen'&gt;scale&lt;/span&gt;_: этот префикс никогда не меняется&lt;/h4&gt;
 
 
 
@@ -150,21 +136,35 @@ class: inverse, center, middle
 
 --
 
+&lt;h4&gt;1) &lt;span style='color:darkgreen'&gt;scale&lt;/span&gt;_ : this prefix never changes.&lt;/h4&gt;
 
 
 
-&lt;h4&gt;2) &lt;span style='color:cornflowerblue'&gt;aesthetic&lt;/span&gt;: _fill_ или _color_ или _x_ или _y_ и т.д.&lt;/h4&gt;
 
 
-&lt;h4&gt;2) &lt;span style='color:cornflowerblue'&gt;aesthetic&lt;/span&gt;: _fill_ o _color_ или _x_ o _y_ etc.&lt;/h4&gt;
+
+
+
+
+
+
+--
+&lt;h4&gt;2) &lt;span style='color:cornflowerblue'&gt;aesthetic&lt;/span&gt;: _fill_ or _color_ or _x_ or _y_ etc.&lt;/h4&gt;
+
+
+
+
+
+
+
 
 --
 
+&lt;h4&gt;3) &lt;span style='color:deeppink'&gt;method&lt;/span&gt;: _continuous() or _discrete() or _manual() or _date() etc.&lt;/h4&gt;
 
 
 
 
-&lt;h4&gt;3) &lt;span style='color:deeppink'&gt;method&lt;/span&gt;: _continuous() или _discrete() или _manual() or _date() и т.д.&lt;/h4&gt;
 
 
 
@@ -179,24 +179,24 @@ class: inverse, center, middle
 
 
 ---
-# Примеры шкал  
+# Scales examples  
 
-Некоторые примеры команд шкал:
+Some examples of scale commands:
 
-Вы хотите настроить|Команда шкалы
+You want to adjust|Scale command
 --------------------|-------------------
-непрерывная ось y |`scale_y_continuous()`
-ось x дата |`scale_x_date()`  
-категориальная ось х |`scale_x_discrete()`  
-заполнение, непрерывное |`scale_fill_continuous()`
-заполнение, непрерывное |`scale_fill_gradient()`  
-цвет, ручное назначение |`scale_color_manual()`  
+continuous y-axis |`scale_y_continuous()`
+date x-axis |`scale_x_date()`  
+categorical x-axis |`scale_x_discrete()`  
+fill, continuous |`scale_fill_continuous()`
+fill, continuous |`scale_fill_gradient()`  
+color, manual assign |`scale_color_manual()`  
 
 
 
 
 ---
-# Шкалы - по умолчанию
+# Scales - default
 
 .pull-left[
 
@@ -211,7 +211,7 @@ geom_bar()
 ```
 
 
-Выше для заливки столбчатой диаграммы используются **цвета и разрывы осей по умолчанию**: 
+Above, the fill of a bar plot uses the **default colors and axis breaks**: 
 
 ]
 
@@ -225,7 +225,7 @@ geom_bar()
 Ignore the overlapping x-axis labels, for code simplicity we are not adjusting these in this slide.  
 
 ---
-# Шкалы - модифицированный  
+# Scales - adjusted fill  
 
 .pull-left[
 
@@ -244,11 +244,11 @@ geom_bar() +
 *    "female"   = "aquamarine"))
 ```
 
-В рамках `scale_fill_manual()` мы предоставляем назначения **вручную** 
-в пределах вектора `c()`.  
+Within `scale_fill_manual()` we provide **manual** assignments 
+within a vector `c()`.  
 
 
-.footnote[Используйте *na.value = "grey"* для отсутствующих значений 
+.footnote[Use *na.value = "grey"* for missing values 
 ]  
 
 ]
@@ -265,7 +265,7 @@ Discuss the na.value= arguments in most scale commands, and the difference betwe
 
 
 ---
-# Весы - colorbrewer 
+# Scales - colorbrewer 
 
 .pull-left[
 
@@ -283,10 +283,10 @@ geom_bar() +
 *   na.value = "grey50")
 ```
 
-Используйте `scale_fill_brewer()` для приятных палитр  
+Use `scale_fill_brewer()` for pleasant palettes  
 
 
-.footnote[Используйте *na.value = "grey"* для отсутствующих значений 
+.footnote[Use *na.value = "grey"* for missing values 
 ]  
 
 ]
@@ -302,7 +302,7 @@ Briefly mention the `na.value=` arguments in most scale commands, and the differ
 
 
 ---
-# Шкалы - скорректированная ось y 
+# Scales - adjusted y-axis 
 
 .pull-left[
 
@@ -324,7 +324,7 @@ scale_fill_manual(
 *               by = 10))
 ```
 
-В `scale_y_continuous()` мы корректируем разрывы оси y, используя `seq()` для определения числовой последовательности. 
+In `scale_y_continuous()` we adjust the y-axis breaks using `seq()` to define a numeric sequence. 
 
 ]
 
@@ -339,7 +339,7 @@ scale_fill_manual(
 
 
 ---
-# Шкалы - начало осей c 0  
+# Scales - start axes at 0  
 
 .pull-left[
 
@@ -364,7 +364,7 @@ scale_y_continuous(
 *  expand = c(0, 0))
 ```
 
-В командах `scale_x_` или `scale_y_` используйте `expand = c(0,0)` для удаления лишнего пространства вокруг графика. 
+In `scale_x_` or `scale_y_` commands, use `expand = c(0,0)` to remove excess space around the plot. 
 
 ]
 
@@ -378,7 +378,7 @@ scale_y_continuous(
 
 
 ---
-# Шкалы - подписи оси дат  
+# Scales - date axis labels  
 
 .pull-left[
 
@@ -390,7 +390,7 @@ ggplot(
 geom_histogram()
 ```
 
-Масштаб по умолчанию для осей дат зависит от диапазона ваших данных.  
+The default scale for date axes will vary by the range of your data.  
 
 ]
 
@@ -409,13 +409,9 @@ geom_histogram()
 
 
 ---
-# Шкалы - подписи разрывов дат 
+# Scales - date label breaks 
 
 .pull-left[  
-
-
-
-
 
 
 ```r
@@ -424,16 +420,20 @@ ggplot(
   mapping = aes(x = date_onset)) +
 geom_histogram() +
 *scale_x_date(
-*  date_breaks = "2 months") #2 месяца
+*  date_breaks = "2 months") #2 months
 ```
 
 
 
-Настройте подписи осей с помощью `scale_x_date()`. 
 
-Используйте значения `date_breaks=`, такие как "1 неделя", "2 недели" или "3 месяца". 
 
-Они регулируют *подписи* разрывов осей, а не корзины гистограммы!
+
+
+Adjust axis labels with `scale_x_date()`. 
+
+Use `date_breaks=` values like "1 week", "2 weeks", or "3 months". 
+
+These adjust axis break *labels*, not histogram bins!
 
 ]
 
@@ -454,7 +454,7 @@ For tips on geom_histogram() bins, see Epi R Handbook epicurves page
 
 
 ---
-# Шкалы - подписи оси дат 
+# Scales - date axis labels 
 
 .pull-left[
 
@@ -469,13 +469,13 @@ scale_x_date(
 * date_labels = "%d %b\n%Y")
 ```
 
-Укажите формат подписи даты в `date_labels=`, используя  
+Specify date label format to `date_labels=` using  
 ["strptime" syntax](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime)  
 
-`"%d %b %Y"` для ДД ММ ГГГГ.  
+`"%d %b %Y"` for DD MM YYYY.  
 
 
-.footnote[См. главы Epi R Handbook [Эпикурвы](https://epirhandbook.com/epidemic-curves.html) и [Струны](https://epirhandbook.com/characters-and-strings.html). 
+.footnote[See Epi R Handbook [Epicurves](https://epirhandbook.com/epidemic-curves.html) and [Strings](https://epirhandbook.com/characters-and-strings.html) chapters 
 ]  
 
 
@@ -496,13 +496,9 @@ scale_x_date(
 
 
 ---
-# Шкалы - автоматические эффективные подписи 
+# Scales - auto-efficient labels 
 
 .pull-left[
-
-
-
-
 
 
 ```r
@@ -511,15 +507,19 @@ ggplot(
   mapping = aes(x = date_onset)) +
 geom_histogram() +
 scale_x_date(
-* date_breaks = "2 weeks", # 2 недели
+* date_breaks = "2 weeks", #2 weeks
 * labels = label_date_short() )
 ```
 
 
 
-Или просто присвойте `labels=` значению `label_date_short()` из [{scales}](https://scales.r-lib.org/)  
 
-Год не повторяется на каждой подписи. 
+
+
+
+Or, simply assign `labels=` to `label_date_short()` from [{scales}](https://scales.r-lib.org/)  
+
+The year is not repeated on each label. 
 
 ]
 
@@ -537,7 +537,7 @@ scale_x_date(
 ---
 class: inverse, center, middle
 
-## Подписи в {ggplot2}  
+## Labels in {ggplot2}  
 
 
 &lt;img src="../../../images/ggplot_scales_themes/labels.png" width="50%" /&gt;
@@ -547,7 +547,7 @@ class: inverse, center, middle
 
 
 ---
-# Подписи графиков  
+# Plot labels  
 
 .pull-left[
 
@@ -577,13 +577,9 @@ scale_fill_brewer(type = "qual",
 
 
 ---
-# Подписи графиков 
+# Plot labels 
 
 .pull-left[
-
-
-
-
 
 
 ```r
@@ -599,29 +595,33 @@ scale_x_date(
 scale_fill_brewer(type = "qual",
                   na.value = "grey50")+
 *labs(
-*  title = "Эпидемическая кривая вспышки лихорадки Эбола",
-*  subtitle = "Подтвержденные случаи, 2014 год",
-*  x = "Дата",
-*  y = "Количество случаев",
-*  caption = "Вымышленные данные по лихорадке Эбола",
-*  fill = "Больница"
+*  title = "Epidemic curve of Ebola outbreak",
+*  subtitle = "Confirmed cases, 2014",
+*  x = "Date",
+*  y = "Number of cases",
+*  caption = "Fictional Ebola data",
+*  fill = "Hospital"
 ) +
 ```
 
 
 
 
-Используйте `labs()` andПримечание: редактируйте заголовок легенды через эстетику, которая создала легенду (например, `fill=`).  
+
+
+
+
+Use `labs()` as above.Note: edit legend title via the aesthetic that created the legend (e.g. `fill=`).  
 
 ]
 
 .pull-right[
 
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-56-1.png" width="504" /&gt;
 
 
 
 
-&lt;img src="module_6-2_files/figure-html/unnamed-chunk-58-1.png" width="504" /&gt;
 
 
 
@@ -632,46 +632,49 @@ scale_fill_brewer(type = "qual",
 
 
 ---
-# Динамические подписи  
+# Dynamic labels  
 
-Встройте код в `str_glue("здесь текст {ЗДЕСЬ КОД} здесь текст")`. 
-Код обновится с получением данных. 
-
-
-
-
+Embed code within `str_glue("text here {CODE HERE} text here")` 
+The code will update with the data. 
 
 
 ```r
-str_glue("Данные по состоянию на {Sys.Date()}")
+str_glue("Data as of {Sys.Date()}")
 ```
 
 ```
-## Данные по состоянию на 2022-11-13
+## Data as of 2022-11-19
 ```
 
 
+
+
+
+
+```
+## Datos a partir de 2022-11-19
+```
 
 --
 
 
-
-
-
-
 ```r
-str_glue("{fmt_count(surv, is.na(date_onset))} случаи с отсутствующим началом и не показаны")
+str_glue("{fmt_count(surv, is.na(date_onset))} cases missing onset and not shown")
 ```
 
 ```
-## 28 (5.2%) случаи с отсутствующим началом и не показаны
+## 28 (5.2%) cases missing onset and not shown
 ```
 
 
 
 
 
-.footnote[См. главу [Epi R Handbook Strings](https://epirhandbook.com/characters-and-strings.html#dynamic-strings) и пакет {stringr}.  
+
+
+
+
+.footnote[See the [Epi R Handbook Strings chapter](https://epirhandbook.com/characters-and-strings.html#dynamic-strings) and the {stringr} package.  
  
 ]
 
@@ -687,7 +690,7 @@ Explain that in str_glue, anything within curly brackets it will run as R code.
 ---
 class: inverse, center, middle
 
-## Темы в {ggplot2}  
+## Themes in {ggplot2}  
 
 
 &lt;img src="../../../images/ggplot_scales_themes/themes.png" width="50%" /&gt;
@@ -695,29 +698,29 @@ class: inverse, center, middle
 
 ---
 
-# Темы  
+# Themes  
 
-Темы - это **не связанные с данными** особенности дизайна, например: 
+Themes are **non-data** design features, for example: 
 
-* Фон рабочей области графиков 
-* Размер, цвет и ориентация текста  
-* Положение легенды 
+* Plot canvas background 
+* Text size, color, and orientation  
+* Position of legend 
 
 --
 
-Плюсы {ggplot2} - вы можете вносить очень маленькие корректировки  
+The power of {ggplot2} - you can make extremely small adjustments  
 
-... если вы хотите.  
+... if you want to.  
 
 
 
 ---
-# Темы 
+# Themes 
 
 .pull-left[
 
 
-["Полные темы"](https://ggplot2.tidyverse.org/reference/ggtheme.html) легко добавить.  
+["Complete themes"](https://ggplot2.tidyverse.org/reference/ggtheme.html) are easy to add.  
 
 
 ```r
@@ -731,7 +734,7 @@ theme_void()
 theme_classic()
 ```
 
-Попробуйте использовать аргумент `base_size = 16` для быстрого увеличения размера текста.  
+Try the argument `base_size = 16` to quickly increase text size.  
 
 ]
 
@@ -746,41 +749,37 @@ theme_classic()
 
 
 ---
-# Микрокорректировки 
+# Micro-adjustments 
 
-Вносите микрокорректировки в `theme()`.  
+Make micro-adjustments within `theme()`.  
 
-Приведите аргументы для каждого небольшого изменения, которое вы хотите внести, например:  
+Supply arguments for each small change you want to make, for example:  
 
-Компонент графика        | Аргумент темы 
+Plot component        | Theme argument 
 -----------------------------------------------------------------------------------------------|---------------  
-положение легенды       |`legend.position = `  
-направление легенды (горизонтальное или вертикальное)       | `legend.direction = `  
+legend position       |`legend.position = `  
+legend direction (horizontal or vertical)       | `legend.direction = `  
 
 --
 
-Они могут быть *очень* специфическими:   
+These can be *very very* specific:   
 
-Компонент графика        | Аргумент темы 
+Plot component        | Theme argument 
 -----------------------------------------------------------------------------------------------|---------------  
-Длина тиков по оси X        |`axis.ticks.length.x = `  
+Length of axis ticks on the X-axis        |`axis.ticks.length.x = `  
 
-Существуют сотни вариантов.  
+There are literally hundreds of options.  
 
 ???
 Think of all the minute adjustments that you make when creating a plot in Excel. How many times do you have to re-do all those steps? All of those steps can be coded, which makes the plot adjustable. 
 
 
 ---
-# Темы 
+# Themes 
 
 .pull-left[
 
-Внесите микрокорректировки в `theme()`. 
-
-
-
-
+Make micro-adjustments within `theme()`. 
 
 
 ```r
@@ -793,10 +792,10 @@ ggplot(
     alpha = 0.3) +
 geom_point() +
 labs(
-   title = "Рост по возрасту",
-  x = "Возраст (годы)",
-  y = "Рост (см))",
-  color = "Пол")+
+  title = "Height by age",
+  x = "Age (years)",
+  y = "Height (cm)",
+  color = "Gender")+
 theme_minimal(base_size = 16) +
 *theme(
 * legend.position = "bottom",
@@ -808,17 +807,21 @@ theme_minimal(base_size = 16) +
 
 
 
+
+
+
+
 ]
 
 .pull-right[
 
-Синтаксис требует практики - см. [этот список](https://ggplot2.tidyverse.org/reference/theme.html) специфических аргументов. 
+The syntax takes practice - see [this list](https://ggplot2.tidyverse.org/reference/theme.html) of feature-specific arguments. 
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-75-1.png" width="504" /&gt;
 
 
 
 
-
-&lt;img src="module_6-2_files/figure-html/unnamed-chunk-77-1.png" width="504" /&gt;
 
 
 
@@ -833,9 +836,9 @@ Remember to add them AFTER any complete themes.
 
 
 ---
-# Темы - `element_text()` 
+# Themes - `element_text()` 
 
-При изменении *текста* микрокорректировки часто должны быть сделаны *внутри* `element_text()`. 
+If changing *text*, the micro-adjustments often need to be made *within* `element_text()` 
 
 
 ```r
@@ -847,7 +850,7 @@ theme(
 * axis.title.y = element_text(angle = 90))
 ```
 
-Этот синтаксис аналогичен синтаксису `mapping = aes()`. 
+This is a similar syntax to `mapping = aes()` 
 
 
 ???
@@ -862,7 +865,7 @@ class: inverse, center, middle
 
 
 
-## Упражнение 
+## Exercise 
 
 
 &lt;img src="../../../images/breakout/teamwork3.png" width="50%" /&gt;
