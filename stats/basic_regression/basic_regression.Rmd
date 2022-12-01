@@ -87,6 +87,7 @@ style_mono_accent(
 )
 ```
 
+
 ```{css, echo=F}
     .remark-slide table{
       border: none
@@ -100,9 +101,22 @@ style_mono_accent(
     tr:last-child {
     border-bottom: none;
   }
-  .tiny .remark-code { /*Change made here*/
+    .tiny .remark-code { /*Change made here*/
   font-size: 50% !important;
-}
+    }
+    .teenytiny .remark-code { /*Change made here*/
+  font-size: 25% !important;
+    }
+    .giant .remark-code { /*Change made here*/
+  font-size: 150% !important;
+    }
+    .smaller .remark-code { /*Change made here*/
+  font-size: 75% !important;
+    }
+    .huge .remark-code { /*Change made here*/
+  font-size: 250% !important;
+    }
+  
 ```
 
 
@@ -116,6 +130,37 @@ linelist <- surv %>%
 
 independent_exposures <- c("age", "gender", "cough", "temp")
 outcome <- "outcome_death"
+
+male_regression <- linelist %>%
+  select(independent_exposures,    #The exposures we want to investigate
+         outcome_death) %>%        #The outcome
+     filter(gender == "male") %>%  #The exposure we want to subset by
+     select(-gender) %>%           #We remove the column we are subsetting by
+     drop_na() %>%                 #We can only use complete data, so we remove the rows with NA values
+  tbl_uvregression(
+    method = glm,                  #This indicates we want to use a generalized linear model 
+    y = outcome_death,             #The outcome     
+    method.args = list(
+         family = binomial         #The distribution of the data we are fitting to
+         ),           
+    exponentiate = TRUE            #For logistic regression if we want the log odds we need to specify this
+  )
+
+female_regression <- linelist %>%
+  select(independent_exposures,    #The exposures we want to investigate
+         outcome_death) %>%        #The outcome
+     filter(gender == "female") %>%  #The exposure we want to subset by
+     select(-gender) %>%           #We remove the column we are subsetting by
+     drop_na() %>%                 #We can only use complete data, so we remove the rows with NA values
+  tbl_uvregression(
+    method = glm,                  #This indicates we want to use a generalized linear model 
+    y = outcome_death,             #The outcome     
+    method.args = list(
+         family = binomial         #The distribution of the data we are fitting to
+         ),           
+    exponentiate = TRUE            #For logistic regression if we want the log odds we need to specify this
+  )
+
 
 ```
 
@@ -134,6 +179,27 @@ And this allows us to do a number of different things, such as...
 knitr::include_graphics(xfun::relative_path(here::here("images", "regression", "regression_figure.png")))
 ```
 ]
+
+---
+
+# Regression
+
+- Testing a theory or association.
+ 
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "regression", "testing_test_tube.jpg")))
+```
+
+---
+
+# Regression
+
+- Testing a theory or association.
+- Predicting what could happen in a new dataset if the relationships remain the same.
+ 
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "regression", "testing_test_tube.jpg")))
+```
 
 ---
 
@@ -181,9 +247,54 @@ While these have numerous potential inputs (see `?tbl_uvregression` for examples
 .pull-left[
 ```{r, echo = T, eval = FALSE}
 linelist %>%
-  select(independent_exposures,   #The exposures we want to investigate
-         outcome_death) %>%       #The outcome
-     drop_na() %>%                #We can only use complete data, so we remove the rows with NA values
+
+```
+]
+
+---
+
+# gtsummary syntax
+
+.pull-left[
+```{r, echo = T, eval = FALSE}
+linelist %>%
+  select(age, 
+         gender, 
+         temp, 
+         cough, 
+         outcome_death)
+
+```
+]
+---
+
+# gtsummary syntax
+
+.pull-left[
+```{r, echo = T, eval = FALSE}
+linelist %>%
+  select(age, 
+         gender, 
+         temp, 
+         cough, 
+         outcome_death) %>%       
+     drop_na() 
+```
+]
+
+---
+
+# gtsummary syntax
+
+.pull-left[
+```{r, echo = T, eval = FALSE}
+linelist %>%
+  select(age, 
+         gender, 
+         temp, 
+         cough, 
+         outcome_death) %>%       
+     drop_na() %>%                
   tbl_uvregression(
     method = ,                
     y = ,                     
@@ -202,16 +313,17 @@ linelist %>%
 ```{r univariate_code_table, echo = T, eval = F}
 
 linelist %>%
-  select(independent_exposures,   #The exposures we want to investigate
-         outcome_death) %>%       #The outcome
-     drop_na() %>%                #We can only use complete data, so we remove the rows with NA values
+  select(age, 
+         gender,
+         temp, 
+         cough, 
+         outcome_death) %>%       
+     drop_na() %>%                
   tbl_uvregression(
-    method = glm,                 #This indicates we want to use a generalized linear model     
-    y = outcome_death,            #The outcome                
-    method.args = list(
-         family = binomial        #The distribution of the data we are fitting to
-         ),           
-    exponentiate = TRUE           #For logistic regression if we want the log odds we need to specify this     
+    method = glm,                 
+    y = outcome_death,                     
+    method.args = list(binomial),           
+    exponentiate = TRUE
   )
 
 ```
@@ -226,18 +338,65 @@ linelist %>%
 
 # Stratified regression
 
-Here we define stratified regression as the process of carrying out separate regression analyses on different "groups" of data. 
+Here we define stratified regression as the process of carrying out separate regression analyses on **different "groups" of data**. 
 
-We do this because we think there may be plausible reasons why relationships between the dependent and independent exposures could be different between groups
+We do this because we think there may be plausible reasons why there might be **different relationships** for **different groups between** between the dependent and independent exposures.
 
-Can you think of any groups you might want to separate in your analysis? 
+---
+# Groups we might want to stratify by
+
+Can you think of any groups you might want to separate in your analysis?
+
+---
+
+# Groups we might want to stratify by
+
+.huge[
+**Age**
+]
+
+---
+
+# Groups we might want to stratify by
+
+.huge[
+Age
+
+**Sex**
+]
+
+---
+
+# Groups we might want to stratify by
+
+.huge[
+Age
+
+Sex
+
+**Race/ethnicity**
+]
+
+---
+
+# Groups we might want to stratify by
+
+.huge[
+Age
+
+Sex
+
+Race/ethnicity
+
+**Geographic area**
+]
 
 ---
 
 # Stratified regression
 
 * `filter()` our dataset to the group we want
- - `gender = male` and `gender = female`
+ - `gender == male` and `gender == female`
 * We then _remove_ gender after we filter
  - We are subsetting the data so each regression only has the `gender` data of the subset
 
@@ -245,37 +404,89 @@ Can you think of any groups you might want to separate in your analysis?
 ---
 
 # Stratified regression
-.tiny[
-```{r, echo = T, eval = T}
+.small[
+```{r, echo = T, eval = F}
 male_regression <- linelist %>%
-  select(independent_exposures,    #The exposures we want to investigate
-         outcome_death) %>%        #The outcome
-     filter(gender == "male") %>%  #The exposure we want to subset by
-     select(-gender) %>%           #We remove the column we are subsetting by
-     drop_na() %>%                 #We can only use complete data, so we remove the rows with NA values
+  select(age, gender, temp, cough, outcome_death)
+
+
+```
+]
+---
+
+# Stratified regression
+.small[
+```{r, echo = T, eval = F}
+male_regression <- linelist %>%
+  select(age, gender, temp, cough, outcome_death) %>%       
+     filter(gender == "male") %>%  
+
+
+
+```
+]
+---
+
+# Stratified regression
+.small[
+```{r, echo = T, eval = F}
+male_regression <- linelist %>%
+  select(age, gender, temp, cough, outcome_death) %>%       
+     filter(gender == "male") %>%  
+     select(-gender) %>%          
+
+```
+]
+---
+
+# Stratified regression
+.small[
+```{r, echo = T, eval = F}
+male_regression <- linelist %>%
+  select(age, gender, temp, cough, outcome_death) %>%        
+     filter(gender == "male") %>%  
+     select(-gender) %>%          
+     drop_na() %>%                
+
+```
+]
+---
+
+# Stratified regression
+.small[
+```{r, echo = T, eval = F}
+male_regression <- linelist %>%
+  select(age, gender, temp, cough, outcome_death) %>%        
+     filter(gender == "male") %>%  
+     select(-gender) %>%          
+     drop_na() %>%                
   tbl_uvregression(
-    method = glm,                  #This indicates we want to use a generalized linear model 
-    y = outcome_death,             #The outcome     
-    method.args = list(
-         family = binomial         #The distribution of the data we are fitting to
-         ),           
-    exponentiate = TRUE            #For logistic regression if we want the log odds we need to specify this
+    method = glm,                  
+    y = outcome_death,                 
+    method.args = list(family = binomial),             
+    exponentiate = TRUE            
   )
 
+
+```
+]
+---
+
+# Stratified regression
+.small[
+```{r, echo = T, eval = F}
 female_regression <- linelist %>%
-  select(independent_exposures,    #The exposures we want to investigate
-         outcome_death) %>%        #The outcome
-     filter(gender == "female") %>%  #The exposure we want to subset by
-     select(-gender) %>%           #We remove the column we are subsetting by
-     drop_na() %>%                 #We can only use complete data, so we remove the rows with NA values
+  select(age, gender, temp, cough, outcome_death) %>%       
+     filter(gender == "female") %>%  
+     select(-gender) %>%           
+     drop_na() %>%                
   tbl_uvregression(
-    method = glm,                  #This indicates we want to use a generalized linear model 
-    y = outcome_death,             #The outcome     
-    method.args = list(
-         family = binomial         #The distribution of the data we are fitting to
-         ),           
-    exponentiate = TRUE            #For logistic regression if we want the log odds we need to specify this
+    method = glm,            
+    y = outcome_death,          
+    method.args = list(family = binomial),           
+    exponentiate = TRUE       
   )
+
 
 ```
 ]
@@ -287,11 +498,24 @@ We can then display these tables side by side to see if there is any change in e
 
 ```{r, echo = T, eval = T}
 tbl_merge(tbls = list(male_regression, 
+                      female_regression))
+```
+
+---
+
+# Comparing outputs
+
+And we can customise the argument `tab_spanner = ` to add in meaningful titles.
+
+
+```{r, echo = T, eval = T}
+tbl_merge(tbls = list(male_regression, 
                       female_regression),
           tab_spanner = c("Male only", 
                           "Female only"))
 ```
 ---
+
 
 # Ready or not, we are going to give it a try!
 

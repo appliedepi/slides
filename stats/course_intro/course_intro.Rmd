@@ -414,6 +414,43 @@ There are many different ways of carrying out statistical tests in R, and a vari
 However, in this course we will be focussing on the package **gtsummary** as it allows us to carry out these tests with a few simple commands, and produces publication ready tables with ease.
 
 ---
+
+# How do we carry out and incorporate statistical tests in R?
+
+Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%>%`!
+
+It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
+```{r, eval = F, echo = T}
+linelist %>%
+
+```
+
+
+---
+# How do we carry out and incorporate statistical tests in R?
+
+Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%>%`!
+
+It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
+```{r, eval = F, echo = T}
+linelist %>%
+    select(outcome, vomit, cough) %>%
+```
+
+
+---
+# How do we carry out and incorporate statistical tests in R?
+
+Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%>%`!
+
+It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
+```{r, eval = F, echo = T}
+linelist %>%
+    select(outcome, vomit, cough) %>%
+    tbl_summary(by = outcome) %>%
+```
+
+---
 # How do we carry out and incorporate statistical tests in R?
 
 Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%>%`!
@@ -437,9 +474,7 @@ Here we select a few columns and explore their relationship with outcome
 
 linelist %>%
          select(outcome, vomit, cough) %>%
-     tbl_summary(
-     by = outcome
-     ) %>%   
+     tbl_summary(by = outcome) %>%   
      add_p() 
 
 ```
@@ -456,9 +491,7 @@ The default test carried out is the Chi-squared test, but if we want to carry ou
 
 linelist %>% 
      select(outcome, wt_kg) %>%
-     tbl_summary(
-          by = outcome
-     ) %>%
+     tbl_summary(by = outcome) %>%
      add_p(wt_kg ~ "t.test")
 
 ```
@@ -473,8 +506,7 @@ We can then further update the information in the table by adding in descriptive
 ```{r, echo = T, eval = T}
 linelist %>% 
      select(outcome, wt_kg) %>%
-     tbl_summary(
-          statistic = wt_kg ~ "{mean} ({sd})",
+     tbl_summary(statistic = wt_kg ~ "{mean} ({sd})",
           by = outcome
      ) %>%
      add_p(wt_kg ~ "t.test")
