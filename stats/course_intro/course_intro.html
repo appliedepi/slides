@@ -3,6 +3,7 @@
   <head>
     <title>Advanced statistics in R</title>
     <meta charset="utf-8" />
+    <meta name="author" content="" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
@@ -236,6 +237,45 @@ There are many different ways of carrying out statistical tests in R, and a vari
 However, in this course we will be focussing on the package **gtsummary** as it allows us to carry out these tests with a few simple commands, and produces publication ready tables with ease.
 
 ---
+
+# How do we carry out and incorporate statistical tests in R?
+
+Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%&gt;%`!
+
+It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
+
+```r
+linelist %&gt;%
+```
+
+
+---
+# How do we carry out and incorporate statistical tests in R?
+
+Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%&gt;%`!
+
+It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
+
+```r
+linelist %&gt;%
+    select(outcome, vomit, cough) %&gt;%
+```
+
+
+---
+# How do we carry out and incorporate statistical tests in R?
+
+Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%&gt;%`!
+
+It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
+
+```r
+linelist %&gt;%
+    select(outcome, vomit, cough) %&gt;%
+    tbl_summary(by = outcome) %&gt;%
+```
+
+---
 # How do we carry out and incorporate statistical tests in R?
 
 Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%&gt;%`!
@@ -260,9 +300,7 @@ Here we select a few columns and explore their relationship with outcome
 ```r
 linelist %&gt;%
          select(outcome, vomit, cough) %&gt;%
-     tbl_summary(
-     by = outcome
-     ) %&gt;%   
+     tbl_summary(by = outcome) %&gt;%   
      add_p() 
 ```
 
@@ -723,9 +761,7 @@ The default test carried out is the Chi-squared test, but if we want to carry ou
 ```r
 linelist %&gt;% 
      select(outcome, wt_kg) %&gt;%
-     tbl_summary(
-          by = outcome
-     ) %&gt;%
+     tbl_summary(by = outcome) %&gt;%
      add_p(wt_kg ~ "t.test")
 ```
 
@@ -1177,8 +1213,7 @@ We can then further update the information in the table by adding in descriptive
 ```r
 linelist %&gt;% 
      select(outcome, wt_kg) %&gt;%
-     tbl_summary(
-          statistic = wt_kg ~ "{mean} ({sd})",
+     tbl_summary(statistic = wt_kg ~ "{mean} ({sd})",
           by = outcome
      ) %&gt;%
      add_p(wt_kg ~ "t.test")
