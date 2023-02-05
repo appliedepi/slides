@@ -1664,7 +1664,7 @@ theme_minimal(base_size = 14)
 
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_gghighlight", params$lang])`
 
-```{r, echo=T, eval=F}
+```{r, echo=params$lang == "en", eval=F}
 surv %>% 
   # get weekly counts by hospital
   group_by(
@@ -1673,6 +1673,69 @@ surv %>%
   count() %>% 
   
   # plot
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+  
+```
+
+```{r, echo=params$lang == "fr",, eval=F}
+surv %>% 
+  # obtenir des comptages hebdomadaires par hôpital
+  group_by(
+     hospital,
+     week = floor_date(date_onset, "week")) %>%
+  count() %>% 
+  
+  # graphique
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+  
+```
+
+```{r, echo=params$lang == "ru",, eval=F}
+surv %>% 
+  # получить еженедельные подсчеты по больницам
+  group_by(
+     hospital,
+     week = floor_date(date_onset, "week")) %>%
+  count() %>% 
+  
+  # сюжет
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+  
+```
+
+```{r, echo=params$lang == "es",, eval=F}
+surv %>% 
+  # Obtenga los recuentos semanales por hospital
+  group_by(
+     hospital,
+     week = floor_date(date_onset, "week")) %>%
+  count() %>% 
+  
+  # parcela
   ggplot(
     mapping = aes(
       x = week,
