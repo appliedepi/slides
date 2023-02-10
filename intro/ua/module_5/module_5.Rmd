@@ -682,6 +682,12 @@ surv %>%
   summarise(n_rows = n())                        # n() cuenta el número de filas del grupo
 ```
 
+```{r summarise2_ua, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(n_rows = n())                        # n() counts the number of rows per group
+```
+
 ```{r , echo=F, eval = params$lang == "en"}
 decorate("summarise2_en") %>%
   flair("n_rows", color = "deeppink") %>%
@@ -756,6 +762,14 @@ surv %>%
   summarise(
     n_rows  = n(),                               # n() cuenta el número de filas por grupo
     age_avg = mean(age_years, na.rm = T))        # edad media del grupo
+```
+
+```{r summarise3_ua, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T))        # mean age in the group
 ```
 
 ```{r , echo=F, eval = params$lang == "en"}
@@ -846,6 +860,17 @@ surv %>%
     n_rows  = n(),                               # n() cuenta el número de filas por grupo
     age_avg = mean(age_years, na.rm = T),        # edad media del grupo
     max_onset = max(date_onset, na.rm=T))        # Fecha de inicio más tardía
+
+```
+
+
+```{r summarise4_ua, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T))        # latest onset date
 
 ```
 
@@ -940,9 +965,10 @@ surv %>%
     n_rows  = n(),                               # n() подсчитывает количество строк в группе
     age_avg = mean(age_years, na.rm = T),        # средний возраст в группе
     max_onset = max(date_onset, na.rm=T),        # последняя дата начала заболевания
-    n_female = sum(gender == 'female', na.rm=T)) ## количество женщин в группе
+    n_female = sum(gender == 'female', na.rm=T)) # количество женщин в группе
 
 ```
+
 ```{r summarise5_es, include = F}
 surv %>% 
   group_by(hospital) %>% 
@@ -951,6 +977,17 @@ surv %>%
     age_avg = mean(age_years, na.rm = T),        # edad media del grupo
     max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
     n_female = sum(gender == 'female', na.rm=T)) # número de mujeres en el grupo
+
+```
+
+```{r summarise5_ua, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T)) # number female in group
 
 ```
 
@@ -1025,7 +1062,7 @@ str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_9", params$lang])}) %>%
 surv %>% 
   group_by(hospital) %>% 
   summarise(
-    n_rows  = n(),                                # n() counts the number of rows per group
+    n_rows  = n(),                               # n() counts the number of rows per group
     age_avg = mean(age_years, na.rm = T),        # mean age in the group
     max_onset = max(date_onset, na.rm=T),        # latest onset date
     n_female = sum(gender == 'female', na.rm=T), # number female in group
@@ -1050,7 +1087,7 @@ surv %>%
     n_rows  = n(),                               # n() подсчитывает количество строк в группе
     age_avg = mean(age_years, na.rm = T),        # средний возраст в группе
     max_onset = max(date_onset, na.rm=T),        # последняя дата начала заболевания
-    n_female = sum(gender == 'female', na.rm=T), ## количество женщин в группе
+    n_female = sum(gender == 'female', na.rm=T), # количество женщин в группе
     pct_female = percent(n_female / n_rows))     # процент женщин в группе
 ```
 
@@ -1058,13 +1095,23 @@ surv %>%
 surv %>% 
   group_by(hospital) %>% 
   summarise(
-    n_rows  = n(),                                # n() cuenta el número de filas por grupo
+    n_rows  = n(),                               # n() cuenta el número de filas por grupo
     age_avg = mean(age_years, na.rm = T),        # edad media del grupo
     max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
     n_female = sum(gender == 'female', na.rm=T), # número de mujeres en el grupo
     pct_female = percent(n_female / n_rows))     # Porcentaje de mujeres en el grupo
 ```
 
+```{r summarise6_ua, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T), # number female in group
+    pct_female = percent(n_female / n_rows))     # percent female in group
+```
 
 
 ```{r , echo=F, eval = params$lang == "en"}
@@ -1186,6 +1233,17 @@ surv %>%
   arrange(n_rows)                                  #<<
 ```
 
+```{r, echo = params$lang == "ua", eval = params$lang == "ua"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T), # number female in group
+    pct_female = percent(n_female / n_rows)) %>% # percent female in group
+  arrange(n_rows)                                  #<<
+```
 ---
 
 # `arrange()`
@@ -1240,7 +1298,17 @@ surv %>%
   arrange(-n_rows) 
 ```
 
-
+```{r , echo=params$lang == "ua", eval = params$lang == "ua"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T), # number female in group
+    pct_female = percent(n_female / n_rows)) %>% # percent female in group
+  arrange(-n_rows) 
+```
 
 ---
 
@@ -1300,7 +1368,18 @@ surv %>%
   qflextable()                                   #<<
 ```
 
-
+```{r dplyr-flex-au, echo=params$lang == "ua", eval = params$lang == "ua"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T), # number female in group
+    pct_female = percent(n_female / n_rows)) %>% # percent female in group
+  arrange(-n_rows) %>% 
+  qflextable()                                   #<<
+```
 
 
 
@@ -1482,6 +1561,19 @@ surv %>%
          age_years = "Edad (años)", 
          hospital = "Hospital"))     
 ```
+
+
+
+```{r, echo=params$lang == "ua", eval=F}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(
+       by = gender,
+       label = list(
+         age_years = "Age (years)", 
+         hospital = "Hospital"))     
+```
+
 `r paste0(mod5[mod5$uid == "mod5_tx_tblsummary_3", params$lang])`)
 ]
 
@@ -1525,6 +1617,15 @@ surv %>%
                    hospital = "Hospital"))    #<< 
 ```
 
+
+```{r, echo=F, eval=params$lang == "ua"}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(by = gender,
+              label = list(
+                   age_years = "Age (years)", #<<
+                   hospital = "Hospital"))    #<< 
+```
 ]
 
 
