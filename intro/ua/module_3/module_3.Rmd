@@ -1,0 +1,1232 @@
+---
+title: "Introduction to R for Applied Epidemiology"
+subtitle: "<br>Cleaning data with R"
+author: "2022"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "en"
+---
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,       # for decorating code chunks with colors
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+
+```{r, echo=F, include = F}
+surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic", col_types = "c") %>%
+  clean_names()
+
+mod3 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod3", col_types = "c") %>%
+  clean_names()
+```
+
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
+
+### `r paste0(mod3[mod3$uid == "mod3_h1_subtitle", params$lang])`
+
+contact@appliedepi.org
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_objectives", params$lang])`  
+
+`r paste0(mod3[mod3$uid == "mod3_op_objectives", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_objectives_1", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_objectives_2", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_objectives_3", params$lang])`  
+
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_1_1", params$lang])}),      str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_2_1", params$lang])}),      str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_3_1", params$lang])}),
+  str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_1_2", params$lang])}),     str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_2_2", params$lang])}),      str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_3_2", params$lang])}),
+  str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_1_3", params$lang])}),     str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_2_3", params$lang])}),      str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_3_3", params$lang])}), 
+  str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_1_4", params$lang])}),  str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_2_4", params$lang])}),   str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_3_4", params$lang])}),
+  str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_1_5", params$lang])}),     str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_2_5", params$lang])}),      str_glue({paste0(mod3[mod3$uid == "mod3_tb_objectives_3_5", params$lang])})
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines(str_glue({paste0(mod3[mod3$uid == "mod3_tb_session_4_1", params$lang])}))
+```
+
+`r paste0(mod3[mod3$uid == "mod3_tx_objectives", params$lang])`  
+
+???
+Note stretch breaks throughout.
+
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_review", params$lang])`  
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_1", params$lang])`  
+
+--
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_2", params$lang])`  
+
+--
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_3", params$lang])`  
+
+--
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_4", params$lang])`  
+
+--
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_5", params$lang])`  
+
+--
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_6", params$lang])`  
+
+--
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_review_7", params$lang])`  
+
+
+
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_clean", params$lang])`   
+
+`r paste0(mod3[mod3$uid == "mod3_tx_clean", params$lang])`  
+
+
+.pull-left[
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_broom.png")))
+```
+]
+
+--
+
+.pull-right[
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_1", params$lang])`  
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_2", params$lang])` 
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_3", params$lang])`  
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_4", params$lang])`  
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_5", params$lang])`  
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_6", params$lang])`  
+
+- `r paste0(mod3[mod3$uid == "mod3_bu_clean_7", params$lang])` 
+ 
+]
+
+
+
+.footnote[]
+
+???
+Ask the participants what steps they take to clean datasets
+
+
+---
+class: inverse, center, middle
+
+## `r paste0(mod3[mod3$uid == "mod3_h1_cleanR", params$lang])` 
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "data_cleaning.png")))
+```
+
+
+
+
+
+---
+
+class: medium-large-table
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_reviewdata", params$lang])`  
+
+`r paste0(mod3[mod3$uid == "mod3_tx_reviewdata_1", params$lang])`  
+`r paste0(mod3[mod3$uid == "mod3_tx_reviewdata_2", params$lang])`    
+
+```{r}
+head(surv_raw, 25) %>% 
+  tibble() %>% 
+  DT::datatable(
+    options = list(
+      scrollY = 300,
+      scrollX = 600,
+      pageLength = 25,
+      fontSize = '25%',
+      dom = "ti",
+      ordering = FALSE,
+      rownames = FALSE,
+      options = list(pageLength = 5, scrollX=T),
+      class = 'white-space: nowrap' 
+    )
+  )
+```
+
+???
+Table shows just the first 25 rows, to load faster.  
+
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_demo", params$lang])`  
+
+`r paste0(mod3[mod3$uid == "mod3_tx_demo_1", params$lang])`
+```{r, echo=F}
+demo <- surv_raw %>% 
+     head(5) %>% 
+     select(case_id, age, gender, lab_confirmed, `onset date`, `wt (kg)`, `ht (cm)`)
+
+demo <- demo %>% 
+  add_row(demo[4,], .before = 5)
+```
+
+```{r, eval=T}
+demo %>% 
+  knitr::kable()
+     
+```
+
+--
+
+`r paste0(mod3[mod3$uid == "mod3_tx_demo_2", params$lang])`
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_dplyR", params$lang])`  
+
+.pull-left[
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "dplyr_hex.png")))
+```
+]
+
+.pull-right[
+
+
+* `r paste0(mod3[mod3$uid == "mod3_bu_dplyR_1", params$lang])`  
+
+* `r paste0(mod3[mod3$uid == "mod3_bu_dplyR_2", params$lang])`  
+
+* `r paste0(mod3[mod3$uid == "mod3_bu_dplyR_3", params$lang])`  
+
+
+]
+
+.footnote[`r paste0(mod3[mod3$uid == "mod3_fn_dplyR", params$lang])`]
+
+???
+Tidyverse has made R coding much more user-friendly, intuitive, and accessible to beginner coders  
+
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_functions", params$lang])`  
+
+`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_1", params$lang])`       | `r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2", params$lang])`                               
+---------------|---------------------------------------
+`filter()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_1", params$lang])`
+`select()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_2", params$lang])`
+`clean_names()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_5", params$lang])`  
+`rename()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_3", params$lang])` 
+`mutate()`|`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_4", params$lang])` 
+`mdy()`, `dmy()`, `ymd()` |`r paste0(mod3[mod3$uid == "mod3_tb_dplyR_2_6", params$lang])` 
+
+
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_filter", params$lang])`  
+
+* `r paste0(mod3[mod3$uid == "mod3_tx_filter_1", params$lang])`
+
+```{r, eval=F, echo=T}
+filter(demo, ___)
+```
+
+--
+
+* `r paste0(mod3[mod3$uid == "mod3_tx_filter_2", params$lang])`
+
+```{r eval=FALSE, echo=TRUE}
+filter(demo, age < 18)
+```
+
+--
+
+```{r eval=FALSE, echo=TRUE}
+filter(demo, age < 18, gender == "m")
+```
+
+
+--
+
+`r paste0(mod3[mod3$uid == "mod3_tx_filter_3", params$lang])`
+
+```{r eval=FALSE, echo=TRUE}
+filter(demo, age < 18 & (gender == "m" | lab_confirmed == TRUE))
+```
+
+.footnote[`r paste0(mod3[mod3$uid == "mod3_fn_filter", params$lang])`]
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_filter", params$lang])`  
+
+```{r, eval=F, echo=params$lang == "en"}
+# complete demo data
+filter(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+# données de démo complètes
+filter(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+# полные демонстрационные данные
+filter(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+# datos completos de la demostración
+filter(demo, ___)
+```
+
+```{r, eval=T, echo=F}
+demo %>% knitr::kable()
+```
+
+
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_filter", params$lang])`  
+
+
+```{r eval = F, echo=params$lang == "en"}
+# filter applied  
+filter(demo, age < 18)
+```
+
+
+```{r eval = F, echo=params$lang == "fr"}
+# filtre appliqué
+filter(demo, age < 18)
+```
+
+
+```{r eval = F, echo=params$lang == "ru"}
+# применён фильтр
+filter(demo, age < 18)
+```
+
+```{r eval = F, echo=params$lang == "es"}
+# filtro aplicado  
+filter(demo, age < 18)
+```
+
+```{r eval = T, echo=F}
+filter(demo, age < 18) %>% knitr::kable()
+```
+
+
+
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_select", params$lang])` 
+
+`r paste0(mod3[mod3$uid == "mod3_tx_select_1", params$lang])`
+
+--
+
+```{r, eval=F, echo=params$lang == "en"}
+# complete demo data
+select(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+# données de démo complètes
+select(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+# полные демонстрационные данные
+select(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+# datos completos de la demostración
+select(demo, ___)
+```
+
+--
+
+```{r, eval=T, echo=F}
+demo %>% knitr::kable()
+```
+
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_select", params$lang])` 
+
+`r paste0(mod3[mod3$uid == "mod3_tx_select_2", params$lang])`
+
+```{r, eval=F, echo=params$lang == "en"}
+# select() to keep case_id and age columns only
+select(demo, case_id, age)
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+# select() pour ne garder que les colonnes case_id et age
+select(demo, case_id, age)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+#select(), чтобы сохранить только столбцы case_id и age
+select(demo, case_id, age)
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+# select() para mantener sólo las columnas case_id y age
+select(demo, case_id, age)
+```
+
+```{r, eval=T, echo=F}
+select(demo, case_id, age) %>% knitr::kable()
+```
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_select", params$lang])` 
+
+`r paste0(mod3[mod3$uid == "mod3_tx_select_2", params$lang])`
+
+```{r, eval=F, echo=params$lang == "en"}
+# add gender column
+select(demo, case_id, age, gender)
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+# ajouter la colonne sexe
+select(demo, case_id, age, gender)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+# добавить колонку "пол
+select(demo, case_id, age, gender)
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+# añadir la columna de género
+select(demo, case_id, age, gender)
+```
+
+```{r, eval=T, echo=F}
+select(demo, case_id, age, gender) %>% knitr::kable()
+```
+
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_select", params$lang])` 
+
+`r paste0(mod3[mod3$uid == "mod3_tx_select_3", params$lang])`
+
+```{r, eval=F, echo=params$lang == "en"}
+# remove case_id and lab_confirmed columns from original dataset
+select(demo, -case_id, -lab_confirmed)
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+#supprimer les colonnes case_id et lab_confirmed du jeu de données original
+select(demo, -case_id, -lab_confirmed)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+#удалить столбцы case_id и lab_confirmed из исходного набора данных
+select(demo, -case_id, -lab_confirmed)
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+# eliminar las columnas case_id y lab_confirmed del conjunto de datos original
+select(demo, -case_id, -lab_confirmed)
+```
+
+
+```{r, eval=T, echo=F}
+select(demo, -case_id, -lab_confirmed) %>% knitr::kable()
+```
+
+
+
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_combine", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_combine_1", params$lang])`
+
+--
+
+.pull-left[
+
+`r paste0(mod3[mod3$uid == "mod3_tx_combine_2", params$lang])`
+
+* `r paste0(mod3[mod3$uid == "mod3_bu_combine_1", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_combine_2", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_combine_3", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_combine_4", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_combine_5", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_combine_6", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_combine_3", params$lang])`
+]
+
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "cleaning.png")))
+```
+
+]
+
+
+
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_pipe", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_pipe_1", params$lang])`
+
+`filter(`**demo**`, age < 18)`
+
+
+--
+
+
+`r paste0(mod3[mod3$uid == "mod3_tx_pipe_2", params$lang])`  
+
+**demo** `%>% filter(age < 18)`
+
+--
+
+`r paste0(mod3[mod3$uid == "mod3_tx_pipe_3", params$lang])`  
+`demo` **%>%** `filter(age < 18)` 
+
+
+```{r, eval=T, echo=F}
+demo %>% filter(age < 18) %>% knitr::kable()
+```
+
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_pipe", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_pipe_1", params$lang])`
+
+`filter(`**demo**`, age < 18)`
+
+
+`r paste0(mod3[mod3$uid == "mod3_tx_pipe_2", params$lang])`  
+
+**demo** `%>% filter(age < 18)`
+
+
+`r paste0(mod3[mod3$uid == "mod3_tx_pipe_3", params$lang])`  
+
+`demo` **%>%** `filter(age < 18)` **%>%** `select(case_id, age, gender)`
+
+
+```{r, eval=T, echo=F}
+demo %>% filter(age < 18) %>% select(case_id, age, gender) %>% knitr::kable()
+```
+
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_2", params$lang])`
+
+```{r, eval=F, echo=T}
+demo
+```
+
+```{r, eval=T, echo=F}
+demo %>%  
+  #add_row(demo[5,]) %>% 
+  knitr::kable() 
+```
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
+
+```{r, eval=F, echo=params$lang == "en"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed)        # select columns
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed)        # sélectionner les colonnes
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed)        # выбрать столбцы
+```
+
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed)        # seleccionar columnas
+```
+
+```{r, eval= params$lang == "en", echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  knitr::kable() 
+```
+
+```{r, eval= params$lang == "fr", echo=F}
+demo %>% 
+  add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # sélectionner les colonnes
+  knitr::kable() 
+```
+
+```{r, eval= params$lang == "ru", echo=F}
+demo %>% 
+  add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
+  knitr::kable() 
+```
+
+```{r, eval= params$lang == "es", echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # de-duplicar
+  knitr::kable() 
+```
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
+
+
+```{r, eval=F, echo=params$lang == "en"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct()                                         # de-duplicate
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # sélectionner les colonnes
+  distinct()                                         # dédupliquer 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
+  distinct()                                         # де-дублировать
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # seleccionar columnas
+  distinct()                                         # de-duplicar
+```
+
+```{r, eval=T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct() %>%                                     # de-duplicate
+  knitr::kable() 
+```
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
+
+
+```{r, eval=F, echo=params$lang == "en"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct() %>%                                     # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE)            # only young children confirmed cases
+```
+
+```{r, eval=F, echo= params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # Sélectionner les colonnes
+  distinct() %>%                                     # dédupliquer 
+  filter(age < 18, lab_confirmed == TRUE)            # uniquement les cas confirmés d'enfants 
+```
+
+```{r, eval=F, echo=params$lang== "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
+  distinct()  %>%                                    # де-дублировать
+  filter(age < 18, lab_confirmed == TRUE)            #подтвержденные случаи заболевания только у маленьких детей
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # seleccionar columnas
+  distinct() %>%                                     # de-duplicar
+  filter(age < 18, lab_confirmed == TRUE)            # sólo los casos confirmados de niños pequeños
+```
+
+```{r, eval=T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct() %>%                                     # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE) %>%        # only young children confirmed cases
+  knitr::kable() 
+```
+
+
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
+
+
+```{r, eval=F, echo=params$lang == "en"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct() %>%                                     # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE) %>%        # only children cases      
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # create a column      
+ 
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # Sélectionner les colonnes
+  distinct() %>%                                     # dédupliquer 
+  filter(age < 18, lab_confirmed == TRUE) %>%        # uniquement les cas confirmés d'enfants
+  mutate(infant = ifelse(age < 1, "infant", "not infant")) # créer une colonne       
+ 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
+  distinct()  %>%                                    # де-дублировать
+  filter(age < 18, lab_confirmed == TRUE) %>%        # подтвержденные случаи заболевания только у детей младшего возраста                   
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # создать столбец
+ 
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # seleccionar columnas
+  distinct() %>%                                     # de-duplicar
+  filter(age < 18, lab_confirmed == TRUE) %>%        # casos confirmados sólo en niños pequeños      
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # crear una columna      
+ 
+```
+
+```{r, eval=T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%          
+  distinct() %>%                                           
+  filter(age < 18, lab_confirmed == TRUE) %>%              
+  mutate(infant = ifelse(age < 1, "infant", "not infant")) %>% 
+  knitr::kable()
+```
+
+.footnote[`r paste0(mod3[mod3$uid == "mod3_fn_vertical_1", params$lang])`]
+
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_vertical", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_1", params$lang])`  
+
+```{r, eval=F, echo=params$lang == "en"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%            # select columns   
+  distinct() %>%                                             # de-duplicate   
+  filter(age < 18, lab_confirmed == TRUE) %>%                # only children cases   
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))   # create a column    
+ 
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # Sélectionner les colonnes
+  distinct() %>%                                     # dédupliquer 
+  filter(age < 18, lab_confirmed == TRUE) %>%        # uniquement les cas confirmés d'enfants
+  mutate(infant = ifelse(age < 1, "infant", "not infant")) # créer une colonne       
+ 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%                # выбрать столбцы
+  distinct() %>%                                                 # де-дублировать
+  filter(age < 18, lab_confirmed == TRUE) %>%                    # подтвержденные случаи заболевания только у детей младшего возраста
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))       # создать столбец
+ 
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%                # seleccionar columnas
+  distinct() %>%                                                 # de-duplicar
+  filter(age < 18, lab_confirmed == TRUE) %>%                    # casos confirmados sólo en niños pequeños
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))       # crear una columna
+ 
+```
+
+```{r, eval=T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%          
+  distinct() %>%                                           
+  filter(age < 18, lab_confirmed == TRUE) %>%              
+  mutate(infant = ifelse(age < 1, "infant", "not infant")) %>% 
+  knitr::kable()
+```
+
+`r paste0(mod3[mod3$uid == "mod3_tx_vertical_3", params$lang])`  
+`r paste0(mod3[mod3$uid == "mod3_fn_vertical_2", params$lang])`  
+
+
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_cleancol", params$lang])`  
+
+`r paste0(mod3[mod3$uid == "mod3_tx_cleancol_1", params$lang])`  
+
+```{r, echo=T}
+demo %>% 
+  names()
+```
+
+--
+
+`r paste0(mod3[mod3$uid == "mod3_tx_cleancol_2", params$lang])`  
+
+* `r paste0(mod3[mod3$uid == "mod3_bu_cleancol_1", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_cleancol_2", params$lang])`  
+
+```{r, echo=T}
+demo %>% 
+  clean_names() %>%     #<<
+  names()
+```
+`r paste0(mod3[mod3$uid == "mod3_tx_cleancol_3", params$lang])`  
+
+--
+
+`r paste0(mod3[mod3$uid == "mod3_tx_cleancol_4", params$lang])`  
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_rename", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_rename_1", params$lang])`  
+
+--
+
+`r paste0(mod3[mod3$uid == "mod3_tx_rename_2", params$lang])`  
+
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
+demo %>% 
+  clean_names() %>% 
+  rename(
+       # NEW      = OLD
+       age_years  = age,                    #<<
+       date_onset = onset_date) %>%         #<<
+  names()
+```
+
+```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
+demo %>% 
+  clean_names() %>% 
+  rename(
+       # Nouveau  = Ancien
+       age_years  = age,                    #<<
+       date_onset = onset_date) %>%         #<<
+  names()
+```
+
+```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
+demo %>% 
+  clean_names() %>% 
+  rename(
+       # НОВЫЙ = СТАРЫЙ
+
+       age_years  = age,                    #<<
+       date_onset = onset_date) %>%         #<<
+  names()
+```
+
+```{r, eval=params$lang == "es", echo=params$lang == "es"}
+demo %>% 
+  clean_names() %>% 
+  rename(
+       # NUEVO      = ANTIGUO
+       age_years  = age,                    #<<
+       date_onset = onset_date) %>%         #<<
+  names()
+```
+
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_print", params$lang])`   
+
+`r paste0(mod3[mod3$uid == "mod3_tx_print_1", params$lang])`  
+
+```{r, echo=params$lang == "en", eval=F}
+demo %>%                    # PRINT only child cases
+  filter(age < 18)
+```
+
+```{r, echo=params$lang == "fr", eval=F}
+demo %>%                    # IMPRIMER uniquement les cas d'enfants
+  filter(age < 18)
+```
+
+```{r, echo=params$lang == "ru", eval=F}
+demo %>%                   # ПЕЧАТАТЬ только детские случаи
+  filter(age < 18)
+```
+
+```{r, echo=params$lang == "es", eval=F}
+demo %>%                    # PRINT only child cases
+  filter(age < 18)
+```
+
+```{r, echo=F, eval=T}
+demo %>%                    # Imprime sólo los casos de niños
+  filter(age < 18) %>% 
+  knitr::kable()
+```
+
+--
+
+
+`r paste0(mod3[mod3$uid == "mod3_tx_print_2", params$lang])`  
+
+```{r pipe-assign, eval=F, echo=T}
+demo_children <- demo %>%
+  filter(age < 18)
+```
+
+`r paste0(mod3[mod3$uid == "mod3_tx_print_3", params$lang])`  
+
+???
+Note how the column names in `demo` are old! It's because our changes have not yet been saved.  
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_mutate", params$lang])`  
+ 
+`r paste0(mod3[mod3$uid == "mod3_tx_mutate_1", params$lang])`
+
+```{r, results = "asis", echo = FALSE}
+str_glue({paste0(mod3[mod3$uid == "mod3_tx_mutate_3", params$lang])}) %>%
+  flair(str_glue({paste0(mod3[mod3$uid == "mod3_tx_mutate_4", params$lang])}), color = "deeppink") %>%
+  flair(str_glue({paste0(mod3[mod3$uid == "mod3_tx_mutate_5", params$lang])}), color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+--
+
+```{r mutate, include = F}
+demo %>% 
+  mutate(age_group = ifelse(age >= 18, 'adult', 'minor')) # creates new T/F column
+```
+
+```{r mutate_flair, echo=F}
+decorate("mutate") %>%
+  flair("age_group", color = "deeppink") %>%
+  flair("ifelse(age >= 18, 'adult', 'minor')", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+--
+
+`r paste0(mod3[mod3$uid == "mod3_tx_mutate_2", params$lang])`  
+
+---
+
+# `r paste0(mod3[mod3$uid == "mod3_h1_mutate1", params$lang])`  
+ 
+`r paste0(mod3[mod3$uid == "mod3_tx_mutate1_1", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_mutate1_2", params$lang])`  
+
+--
+
+
+
+```{r echo=params$lang == "en", eval=params$lang == "en"}
+demo %>% 
+  mutate(gender = recode(gender,   #re-define gender as: 
+    'm' = 'male',                  # when "m", change to "male"   
+    'f' = 'female'))               # when "f", change to "female"
+```
+
+```{r echo=params$lang == "fr", eval=params$lang == "fr"}
+demo %>% 
+  mutate(gender = recode(gender,   # redéfinir le genre comme : 
+    'm' = 'male',                  # quand 'm', devient 'male'   
+    'f' = 'female'))               # quand "f", devient 'female'
+```
+
+```{r echo=params$lang == "ru", eval=params$lang == "ru"}
+demo %>% 
+  mutate(gender = recode(gender,   # переопределите пол как:
+    'm' = 'male',                  # когда "m", меняется на "male"
+    'f' = 'female'))               # когда "f", меняется на "female"
+```
+
+```{r echo=params$lang == "es", eval=params$lang == "es"}
+demo %>% 
+  mutate(gender = recode(gender,   # redefinir el género como 
+    'm' = 'male',                  # cuando "m", cambiar a "masculino"   
+    'f' = 'female'))               # cuando "f", cambiar a "mujer"
+```
+
+???
+Explain that there are many nuances to case_when() which you will practice in the breakout exercise
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_date", params$lang])`
+
+`r paste0(mod3[mod3$uid == "mod3_tx_date_1", params$lang])`  
+
+.pull-left[
+
+`r paste0(mod3[mod3$uid == "mod3_tx_date_2", params$lang])`  
+
+`r paste0(mod3[mod3$uid == "mod3_op_date", params$lang])`  
+
+* `r paste0(mod3[mod3$uid == "mod3_bu_date_2", params$lang])` 
+* `r paste0(mod3[mod3$uid == "mod3_bu_date_1", params$lang])` 
+
+`r paste0(mod3[mod3$uid == "mod3_tx_date_3", params$lang])`
+
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "Dates_500x500.png")))
+```
+
+]
+
+
+---
+# `r paste0(mod3[mod3$uid == "mod3_h1_lubridate", params$lang])`  
+
+`r paste0(mod3[mod3$uid == "mod3_tx_lubridate_1", params$lang])`  
+
+* `r paste0(mod3[mod3$uid == "mod3_bu_lubridate_1", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_lubridate_2", params$lang])`  
+* `r paste0(mod3[mod3$uid == "mod3_bu_lubridate_3", params$lang])` 
+
+--
+
+.pull-left[
+
+```{r, eval=T, echo=T}
+demo %>% 
+  clean_names() %>% 
+  select(case_id, onset_date) %>% 
+  tibble()
+```
+
+]
+
+--
+
+.pull-right[
+ 
+```{r, eval=T, echo=T}
+demo %>% 
+  clean_names() %>% 
+  mutate(onset_date = mdy(onset_date)) %>%  #<<
+  select(case_id, onset_date) %>% 
+  tibble()
+```
+
+]
+
+`r paste0(mod3[mod3$uid == "mod3_fn_lubridate", params$lang])`
+
+
+
+---
+class: inverse, center, middle
+
+
+
+## `r paste0(mod3[mod3$uid == "mod3_h2_exercise", params$lang])`  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "COVID dominoes.png")))
+```

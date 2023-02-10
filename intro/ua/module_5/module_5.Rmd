@@ -1,0 +1,1547 @@
+---
+title: "Introduction to R for<br>Applied Epidemiology"
+subtitle: "<br>Grouping and summarizing data"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "ru"
+---
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flextable,  # pretty tables
+  scales,     # percents in tables
+  flair,      # text highlights
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{r, include=FALSE}
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic", col_types = "c") %>%
+  clean_names()
+
+mod5 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod5", col_types = "c") %>%
+  clean_names()
+```
+
+
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
+
+### `r paste0(mod5[mod5$uid == "mod5_h1_subtitle", params$lang])`
+
+contact@appliedepi.org
+
+---
+
+
+
+#  `r paste0(mod5[mod5$uid == "mod5_h1_grouping", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "Grouping_1500x500.png")))
+```
+
+
+
+---
+# `r paste0(mod5[mod5$uid == "mod5_h1_objectives", params$lang])`  
+
+`r paste0(mod5[mod5$uid == "mod5_op_objectives", params$lang])`  
+* `r paste0(mod5[mod5$uid == "mod5_bu_objectives_1", params$lang])`  
+* `r paste0(mod5[mod5$uid == "mod5_bu_objectives_2", params$lang])`  
+* `r paste0(mod5[mod5$uid == "mod5_bu_objectives_3", params$lang])`  
+* `r paste0(mod5[mod5$uid == "mod5_bu_objectives_4", params$lang])`  
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_1_1", params$lang])}),     str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_2_1", params$lang])}),      str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_3_1", params$lang])}),
+  str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_1_2", params$lang])}),     str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_2_2", params$lang])}),      str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_3_2", params$lang])}),
+  str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_1_3", params$lang])}),     str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_2_3", params$lang])}), str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_3_3", params$lang])}),
+  str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_1_4", params$lang])}),     str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_2_4", params$lang])}), str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_3_4", params$lang])}),
+  str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_1_5", params$lang])}),     str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_2_5", params$lang])}), str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_3_5", params$lang])}),
+  str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_1_6", params$lang])}),     str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_2_6", params$lang])}),      str_glue({paste0(mod5[mod5$uid == "mod5_tb_objectives_3_6", params$lang])})
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines(str_glue({paste0(mod5[mod5$uid == "mod5_fn_objectives", params$lang])}))
+```
+
+???
+Note stretch breaks throughout.
+
+
+
+
+---
+class: inverse, center, middle
+
+## `r paste0(mod5[mod5$uid == "mod5_h1_janitor", params$lang])`  
+
+## `r paste0(mod5[mod5$uid == "mod5_h1_tidyverse", params$lang])`  
+
+## `r paste0(mod5[mod5$uid == "mod5_h1_gtsummary", params$lang])`
+
+
+
+
+
+---
+class: inverse, center, middle
+
+## `r paste0(mod5[mod5$uid == "mod5_h1_janitor", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "65%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "simple_table.png")))
+```
+
+
+
+
+---
+
+# `r paste0(mod5[mod5$uid == "mod5_h1_tabyl", params$lang])`  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district)            #<<
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district)
+```
+
+]
+
+
+---
+
+# `r paste0(mod5[mod5$uid == "mod5_h1_adorn", params$lang])`  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district) %>% 
+  adorn_totals()            #<<
+```
+
+]
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district) %>% 
+  adorn_totals()
+```
+
+]
+
+
+
+
+---
+
+# `r paste0(mod5[mod5$uid == "mod5_h1_adorn", params$lang])`  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district) %>% 
+  adorn_totals() %>% 
+  adorn_pct_formatting()                            #<<
+```
+
+]
+
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district) %>% 
+  adorn_totals() %>% 
+  adorn_pct_formatting()
+```
+
+]
+
+
+
+---
+
+# `r paste0(mod5[mod5$uid == "mod5_h1_tabylcross", params$lang])`   
+
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district, gender)              #<<
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district, gender)
+```
+
+]
+
+
+
+---
+
+# `r paste0(mod5[mod5$uid == "mod5_h1_tabylcross", params$lang])`   
+
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE)              #<<
+```
+
+`r paste0(mod5[mod5$uid == "mod5_tx_tabylcross", params$lang])`  
+
+]
+
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE)
+```
+
+]
+
+
+
+---
+
+# `r paste0(mod5[mod5$uid == "mod5_h1_adorncross", params$lang])`  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both")                     #<<
+```
+
+`r paste0(mod5[mod5$uid == "mod5_tx_adorncross_1", params$lang])`  
+
+]
+
+
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") 
+```
+
+]
+
+---
+
+# `r paste0(mod5[mod5$uid == "mod5_h1_adorncross", params$lang])`  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") %>% 
+  adorn_percentages() %>%     #<<
+  adorn_pct_formatting()      #<<
+```
+
+`r paste0(mod5[mod5$uid == "mod5_tx_adorncross_2", params$lang])`  
+
+]
+
+
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") %>% 
+  adorn_percentages() %>%     
+  adorn_pct_formatting()      
+```
+
+]
+
+
+---
+
+# `r paste0(mod5[mod5$uid == "mod5_h1_adorncross", params$lang])`  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") %>% 
+  adorn_percentages() %>%     
+  adorn_pct_formatting(digits = 0)      #<<
+```
+
+`r paste0(mod5[mod5$uid == "mod5_tx_adorncross_3", params$lang])`  
+
+]
+
+
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") %>% 
+  adorn_percentages() %>%     
+  adorn_pct_formatting(digits = 0)      
+```
+
+]
+
+
+???
+This may look ugly, but you can make this into pretty image very easily  
+
+---
+
+# `r paste0(mod5[mod5$uid == "mod5_h1_flextable", params$lang])`
+
+`r paste0(mod5[mod5$uid == "mod5_tx_flextable", params$lang])`  
+
+.pull-left[
+```{r, echo=T, eval=F}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") %>% 
+  adorn_percentages() %>%     
+  adorn_pct_formatting(digits = 0) %>% 
+  qflextable()                                       #<<
+```
+]
+
+.pull-right[
+```{r, echo=F, eval=T}
+surv %>% 
+  tabyl(district, gender, show_na = FALSE) %>% 
+  adorn_totals(where = "both") %>% 
+  adorn_percentages() %>%     
+  adorn_pct_formatting(digits = 0) %>% 
+  qflextable()                                       #<<
+```
+
+]
+
+.footnote[`r paste0(mod5[mod5$uid == "mod5_fn_flextable", params$lang])`]
+
+
+
+
+
+
+
+
+---
+class: inverse, center, middle
+
+## `r paste0(mod5[mod5$uid == "mod5_h1_tidyverse", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "65%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "flexibility.png")))
+```
+
+
+
+
+
+---
+
+# `r paste0(mod5[mod5$uid == "mod5_h1_fnc", params$lang])`  
+
+`r paste0(mod5[mod5$uid == "mod5_tx_fnc", params$lang])`  
+
+* `count()`  
+* `group_by()`  
+* `summarise()`  
+* `arrange()`  
+
+
+
+
+---
+# `count()`  
+
+`r paste0(mod5[mod5$uid == "mod5_tx_count_1", params$lang])`  
+
+`r paste0(mod5[mod5$uid == "mod5_tx_count_2", params$lang])`  
+
+--
+
+
+```{r, echo=T}
+surv %>% 
+  count(hospital)                            #<<
+```
+
+???
+Very quick and fast
+
+
+---
+# `count()`  
+
+`r paste0(mod5[mod5$uid == "mod5_tx_count_3", params$lang])`  
+
+--
+
+```{r, echo=T}
+surv %>% 
+  count(hospital, gender)                            #<<
+```
+
+???
+Very quick and fast
+
+
+---
+# `r paste0(mod5[mod5$uid == "mod5_h1_groupby", params$lang])`  
+
+`r paste0(mod5[mod5$uid == "mod5_tx_groupby_1", params$lang])`  
+
+--
+
+`r paste0(mod5[mod5$uid == "mod5_tx_groupby_2", params$lang])`   
+
+--
+
+`r paste0(mod5[mod5$uid == "mod5_tx_groupby_3", params$lang])`  
+
+--
+
+`r paste0(mod5[mod5$uid == "mod5_tx_groupby_4", params$lang])`   
+
+--
+
+`r paste0(mod5[mod5$uid == "mod5_tx_groupby_5", params$lang])`   
+
+
+.footnote[`r paste0(mod5[mod5$uid == "mod5_fn_groupby", params$lang])`]  
+
+
+
+
+---
+# `r paste0(mod5[mod5$uid == "mod5_h1_groupby", params$lang])`  
+
+```{r, echo=T, eval=F}
+surv %>% 
+  group_by(hospital)
+```
+
+`r paste0(mod5[mod5$uid == "mod5_tx_groupby_6", params$lang])`  
+
+--
+
+`r paste0(mod5[mod5$uid == "mod5_tx_groupby_7", params$lang])`
+
+```{r, echo=F, eval=T}
+surv %>% 
+  group_by(hospital)
+```
+
+
+
+???
+Note the `groups: hospital`, at the top of the tibble
+
+
+
+
+---
+# `r paste0(mod5[mod5$uid == "mod5_h1_groupby", params$lang])`  
+
+`r paste0(mod5[mod5$uid == "mod5_tx_groupby_8", params$lang])`  
+
+--
+
+```{r, results = "asis", echo = FALSE}
+str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_9", params$lang])}) %>%
+  flair(str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_10", params$lang])}), color = "deeppink") %>%
+  flair(str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_11", params$lang])}), color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+--
+
+```{r summarise, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise()   
+```
+
+```{r summarise_flair, echo=F}
+decorate("summarise") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
+
+
+
+---
+# `r paste0(mod5[mod5$uid == "mod5_h1_groupby", params$lang])`  
+
+Within the parentheses, *list new columns for the **new**, summary dataset.*  
+
+```{r, results = "asis", echo = FALSE}
+str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_9", params$lang])}) %>%
+  flair(str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_10", params$lang])}), color = "deeppink") %>%
+  flair(str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_11", params$lang])}), color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r summarise2_en, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(n_rows = n())                        # n() counts the number of rows per group
+```
+
+```{r summarise2_fr, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(n_rows = n())                       # n(): le nombre de lignes par groupe
+```
+
+```{r summarise2_ru, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(n_rows = n())                        # n() подсчитывает количество строк в группе
+```
+
+```{r summarise2_es, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(n_rows = n())                        # n() cuenta el número de filas del grupo
+```
+
+```{r , echo=F, eval = params$lang == "en"}
+decorate("summarise2_en") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "fr"}
+decorate("summarise2_fr") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "ru"}
+decorate("summarise2_ru") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "es"}
+decorate("summarise2_es") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
+
+
+---
+# `r paste0(mod5[mod5$uid == "mod5_h1_groupby", params$lang])`  
+
+`r paste0(mod5[mod5$uid == "mod5_tx_groupby_12", params$lang])`  
+
+```{r, results = "asis", echo = FALSE}
+str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_9", params$lang])}) %>%
+  flair(str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_10", params$lang])}), color = "deeppink") %>%
+  flair(str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_11", params$lang])}), color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r summarise3_en, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T))        # mean age in the group
+```
+
+```{r summarise3_fr, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n(): le nombre de lignes par groupe
+    age_avg = mean(age_years, na.rm = T))        # âge moyen dans le groupe
+```
+
+```{r summarise3_ru, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               #n() подсчитывает количество строк для каждой группы
+    age_avg = mean(age_years, na.rm = T))        # средний возраст в группе
+```
+
+```{r summarise3_es, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() cuenta el número de filas por grupo
+    age_avg = mean(age_years, na.rm = T))        # edad media del grupo
+```
+
+```{r , echo=F, eval = params$lang == "en"}
+decorate("summarise3_en") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "fr"}
+decorate("summarise3_fr") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "ru"}
+decorate("summarise3_ru") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "es"}
+decorate("summarise3_es") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
+
+---
+# `r paste0(mod5[mod5$uid == "mod5_h1_groupby", params$lang])`  
+
+`r paste0(mod5[mod5$uid == "mod5_tx_groupby_13", params$lang])`  
+
+```{r, results = "asis", echo = FALSE}
+str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_9", params$lang])}) %>%
+  flair(str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_10", params$lang])}), color = "deeppink") %>%
+  flair(str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_11", params$lang])}), color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r summarise4_en, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T))        # latest onset date
+
+```
+
+```{r summarise4_fr, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n(): le nombre de lignes par groupe
+    age_avg = mean(age_years, na.rm = T),        # âge moyen dans le groupe
+    max_onset = max(date_onset, na.rm=T))        # date d'apparition la plus récente
+
+```
+
+```{r summarise4_ru, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows = n(),                               # n() подсчитывает количество строк в группе
+    age_avg = mean(age_years, na.rm = T),       # средний возраст в группе
+    max_onset = max(date_onset, na.rm=T))       # последняя дата начала заболевания
+
+```
+
+```{r summarise4_es, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() cuenta el número de filas por grupo
+    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
+    max_onset = max(date_onset, na.rm=T))        # Fecha de inicio más tardía
+
+```
+
+```{r , echo=F, eval = params$lang == "en"}
+decorate("summarise4_en") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "fr"}
+decorate("summarise4_fr") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "ru"}
+decorate("summarise4_ru") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "es"}
+decorate("summarise4_es") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
+
+
+---
+# `r paste0(mod5[mod5$uid == "mod5_h1_groupby", params$lang])`  
+
+`r paste0(mod5[mod5$uid == "mod5_tx_groupby_13", params$lang])`   
+
+```{r, results = "asis", echo = FALSE}
+str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_9", params$lang])}) %>%
+  flair(str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_10", params$lang])}), color = "deeppink") %>%
+  flair(str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_11", params$lang])}), color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r summarise5_en, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T)) # number female in group
+
+```
+
+
+```{r summarise5_fr, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n(): le nombre de lignes par groupe
+    age_avg = mean(age_years, na.rm = T),        # âge moyen dans le groupe
+    max_onset = max(date_onset, na.rm=T),        # date d'apparition la plus récente
+    n_female = sum(gender == 'female', na.rm=T)) # nombre de femmes dans le groupe
+
+```
+
+
+```{r summarise5_ru, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() подсчитывает количество строк в группе
+    age_avg = mean(age_years, na.rm = T),        # средний возраст в группе
+    max_onset = max(date_onset, na.rm=T),        # последняя дата начала заболевания
+    n_female = sum(gender == 'female', na.rm=T)) ## количество женщин в группе
+
+```
+```{r summarise5_es, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() cuenta el número de filas por grupo
+    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
+    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
+    n_female = sum(gender == 'female', na.rm=T)) # número de mujeres en el grupo
+
+```
+
+```{r , echo=F, eval = params$lang == "en"}
+decorate("summarise5_en") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair(" n_female ", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(gender == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "fr"}
+decorate("summarise5_fr") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair(" n_female ", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(gender == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "ru"}
+decorate("summarise5_ru") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair(" n_female ", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(gender == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "es"}
+decorate("summarise5_es") %>%
+  flair("n_rows", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair(" n_female ", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(gender == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
+
+---
+# `r paste0(mod5[mod5$uid == "mod5_h1_groupby", params$lang])`  
+
+`r paste0(mod5[mod5$uid == "mod5_tx_groupby_13", params$lang])`   
+
+```{r, results = "asis", echo = FALSE}
+str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_9", params$lang])}) %>%
+  flair(str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_10", params$lang])}), color = "deeppink") %>%
+  flair(str_glue({paste0(mod5[mod5$uid == "mod5_tx_groupby_11", params$lang])}), color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r summarise6_en, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                                # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T), # number female in group
+    pct_female = percent(n_female / n_rows))     # percent female in group
+```
+
+```{r summarise6_fr, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n(): le nombre de lignes par groupe
+    age_avg = mean(age_years, na.rm = T),        # âge moyen dans le groupe
+    max_onset = max(date_onset, na.rm=T),        # date d'apparition la plus récente
+    n_female = sum(gender == 'female', na.rm=T), # nombre de femmes dans le groupe
+    pct_female = percent(n_female / n_rows))     # pourcentage de femmes dans le groupe
+```
+
+```{r summarise6_ru, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() подсчитывает количество строк в группе
+    age_avg = mean(age_years, na.rm = T),        # средний возраст в группе
+    max_onset = max(date_onset, na.rm=T),        # последняя дата начала заболевания
+    n_female = sum(gender == 'female', na.rm=T), ## количество женщин в группе
+    pct_female = percent(n_female / n_rows))     # процент женщин в группе
+```
+
+```{r summarise6_es, include = F}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                                # n() cuenta el número de filas por grupo
+    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
+    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
+    n_female = sum(gender == 'female', na.rm=T), # número de mujeres en el grupo
+    pct_female = percent(n_female / n_rows))     # Porcentaje de mujeres en el grupo
+```
+
+
+
+```{r , echo=F, eval = params$lang == "en"}
+decorate("summarise6_en") %>%
+  flair(" n_rows ", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair(" n_female ", color = "deeppink") %>%
+  flair("pct_female", color = "deeppink") %>%
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(gender == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("percent(n_female / n_rows)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
+```{r , echo=F, eval = params$lang == "fr"}
+decorate("summarise6_fr") %>%
+  flair(" n_rows ", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair(" n_female ", color = "deeppink") %>%
+  flair("pct_female", color = "deeppink") %>%
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(gender == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("percent(n_female / n_rows)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
+```{r , echo=F, eval = params$lang == "ru"}
+decorate("summarise6_ru") %>%
+  flair(" n_rows ", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair(" n_female ", color = "deeppink") %>%
+  flair("pct_female", color = "deeppink") %>%
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(gender == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("percent(n_female / n_rows)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r , echo=F, eval = params$lang == "es"}
+decorate("summarise6_es") %>%
+  flair(" n_rows ", color = "deeppink") %>%
+  flair("age_avg", color = "deeppink") %>%
+  flair("max_onset", color = "deeppink") %>%
+  flair("n()", color = "cornflowerblue") %>% 
+  flair(" n_female ", color = "deeppink") %>%
+  flair("pct_female", color = "deeppink") %>%
+  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(gender == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("percent(n_female / n_rows)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+---
+
+# `arrange()`
+
+`r paste0(mod5[mod5$uid == "mod5_tx_arrange_1", params$lang])`  
+
+```{r, echo = params$lang == "en", eval = params$lang == "en"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T), # number female in group
+    pct_female = percent(n_female / n_rows)) %>% # percent female in group
+  arrange(n_rows)                                  #<<
+```
+
+
+```{r , echo=params$lang == "fr", eval=params$lang == "fr"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n(): le nombre de lignes par groupe
+    age_avg = mean(age_years, na.rm = T),        # âge moyen dans le groupe
+    max_onset = max(date_onset, na.rm=T),        # date d'apparition la plus récente
+    n_female = sum(gender == 'female', na.rm=T), # nombre de femmes dans le groupe
+    pct_female = percent(n_female / n_rows)) %>% # pourcentage de femmes dans le groupe
+  arrange(n_rows)
+```
+
+
+
+```{r , echo=params$lang == "ru", eval=params$lang == "ru"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() подсчитывает количество строк в группе
+    age_avg = mean(age_years, na.rm = T),        # средний возраст в группе
+    max_onset = max(date_onset, na.rm=T),        # последняя дата начала заболевания
+    n_female = sum(gender == 'female', na.rm=T), # количество женщин в группе
+    pct_female = percent(n_female / n_rows)) %>% # процент женщин в группе
+  arrange(n_rows)
+```
+
+```{r, echo = params$lang == "es", eval = params$lang == "es"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() cuenta el número de filas por grupo
+    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
+    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
+    n_female = sum(gender == 'female', na.rm=T), # número de mujeres en el grupo
+    pct_female = percent(n_female / n_rows)) %>% # Porcentaje de mujeres en el grupo
+  arrange(n_rows)                                  #<<
+```
+
+---
+
+# `arrange()`
+
+`r paste0(mod5[mod5$uid == "mod5_tx_arrange_2", params$lang])`  
+
+```{r , echo=params$lang == "en", eval = params$lang == "en"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T), # number female in group
+    pct_female = percent(n_female / n_rows)) %>% # percent female in group
+  arrange(-n_rows) 
+```
+
+```{r , echo=params$lang == "fr", eval=params$lang == "fr"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n(): le nombre de lignes par groupe
+    age_avg = mean(age_years, na.rm = T),        # âge moyen dans le groupe
+    max_onset = max(date_onset, na.rm=T),        # date d'apparition la plus récente
+    n_female = sum(gender == 'female', na.rm=T), # nombre de femmes dans le groupe
+    pct_female = percent(n_female / n_rows)) %>% # pourcentage de femmes dans le groupe
+  arrange(-n_rows)                                   
+```
+
+```{r , echo=params$lang == "ru", eval=params$lang == "ru"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() подсчитывает количество строк в группе
+    age_avg = mean(age_years, na.rm = T),        # средний возраст в группе
+    max_onset = max(date_onset, na.rm=T),        # последняя дата начала заболевания
+    n_female = sum(gender == 'female', na.rm=T), # количество женщин в группе
+    pct_female = percent(n_female / n_rows))  %>% # процент женщин в группе
+  arrange(-n_rows)                                  
+```
+
+```{r , echo=params$lang == "es", eval = params$lang == "es"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() cuenta el número de filas por grupo
+    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
+    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
+    n_female = sum(gender == 'female', na.rm=T), # número de mujeres en el grupo
+    pct_female = percent(n_female / n_rows)) %>% # Porcentaje de mujeres en el grupo
+  arrange(-n_rows) 
+```
+
+
+
+---
+
+# flextable
+
+`r paste0(mod5[mod5$uid == "mod5_tx_flextable_1", params$lang])`  
+
+```{r dplyr-flex-en, echo=params$lang == "en", eval = params$lang == "en"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() counts the number of rows per group
+    age_avg = mean(age_years, na.rm = T),        # mean age in the group
+    max_onset = max(date_onset, na.rm=T),        # latest onset date
+    n_female = sum(gender == 'female', na.rm=T), # number female in group
+    pct_female = percent(n_female / n_rows)) %>% # percent female in group
+  arrange(-n_rows) %>% 
+  qflextable()                                   #<<
+```
+
+```{r dplyr-flex-fr, echo=params$lang == "fr", eval = params$lang == "fr"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n(): le nombre de lignes par groupe
+    age_avg = mean(age_years, na.rm = T),        # âge moyen dans le groupe
+    max_onset = max(date_onset, na.rm=T),        # date d'apparition la plus récente
+    n_female = sum(gender == 'female', na.rm=T), # nombre de femmes dans le groupe
+    pct_female = percent(n_female / n_rows)) %>% # pourcentage de femmes dans le groupe
+  arrange(-n_rows) %>% 
+  qflextable()                                   #<<
+```
+
+```{r dplyr-flex-ru, echo=params$lang == "ru", eval = params$lang == "ru"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() подсчитывает количество строк в группе
+    age_avg = mean(age_years, na.rm = T),        # средний возраст в группе
+    max_onset = max(date_onset, na.rm=T),        # последняя дата начала заболевания
+    n_female = sum(gender == 'female', na.rm=T), # количество женщин в группе
+    pct_female = percent(n_female / n_rows)) %>% # процент женщин в группе
+  arrange(-n_rows) %>% 
+  qflextable()                                   #<<
+```
+
+```{r dplyr-flex-es, echo=params$lang == "es", eval = params$lang == "es"}
+surv %>% 
+  group_by(hospital) %>% 
+  summarise(
+    n_rows  = n(),                               # n() cuenta el número de filas por grupo
+    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
+    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
+    n_female = sum(gender == 'female', na.rm=T), # número de mujeres en el grupo
+    pct_female = percent(n_female / n_rows)) %>% # Porcentaje de mujeres en el grupo
+  arrange(-n_rows) %>% 
+  qflextable()                                   #<<
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+class: inverse, center, middle
+
+## `r paste0(mod5[mod5$uid == "mod5_h1_gtsummary", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "65%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "beauty.png")))
+```
+
+
+---
+
+# `tbl_summary()`  
+
+* `r paste0(mod5[mod5$uid == "mod5_bu_tblsummary_1", params$lang])`  
+
+--
+
+.pull-left[
+
+```{r, echo=T, eval= F}
+surv %>% 
+  select(hospital, age_years)   #<<
+```
+
+`r paste0(mod5[mod5$uid == "mod5_tx_tblsummary_1", params$lang])`  
+`r paste0(mod5[mod5$uid == "mod5_tx_tblsummary_2", params$lang])`  
+* `r paste0(mod5[mod5$uid == "mod5_bu_tblsummary_2", params$lang])`  
+* `r paste0(mod5[mod5$uid == "mod5_bu_tblsummary_3", params$lang])`  
+
+]
+
+
+
+---
+
+# `tbl_summary()`  
+
+* `r paste0(mod5[mod5$uid == "mod5_bu_tblsummary_1", params$lang])`  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  select(hospital, age_years) %>% 
+  tbl_summary()                 #<<
+```
+
+`r paste0(mod5[mod5$uid == "mod5_tx_tblsummary_1", params$lang])`  
+`r paste0(mod5[mod5$uid == "mod5_tx_tblsummary_2", params$lang])`  
+* `r paste0(mod5[mod5$uid == "mod5_bu_tblsummary_2", params$lang])`  
+* `r paste0(mod5[mod5$uid == "mod5_bu_tblsummary_3", params$lang])`   
+
+]
+
+--
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  select(hospital, age_years) %>%   
+  tbl_summary()                    #<<
+```
+
+]
+
+
+
+
+---
+
+# `tbl_summary()`  
+
+* `r paste0(mod5[mod5$uid == "mod5_bu_tblsummary_4", params$lang])`  
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(by = gender)                 #<<
+```
+
+`r paste0(mod5[mod5$uid == "mod5_tx_tblsummary_3", params$lang])`)
+]
+
+--
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  select(age_years, hospital, gender) %>%   
+  tbl_summary(by = gender)   #<<
+```
+
+]
+
+
+
+---
+
+# `tbl_summary()`  
+
+* `r paste0(mod5[mod5$uid == "mod5_bu_tblsummary_5", params$lang])`  
+
+.pull-left[
+
+```{r, echo=params$lang == "en", eval=F}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(
+       by = gender,
+       label = list(
+         age_years = "Age (years)", 
+         hospital = "Hospital"))     
+```
+
+
+```{r, echo=params$lang == "fr", eval=F}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(
+       by = gender,
+       label = list(
+         age_years = "Âge (années)", 
+         hospital = "Hôpital"))     
+```
+
+```{r, echo=params$lang == "ru", eval=F}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(
+       by = gender,
+       label = list(
+         age_years = "Возраст (годы)", 
+         hospital = "Больница"))     
+```
+
+```{r, echo=params$lang == "es", eval=F}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(
+       by = gender,
+       label = list(
+         age_years = "Edad (años)", 
+         hospital = "Hospital"))     
+```
+`r paste0(mod5[mod5$uid == "mod5_tx_tblsummary_3", params$lang])`)
+]
+
+--
+
+.pull-right[
+
+```{r, echo=F, eval=params$lang == "en"}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(by = gender,
+              label = list(
+                   age_years = "Age (years)", #<<
+                   hospital = "Hospital"))    #<< 
+```
+
+```{r, echo=F, eval=params$lang == "fr"}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(by = gender,
+              label = list(
+                   age_years = "Âge (années)", #<<
+                   hospital = "Hôpital"))    #<< 
+```
+
+```{r, echo=F, eval=params$lang == "ru"}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(by = gender,
+              label = list(
+                   age_years = "Возраст (годы)", #<<
+                   hospital = "Больница"))    #<< 
+```
+
+```{r, echo=F, eval=params$lang == "es"}
+surv %>% 
+  select(hospital, age_years, gender) %>% 
+  tbl_summary(by = gender,
+              label = list(
+                   age_years = "Edad (años)", #<<
+                   hospital = "Hospital"))    #<< 
+```
+
+]
+
+
+
+---
+class: inverse, center, middle
+
+## `r paste0(mod5[mod5$uid == "mod5_h1_whichuse", params$lang])`  
+
+`r paste0(mod5[mod5$uid == "mod5_tx_whichuse_1", params$lang])`  
+`r paste0(mod5[mod5$uid == "mod5_tx_whichuse_2", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "90%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "choices.png")))
+```
+
+
