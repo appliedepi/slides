@@ -716,7 +716,7 @@ cowplot::plot_grid(histogram, points,
 
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_1", params$lang])`   |`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_2", params$lang])`
 ------------------------------------------------------------------------|--------------------------------------------------------------------
-`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_5", params$lang])`|`geom_lines()`  
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_5", params$lang])`|`geom_line()`  
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_6", params$lang])`|`geom_bar()` or `geom_col()`  
 
 .footnote[`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_geometry", params$lang])`]
@@ -972,6 +972,15 @@ geom_point()          # mostrar los datos en forma de puntos
 ```
 
 
+```{r, echo = params$lang == "ua", eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,        # use case linelist
+  mapping = aes(      # make aesthetic mappings for all geoms
+    x = age_years,    # assign x-axis to age column
+    y = ht_cm)) +     # assign y-axis to height
+geom_point()          # display data as points
+```
+
 
 ???
 - Which of the above is easier to read for you?
@@ -1107,6 +1116,20 @@ cowplot::plot_grid(color_purple, color_hospital,
 
 ```
 
+```{r,eval = params$lang == "ua", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using color = 'purple'")
+
+color_hospital <- ggplot() + theme_void()
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
 ]
 
 
@@ -1210,6 +1233,24 @@ color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
   geom_point(aes(color = hospital))+
   theme_minimal(base_size = 16)+
   labs(title = "Utilizar aes(color = hospital)")
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r, eval = params$lang == "ua", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using color = 'purple'")
+
+color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(aes(color = hospital))+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using aes(color = hospital)")
 
 cowplot::plot_grid(color_purple, color_hospital,
                   nrow = 2, rel_widths = c(2,2))
@@ -1330,6 +1371,27 @@ fill_hospital <- ggplot(data = surv, aes(x = date_onset))+
   geom_histogram(aes(fill = hospital))+
     theme_minimal(base_size = 16)+
   labs(title = "Utilizar aes(fill = hospital)")
+
+cowplot::plot_grid(
+                  fill_purple, fill_hospital,
+                   
+                   nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r, eval = params$lang == "ua", message=F, warning=F}
+
+fill_purple <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(fill = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using fill = 'purple'")
+
+
+fill_hospital <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(aes(fill = hospital))+
+    theme_minimal(base_size = 16)+
+  labs(title = "Using aes(fill = hospital)")
 
 cowplot::plot_grid(
                   fill_purple, fill_hospital,
@@ -1606,6 +1668,15 @@ labs(caption = "Obsérvese el eje y libre")+
 theme_grey(base_size = 16)
 ```
 
+```{r, eval = params$lang == "ua", echo = F }
+ggplot(data = surv,
+       mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~hospital,
+           scales = "free_y") +
+labs(caption = "Note the free y-axis")+
+theme_grey(base_size = 16)
+```
 ]
 
 
@@ -1664,14 +1735,93 @@ theme_minimal(base_size = 14)
 
 `r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_gghighlight", params$lang])`
 
-```{r, echo=T, eval=F}
+```{r, echo=params$lang == "en", eval=F}
 surv %>% 
   # get weekly counts by hospital
-  group_by(
+  count(
      hospital,
      week = floor_date(date_onset, "week")) %>%
-  count() %>% 
+
+  # plot
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
   
+```
+
+```{r, echo=params$lang == "fr",, eval=F}
+surv %>% 
+  # obtenir des comptages hebdomadaires par hôpital
+  count(
+     hospital,
+     week = floor_date(date_onset, "week")) %>% 
+  
+  # graphique
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+  
+```
+
+```{r, echo=params$lang == "ru",, eval=F}
+surv %>% 
+  # получить еженедельные подсчеты по больницам
+  count(
+     hospital,
+     week = floor_date(date_onset, "week")) %>% 
+  
+  # сюжет
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+  
+```
+
+```{r, echo=params$lang == "es",, eval=F}
+surv %>% 
+  # Obtenga los recuentos semanales por hospital
+  count(
+     hospital,
+     week = floor_date(date_onset, "week")) %>% 
+  
+  # parcela
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+  
+```
+
+```{r, echo=params$lang == "ua", eval=F}
+surv %>% 
+  # get weekly counts by hospital
+  count(
+     hospital,
+     week = floor_date(date_onset, "week")) %>%
+
   # plot
   ggplot(
     mapping = aes(
@@ -1687,7 +1837,6 @@ surv %>%
 
 
 
-
 ] 
 
 
@@ -1695,10 +1844,9 @@ surv %>%
 ```{r echo=F, eval=T}
 surv %>% 
   # get daily counts by zip code
-  group_by(
+  count(
      hospital,
-     week = floor_date(date_onset, "week")) %>%
-  count() %>% 
+     week = floor_date(date_onset, "week")) %>% 
   
   # plot
   ggplot(

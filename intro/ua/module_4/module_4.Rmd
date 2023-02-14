@@ -1,0 +1,452 @@
+---
+title: "Introduction to R for Applied Epidemiology"
+subtitle: "<br>Cleaning data with R: Part 2"
+author: "2022"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "en"
+---
+class: inverse, center, middle, title-slide
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,       # for decorating code chunks with colors
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+
+```{r, echo=F, include = F}
+surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic", col_types = "c") %>%
+  clean_names()
+
+mod4 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod4", col_types = "c") %>%
+  clean_names()
+```
+
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
+
+### `r paste0(mod4[mod4$uid == "mod4_h1_subtitle", params$lang])`
+
+contact@appliedepi.org
+
+
+---
+# `r paste0(mod4[mod4$uid == "mod4_h1_objectives", params$lang])`  
+
+`r paste0(mod4[mod4$uid == "mod4_op_objectives", params$lang])`  
+* `r paste0(mod4[mod4$uid == "mod4_bu_objectives_1", params$lang])`  
+* `r paste0(mod4[mod4$uid == "mod4_bu_objectives_2", params$lang])`  
+* `r paste0(mod4[mod4$uid == "mod4_bu_objectives_3", params$lang])`  
+
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  str_glue({paste0(mod4[mod4$uid == "mod4_tb_objectives_1_1", params$lang])}),     str_glue({paste0(mod4[mod4$uid == "mod4_tb_objectives_2_1", params$lang])}),      str_glue({paste0(mod4[mod4$uid == "mod4_tb_objectives_3_1", params$lang])}),
+  str_glue({paste0(mod4[mod4$uid == "mod4_tb_objectives_1_2", params$lang])}),     str_glue({paste0(mod4[mod4$uid == "mod4_tb_objectives_2_2", params$lang])}),      str_glue({paste0(mod4[mod4$uid == "mod4_tb_objectives_3_2", params$lang])}),
+  str_glue({paste0(mod4[mod4$uid == "mod4_tb_objectives_1_3", params$lang])}),     str_glue({paste0(mod4[mod4$uid == "mod4_tb_objectives_2_3", params$lang])}),      str_glue({paste0(mod4[mod4$uid == "mod4_tb_objectives_3_3", params$lang])}),
+  str_glue({paste0(mod4[mod4$uid == "mod4_tb_objectives_1_4", params$lang])}),     str_glue({paste0(mod4[mod4$uid == "mod4_tb_objectives_2_4", params$lang])}),      str_glue({paste0(mod4[mod4$uid == "mod4_tb_objectives_3_4", params$lang])})
+
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines(str_glue({paste0(mod4[mod4$uid == "mod4_tb_session_4_1", params$lang])}))
+```
+
+`r paste0(mod4[mod4$uid == "mod4_tx_objectives", params$lang])`  
+
+???
+Note stretch breaks throughout.
+
+
+---
+# `r paste0(mod4[mod4$uid == "mod4_h1_review", params$lang])`  
+
+
+
+---
+
+# `r paste0(mod4[mod4$uid == "mod4_h1_demo", params$lang])`  
+
+`r paste0(mod4[mod4$uid == "mod4_tx_demo_1", params$lang])`
+```{r, echo=F}
+demo <- surv_raw %>% 
+     head(5) %>% 
+     select(case_id, age, gender, lab_confirmed, fever, epilink)
+```
+
+```{r, eval=T}
+demo %>% 
+  knitr::kable()
+     
+```
+
+--
+
+`r paste0(mod4[mod4$uid == "mod4_tx_demo_2", params$lang])`
+
+---
+
+# `r paste0(mod4[mod4$uid == "mod4_h1_dplyR", params$lang])`  
+
+`r paste0(mod4[mod4$uid == "mod4_tx_dplyR", params$lang])`  
+
+
+`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_1", params$lang])`       | `r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2", params$lang])`                               
+---------------|---------------------------------------
+`mutate()`|`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2_1", params$lang])`  
+`ifelse()`|`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2_2", params$lang])`  
+`case_when()`|`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2_3", params$lang])`   
+`age_categories()`|`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2_4", params$lang])`   
+`coalesce()`|`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2_5", params$lang])`   
+`select()`|`r paste0(mod4[mod4$uid == "mod4_tb_dplyR_2_6", params$lang])`  
+
+
+
+
+
+
+---
+
+# `r paste0(mod4[mod4$uid == "mod4_h1_print", params$lang])`   
+
+`r paste0(mod4[mod4$uid == "mod4_tx_print_1", params$lang])` 
+
+```{r, echo=params$lang == "en", eval=F}
+demo %>%                    # PRINT only cases over 10 years
+  filter(age > 10)
+```
+
+```{r, echo=params$lang == "fr", eval=F}
+demo %>%                    # IMPRIMER seulement les cas plus que 10 ans
+  filter(age > 10)
+```
+
+```{r, echo=params$lang == "ru", eval=F}
+demo %>%                    # ПЕЧАТАТЬ только случаи старше 10 лет
+  filter(age > 10)
+```
+
+```{r, echo=params$lang == "es", eval=F}
+demo %>%                    # IMPRIMIR sólo los casos de más de 10 años
+  filter(age > 10)
+```
+
+```{r, echo=F, eval=T}
+demo %>%                    # print only cases over 10 years
+  filter(age > 10) %>% 
+  knitr::kable()
+```
+
+--
+
+
+`r paste0(mod4[mod4$uid == "mod4_tx_print_2", params$lang])` 
+
+```{r pipe-assign, eval=F, echo=T}
+demo_over10 <- demo %>%
+  filter(age > 10)
+```
+
+`r paste0(mod4[mod4$uid == "mod4_tx_print_3", params$lang])`  
+
+???
+Note how the column names in `demo` are old! It's because our changes have not yet been saved.  
+
+---
+
+# `r paste0(mod4[mod4$uid == "mod4_h1_mutate", params$lang])`  
+ 
+`r paste0(mod4[mod4$uid == "mod4_tx_mutate_1", params$lang])`
+
+`r paste0(mod4[mod4$uid == "mod4_tx_mutate_2", params$lang])`  
+
+--
+
+
+
+```{r, echo=params$lang == "en", eval=params$lang == "en"}
+demo %>% 
+  mutate(gender = recode(gender,   # re-define gender as: 
+    "m" = "male",                  # when "m", change to "male"   
+    "f" = "female"))               # when "f", change to "female"
+```
+
+
+```{r, echo=params$lang == "fr", eval=params$lang == "fr"}
+demo %>% 
+  mutate(gender = recode(gender,   # redéfinir le sexe: 
+    "m" = "male",                  # ou "m" devient "male"
+    "f" = "female"))               # ou "f" devient "female"
+```
+
+
+```{r, echo=params$lang == "ru", eval=params$lang == "ru"}
+demo %>% 
+  mutate(gender = recode(gender,   # переопределить пол как: 
+    "m" = "male",                  # когда "m", меняется на "male" 
+    "f" = "female"))               # когда "f", меняется на "female"  
+```
+
+```{r, echo=params$lang == "es", eval=params$lang == "es"}
+demo %>% 
+  mutate(gender = recode(gender,   #redefinir género como: 
+    "m" = "male",                  # cuando "m", cambiar a "masculino"   
+    "f" = "female"))               # cuando "f", cambiar a "mujer"
+```
+
+
+
+???
+Explain that there are many nuances to case_when() which you will practice in the breakout exercise
+
+
+
+---
+
+# `r paste0(mod4[mod4$uid == "mod4_h1_ifelse", params$lang])`  
+ 
+`r paste0(mod4[mod4$uid == "mod4_tx_ifelse_1", params$lang])`  
+
+```{r, results = "asis", echo = FALSE}
+str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_3", params$lang])}) %>%
+  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_4", params$lang])}), color = "deeppink") %>%
+  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_5", params$lang])}), color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+--
+
+```{r mutate_en, include = FALSE}
+demo %>% 
+  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # creates new T/F column
+```
+
+
+```{r mutate_fr, include = FALSE}
+demo %>% 
+  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # crée une nouvelle colonne vrai-faux
+```
+
+
+```{r mutate_ru, include = FALSE}
+demo %>% 
+  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # создает новый столбец типа истина-ложь
+```
+
+```{r mutate_es, include = FALSE}
+demo %>% 
+  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # crea una nueva columna T/F
+```
+
+```{r mutate_flair_en, echo=F, eval = params$lang == "en"}
+decorate("mutate_en") %>%
+  flair("adult", color = "deeppink") %>%
+  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r mutate_flair_fr, echo=F, eval = params$lang == "fr"}
+decorate("mutate_fr") %>%
+  flair("adult", color = "deeppink") %>%
+  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r mutate_flair_ru, echo=F, eval = params$lang == "ru"}
+decorate("mutate_ru") %>%
+  flair("adult", color = "deeppink") %>%
+  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r mutate_flair_es, echo=F, eval = params$lang == "es"}
+decorate("mutate_en") %>%
+  flair("adult", color = "deeppink") %>%
+  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+--
+
+`r paste0(mod4[mod4$uid == "mod4_tx_ifelse_2", params$lang])`  
+
+
+
+---
+
+# `r paste0(mod4[mod4$uid == "mod4_h1_casewhen", params$lang])`  
+ 
+`r paste0(mod4[mod4$uid == "mod4_tx_casewhen_1", params$lang])` 
+
+--
+
+```{r, results = "asis", echo = FALSE}
+str_glue({paste0(mod4[mod4$uid == "mod4_tx_casewhen_4", params$lang])}) %>%
+  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_casewhen_5", params$lang])}), color = "orange") %>%
+  flair("~", color = "deeppink") %>%
+  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_casewhen_6", params$lang])}), color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r mutate3, include = F}
+demo %>% 
+  mutate(case_def = case_when(
+    lab_confirmed == TRUE             ~ "Confirmed",
+    epilink == 'yes' & fever == 'yes' ~ "Suspect",
+    TRUE                              ~ "To investigate"))
+```
+
+```{r mutate3_flair, echo=F}
+decorate("mutate3") %>%
+  flair("'Confirmed", color = "cornflowerblue") %>%
+  flair("'Suspect'", color = "cornflowerblue") %>%
+  flair("To investigate)", color = "cornflowerblue") %>%
+  flair("~", color = "deeppink") %>%
+  flair("lab_confirmed == TRUE", color = "orange") %>%
+  flair(" epilink == 'yes' & fever == 'yes'", color = "orange") %>%
+  knit_print.with_flair()
+```
+
+
+`r paste0(mod4[mod4$uid == "mod4_tx_casewhen_2", params$lang])` 
+
+
+
+???
+Explain that there are many nuances to case_when() which you will practice in the breakout exercise
+
+
+
+
+
+---
+class: inverse, center, middle
+
+
+
+## `r paste0(mod4[mod4$uid == "mod4_h1_exercise", params$lang])`  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "COVID dominoes.png")))
+```
