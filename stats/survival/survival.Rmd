@@ -1,0 +1,200 @@
+---
+title: "Advanced statistics in R"
+subtitle: "Survival analysis"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation 
+  countdown
+)
+
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png",
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+```
+
+
+```{r, echo=F, eval=T}
+set.seed(1)
+linelist <- rio::import(xfun::relative_path(here::here("data", "linelist_combined_20141201.rds")))
+linelist$fake_data_gender_bias <- NA
+linelist$fake_data_gender_bias[which(linelist$gender == "male")] <- rnorm(sum(which(linelist$gender == "male")), 0.725, 0.1)
+linelist$fake_data_gender_bias[which(linelist$gender == "female")] <- rnorm(sum(which(linelist$gender == "female")), 0.575, 0.1)
+
+fake_data <- data.frame(outcome_measure = 1:25,
+                        variable = c(sample(1:100, 25, replace = T),
+                                     sample(1:100, 25, replace = T),
+                                     sort(sample(1:50, 25, replace = T)),
+                                     sample(1:100, 25, replace = T)),
+                        group = rep(c("A", "B", "C", "D"), each = 25))
+
+
+
+```
+
+# Survival analysis - what is it?
+
+Survival analysis (also known as time-to-event or duration analysis) refers to a group of statistical techniques to analyze the *time* to an *event*. 
+
+---
+
+# Examples
+
+Time from diagnosis to death.
+
+
+---
+
+# Examples
+
+Time from diagnosis to death.
+
+The time from entering a hospital to discharge.
+
+
+---
+
+# Examples
+
+Time from diagnosis to death.
+
+The time from entering a hospital to discharge.
+
+How long from an exposure to developing disease.
+
+---
+
+# Censoring is an important part of survival analysis
+
+Censoring is when we have _some_ information about a subject, but we do not know everything about the time and event.
+
+This may be due to reasons such as:
+
+
+---
+
+# Censoring is an important part of survival analysis
+
+Censoring is when we have _some_ information about a subject, but we do not know everything about the time and event.
+
+This may be due to reasons such as:
+
+* No event is recorded before the study ends
+* An individual is lost to follow up
+* A person withdraws from the study
+
+---
+
+# Censoring is an important part of survival analysis
+
+
+---
+
+# Ready to try it out?
+
+Any questions?
+
+
+
+**Resources**
+
+Course website (initial setup and slides access): [https://appliedepi.github.io/intro_course/](https://appliedepi.github.io/intro_course/)
+
+[Epi R Handbook](epirhandbook.com/)
+
+Applied Epi Community
+A great resource for asking questions and help!
+https://community.appliedepi.org/
+
+---
