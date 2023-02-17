@@ -6,7 +6,7 @@ pacman::p_load(rio, googlesheets4, tidyr, stringr, janitor)
 # list all langs desired
 langs <- c("ua", "es")
 slides_folders <- list.files(here::here("intro", "en"), recursive = FALSE)
-specific_folders <- c("module_6-1")
+specific_folders <- c("module_2")
 
 # Create function
 update_slides <- function(folder = "module_10", rmd = "module_10.Rmd", lang_to = "fr"){
