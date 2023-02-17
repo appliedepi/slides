@@ -4,7 +4,7 @@
 pacman::p_load(rio, googlesheets4, tidyr, stringr, janitor)
 
 # list all langs desired
-langs <- c("en")
+langs <- c("ua", "es")
 slides_folders <- list.files(here::here("intro", "en"), recursive = FALSE)
 specific_folders <- c("module_6-1")
 
