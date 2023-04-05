@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Advanced statistics in R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Advanced statistics in R
+]
+.subtitle[
+## Survival analysis
+]
+.author[
+### 
+]
+.date[
+### <a href="mailto:contact@appliedepi.org">contact@appliedepi.org</a>
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+&lt;/style&gt;
+
+
+
+
+# Survival analysis - what is it?
+
+Survival analysis (also known as time-to-event or duration analysis) refers to a group of statistical techniques to analyze the *time* to an *event*. 
+
+---
+
+# Examples
+
+Time from diagnosis to death.
+
+
+---
+
+# Examples
+
+Time from diagnosis to death.
+
+The time from entering a hospital to discharge.
+
+
+---
+
+# Examples
+
+Time from diagnosis to death.
+
+The time from entering a hospital to discharge.
+
+How long from an exposure to developing disease.
+
+---
+
+# Censoring is an important part of survival analysis
+
+Censoring is when we have _some_ information about a subject, but we do not know everything about the time and event.
+
+This may be due to reasons such as:
+
+
+---
+
+# Censoring is an important part of survival analysis
+
+Censoring is when we have _some_ information about a subject, but we do not know everything about the time and event.
+
+This may be due to reasons such as:
+
+---
+
+# Censoring is an important part of survival analysis
+
+Censoring is when we have _some_ information about a subject, but we do not know everything about the time and event.
+
+This may be due to reasons such as:
+
+* No event is recorded before the study ends
+
+---
+
+# Censoring is an important part of survival analysis
+
+Censoring is when we have _some_ information about a subject, but we do not know everything about the time and event.
+
+This may be due to reasons such as:
+
+* No event is recorded before the study ends
+* An individual is lost to follow up
+
+---
+
+# Censoring is an important part of survival analysis
+
+Censoring is when we have _some_ information about a subject, but we do not know everything about the time and event.
+
+This may be due to reasons such as:
+
+* No event is recorded before the study ends
+* An individual is lost to follow up
+* A person withdraws from the study
+
+---
+
+# Left, right and interval censoring
+
+The type of censoring is related to when the individual was observed, and when the event happened.
+
+---
+
+# Left, right and interval censoring
+
+The type of censoring is related to when the individual was observed, and when the event happened.
+
+**Right censoring    - When the event did not occur during the study, but was observed to occur afterwards.**
+---
+
+# Left, right and interval censoring
+
+The type of censoring is related to when the individual was observed, and when the event happened.
+
+Right censoring    - When the event did not occur during the study, but was observed to occur afterwards.
+
+**Left censoring     - When an event or exposure occurred before the study.**
+---
+
+# Left, right and interval censoring
+
+The type of censoring is related to when the individual was observed, and when the event happened.
+
+Right censoring    - When the event did not occur during the study, but was observed to occur afterwards.
+
+Left censoring     - When an event or exposure occurred before the study.
+
+**Interval censoring - When an individual is unobserved for a period of time in the study.**
+---
+
+&lt;img src="../../images/survival/blank_censored.png" width="100%" /&gt;
+
+---
+
+&lt;img src="../../images/survival/right_censored.png" width="100%" /&gt;
+
+---
+
+&lt;img src="../../images/survival/left_censored.png" width="100%" /&gt;
+---
+
+&lt;img src="../../images/survival/interval_censored.png" width="100%" /&gt;
+---
+
+&lt;img src="../../images/survival/not_censored.png" width="100%" /&gt;
+---
+
+# The **survival package** 
+
+We will be using the **survival** package to carry out our analysis.
+
+The first step is to use the function `Surv()` with the arguments `time` and `event`.
+
+Where:
+
+---
+
+# The **survival package** 
+
+We will be using the **survival** package to carry out our analysis.
+
+The first step is to use the function `Surv()` with the arguments `time` and `event`.
+
+Where:
+
+`time = ` refers to the duration of time (hour, day, month, year, etc), and
+
+
+---
+
+# The **survival package** 
+
+We will be using the **survival** package to carry out our analysis.
+
+The first step is to use the function `Surv()` with the arguments `time` and `event`.
+
+Where:
+
+`time = `  refers to the duration of time (hour, day, month, year, etc), and
+
+`event = ` a binary indication (0 or 1) of whether or not the event occurred. 
+
+---
+
+# Creating the surv object
+
+First we have our dataset, `survival_basic`, which contains two columns.
+
+`event`         - Whether an individual died.
+
+`time_to_event` - The number of days between onset and death.
+
+
+```
+##   event time_to_event
+## 1     0       16 days
+## 2     1        4 days
+## 3     1       16 days
+## 4     1        6 days
+## 5     0        7 days
+## 6     0       15 days
+```
+
+---
+
+# Using $ not %&gt;%
+
+The **survival** package is not pipe (`%&gt;%`) friendly, so rather than piping in the dataset we need to specify which columns we want to use with `$`.
+
+
+```r
+head(survival_basic$event)
+```
+
+```
+## [1] 0 1 1 1 0 0
+```
+
+---
+
+# Creating the Surv object
+
+
+```r
+surv_obj &lt;- Surv(time = survival_basic$time_to_event,
+     event = survival_basic$event)
+
+class(surv_obj)
+```
+
+```
+## [1] "Surv"
+```
+
+```r
+head(surv_obj)
+```
+
+```
+## [1] 16+  4  16   6   7+ 15+
+```
+
+---
+
+# How to use our Surv object
+
+Once we have created our `Surv` object, `surv_obj`, we can use the function `survfit()` from the **survival** package to fit our first analysis. A *Kaplan Meier (KM)* estimate of the survival curve.
+
+---
+
+# Running `survfit()`
+
+This takes our `Surv` object, `surv_obj` and uses a tilde, `~ 1`, to specify that we are fitting to the events previously specified with a value of 1.
+
+
+```r
+surv_fit &lt;- survfit(surv_obj ~ 1)
+```
+
+---
+
+`time`      - The time
+
+`n.event`   - The number of individuals at risk (who did not develop the event and were not censored)
+
+`n.event`   - The number of events
+
+`survival`  - The probability of **not** developing the event
+
+`std.err`   - The standard error
+
+`95% CI`    - The lower and upper 95% confidence intervals
+
+
+
+```r
+summary(surv_fit)
+```
+
+```
+## Call: survfit(formula = surv_obj ~ 1)
+## 
+##  time n.risk n.event survival std.err lower 95% CI upper 95% CI
+##   -10    351       2    0.994 0.00402        0.986        1.000
+##    -8    349       1    0.991 0.00491        0.982        1.000
+##    -7    348       1    0.989 0.00567        0.978        1.000
+##    -5    345       2    0.983 0.00693        0.969        0.997
+##    -4    342       1    0.980 0.00748        0.965        0.995
+##    -1    340       1    0.977 0.00800        0.962        0.993
+##     1    339       1    0.974 0.00848        0.958        0.991
+##     2    338       2    0.968 0.00936        0.950        0.987
+##     3    336      11    0.937 0.01305        0.912        0.963
+##     4    324      22    0.873 0.01787        0.839        0.909
+##     5    297      22    0.808 0.02121        0.768        0.851
+##     6    272      23    0.740 0.02373        0.695        0.788
+##     7    242      14    0.697 0.02496        0.650        0.748
+##     8    220      13    0.656 0.02597        0.607        0.709
+##     9    204      12    0.617 0.02673        0.567        0.672
+##    10    184       9    0.587 0.02725        0.536        0.643
+##    11    171      12    0.546 0.02781        0.494        0.603
+##    12    156       9    0.515 0.02812        0.462        0.573
+##    13    134       3    0.503 0.02827        0.451        0.562
+##    14    123       3    0.491 0.02845        0.438        0.550
+##    15    110       4    0.473 0.02878        0.420        0.533
+##    16     99      11    0.420 0.02963        0.366        0.483
+##    17     81       4    0.400 0.02993        0.345        0.463
+##    18     69       3    0.382 0.03026        0.327        0.446
+##    20     59       2    0.369 0.03059        0.314        0.434
+##    21     53       2    0.355 0.03098        0.300        0.422
+##    22     46       1    0.348 0.03126        0.291        0.415
+##    23     42       1    0.339 0.03159        0.283        0.407
+##    28     27       1    0.327 0.03283        0.268        0.398
+##    29     24       2    0.300 0.03529        0.238        0.377
+##    30     20       1    0.285 0.03657        0.221        0.366
+##    36     10       1    0.256 0.04257        0.185        0.355
+##    38      7       2    0.183 0.05326        0.103        0.324
+##    51      1       1    0.000     NaN           NA           NA
+```
+
+---
+# Ready to try it out?
+
+Any questions?
+
+
+
+**Resources**
+
+Course website (initial setup and slides access): [https://appliedepi.github.io/intro_course/](https://appliedepi.github.io/intro_course/)
+
+[Epi R Handbook](epirhandbook.com/)
+
+Applied Epi Community
+A great resource for asking questions and help!
+https://community.appliedepi.org/
+
+---
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

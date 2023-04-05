@@ -51,6 +51,8 @@ pacman::p_load(
   flair,      # coloring text
   kableExtra, # for output tables
   xaringanthemer,  # for styling presentation 
+  survival, #for survival analysis
+  broom, #for cleaning survival outputs
   countdown
 )
 
@@ -119,6 +121,11 @@ fake_data <- data.frame(outcome_measure = 1:25,
                                      sample(1:100, 25, replace = T)),
                         group = rep(c("A", "B", "C", "D"), each = 25))
 
+survival_basic <- linelist %>%
+  mutate(time_to_event = date_outcome - date_onset,
+         event = ifelse(outcome == "Death", 1, 0)) %>%
+  select(event, time_to_event, gender) %>%
+  drop_na()
 
 
 ```
@@ -170,13 +177,286 @@ Censoring is when we have _some_ information about a subject, but we do not know
 
 This may be due to reasons such as:
 
+---
+
+# Censoring is an important part of survival analysis
+
+Censoring is when we have _some_ information about a subject, but we do not know everything about the time and event.
+
+This may be due to reasons such as:
+
+* No event is recorded before the study ends
+
+---
+
+# Censoring is an important part of survival analysis
+
+Censoring is when we have _some_ information about a subject, but we do not know everything about the time and event.
+
+This may be due to reasons such as:
+
+* No event is recorded before the study ends
+* An individual is lost to follow up
+
+---
+
+# Censoring is an important part of survival analysis
+
+Censoring is when we have _some_ information about a subject, but we do not know everything about the time and event.
+
+This may be due to reasons such as:
+
 * No event is recorded before the study ends
 * An individual is lost to follow up
 * A person withdraws from the study
 
 ---
 
-# Censoring is an important part of survival analysis
+# Left, right and interval censoring
+
+The type of censoring is related to when the individual was observed, and when the event happened.
+
+---
+
+# Left, right and interval censoring
+
+The type of censoring is related to when the individual was observed, and when the event happened.
+
+**Right censoring    - When the event did not occur during the study, but was observed to occur afterwards.**
+---
+
+# Left, right and interval censoring
+
+The type of censoring is related to when the individual was observed, and when the event happened.
+
+Right censoring    - When the event did not occur during the study, but was observed to occur afterwards.
+
+**Left censoring     - When an event or exposure occurred before the study.**
+---
+
+# Left, right and interval censoring
+
+The type of censoring is related to when the individual was observed, and when the event happened.
+
+Right censoring    - When the event did not occur during the study, but was observed to occur afterwards.
+
+Left censoring     - When an event or exposure occurred before the study.
+
+**Interval censoring - When an individual is unobserved for a period of time in the study.**
+---
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "survival", "blank_censored.png")))
+```
+
+---
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "survival", "right_censored.png")))
+```
+
+---
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "survival", "left_censored.png")))
+```
+---
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "survival", "interval_censored.png")))
+```
+---
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "survival", "not_censored.png")))
+```
+---
+
+# The **survival package** 
+
+We will be using the **survival** package to carry out our analysis.
+
+The first step is to use the function `Surv()` with the arguments `time` and `event`.
+
+Where:
+
+---
+
+# The **survival package** 
+
+We will be using the **survival** package to carry out our analysis.
+
+The first step is to use the function `Surv()` with the arguments `time` and `event`.
+
+Where:
+
+`time = ` refers to the duration of time (hour, day, month, year, etc), and
+
+
+---
+
+# The **survival package** 
+
+We will be using the **survival** package to carry out our analysis.
+
+The first step is to use the function `Surv()` with the arguments `time` and `event`.
+
+Where:
+
+`time = `  refers to the duration of time (hour, day, month, year, etc), and
+
+`event = ` a binary indication (0 or 1) of whether or not the event occurred. 
+
+---
+
+# Creating the surv object
+
+First we have our dataset, `survival_basic`, which contains two columns.
+
+`event`         - Whether an individual died.
+
+`time_to_event` - The number of days between onset and death.
+
+`gender`        - The gender of the individual.
+
+```{r, echo = F, eval = T}
+
+head(survival_basic)
+
+```
+
+---
+
+# Using $ not %>%
+
+The **survival** package is not pipe (`%>%`) friendly, so rather than piping in the dataset we need to specify which columns we want to use with `$`.
+
+```{r, echo = T, eval = T}
+
+head(survival_basic$event)
+
+```
+
+---
+
+# Creating the Surv object
+
+```{r, echo = T, eval = T}
+
+surv_obj <- Surv(time = survival_basic$time_to_event,
+     event = survival_basic$event)
+
+class(surv_obj)
+head(surv_obj)
+
+```
+
+---
+
+# How to use our Surv object
+
+Once we have created our `Surv` object, `surv_obj`, we can use the function `survfit()` from the **survival** package to fit our first analysis. A *Kaplan Meier (KM)* estimate of the survival curve.
+
+---
+
+# Running `survfit()`
+
+This takes our `Surv` object, `surv_obj` and uses a tilde, `~ 1`, to specify that we are fitting to the events previously specified with a value of 1.
+
+```{r, echo = T, eval = T}
+
+surv_fit <- survfit(surv_obj ~ 1)
+
+```
+
+---
+
+# Understanding the output of `survfit`
+
+`time`      - The time
+
+`n.event`   - The number of individuals at risk (who did not develop the event and were not censored)
+
+`n.event`   - The number of events
+
+`survival`  - The probability of **not** developing the event
+
+`std.err`   - The standard error
+
+`95% CI`    - The lower and upper 95% confidence intervals
+
+
+```{r, echo = T, eval = T}
+summary(surv_fit)
+```
+
+---
+
+# Plotting the output
+
+To plot the output we can use the function `tidy()` from the **broom** package to reformat the data for easy plotting with ``ggplot()``.
+
+```{r, echo = T, eval = T}
+surv_plot_data <- tidy(surv_fit)
+
+head(surv_plot_data)
+```
+
+---
+
+# Plotting the output
+
+```{r, echo = T, eval = T}
+ggplot(data = surv_plot_data,
+       aes(x = time,
+           y = estimate,
+           ymin = conf.low,
+           ymax = conf.high)) +
+  geom_line() +                
+  geom_ribbon(alpha = 0.25) +    #This plots the 95% CI information given by ymin and ymax, alpha changes the opacity
+  labs(x = "Time",
+       y = "Survival probability") +
+  theme_bw()
+```
+---
+
+#Comparing survival plots
+
+If we want to compare outcomes, say by an outcome like `gender` we can specify this when we use `survfit()`.
+
+In this we have to also specify the dataset used to create our `Survival` object (`survival_obj`).
+
+```{r, echo = T, eval = T}
+
+survfit_gender <- survfit(surv_obj ~ gender,
+        data = survival_basic)
+
+
+surv_plot_gender <- tidy(survfit_gender)
+
+```
+
+---
+
+#Survival plot by gender
+
+```{r, echo = T, eval = T}
+ggplot(data = surv_plot_gender,
+       aes(x = time,
+           y = estimate,
+           ymin = conf.low,
+           ymax = conf.high,
+           color = strata,
+           fill = strata)) +
+  geom_line() +                
+  geom_ribbon(alpha = 0.25) +    #This plots the 95% CI information given by ymin and ymax, alpha changes the opacity
+  labs(x = "Time",
+       y = "Survival probability") +
+  theme_bw()
+```
+
+---
+
 
 
 ---
