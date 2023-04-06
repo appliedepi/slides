@@ -114,6 +114,14 @@ linelist$fake_data_gender_bias <- NA
 linelist$fake_data_gender_bias[which(linelist$gender == "male")] <- rnorm(sum(which(linelist$gender == "male")), 0.725, 0.1)
 linelist$fake_data_gender_bias[which(linelist$gender == "female")] <- rnorm(sum(which(linelist$gender == "female")), 0.575, 0.1)
 
+linelist <- linelist %>%
+  group_by(case_id) %>%
+  mutate(bleeding = case_when(
+    date_outcome - date_onset < 10 ~ sample(c("Yes", "No", "No"), 1),
+    date_outcome - date_onset >= 10 ~ sample(c("Yes", "Yes", "No"), 1)
+  )) %>%
+  ungroup()
+
 fake_data <- data.frame(outcome_measure = 1:25,
                         variable = c(sample(1:100, 25, replace = T),
                                      sample(1:100, 25, replace = T),
@@ -477,21 +485,84 @@ ggplot(data = surv_plot_gender,
 ]
 
 .pull-right[
-```{r plot-second-out, echo = F}
+```{r plot-second-out, ref.label = "plot-second", eval = T, echo = F}
 ```
 ]
 
 ---
 
+# Assessing statistical significance 
 
+Using the function `survdiff()` we can calculate a log-rank test, giving us a chi-square statistic and a p-value to understand if there is a statistical difference between the gender.
+
+```{r, echo = T, eval = T}
+
+logrank_gender <- survdiff(formula = surv_obj ~ gender,
+         data = survival_basic)
+
+logrank_gender
+
+```
+
+---
+
+# Cox proportial hazards regression
+
+Cox proportional hazards regression is one of the most useful regression techniques for survival analysis. 
+
+This gives us the hazard ratio (comparable to an odds ratio) that an individual has survived to a time point.
+
+To do this we use the function `coxph()` from the **survival** package.
+
+We can take into account the effect of independent variables on the outcome, much like a standard regression.
+
+---
+
+# Creating a new dataframe and running coxph()
+
+```{r, echo = T, eval = T}
+
+#Create a new dataset with additional variables
+linelist_update <- linelist %>%
+  mutate(time_to_event = date_outcome - date_onset,
+         event = ifelse(outcome == "Death", 1, 0)) %>%
+  select(event, time_to_event,  gender,
+         age, bleeding, blood_ct, temp) %>%
+  drop_na()
+
+#Create a survival object
+surv_obj_cox <- Surv(time = linelist_update$time_to_event,
+                     event = linelist_update$event)
+
+#Run the regression
+cox_regression <- coxph(surv_obj_cox ~ gender + age + temp + blood_ct + bleeding,
+                        data = linelist_update)
+
+```
+
+---
+
+#Displaying the output
+
+As with other regressions we have looked at, we can use the function `tbl_regression` from **gtsummary** to produce publication ready outputs.
+
+```{r plot-table, echo = T, eval = F}
+cox_regression %>%
+  tbl_regression(exponentiate = TRUE) %>%
+  bold_p()
+```
+
+---
+
+#Displaying the output
+```{r plot-table-out, ref.label = "plot-table", eval = T, echo = F}
+```
 
 ---
 
 # Ready to try it out?
 
 Any questions?
-
-
 
 **Resources**
 
