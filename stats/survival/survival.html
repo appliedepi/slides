@@ -210,7 +210,7 @@ The first step is to use the function `Surv()` with the arguments `time` and `ev
 
 Where:
 
-`time = ` refers to the duration of time (hour, day, month, year, etc), and
+`time  = ` refers to *when* an event occurred, or the end of the study, and
 
 
 ---
@@ -223,9 +223,9 @@ The first step is to use the function `Surv()` with the arguments `time` and `ev
 
 Where:
 
-`time = `  refers to the duration of time (hour, day, month, year, etc), and
+`time  = ` refers to *when* an event occurred, or the end of the study, and
 
-`event = ` a binary indication (0 or 1) of whether or not the event occurred. 
+`event = ` a binary indication (0 or 1) of whether or not the event of interest occurred. 
 
 ---
 
@@ -233,19 +233,21 @@ Where:
 
 First we have our dataset, `survival_basic`, which contains two columns.
 
-`event`         - Whether an individual died.
+- `event`: Whether an individual died.
 
-`time_to_event` - The number of days between onset and death.
+- `time_to_event`: The number of days between onset and death.
+
+- `gender`: The gender of the individual.
 
 
 ```
-##   event time_to_event
-## 1     0       16 days
-## 2     1        4 days
-## 3     1       16 days
-## 4     1        6 days
-## 5     0        7 days
-## 6     0       15 days
+##   event time_to_event gender
+## 1     0       16 days female
+## 2     1        4 days female
+## 3     1       16 days female
+## 4     1        6 days female
+## 5     0        7 days   male
+## 6     0       15 days   male
 ```
 
 ---
@@ -306,6 +308,8 @@ surv_fit &lt;- survfit(surv_obj ~ 1)
 
 ---
 
+# Understanding the output of `survfit()`
+
 `time`      - The time
 
 `n.event`   - The number of individuals at risk (who did not develop the event and were not censored)
@@ -318,6 +322,9 @@ surv_fit &lt;- survfit(surv_obj ~ 1)
 
 `95% CI`    - The lower and upper 95% confidence intervals
 
+---
+
+# Understanding the output of `survfit()`
 
 
 ```r
@@ -328,43 +335,139 @@ summary(surv_fit)
 ## Call: survfit(formula = surv_obj ~ 1)
 ## 
 ##  time n.risk n.event survival std.err lower 95% CI upper 95% CI
-##   -10    351       2    0.994 0.00402        0.986        1.000
-##    -8    349       1    0.991 0.00491        0.982        1.000
-##    -7    348       1    0.989 0.00567        0.978        1.000
-##    -5    345       2    0.983 0.00693        0.969        0.997
-##    -4    342       1    0.980 0.00748        0.965        0.995
-##    -1    340       1    0.977 0.00800        0.962        0.993
-##     1    339       1    0.974 0.00848        0.958        0.991
-##     2    338       2    0.968 0.00936        0.950        0.987
-##     3    336      11    0.937 0.01305        0.912        0.963
-##     4    324      22    0.873 0.01787        0.839        0.909
-##     5    297      22    0.808 0.02121        0.768        0.851
-##     6    272      23    0.740 0.02373        0.695        0.788
-##     7    242      14    0.697 0.02496        0.650        0.748
-##     8    220      13    0.656 0.02597        0.607        0.709
-##     9    204      12    0.617 0.02673        0.567        0.672
-##    10    184       9    0.587 0.02725        0.536        0.643
-##    11    171      12    0.546 0.02781        0.494        0.603
-##    12    156       9    0.515 0.02812        0.462        0.573
-##    13    134       3    0.503 0.02827        0.451        0.562
-##    14    123       3    0.491 0.02845        0.438        0.550
-##    15    110       4    0.473 0.02878        0.420        0.533
-##    16     99      11    0.420 0.02963        0.366        0.483
-##    17     81       4    0.400 0.02993        0.345        0.463
-##    18     69       3    0.382 0.03026        0.327        0.446
-##    20     59       2    0.369 0.03059        0.314        0.434
-##    21     53       2    0.355 0.03098        0.300        0.422
-##    22     46       1    0.348 0.03126        0.291        0.415
-##    23     42       1    0.339 0.03159        0.283        0.407
-##    28     27       1    0.327 0.03283        0.268        0.398
-##    29     24       2    0.300 0.03529        0.238        0.377
-##    30     20       1    0.285 0.03657        0.221        0.366
-##    36     10       1    0.256 0.04257        0.185        0.355
-##    38      7       2    0.183 0.05326        0.103        0.324
+##   -10    335       2    0.994 0.00421       0.9858        1.000
+##    -8    333       1    0.991 0.00515       0.9810        1.000
+##    -7    332       1    0.988 0.00593       0.9765        1.000
+##    -5    329       2    0.982 0.00726       0.9679        0.996
+##    -4    326       1    0.979 0.00784       0.9638        0.995
+##    -1    324       1    0.976 0.00838       0.9597        0.993
+##     2    323       2    0.970 0.00935       0.9518        0.988
+##     3    321      11    0.937 0.01336       0.9109        0.963
+##     4    309      22    0.870 0.01849       0.8346        0.907
+##     5    282      22    0.802 0.02199       0.7602        0.846
+##     6    257      23    0.730 0.02460       0.6837        0.780
+##     7    230      13    0.689 0.02573       0.6405        0.741
+##     8    209      13    0.646 0.02674       0.5959        0.701
+##     9    193       9    0.616 0.02731       0.5648        0.672
+##    10    176       9    0.585 0.02786       0.5325        0.642
+##    11    163      10    0.549 0.02837       0.4959        0.607
+##    12    150       9    0.516 0.02871       0.4625        0.575
+##    13    128       3    0.504 0.02887       0.4502        0.564
+##    14    117       2    0.495 0.02901       0.4414        0.555
+##    15    106       4    0.476 0.02938       0.4222        0.538
+##    16     95      11    0.421 0.03033       0.3658        0.485
+##    17     77       4    0.399 0.03066       0.3436        0.464
+##    18     66       3    0.381 0.03101       0.3250        0.447
+##    20     56       2    0.368 0.03136       0.3110        0.435
+##    21     50       2    0.353 0.03178       0.2958        0.421
+##    22     43       1    0.345 0.03208       0.2872        0.414
+##    23     39       1    0.336 0.03246       0.2779        0.406
+##    28     25       1    0.322 0.03382       0.2625        0.396
+##    29     22       2    0.293 0.03655       0.2296        0.374
+##    30     18       1    0.277 0.03798       0.2116        0.362
+##    36     10       1    0.249 0.04310       0.1775        0.350
+##    38      7       2    0.178 0.05251       0.0998        0.317
 ##    51      1       1    0.000     NaN           NA           NA
 ```
 
 ---
+
+# Preparing the output for plotting
+
+To plot the output we can use the function `tidy()` from the **broom** package to reformat the data for easy plotting with `ggplot()`.
+
+
+```r
+surv_plot_data &lt;- tidy(surv_fit)
+
+head(surv_plot_data)
+```
+
+```
+## # A tibble: 6 × 8
+##    time n.risk n.event n.censor estimate std.error conf.high conf.low
+##   &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1   -10    335       2        0    0.994   0.00423     1        0.986
+## 2    -8    333       1        0    0.991   0.00519     1        0.981
+## 3    -7    332       1        1    0.988   0.00601     1.00     0.976
+## 4    -6    330       0        1    0.988   0.00601     1.00     0.976
+## 5    -5    329       2        1    0.982   0.00739     0.996    0.968
+## 6    -4    326       1        0    0.979   0.00801     0.995    0.964
+```
+
+---
+
+# Plotting the output
+
+.pull-left[
+
+```r
+ggplot(data = surv_plot_data,
+       aes(x = time,
+           y = estimate,
+           ymin = conf.low,
+           ymax = conf.high)) +
+  geom_line() +                
+  geom_ribbon(alpha = 0.25) + 
+  labs(x = "Time",
+       y = "Probability") +
+  theme_bw()
+```
+]
+
+.pull-right[
+&lt;img src="survival_files/figure-html/plot-first-out-1.png" width="504" /&gt;
+]
+
+---
+
+#Comparing survival plots
+
+If we want to compare outcomes, say by an outcome like `gender` we can specify this when we use `survfit()`.
+
+In this we have to also specify the dataset used to create our `Survival` object (`survival_obj`).
+
+
+```r
+survfit_gender &lt;- survfit(surv_obj ~ gender,
+        data = survival_basic)
+
+
+surv_plot_gender &lt;- tidy(survfit_gender)
+```
+
+---
+
+#Survival plot by gender
+
+.pull-left[
+
+```r
+ggplot(data = surv_plot_gender,
+       aes(x = time,
+           y = estimate,
+           ymin = conf.low,
+           ymax = conf.high,
+           color = strata,
+           fill = strata)) +
+  geom_line() +                
+  geom_ribbon(alpha = 0.25) +
+  labs(x = "Time",
+       y = "Survival probability") +
+  theme_bw()
+```
+]
+
+.pull-right[
+
+]
+
+---
+
+
+
+---
+
 # Ready to try it out?
 
 Any questions?
