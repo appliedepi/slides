@@ -63,23 +63,23 @@ class: inverse, center, middle, title-slide
 
 
 
-# Вступ до R для прикладної епідеміології
+# Introducción a R para la Epidemiología Aplicada
 
-### Вичищення даних за допомогою R (частина 2)
+### Limpieza de datos con R (parte 2)
 
 contact@appliedepi.org
 
 
 ---
-# Цілі та розклад  
+# Hoy: objetivos y agenda  
 
-**У цьому модулі ми прагнемо допомогти вам:**  
-* Ознайомитися з функціями {dplyr}, які використовують для вичищення даних у сфері громадського здоров’я  
-* Навчитися застосовувати серію функцій до таблиці за допомогою оператора передавання  
-* Почніть писати скрипт R для аналізу даних спалахів  
+**En este módulo pretendemos ayudarle con:**  
+* Familiarizarse con las funciones {dplyr} utilizadas para limpiar los datos de salud pública  
+* Aplicar una serie de funciones a un data frame utilizando el operador de pipe  
+* Empezar a escribir un script en R para analizar los datos del brotes  
 
 
-&lt;template id="413d87e2-edd0-4031-af73-97938969b19f"&gt;&lt;style&gt;
+&lt;template id="e5d0609f-9683-4693-b429-cc69100e2ea9"&gt;&lt;style&gt;
 .tabwid table{
   border-spacing:0px !important;
   border-collapse:collapse;
@@ -118,33 +118,33 @@ background-color: transparent;
 .katex-display {
     margin: 0 0 !important;
 }
-&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-19d485a4{}.cl-19bbeb20{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-19c52b36{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-19c5640c{width:1.654in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c5642a{width:1.166in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c56434{width:2.796in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c5643e{width:1.654in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c56452{width:1.166in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c5645c{width:2.796in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c56466{width:1.654in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c56470{width:1.166in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c5647a{width:2.796in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c56484{width:1.654in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c5648e{width:1.166in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c56498{width:2.796in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c564a2{width:1.654in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c564ac{width:1.166in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-19c564b6{width:2.796in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-19d485a4'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-19c5640c"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-19c5642a"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-19c56434"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-19c5643e"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;15 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-19c56452"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;Головна&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-19c5645c"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;Повторення попереднього модуля&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-19c5643e"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;15 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-19c56452"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;Головна&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-19c5645c"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;Демонстрація — логічне кодування&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-19c56466"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;1 година 30 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-19c56470"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;Головна&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-19c5647a"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;Вправа&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-19c56484"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;30 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-19c5648e"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;Сесійні зали&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-19c56498"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;Загальне обговорення&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-19c564a2"&gt;&lt;p class="cl-19c52b36"&gt;&lt;span class="cl-19bbeb20"&gt;Під час виконання вправи ви можете робити перерви на власний розсуд&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
-&lt;div class="flextable-shadow-host" id="782d8ae9-9e89-4543-8e3b-bd0a0b6a94cc"&gt;&lt;/div&gt;
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-673e39d0{}.cl-67310440{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-67375f52{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-67377adc{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377ae6{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377af0{width:2.603in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377afa{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377afb{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b04{width:2.603in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b0e{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b0f{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b18{width:2.603in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b22{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b23{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b2c{width:2.603in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b2d{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b36{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b37{width:2.603in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b40{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b41{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-67377b42{width:2.603in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-673e39d0'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-67377adc"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-67377ae6"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-67377af0"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-67377afa"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;15 minutos&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-67377afb"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;Principal&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-67377b04"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;Revisión del módulo anterior&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-67377b0e"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;15 minutos&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-67377b0f"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;Principal&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-67377b18"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;Demostración - codificación lógica&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-67377b22"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;1h30 minutos&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-67377b23"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;Principal&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-67377b2c"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;Ejercicio&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-67377b2d"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;30 minutos&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-67377b36"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;Sesiones&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-67377b37"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;Reunión de plenaria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-67377b40"&gt;&lt;p class="cl-67375f52"&gt;&lt;span class="cl-67310440"&gt;Haz las pausas que desees durante el ejercicio&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="d43eb8b9-dc2c-4045-aaf0-a72c43cc729d"&gt;&lt;/div&gt;
 &lt;script&gt;
-var dest = document.getElementById("782d8ae9-9e89-4543-8e3b-bd0a0b6a94cc");
-var template = document.getElementById("413d87e2-edd0-4031-af73-97938969b19f");
+var dest = document.getElementById("d43eb8b9-dc2c-4045-aaf0-a72c43cc729d");
+var template = document.getElementById("e5d0609f-9683-4693-b429-cc69100e2ea9");
 var caption = template.content.querySelector("caption");
 var fantome = dest.attachShadow({mode: 'open'});
 var templateContent = template.content;
 fantome.appendChild(templateContent);
 &lt;/script&gt;
 
-**Це *довга*, але дуже важлива вправа*.  
+**Este es un ejercicio  *extenso*, pero muy importante.**  
 
 ???
 Note stretch breaks throughout.
 
 
 ---
-# Повторення попереднього модуля  
+# Revisión del módulo anterior  
 
 
 
 ---
 
-# Демонстраційний набір даних  
+# Conjunto de datos de demostración  
 
-Скористаймося меншою версією для практики й вивчімо деякі основні функції R
+Utilicemos una versión reducida para practicar, y exploremos algunas funciones básicas de R
 
 
 &lt;table&gt;
@@ -204,23 +204,23 @@ Note stretch breaks throughout.
 
 --
 
-Ми назвемо його "**`demo`**".
+Lo llamaremos "**`demo`**"
 
 ---
 
-# Пакет {dplyr}  
+# El paquete {dplyr}  
 
-Деякі функції {dplyr}, які ми використовуватимемо:  
+Algunas de las funciones {dplyr} que utilizaremos:  
 
 
-Функція       | Утиліта                               
+Función       | Utilidad                               
 ---------------|---------------------------------------
-`mutate()`|створення й перетворення стовпців  
-`ifelse()`|просте логічне перекодування значень  
-`case_when()`|складне логічне перекодування значень   
-`age_categories()`|створення стовпця вікової категорії   
-`coalesce()`|пріоритизація значень   
-`select()`|підгрупа стовпців  
+`mutate()`|crear y transformar columnas  
+`ifelse()`|recodificación lógica simple de los valores  
+`case_when()`|recodificación lógica compleja de los valores   
+`age_categories()`|crear una columna de categoría de edad   
+`coalesce()`|priorización de valores   
+`select()`|creación de subconjuntos y ordenado de las columnas  
 
 
 
@@ -229,15 +229,21 @@ Note stretch breaks throughout.
 
 ---
 
-# Друк або збереження   
+# Retornar vs. guardar   
 
-Наші оператори передавання друкують модифікований `demo` — таблиця **не** змінилася! 
-
-
+Nuestras pipe sólo han *retornado* el `demo` modificado - ¡el data frame no ha **cambiado!** 
 
 
 
 
+
+
+
+
+```r
+demo %&gt;%                    # IMPRIMIR sólo los casos de más de 10 años
+  filter(age &gt; 10)
+```
 
 
 
@@ -275,7 +281,7 @@ Note stretch breaks throughout.
 --
 
 
-Для збереження: додайте оператор присвоювання **&lt;-** для визначення нової таблиці. 
+Para guardar: añada el operador de asignación **&lt;-** para definir un nuevo data frame. 
 
 
 ```r
@@ -283,18 +289,18 @@ demo_over10 &lt;- demo %&gt;%
   filter(age &gt; 10)
 ```
 
-(Немає виведення в консоль R, але з’явився новий об’єкт у панелі Середовища)  
+(No hay salida en la consola de R, pero sí un nuevo objeto en el panel de entorno)  
 
 ???
 Note how the column names in `demo` are old! It's because our changes have not yet been saved.  
 
 ---
 
-# `mutate()` для редагування стовпців  
+# `mutate()` para editar las columnas  
  
-`mutate()` також використовують для *редагування* наявних стовпців, наприклад для *перекодування* значень
+`mutate()` también se utiliza para *editar* columnas existentes, como *recodificar* valores
 
-`recode()` використовують усередині `mutate()` для перекодування стовпця gender  
+A continuación, se utiliza `recode()` dentro de `mutate()` para recodificar la columna de género  
 
 --
 
@@ -307,6 +313,23 @@ Note how the column names in `demo` are old! It's because our changes have not y
 
 
 
+
+
+```r
+demo %&gt;% 
+  mutate(gender = recode(gender,   #redefinir género como: 
+    "m" = "male",                  # cuando "m", cambiar a "masculino"   
+    "f" = "female"))               # cuando "f", cambiar a "mujer"
+```
+
+```
+##   case_id age gender lab_confirmed fever epilink
+## 1  694928  23   male         FALSE   yes      no
+## 2  86340d   1 female          TRUE   yes     yes
+## 3  92d002  16 female          TRUE   yes     yes
+## 4  544bd1  10 female          TRUE   yes     yes
+## 5  6056ba   0 female          TRUE   yes     yes
+```
 
 
 
@@ -319,47 +342,75 @@ Explain that there are many nuances to case_when() which you will practice in th
 
 ---
 
-# `ifelse()` для простої логіки  
+# `ifelse()` para la lógica simple  
  
-`ifelse()` усередині `mutate()` використовують для застосування простої логіки перекодування  
+`ifelse()` dentro de `mutate()` se utiliza para aplicar una lógica de recodificación simple  
 
-&lt;h4&gt;Синтаксис такий: &lt;span style='color:deeppink'&gt;ім’я нового стовпця&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;функція&lt;/span&gt;, яка створює нові значення:&lt;/h4&gt;
-
---
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+&lt;h4&gt;La sintaxis es: &lt;span style='color:deeppink'&gt;nuevo nombre de columna&lt;/span&gt; = una &lt;span style='color:cornflowerblue'&gt;función&lt;/span&gt; que crea los nuevos valores:&lt;/h4&gt;
 
 --
 
-`ifelse()` застосовує логічний критерій до кожного рядка, повертає одне значення, якщо воно істинне, та інше, якщо воно хибне.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;demo %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;mutate(&lt;span style='color:deeppink'&gt;adult&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;ifelse(age &gt;= 18, 'yes', 'no')&lt;/span&gt;) # creates new T/F column&lt;/code&gt;
+
+```
+
+##   case_id age gender lab_confirmed fever epilink adult
+## 1  694928  23      m         FALSE   yes      no   yes
+## 2  86340d   1      f          TRUE   yes     yes    no
+## 3  92d002  16      f          TRUE   yes     yes    no
+## 4  544bd1  10      f          TRUE   yes     yes    no
+## 5  6056ba   0      f          TRUE   yes     yes    no
+
+```
+
+
+&lt;code class ='r hljs remark-code'&gt;demo %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;mutate(&lt;span style='color:deeppink'&gt;adult&lt;/span&gt; = &lt;span style='color:cornflowerblue'&gt;ifelse(age &gt;= 18, 'yes', 'no')&lt;/span&gt;) # creates new T/F column&lt;/code&gt;
+
+```
+
+##   case_id age gender lab_confirmed fever epilink adult
+## 1  694928  23      m         FALSE   yes      no   yes
+## 2  86340d   1      f          TRUE   yes     yes    no
+## 3  92d002  16      f          TRUE   yes     yes    no
+## 4  544bd1  10      f          TRUE   yes     yes    no
+## 5  6056ba   0      f          TRUE   yes     yes    no
+
+```
+
+--
+
+`ifelse()` aplica un criterio lógico a cada fila, devuelve un valor si es verdadero, y devuelve otro valor si es falso.  
 
 
 
 ---
 
-# Використовуйте це для складної логіки  
+# Utilice `case_when()` para describir lógicas complejas  
  
-`case_when()` використовують для перевірки логічних критеріїв для кожного рядка та присвоєння відповідного нового значення. 
+`case_when()` se utiliza para revisar una serie de criterios lógicos en cada fila y asignar un nuevo valor correspondiente. 
 
 --
 
-&lt;h4&gt;Синтаксис case_when() такий: &lt;span style='color:orange'&gt;логічні критерії для рядка&lt;/span&gt; &lt;span style='color:deeppink'&gt;~&lt;/span&gt; результат, якщо вони виконані&lt;/h4&gt;
+&lt;h4&gt;La sintaxis de case_when() es: criterio lógico para la fila &lt;span style='color:deeppink'&gt;~&lt;/span&gt; &lt;span style='color:cornflowerblue'&gt;resultado si se cumple&lt;/span&gt;&lt;/h4&gt;
 
 
 
@@ -378,7 +429,7 @@ Explain that there are many nuances to case_when() which you will practice in th
 ```
 
 
-Кожен рядок у наборі даних оцінюють за критеріями (згори донизу). 
+Cada fila del conjunto de datos se evalúa según los criterios (de arriba a abajo). 
 
 
 
@@ -394,7 +445,7 @@ class: inverse, center, middle
 
 
 
-## Вправа  
+## Ejercicio  
 
 
 &lt;img src="../../../images/breakout/COVID dominoes.png" width="100%" /&gt;
