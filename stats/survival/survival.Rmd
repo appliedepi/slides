@@ -176,15 +176,6 @@ Censoring is when we have _some_ information about a subject, but we do not know
 
 This may be due to reasons such as:
 
-
----
-
-# Censoring is an important part of survival analysis
-
-Censoring is when we have _some_ information about a subject, but we do not know everything about the time and event.
-
-This may be due to reasons such as:
-
 ---
 
 # Censoring is an important part of survival analysis
@@ -319,7 +310,7 @@ Where:
 
 # Creating the surv object
 
-First we have our dataset, `survival_basic`, which contains two columns.
+First we have our dataset, `survival_basic`, which contains three columns.
 
 - `event`: Whether an individual died.
 
@@ -363,7 +354,9 @@ head(surv_obj)
 
 # How to use our Surv object
 
-Once we have created our `Surv` object, `surv_obj`, we can use the function `survfit()` from the **survival** package to fit our first analysis. A *Kaplan Meier (KM)* estimate of the survival curve.
+Once we have created our `Surv` object, `surv_obj`, we can use the function `survfit()` from the **survival** package to fit our first analysis. 
+
+A *Kaplan Meier (KM)* estimate of the survival curve.
 
 ---
 
@@ -530,6 +523,42 @@ linelist_update <- linelist %>%
          age, bleeding, blood_ct, temp) %>%
   drop_na()
 
+```
+
+---
+
+# Creating a new dataframe and running coxph()
+
+```{r, echo = T, eval = T}
+
+#Create a new dataset with additional variables
+linelist_update <- linelist %>%
+  mutate(time_to_event = date_outcome - date_onset,
+         event = ifelse(outcome == "Death", 1, 0)) %>%
+  select(event, time_to_event,  gender,
+         age, bleeding, blood_ct, temp) %>%
+  drop_na()
+
+#Create a survival object
+surv_obj_cox <- Surv(time = linelist_update$time_to_event,
+                     event = linelist_update$event)
+
+```
+
+---
+
+# Creating a new dataframe and running coxph()
+
+```{r, echo = T, eval = T}
+
+#Create a new dataset with additional variables
+linelist_update <- linelist %>%
+  mutate(time_to_event = date_outcome - date_onset,
+         event = ifelse(outcome == "Death", 1, 0)) %>%
+  select(event, time_to_event,  gender,
+         age, bleeding, blood_ct, temp) %>%
+  drop_na()
+
 #Create a survival object
 surv_obj_cox <- Surv(time = linelist_update$time_to_event,
                      event = linelist_update$event)
@@ -540,7 +569,6 @@ cox_regression <- coxph(surv_obj_cox ~ gender + age +
                         data = linelist_update)
 
 ```
-
 ---
 
 #Displaying the output
@@ -575,4 +603,3 @@ Applied Epi Community
 A great resource for asking questions and help!
 https://community.appliedepi.org/
 
----
