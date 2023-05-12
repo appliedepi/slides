@@ -519,7 +519,7 @@ If there is a variable that you think should be included (based on biological pl
 
 ---
 
-# Carrying out our multivariable regression
+# Carrying out multivariable regression
 
 Now we are ready to carry out our multivariable regression!
 
@@ -637,7 +637,6 @@ cross_tab <- data_use %>%
 tbl_merge(list(cross_tab, multivariable_regression_table),
           tab_spanner = c("Counts", "Multivariable regression"))
      
-
 ```
 
 ???
@@ -655,7 +654,8 @@ multivariable_regression_table <- data_use %>%
             age) %>%
      glm(formula = outcome_death ~.,     
          family = binomial) %>%            
-     tbl_regression(exponentiate = TRUE)
+     tbl_regression(exponentiate = TRUE) %>%
+  bold_p()
 
 cross_tab <- data_use %>%
   select(lasso_predictors_clean, 
@@ -686,7 +686,8 @@ univariate_regression_table <- data_use %>%
     method = glm,
     y = outcome_death,
     method.args = list(family = binomial),
-    exponentiate = TRUE)
+    exponentiate = TRUE) %>%
+  bold_p()
 
 tbl_merge(tbls = list(univariate_regression_table, multivariable_regression_table),
           tab_spanner = c("Univariate", "Multivariable"))
