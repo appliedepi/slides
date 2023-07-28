@@ -1,0 +1,1158 @@
+---
+title: "Course title"
+subtitle: "<br>Session title"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  flextable,  # for some tables and styling
+  xaringanthemer,  # for styling presentation 
+  countdown
+)
+
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = xfun::relative_path(here::here("slides", "images", "template", "logo.png")),
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slides
+  background_image = xfun::relative_path(here::here("slides", "images", "template", "logo.png")), 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+```{r, echo=F, eval=T}
+linelist <- rio::import(xfun::relative_path(here::here("data", "linelist_combined_20141201.rds")))
+```
+
+
+# Thank you for joining us  
+
+Brief introductions from the instructors  
+
+**Thank you for your service** *to your community in these busy times for public health. We are glad that you are taking the time to learn R with us.*  
+
+
+
+???
+Do a brief round of introductions  
+
+
+
+
+---
+# Slide title
+
+## Subtitle
+
+- Once you have written the code once, there is no need to point and click and re-do analysis with updated data, you can reuse your old code! Which means that R is...
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "efficient_image.PNG")))
+```
+
+???
+Mention marketable skill as well as technically for epidemic response
+
+
+
+---
+# Why use R for statistical analysis?
+
+## Reproducible  
+
+We can re-run the same code and get the same outcome, or use new data and see how findings have changed. Because it is written as a script it is reproducible, and...
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "clone_image.jpg")))
+```
+
+
+
+---
+# Title 
+
+.pull-left[
+- Bullet  
+  - Sub-bullet  
+  - Sub-bullet  
+- Bullet  
+  - Sub-bullet  
+  - Sub-bullet
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. # It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "automated_reports.png")))
+```
+
+]
+
+.footnote[
+A footnote is here.
+]
+
+???
+- Presenter notes
+- Presenter notes
+- Presenter **notes**
+
+
+---
+# Slide with an R table
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Module, ~Topic,
+  "1",   str_glue("topic"),
+  "2",   str_glue("topic"),
+  "3",   str_glue("topic"),
+  "4",   str_glue("topic"),
+  "5",   str_glue("topic"),
+  "6",   str_glue("topic"),
+  "7",   str_glue("topic"),
+  "8",   str_glue("topic"),
+  "9",   str_glue("topic"),
+  "10",  str_glue("topic"),
+  )
+
+outline %>% 
+  flextable::qflextable()
+```
+
+
+
+
+
+
+
+
+---
+# Why use R for statistical analysis?
+
+.pull-left[
+## Easy (once you learn the syntax!)  
+
+We know that R can be scary (it was for us too when we first learned it!), but once you learn the basics, and how to apply these to statistics within R, you can very quickly produce indepth analysis of data in an efficient, effective and reproducible way! 
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "easy_image.jpg")))
+```
+]
+
+
+
+---
+
+# Slide title 
+
+Slide text here
+
+```{r, echo=F}
+demo <- linelist %>% 
+     head(5) %>% 
+     select(case_id, age, gender, lab_confirmed, fever, epilink)
+```
+
+```{r, eval=T}
+demo %>% 
+  knitr::kable()
+     
+```
+
+--
+
+More text here
+
+
+---
+# Slide with clickable timer
+
+```{r}
+countdown(minutes = 5, seconds = 00)
+```
+
+
+
+---
+# Incremental appearance text
+
+Starter text
+
+
+--
+
+Normal text
+
+1) A number text
+
+--
+
+2) A number text
+
+--
+
+3) A number text
+
+--
+
+4) A number text
+
+--
+
+5) A number text
+
+--
+
+And in summary
+The slide is done
+
+
+???
+Notes for presenter
+
+
+
+
+---
+
+class: medium-large-table
+
+# Scrollable data frame  
+
+Text  
+Text    
+
+```{r}
+head(linelist, 25) %>% 
+  tibble() %>% 
+  DT::datatable(
+    options = list(
+      scrollY = 300,
+      scrollX = 600,
+      pageLength = 25,
+      fontSize = '25%',
+      dom = "ti",
+      ordering = FALSE,
+      rownames = FALSE,
+      options = list(pageLength = 5, scrollX=T),
+      class = 'white-space: nowrap' 
+    )
+  )
+```
+
+???
+Table shows just the first 25 rows, to load faster.  
+
+
+
+
+---
+
+# Show a small dataset  
+
+Here we use just the first 5 rows and a few columns:  
+
+```{r, echo=F}
+demo <- linelist %>% 
+     head(5) %>% 
+     select(case_id, age, gender, lab_confirmed, date_onset, wt_kg, ht_cm)
+
+# add a duplicate row to show de-duplication
+demo <- demo %>% 
+  add_row(demo[4,], .before = 5)
+```
+
+```{r, eval=T}
+demo %>% 
+  knitr::kable()
+     
+```
+
+--
+
+Some text
+
+
+
+
+
+
+
+---
+# Slide with emphasis bold
+
+You can write R code this way
+
+`filter(`**demo**`, age < 18)`
+
+
+Or you can write it this way  
+
+**demo** `%>% filter(age < 18)`
+
+
+It allows you to combine several steps 
+
+`demo` **%>%** `filter(age < 18)` **%>%** `select(case_id, age, gender)`
+
+
+```{r, eval=T, echo=F}
+demo %>% filter(age < 18) %>% select(case_id, age, gender) %>% knitr::kable()
+```
+
+
+
+
+---
+# Build code incrementally
+
+Text
+
+```{r, eval=F, echo=T}
+demo
+```
+
+```{r, eval=T, echo=F}
+demo %>%  
+  #add_row(demo[5,]) %>% 
+  knitr::kable() 
+```
+
+---
+# Build code incrementally
+
+Text  
+
+```{r, eval=F, echo=T}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed)        # select columns
+```
+
+
+```{r, eval= T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  knitr::kable() 
+```
+
+---
+# Build code incrementally
+
+Text
+
+```{r, eval=F, echo=T}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct()                                         # de-duplicate
+```
+
+```{r, eval=T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%          
+  distinct() %>%                                           
+  knitr::kable()
+```
+
+---
+# Build code incrementally
+
+Text
+
+```{r, eval=F, echo=T}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct() %>%                                     # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE)            # only young children confirmed cases
+```
+
+```{r, eval=T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%          
+  distinct() %>%                                           
+  filter(age < 18, lab_confirmed == TRUE) %>%              
+  knitr::kable()
+```
+
+
+---
+# Build code incrementally
+
+Text
+
+```{r, eval=F, echo=T}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct() %>%                                     # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE) %>%        # only children cases      
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # create a column      
+ 
+```
+
+```{r, eval=T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%          
+  distinct() %>%                                           
+  filter(age < 18, lab_confirmed == TRUE) %>%              
+  mutate(infant = ifelse(age < 1, "infant", "not infant")) %>% 
+  knitr::kable()
+```
+
+.footnote[Footnote]
+
+
+---
+# Build code incrementally
+
+Text 
+
+```{r, eval=F, echo=T}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%            # select columns   
+  distinct() %>%                                             # de-duplicate   
+  filter(age < 18, lab_confirmed == TRUE) %>%                # only children cases   
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))   # create a column    
+ 
+```
+
+```{r, eval=T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%          
+  distinct() %>%                                           
+  filter(age < 18, lab_confirmed == TRUE) %>%              
+  mutate(infant = ifelse(age < 1, "infant", "not infant")) %>% 
+  knitr::kable()
+```
+
+TEXT HERE TOO
+
+
+
+
+
+
+
+
+---
+# Slide with ggplot & line highlight
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+ggplot(
+  data = linelist,
+  mapping = aes(        
+   x = age_years       #<<
+   ))               
+```
+
+Text here
+
+Text here
+
+`x = `   
+
+
+]
+
+.pull-right[
+
+```{r , echo = FALSE, eval = TRUE}
+ggplot(
+  data = linelist,
+  mapping = aes(
+   x = age_years))+
+theme_grey(base_size = 16)
+```
+] 
+
+???
+ggplot commands tend to get very vertical (long)  
+
+
+
+
+---
+# Combine multiple plots
+
+.pull-left[
+
+Text
+
+Text   |Text
+------------------------------------------------------------------------|--------------------------------------------------------------------
+Text|`geom_histogram()`  
+Text|`geom_point()`
+
+.footnote[A footnote
+]  
+
+]
+
+
+
+.pull-right[
+
+```{r, message=F, warning=F}
+
+# Histogram
+histogram <- ggplot(
+    data = linelist,
+    mapping = aes(
+      x = date_onset))+
+  geom_histogram(fill = "darkorange")+
+  labs(title = "geom_histogram()")+
+  theme_minimal(base_size = 16)
+  
+
+points <- ggplot(
+    data = linelist,
+    mapping = aes(
+      x = age_years,       
+      y = ht_cm)
+    )+
+  geom_point()+
+  labs(title = "geom_point()")+
+  theme_minimal(base_size = 16)
+
+
+cowplot::plot_grid(histogram, points,
+                          nrow = 2, rel_widths = c(2,2))
+
+#cowplot::plot_grid(top, lines, ncol = 1)
+
+```
+
+]
+
+
+
+
+---
+
+class: large-table
+
+# Class: large-table
+
+Text
+
+Text|Text
+-------------------------------------------------------------------|--------------------------------------------------------------------
+`shape`      |Text
+`fill`       |Text
+`color`      |Text
+`size`       |Text
+`alpha`      |Text
+`width`      |Text
+`linetype`   |Text
+`binwidth`   |Text
+  
+
+
+???
+Notes
+
+
+---
+class: medium-text
+
+# Class: medium-text
+
+
+.pull-left[
+
+Text
+
+* Text
+  - Text
+  - Text
+
+</br>
+</br>
+</br>
+</br>
+
+
+]
+
+
+.pull-right[
+
+Text
+
+```{r, eval = T, message=F, warning=F}
+
+color_purple <- ggplot(data = linelist, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using color = 'purple'")
+
+color_hospital <- ggplot() + theme_void()
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+]
+
+
+
+
+---
+# Learning curve 
+
+R has become easier to learn in the last 5 years
+
+.pull-left[
+- Friendlier user interface (RStudio)
+- Simpler syntax ("tidyverse")
+- Free resources & interactive tutorials available  
+    - **Epidemiologist R Handbook**
+    - **R 4 Data Science**
+    - **R epidemiology case studies**
+]
+
+.pull-right[
+
+```{r difficulty_plot, warning = FALSE, message = FALSE}
+exp <- function(x){x^2}
+lgr <- function(x){log(x) + 4}
+num <- 10000
+linwid <- 2
+ggplot() + 
+  geom_function(fun = exp,
+                n = num, 
+                linewidth = linwid,
+                aes(colour = "Excel")) +
+  geom_function(fun = lgr, 
+                n = num, 
+                linewidth = linwid,
+                aes(colour = "R")) + 
+  scale_y_continuous(expand = c(0, 0), 
+                     limits = c(0, 10)) + 
+  scale_x_continuous(expand = c(0, 0), 
+                     limits = c(0, 5)) + 
+  labs(x = "Code complexity", 
+       y = "Task difficulty") + 
+  theme_classic(base_size = 24) + 
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(), 
+        legend.position = "bottom", 
+        legend.title = element_blank())
+```
+
+]
+
+???
+- There is a bit of a learning curve - as with any software.  
+- But we are here to get you over that initial hump so you can keep developing. 
+
+
+
+
+---
+
+# 2-table layout  
+
+
+```{r include=FALSE, echo=F}
+# Make smaller linelists for exemple purpose
+# patients <- linelist_surv %>% 
+#      select(case_id, age, age_unit, gender) %>% 
+#      arrange(case_id) %>% 
+#      head(5)
+
+patients <- tribble(
+     ~case_id, ~age, ~age_unit, ~gender,
+     "5fe599", 2, "years", "m",
+     "8689b7", 3, "years", "f",
+     "11f8ea", 56, "years", "m",
+     "b8812a", 18, "years", "f",
+     "893f25", 3, "years", "m")
+
+
+hosp <- tribble(
+     ~id_patient, ~outcome,
+      "5fe599", "Died",
+      "8689b7", "Recovered",
+      "11f8ea", "Recovered",
+      "ebd24z", "Died")
+
+
+# hosp <- linelist_surv %>% 
+#      select(id_patient = case_id, hospital) %>% 
+#      arrange(id_patient) %>% 
+#      head(3)
+```
+
+Text  
+
+
+.pull-left[
+
+Text  
+
+```{r include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+
+]
+
+.pull-right[
+
+Text  
+
+```{r include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+]
+
+<br>
+
+Text
+
+
+???
+For the purpose of the slides, we created two _mini_ dataframes to see what's happening, one with patient characteristics (age and gender), the other hospital the patient has been hospitalised in.
+**Note that both datasets have the ID of the patient in common, but a slightly different name (a very common situation)**. We call this column the KEY, or the identifier column. It allows to *match* observations in both dataframes.
+
+
+
+
+---
+
+### 4 quad layout
+.pull-left[
+```{r eval = TRUE, echo=FALSE}
+patients %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1, j = 1:4, bg = "orange")
+```
+]
+.pull-right[
+```{r eval = TRUE, echo=FALSE}
+
+hosp_dup <- tribble(
+     ~id_patient, ~outcome,
+      "5fe599", "Died",
+      "5fe599", "Alive",
+      "8689b7", "Recovered",
+      "11f8ea", "Recovered",
+      "ebd24z", "Died")
+
+hosp_dup %>%
+    qflextable() %>% 
+     bg(part = "body", i = 1:2, j = 1:2, bg = "orange")
+```
+]
+.pull-left[
+```{r eval=FALSE, echo=TRUE}
+left_join(patients, hosp,
+  by = c(
+   "case_id" = "id_patient"))
+```
+
+]
+.pull-right[
+```{r eval=TRUE, echo=FALSE}
+left_join(patients,
+          hosp_dup,
+  by = c("case_id" = "id_patient")) %>% 
+  qflextable() %>% 
+  bg(part = "body", i = 1:2, j = 1:5, bg = "orange")
+```
+]
+
+
+
+
+
+---
+# Gif embed  
+
+.pull-left[
+
+* Text  
+
+* Text  
+
+* Text  
+
+* Text  
+
+]
+
+
+.pull-right[
+
+```{r eval = TRUE, echo=FALSE, out.width = '100%'}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "right-join.gif")))
+```
+
+
+]
+
+
+
+---
+# Show YAML or other 'asis'  
+
+TExt  
+
+Text
+
+```{results='asis'}
+---
+title: "R is great for public health"
+subtitle: "A personal testimony"
+author: "Me"
+date: "2022-03-15"
+output: 
+  html_document
+---
+```
+
+???
+Note that it starts and ends with three dashes, and that placement of spaces and colons are very important  
+
+
+
+---
+# Show Rmd code chunk with 3 backticks  
+
+- Text  
+
+--
+
+- Text
+
+`````
+```{r}`r ''`
+# import data
+surv_raw <- import(here("data", "surveillance_linelist_20141201.csv))
+```
+`````  
+--
+
+Text
+
+--
+
+`````
+```{r}`r ''`
+# clean data
+surv <- surv %>% 
+  clean_names() %>% 
+  select(case_id, gender, age, hospital) %>% 
+  mutate(child = ifelse(age < 18))
+```
+````` 
+
+
+---
+# Show how to make Rmd tables 
+
+Text
+
+`````
+Column 1 |Column  2 |Column 3
+---------|----------|--------
+Cell A   |Cell B    |Cell C
+Cell D   |Cell E    |Cell F
+`````
+
+Text
+
+Column 1 |Column  2 |Column 3
+---------|----------|--------
+Cell A   |Cell B    |Cell C
+Cell D   |Cell E    |Cell F
+
+
+---
+
+# The data analysis pipeline
+
+<br>
+
+.center[
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "AE_R_training_support_pyramid.png")))
+```
+]
+
+---
+
+# How do we carry out and incorporate statistical tests in R?
+
+Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%>%`!
+
+It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
+```{r, eval = F, echo = T}
+linelist %>%
+
+```
+
+
+---
+# How do we carry out and incorporate statistical tests in R?
+
+Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%>%`!
+
+It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
+```{r, eval = F, echo = T}
+linelist %>%
+    select(outcome, vomit, cough) %>%
+```
+
+
+---
+# How do we carry out and incorporate statistical tests in R?
+
+Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%>%`!
+
+It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
+```{r, eval = F, echo = T}
+linelist %>%
+    select(outcome, vomit, cough) %>%
+    tbl_summary(by = outcome) %>%
+```
+
+---
+# How do we carry out and incorporate statistical tests in R?
+
+Once we know what we want to do, we can carry out these operations with the help of the handy pipe chain `%>%`!
+
+It is simply just a case of adding in the arguments (here `tbl_summary()` and `add_p()`) and you're ready to go
+```{r, eval = F, echo = T}
+linelist %>%
+    select(outcome, vomit, cough) %>%
+    tbl_summary(by = outcome) %>%
+    add_p() 
+```
+
+---
+
+# gtsummary
+
+For these simple statistical tests, we can use the function `tbl_summary()` and `add_p()` to customise the data we input, the statistics we want output, and the test we want carried out in a few short lines.
+
+Here we select a few columns and explore their relationship with outcome
+```{r, echo = T, eval = T}
+
+linelist %>%
+         select(outcome, vomit, cough) %>%
+     tbl_summary(by = outcome) %>%   
+     add_p() 
+
+```
+
+Remember we can use `?tbl_summary` in order to explore a full range of the available inputs.
+
+---
+
+# gtsummary
+
+The default test carried out is the Chi-squared test, but if we want to carry out another analysis, we simply update the `add_p()` section.
+
+```{r, echo = T, eval  = T}
+
+linelist %>% 
+     select(outcome, wt_kg) %>%
+     tbl_summary(by = outcome) %>%
+     add_p(wt_kg ~ "t.test")
+
+```
+
+For a full list of tests please see `?add_p.tbl_summary`
+
+
+
+
+---
+#Adding in descriptive statistics
+
+We can then further update the information in the table by adding in descriptive statistics. We do this by adding an argument into `tbl_summary()`.
+
+```{r, echo = T, eval = T}
+linelist %>% 
+     select(outcome, wt_kg) %>%
+     tbl_summary(statistic = wt_kg ~ "{mean} ({sd})",
+          by = outcome
+     ) %>%
+     add_p(wt_kg ~ "t.test")
+```
+
+---
+
+# Ready to try it out?
+
+Any questions?
+
+
+
+**Resources**
+
+Course website (initial setup and slides access): [https://appliedepi.github.io/intro_course/](https://appliedepi.github.io/intro_course/)
+
+[Epi R Handbook](epirhandbook.com/)
+
+Applied Epi Community
+A great resource for asking questions and help!
+https://community.appliedepi.org/
+
+---
+
+
+---
+class: inverse, center, middle
+
+
+
+## Send them to exercises  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "Safety Match - COVID artwork.png")))
+```
