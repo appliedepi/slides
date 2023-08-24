@@ -1,6 +1,6 @@
 ---
 title: "Introduction to GIS in R"
-author: "Base maps, projections and geometries"
+author: "Base maps, shapefiles, and geometries"
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
   xaringan::moon_reader:
@@ -49,7 +49,9 @@ pacman::p_load(
   gtsummary,  # summary tables
   flair,      # coloring text
   kableExtra, # for output tables
-  xaringanthemer  # for styling presentation 
+  xaringanthemer,  # for styling presentation 
+  sf,
+  ggspatial
 )
 
 library(countdown)
@@ -367,19 +369,19 @@ class: inverse, center, middle
 
 We want to help you:  
 
-- GIS objective 1
+- Understand the basic components required for GIS in R, including basemaps, shapefiles, Coordinate Reference Systems (CRS), and spatial joins
 
 --
 
-- GIS objective 2
+- Understand how we can build different types of maps in R using {sf} and {ggplot2}
 
 --
 
-- GIS objective 3
+- Understand different types of spatial analysis and how they can be applied in R, including Nearest Neighbour (NN) and Buffer analysis
 
 --
 
-- GIS objective 4
+- Understand and develop code for creating more advanced maps, including Chloropleth maps, Heat maps, and Interactive maps. 
 
 
 
@@ -397,11 +399,17 @@ We want to help you:
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
-  ~Module, ~Topic,
-  "1",   "Introduction",
-  "2",   "Basemaps, projections and geometries",
-  "3",   "ggplot2 layers review",
-  "4",   "other",
+  ~Topic, ~Description,
+  "1",   "Introduction to GIS for R (Day 1)",
+  "2",   "Shapefiles, {sf}, and CRS",
+  "3",   "Spatial joins and admin levels",
+  "4",   "{ggplot2} and basemaps",
+  "5",   "Chloropleth maps",
+  "6",   "Introduction to Spatial Analaysis (Day 2)", 
+  "7",   "Nearest neighbour analysis",
+  "8",   "Buffery analysis",
+  "9",   "Heat maps and interactive maps",
+  "10",  "COVID-19 outbreak case study"
   )
 
 outline %>% 
@@ -514,18 +522,20 @@ We are in this course to succeed, together
 # This session: objectives & schedule  
 
 **In this module we aim to help you:**  
-* Introduce basemaps and projections 
-* Review ggplot2 layers and introduce ggmap  
-* Write base R code for creating maps
+* Understand basemaps, projections, and CRS
+* Learn how to use {sf} and spatial joins for mapping
+* Write R code for creating maps using {ggplot2}
+* Create Chloropleth maps
 
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
   ~Time, ~Location, ~Topic,
   "15 minutes",     "Main",      "Welcome, course logistics, Why R?",
-  "30 minutes",     "Main",      "Lecture 1: basemaps, projections and geometries",
+  "45 minutes",     "Main",      "Lecture 1: Introduction to GIS for R",
+  "15 minures",     "Main",      "Demo",
   "2 hours",        "Breakouts", "Exercise",
-  "30 minutes",     "Main",      "Plenary debrief"
+  "15 minutes",     "Main",      "Plenary debrief"
 )
 
 outline %>% 
@@ -590,8 +600,8 @@ The project is represented by a .Rproj file in the folder.
 knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "project_briefcase.png")))
 ```
 
-* `r emo::ji("folder")` intro_course  
-     * intro_course.Rproj  
+* `r emo::ji("folder")` gis_course  
+     * gis_course.Rproj  
      * `r emo::ji("document")` **linelist.csv**
      * `r emo::ji("document")` **my_analysis.R**
      
@@ -603,14 +613,43 @@ You can zip the folder and share it with a colleague, it can be hosted on a shar
 
 
 
+---
+class: inverse, center, middle  
 
+# Shapefiles, {sf}, and CRS
 
 
 
 ---
-class: inverse, center, middle  
+# Shapefiles 
+.pull-left[
+- Multiple layers make file 
+- Made up of: 
+  - Points, lines, polygons
+- handled with [{sf}](https://r-spatial.github.io/sf/) package
+  - simple features:
+   make things much more simple!
+  - Can use tidyverse syntax as if dataframes
+- Other formats exist (e.g. GeoJson)
+]
 
-# Geometries 
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "85%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "shapefiles.png")))
+```
+]
+
+.footnote[
+See the [EpiRHandbook section on GIS basics](https://epirhandbook.com/gis-basics.html)
+]
+
+???
+Until a few years ago geospatial work in R was very painful - but with SF it has
+now become as easy as dataframes in tidyverse! 
 
 ---
 
@@ -645,55 +684,80 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "points_
 ---
 # Storing Spatial Data 
 
-```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+
+### Shapefiles
+
+- Common data format for storing **vector spatial data**
+- Can represent geographical information as: 
+     - Points
+     - Lines
+     - Polygons
+- Collection of *at minimum* 3 file types: **.shp**, **.shx**, **.dbf**
+- All 3 components needed to read shapefile
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
 knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "shapefiles_directory.png")))
 ```
 
-Shapefiles
 
-  * Traditional method used with ArcGIS or QGIS
-  * Available from many organisations 
+---
 
+# Raster versus Vector
+
+```{r, eval = TRUE, echo = FALSE, out.width = "60%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "raster_vs_vector.png")))
+```
 
 ---
 
 # Storing Spatial Data in R
 
-.pull-left[
-## Simple features
-  * Geometry becomes a variable in your dataframe
-  * Can be used with ggplot  (review to follow)
-  * Attaches the shape to other data about that shape
-]
+
+## Simple features {sf}
+  * Imported geometry (shapefiles) become a variable in your dataframe
+  * Shapefiles in R environment will have class *"sf"* 
+  * Shapefiles can be joined to other dataframes using {sf} join functions
+  * {sf} functions for spatial data manipulation, analysis, and visualisation
+
 
 .pull-right[
-```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+
+```{r, eval = TRUE, echo = FALSE, out.width = "40%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
 knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "sf_hex.gif")))
 ```
+
 ]
 
-.footnote[Image source: https://desktop.arcgis.com/en/arcmap/10.3/manage-data/geodatabases/feature-class-basics.htm]
+.footnote[Image source: https://desktop.arcgis.com/en/arcmap/10.3/manage-data/geodatabases/feature-class-basics.htm]]
+
 
 ---
 
 # Storing Spatial Data in R
 
+## Benefits of {sf}
+
 .pull-left[
-## sf
-  * Geometry becomes a variable in your dataframe
-  * Can be used with ggplot  (review to follow)
-  * Attaches the shape to other data about that shape
-  * You can manipulate the data and keep the geometry attached
+- Compatible with QGIS and POSTGIS
+- *Very fast* reading and writing of large shapefiles
+- Enhanced plotting performance with multiple packages
+     - *"sf"* objects can be treated as data frames
+     - {sf} functions work with tidyverse (`%>%`)
+     - `st_` naming convention: `st_as_sf()`, `st_join()` 
 ]
 
+
 .pull-right[
-```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
@@ -704,63 +768,98 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "shape_d
 
 ---
 
-# Benefits of sf
+# Importing Spatial Data in R
 
-- Compatible with QGIS and POSTGIS
-     - Important open-source GIS platforms
-     - Locations of facilities 
-- Fast reading and writing of data
-- Enhanced plotting performance
-- sf highly functional for analysis
-     - sf objects can be treated as data frames
-     - sf functions work with tidyverse
-     - sf functions names are consistent and intuitve (all begin with st_)
+```{r, echo = TRUE, tidy = FALSE}
+
+# import shapefile
+shapefile <- read_sf(
+  # file path to shape file
+  here("data", "ebola","admin_boundaries", "sle_adm3.shp")) %>% 
+  clean_names()  
+
+```
+
+
+```{r, highlight.output=c(5)}
+shapefile
+```
+
+
 
 ---
-# Basic Cartography
+# Coordinate reference systems
+
+
+
+<iframe width="100%" height="676" frameborder="0"
+  src="https://observablehq.com/embed/@d3/projection-transitions?cells=viewof+context"></iframe>
+
+.footnote[
+Source: [Mike Bostock]("https://twitter.com/mbostock/status/1292887409474994176")
+]
+
+---
+
+# Coordinate reference systems
+
 
 .pull-left[
-- Coordinate refrence systems (CRS)
-- Projections
-- A way to turn our spherical world into two dimensions
+- Defined using EPSG
+- Turns spherical world into two dimensions
+- Data you receive should include the CRS
+- Most common is WGS84 (EPSG 4326)
+      - CRS used for GPS
+- Files with different CRS may **not** work together
 
 
 .footnote[Image source: https://s3.amazonaws.com/files.zevross.com/workshops/spatial/slides/html/4-crs.html#23]
+
 ]
 
+
 .pull-right[
-```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+
+```{r, eval = TRUE, echo = FALSE, out.width = "85%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
-knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "shape_data_snippet.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "projections_example.png")))
 ```
 ]
 
----
-
-# Coordinate Reference System
-
-- Definied using EPSG
-- Data you receive should include teh CRS
-- Most common is WGS84 (EPSG 4326)
-      - Used in GPS
-- Files with different CRS may not work together
 
 
 ---
 
-# Projections 
+# Changing the CRS
+
+```{r, echo = TRUE, tidy = FALSE}
+
+# transform shapefile to different CRS format
+shapefile <- st_transform(shapefile, crs = 3857)
+
+```
+
+
+```{r, highlight.output=c(5)}
+shapefile
+```
+
+
+---
+
+# Projections
 
 .pull-left[
 - Different methods for turning the globe into a map
 - All projections lead to some distortion
-- Can change your perception
+- Biases your perception of regional size 
 ]
 
 .pull-right[
 
-```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
@@ -775,50 +874,38 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "project
 # What's smaller?
 
 
-.pull-left[
-- Russia from East to West
-- Africa from East to West
-]
-
-
-.pull-right[
-```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
 knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "russia_africa_kms.png")))
 ```
 
-]
-
 
 --
 
-.pull_left[
 
-It's because of the projection!
+**It's because of the projection!**
 
-]
+
 
 ---
 
 # Projections
 
-.pull-left[
 
 - There are standard projections for most locations.
 - Google them and use them!
-]
 
-.pull-right[
-```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+
+```{r, eval = TRUE, echo = FALSE, out.width = "60%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
 knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "standard_projections.png")))
 ```
 
-]
+
 
 .footnote[Image source: https://www.mdpi.com/ijgi/ijgi-09-00196/article_deploy/html/images/ijgi-09-00196-g005.png
 ]
@@ -834,7 +921,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "standar
 ]
 
 .pull-right[
-```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+```{r, eval = TRUE, echo = FALSE, out.width = "140%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
@@ -846,312 +933,190 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "map_com
 .footnote[Image source: https://quizlet.com/310047587/parts-of-a-map-diagram/
 ]
 
+
 ---
 
 class: inverse, center, middle  
 
-# ggplot review
+# Spatial joins and admin levels
+
+---
+
+# Spatial joins
+
+ - We want to combine two dataframes with *common columns* 
+ - Multiple different types of joins available from {sf}
+     - `st_join`   (remember left joins?)
+     - `st_touches`
+     - `st_crosses`
+     - `st_contains`
+     - `st_within`
+     - `st_overlaps`
+     - `st_covers`
+     - `st_covered_by`
+     - `st_is_within_distance`
+
+.footnote[
+See the [EpiRHandbook section on joining data](https://epirhandbook.com/joining-data.html)
+]
+
+---
+
+# Admin levels and joins
+
+## How is your survey data formatted?
 
 
 ---
-# Open the plot  
 
-.pull-left[
+class: inverse, center, middle  
 
-```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
-ggplot()                   
-```
+# {ggplot2} and basemaps
 
-`ggplot()` creates an empty canvas.  
+---
+# gg-what??  
 
+--
 
+- The **ggplot2** *package* is the most popular data visualization tool in R  
 
+--
+
+- Its `ggplot()` *function* is at the core of the package  
+
+--
+
+- This whole approach is colloquially known as “ggplotting”  
+
+--
+
+- Resulting figures are sometimes affectionately called “ggplots”  
+
+--
+
+**ggplot2** benefits from a wide variety of supplementary R packages that extends its functionalities, such as **gganimate**, **ggthemr**, **ggdendro**, **gghighlight**, **ggforce**...  
+
+.footnote[
+*Bonus question:* What does the "gg” in these names represent?
 ]
-
-.pull-right[
-
-```{r , echo = FALSE, eval = TRUE}
-ggplot()
-```
-] 
 
 ???
-This is only a blank canvas, we have not defined what should be in the x and y axes. 
-If several data frames are needed, they can be added in their own geoms.
-Piping is useful to make one-time changes to a dataset prior to plotting.  
-
+- "gg" represents the “grammar of graphics” used to construct the figures 
 
 
 ---
-# Add the data  
+# Syntax overview  
 
-.pull-left[
+Build a plot object by “adding” commands on top of one another that specify plot layers and design elements  
 
-```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
-ggplot(data = surv)                   
-```
 
-Assign the data frame to use.  
+--
 
-Alternatively, use the `%>%` pipe operator to "pipe" a data frame *into* `ggplot()`  
+The order of layers will usually look like this:
 
-```{r , echo = TRUE, eval = FALSE, tidy = FALSE}
-surv %>%
-  ggplot()
-```
+1) **"Open" the plot** with the `ggplot()` command and specify the dataset  
 
-]
+--
 
-.pull-right[
+2) **"Map" data columns** to "aesthetic" features of the plot such as axes, color, size, shape, fill, transparency  
 
-```{r , echo = FALSE, eval = TRUE}
-ggplot(data = surv)
-```
-] 
+--
+
+3) **Add (`+`) “geom” layers** that visualize data geometrically as shapes  
+
+--
+
+4) **Modify "scales"**, such as a color scale or y-axis breaks  
+
+--
+
+5) **Add "theme" plot design elements** such as axis labels, title, caption, fonts, text sizes, background themes, or axes rotation  
+
+--
+
+These layers are "added" sequentially with `+` symbols.  
+**ggplot2** commands can be quite long!  
+
 
 ???
-This is only a blank canvas, we have not defined what should be in the x and y axes. 
-If several data frames are needed, they can be added in their own geoms.
-Piping is useful to make one-time changes to a dataset prior to plotting.  
-
-
+Remember that although the commands may be long, it is infinitely easier to edit and recycle than in Excel  
 
 
 ---
-# Add the data  
 
-.pull-left[
+#Add example simple ggplot of map with points
 
-```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
-ggplot(
-  data = surv)                   
+---
+
+# Basemaps
+
+- A screenshot of the map area 
+- Called tiles 
+    - Smaller images pieced together
+- Added for context (bottom layer of *ggplot*
+- A lot of different tile servers
+- A lot of different R packages
+    - We demonstrate {ggspatial}
+    - Able to save tiles for offline use
+    - Also have scalebars
+---
+# Bounding boxes
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "bounding_box.png")))
 ```
 
-Newlines and indents will not impact the code execution.  
 
-They can make longer commands easier to read...  
+---
+# Download & plot basemap
 
+.pull-left[
+```{r, echo = TRUE, tidy = FALSE}
 
+# get the bounding box for the shapefile 
+bounding_box <- shapefile %>% 
+  st_bbox()
+# plot a base map including scale bar 
+basemap <- ggplot() +
+  # change the bounding box to an sf object
+  # this defines the area to download map tiles for
+  geom_sf(data = st_as_sfc(bounding_box)) +
+  # download map tiles and add to the plot
+  annotation_map_tile(
+    # define what map tiles to use
+    type =  "cartolight",
+    # define folder to store tile images 
+    cachedir = here::here("data", "map_tiles"),
+    # define if should download tiles each time
+    forcedownload = FALSE,
+    # hide messages about download status and zoom
+    progress = "none" )
+```
 ]
 
 .pull-right[
 
-```{r , echo = FALSE, eval = TRUE}
-ggplot(data = surv)
+```{r }
+basemap
 ```
-] 
 
-???
-This is only a blank canvas, we have not defined what should be in the x and y axes. 
-If several data frames are needed, they can be added in their own geoms.
-Piping is useful to make one-time changes to a dataset prior to plotting.  
+]
+---
 
+class: inverse, center, middle
 
+## Demo
 
 ---
-# Mappings with `aes()`  
 
-.pull-left[
+class: inverse, center, middle  
 
-```{r, eval=F, echo=T}
-ggplot(
-  data = surv,
-  mapping = aes())        #<<
-```
-
-Plot "aesthetics" are features like position, color, shape...  
-
-`mapping = aes()` maps "aesthetics" to columns in the data.  
-
-]
-
-.pull-right[
-
-```{r , echo = FALSE, eval = TRUE}
-ggplot(
-  data = surv,
-  mapping = aes())+
-theme_grey(base_size = 16)
-```
-] 
-
-???
-ggplot commands tend to get very vertical (long)  
-
-
-
-
+# Chloropleth maps
 
 ---
-# Mappings with `aes()`  
-
-.pull-left[
-
-```{r, eval=F, echo=T}
-ggplot(
-  data = surv,
-  mapping = aes(        
-   x = age_years       #<<
-   ))               
-```
-
-Aesthetic mappings are placed within `aes()`.  
-
-Two basic mappings are axes to columns, via:  
-`x = `   
-
-
-]
-
-.pull-right[
-
-```{r , echo = FALSE, eval = TRUE}
-ggplot(
-  data = surv,
-  mapping = aes(
-   x = age_years))+
-theme_grey(base_size = 16)
-```
-] 
-
-???
-ggplot commands tend to get very vertical (long)  
-
-
-
-
----
-# Mappings with `aes()`  
-
-.pull-left[
-
-```{r, eval=F, echo=T}
-ggplot(
-  data = surv,
-  mapping = aes(        
-   x = age_years,       #<<
-   y = ht_cm))          #<<
-```
-
-Aesthetic mappings are placed within `aes()`.  
-
-Two basic mappings are axes to columns, via:  
-`x = ` and `y = `  
-
-
-]
-
-.pull-right[
-
-```{r , echo = FALSE, eval = TRUE}
-ggplot(
-  data = surv,
-  mapping = aes(
-   x = age_years,
-   y = ht_cm))+
-theme_grey(base_size = 16)
-```
-] 
-
-???
-ggplot commands tend to get very vertical (long)  
-
-
-
-
-
----
-# Add geometry  
-
-.pull-left[
-
-```{r eval=F, echo=T}
-ggplot(
-  data = surv,
-  mapping = aes(
-    x = age_years,
-    y = ht_cm)) +
-*geom_point()
-```
-
-Data are visualized using "geom" commands, such as `geom_point()`.  
-
-These commands are "added"  
-with a **`+`** to the `ggplot()` command.  
-
-]
-
-
-.pull-right[
-
-```{r eval=T, echo=F, message=F, warning=F}
-ggplot(
-  data = surv,
-  mapping = aes(
-   x = age_years,
-   y = ht_cm)) +
-geom_point() + 
-theme_grey(base_size = 16)
-```
-
-]
-
-
-
-
----
-# Geometries  
-
-.pull-left[
-
-Some classical “geoms” include:  
-
-Geometry        |Geom                
-----------------|--------------------
-Histograms      |`geom_histogram()`  
-Points          |`geom_point()`  
-
-
-.footnote[Full list [here](https://ggplot2.tidyverse.org/reference/)]  
-
-]
-
-
-.pull-right[
-
-```{r, message=F, warning=F}
-
-# Histogram
-histogram <- ggplot(
-    data = surv,
-    mapping = aes(
-      x = date_onset))+
-  geom_histogram(fill = "darkorange")+
-  labs(title = "geom_histogram()")+
-  theme_minimal(base_size = 16)
-  
-
-points <- ggplot(
-    data = surv,
-    mapping = aes(
-      x = age_years,       
-      y = ht_cm)
-    )+
-  geom_point()+
-  labs(title = "geom_point()")+
-  theme_minimal(base_size = 16)
-
-
-cowplot::plot_grid(histogram, points,
-                          nrow = 2, rel_widths = c(2,2))
-
-#cowplot::plot_grid(top, lines, ncol = 1)
-
-```
-
-]
-
-
 
 
 
