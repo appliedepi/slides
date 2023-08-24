@@ -1,0 +1,562 @@
+---
+title: "Introduction to GIS in R"
+author: "Spatial analysis"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation 
+  sf,
+  ggspatial
+)
+
+library(countdown)
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png",
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slidesw
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+```{r, echo=F, eval=T}
+surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
+
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+```
+
+
+---
+# This session: objectives & schedule  
+
+**In this module we aim to help you:**  
+* Perform nearest neighbour analysis 
+* Perform buffer analysis
+* Learn to code heat maps and interactive maps
+* Create publication ready maps
+
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  "10 minutes",     "Main",      "Lecture 2:  Spatial analysis",
+  "10 minutes",     "Main",      "Demo: Spatial analysis",
+  "1.5 hour",       "Breakouts", "Exercise",
+  "10 minutes",     "Main",      "Introduce COVID case study",
+  "1 hour",         "Breakouts", "Exercise",    
+  "30 minutes",     "Main",      "Plenary debrief"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+```
+
+???
+Note stretch breaks throughout.
+
+
+---
+
+# Spatial analysis
+
+.pull-left[
+Spatial analysis allows you to:
+- Explore and understand your data from a geographical perspective
+- Determine relationships, detect and quantify trends or patterns
+- Make predictions and decisions about your data
+
+We will focus on 3 types of spatial analysis: 
+- Nearest Neighbour
+- Buffer
+- Heat maps
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "john_snow_map.png")))
+```
+
+
+]
+
+
+---
+
+class: inverse, center, middle  
+
+# Nearest Neighbour
+
+
+---
+# Nearest Neighbour (NN)
+
+Analyse the *nearest feature* in **one layer** to the *nearest feature* in **another layer**. For example: 
+- The closest hospitals to refugee camps or displaced groups
+- The closest net-dispensary to rural villages
+- The closest school to a particular residence
+
+```{r, eval = TRUE, echo = FALSE, out.width = "90%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "dh_nn.png")))
+```
+
+---
+# Nearest Neighbour (NN)
+
+## In practice: 
+
+- Create a **new object** to join layers (cases + health facilities) for NN analysis 
+- Use `join = st_nearest_feature`argument for `st_join()`#
+    - Calculates and appends nearest health facility to case
+
+--
+
+```{r, echo = TRUE, eval = FALSE}
+
+# begin with the linelist, and join data from the nearest clinic
+surv_adm_hf <- st_join(surv_adm, sle_hf, join = st_nearest_feature)
+
+```
+
+--
+
+The nearest neighbour is identifiable as two columns in the **new object**: 
+
+- *"osm_id"*
+- *"name"* 
+
+--
+
+Which column do you think is **better** to use to **id** nearest health facilities? 
+
+---
+# Nearest Neighbour (NN)
+
+## Other useful functions: 
+
+`st_nearest_feature()` allows you to identify the nearest health facility for each case 
+
+```{r, echo = TRUE, eval = FALSE}
+
+# identify the nearest health facility for each case
+# this information is saved as a vector with one value for each case
+nearest_index <- st_nearest_feature(
+  x = surv_adm,      # linelist data 
+  y = sle_hf)        # health facility location
+
+```
+
+```{r, echo = FALSE, eval = FALSE}
+
+nearest_index
+
+```
+
+
+---
+# Nearest Neighbour (NN)
+
+## Other useful functions: 
+
+`st_distance()` allows you to identify the distance between each case and its nearest health facility
+
+
+```{r, echo = TRUE, eval = FALSE}
+# output is a vector of distances, with same length as the # of cases
+# the unit for the distance is listed at the top (m for meters)
+distances <- st_distance(
+  x = surv_adm,
+  y = sle_hf[nearest_index,],
+  by_element = TRUE)
+
+```
+
+--
+We can add `distances` as a column in our `surv_adm_hf` dataframe
+
+```{r, echo = TRUE, eval = FALSE}
+# add the distances as a new column in surv_adm_hf
+surv_adm_hf$nearest_dist <- as.numeric(distances)
+```
+---
+
+# Nearest Neighbour (NN)
+
+### How to plot NN analyses?
+
+- Colour cases (points) by **specific** nearest hospital facility
+- Colour cases by distance to *any* nearest hospital facility
+- Colour cases by <= 1km vs. > 1 km away from nearest hospital facility
+- Other ways to visualise nearest neighbours? 
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "travel_times_example.png")))
+```
+
+---
+
+# Nearest Neighbour (NN)
+
+### How to calculate distance?
+
+.pull-left[
+For this class:
+- "Euclidean" or straight-line distances
+
+Other methods: 
+
+- Road, river, or other transport networks
+- Accounting for spatial topology (e.g. mountains)
+- Other methods of distance we might want to consider? 
+
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "road_networks.png")))
+```
+
+]
+
+---
+
+class: inverse, center, middle  
+
+# Buffer analysis
+
+---
+# Buffer analysis
+
+.pull-left[
+Calculate *"buffers"* or areas of a particular radius around points or lines. 
+
+Examples of buffers of interest:
+- Identify displaced groups more than 5km from a health facility
+- Identify residences more than 10km away from schools in rural areas
+- Identify 5km cachement areas of methadone clinics (gaps in access)
+
+
+Other buffers that could be of interest?
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "buffer_zones_example.png")))
+```
+
+
+]
+
+---
+# Buffer analysis
+
+### How to create buffers in R? 
+
+`st_buffer()` function from the {sf} package
+- provide buffer radius in meters to `dist =` argument 
+- creates circles around your feature of interest
+
+```{r, eval = FALSE, echo = TRUE}
+
+# create new layer (polygons/circles) of 1km buffer around each health facility
+sle_hf_outbreak_1k <- st_buffer(sle_hf_outbreak, dist = 1000)
+#dist = 1000 is equivalent to 1000 meters
+
+```
+
+
+---
+
+# Buffer analysis
+
+### Plotting with buffers
+
+Adding a buffer layer to ggplot():
+
+```{r, eval = FALSE, echo = TRUE}
+
+ggplot() +
+  geom_sf(data = sle_adm3_outbreak) + # outbreak district admin boundaries
+  geom_sf(data = sle_hf_outbreak,     # each health facility
+          color="red")+
+  geom_sf(data = sle_hf_outbreak_1k,  # the radius around each health facility
+          color = "black",
+          fill = NA)
+
+```
+
+But what about **overlaps** in buffer zones?
+
+---
+
+# Buffer analysis
+
+
+.pull-left[
+
+**Overlapping zones**
+
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "buffer_no_union.png")))
+```
+
+
+]
+
+.pull-right[
+
+**United zones**
+
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "buffer_union.png")))
+```
+
+]
+
+---
+# Buffer analysis
+
+We can combine buffers via a **union**
+
+- `st_union()` function joins overlapping buffers together
+- `st_as_sf()` is required after to convert to *"sf"* class
+
+```{r eval = F, echo=T}
+sle_hf_outbreak_1k <- sle_hf_outbreak %>%
+  st_buffer(dist = 1000) %>% # lengths in meters
+  st_union() %>%             # combine overlaps into a single shape
+  st_as_sf()                 # convert to sf class
+```
+
+--
+
+Why is it useful to combine buffers together? 
+
+--
+
+- Easily identify cases within an overlapping area
+    - Working with small distances, unclear where a case will go
+    - Cases can fall under broader overlapping buffer areas
+
+---
+
+class: inverse, center, middle  
+
+# Heat maps
+
+---
+
+# Heat maps
+
+Rather than points or lines, we plot the interpolated (smoothed) "density" of points. 
+
+- Overlapping points can obscure the spatial distribution
+- Heat maps allow us to see easily visualise the spatial distribution
+
+`stat_density2d_filled()` function from the {ggplot2} package using the **original** `data= surv` dataframe (**NOT** an *"sf"* object)
+- mapping x to `lon` and `lat` columns
+- play around with `alpha =` to see basemap through heat map layer
+
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "heatmaps.png")))
+
+```
+---
+
+# Heat maps
+
+How to create a heat map:
+
+1. Open an OpenstreetMap base mp cropped to cases with `base_osm_cropped()`
+2. Add `stat_density2d_filled()` to the ggplot geom layers
+3. Add district boundaries with with white outline on top 
+
+```{r, eval = FALSE, echo = TRUE}
+
+# Add administrative boundaries, cases, facilities
+# You have to use inherit.aes = FALSE is you're using the ggmap basemap
+ggplot()+
+  # base map cropped to cases
+  geom_spatraster_rgb(data = base_osm_cropped)+
+  
+  # density of case points 
+  stat_density2d_filled(data = surv,
+                        mapping = aes(x = lon, y = lat),
+                        alpha = 0.5) +
+  # admin boundaries
+  geom_sf(data = sle_adm3_cropped,
+          fill = NA,
+          color = "white")
+
+```
+
+---
+# Heat maps
+```{r, eval = TRUE, echo = FALSE, out.width = "90%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "heat_map.png")))
+
+```
+
+
+
+---
+
+class: inverse, center, middle  
+
+# Interactive maps
+
+---
+# Interactive maps
+
+R has excellent **interactive* GIS capabilities
+
+- {leaflet}, {tmap}, {mapview} can all be used to produce interactive maps
+- these maps allow users to pan, scroll, zoom, select, etc. 
+- interactive maps can be shared in HTML outbreak situation reports, dashboards, shiny apps, etc. 
+
+The exercises today will provide an opportunity to work through an example using {lealet}. 
+
+---
+
+# {leaflet}
+
+The `leaflet()` function opens an interactive space in the RStudio Viewer pane
+
+- `addTiles()` accesses OpenStreetMap base tiles
+- `addMarkers()` centers the map using `lat = ` and `lng =` arguments
+    - *NOTE* the argument is `lng` not `lon`
+- `addPolygons()` adds shapefiles provided to the map
+  - adjust fill, outline, opacity and other settings
+  - e.g. lines around polygons with `stroke = TRUE`
+- `colorBin()` to create a palette function 
+- `addLegend()` to add legend to interactive plot
+
+---
+
+# Example interactive plot
+
+
+---
+
+
+class: inverse, center, middle  
+
+# Demo
+
+---
+
+
+class: inverse, center, middle  
+
+# Exercise 2
+
+---
+
+
