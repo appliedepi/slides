@@ -404,11 +404,11 @@ outline <- dplyr::tribble(
   "2",   "Shapefiles, {sf}, and CRS",
   "3",   "Spatial joins and admin levels",
   "4",   "{ggplot2} and basemaps",
-  "5",   "Choropleth maps",
+  "5",   "Choropleth maps and heat maps",
   "6",   "Introduction to Spatial Analysis (Day 2)", 
   "7",   "Nearest neighbour analysis",
   "8",   "Buffer analysis",
-  "9",   "Heat maps and interactive maps",
+  "9",   "Interactive maps",
   "10",  "COVID-19 outbreak case study"
   )
 
@@ -532,9 +532,11 @@ We are in this course to succeed, together
 outline <- dplyr::tribble(
   ~Time, ~Location, ~Topic,
   "15 minutes",     "Main",      "Welcome, course logistics, Why R?",
-  "45 minutes",     "Main",      "Lecture 1: Introduction to GIS for R",
+  "30 minutes",     "Main",      "Lecture 1: Introduction to GIS for R",
   "15 minures",     "Main",      "Demo",
-  "2 hours",        "Breakouts", "Exercise",
+  "1 hour",        "Breakouts", "Exercise",
+  "15 minutes",     "Main",      "Demo: Choropleths and heat maps",
+  "1 hour",        "Breakouts", "Exercise",
   "15 minutes",     "Main",      "Plenary debrief"
 )
 
@@ -1198,6 +1200,28 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "simulat
 
 ---
 
+class: inverse, center, middle
+
+# Demo
+
+
+---
+class: inverse, center, middle
+
+
+
+## Exercise 1  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "teamwork2.png")))
+```
+
+---
+
 class: inverse, center, middle  
 
 # Choropleth maps
@@ -1227,6 +1251,72 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "choropl
 ```
 
 
+---
+
+class: inverse, center, middle  
+
+# Heat maps
+
+---
+
+# Heat maps
+
+Rather than points or lines, we plot the interpolated (smoothed) "density" of points. 
+
+- Overlapping points can obscure the spatial distribution
+- Heat maps allow us to see easily visualise the spatial distribution
+
+`stat_density2d_filled()` function from the {ggplot2} package using the **original** `data= surv` dataframe (**NOT** an *"sf"* object)
+- mapping x to `lon` and `lat` columns
+- play around with `alpha =` to see basemap through heat map layer
+
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "heatmaps.png")))
+
+```
+---
+
+# Heat maps
+
+How to create a heat map:
+
+1. Open an OpenstreetMap base mp cropped to cases with `base_osm_cropped()`
+2. Add `stat_density2d_filled()` to the ggplot geom layers
+3. Add district boundaries with with white outline on top 
+
+```{r, eval = FALSE, echo = TRUE}
+
+# Add administrative boundaries, cases, facilities
+# You have to use inherit.aes = FALSE is you're using the ggmap basemap
+ggplot()+
+  # base map cropped to cases
+  geom_spatraster_rgb(data = base_osm_cropped)+
+  
+  # density of case points 
+  stat_density2d_filled(data = surv,
+                        mapping = aes(x = lon, y = lat),
+                        alpha = 0.5) +
+  # admin boundaries
+  geom_sf(data = sle_adm3_cropped,
+          fill = NA,
+          color = "white")
+
+```
+
+---
+# Heat maps
+```{r, eval = TRUE, echo = FALSE, out.width = "90%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "heat_map.png")))
+
+```
+
+
 
 
 ---
@@ -1241,7 +1331,7 @@ class: inverse, center, middle
 
 
 
-## Exercise 1  
+## Back to Exercises
 
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "50%"}

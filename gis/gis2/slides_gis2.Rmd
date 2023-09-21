@@ -51,7 +51,8 @@ pacman::p_load(
   kableExtra, # for output tables
   xaringanthemer,  # for styling presentation 
   sf,
-  ggspatial
+  ggspatial, 
+  leaflet
 )
 
 library(countdown)
@@ -103,10 +104,11 @@ style_mono_accent(
 surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
 
 surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+surv_adm <- rio::import(here::here("data", "surv_adm.rds"))
 ```
 
 
----
+
 # This session: objectives & schedule  
 
 **In this module we aim to help you:**  
@@ -275,7 +277,7 @@ surv_adm_hf$nearest_dist <- as.numeric(distances)
 - Colour cases by <= 1km vs. > 1 km away from nearest hospital facility
 - Other ways to visualise nearest neighbours? 
 
-```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+```{r, eval = TRUE, echo = FALSE, out.width = "50%", fig.align = 'center'}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
@@ -294,7 +296,7 @@ For this class:
 
 Other methods: 
 
-- Road, river, or other transport networks
+- Road, river, or other transport networks (see [example](https://gis.stackexchange.com/questions/451410/doing-nearest-neighbors-accounting-for-road-distance-in-r))
 - Accounting for spatial topology (e.g. mountains)
 - Other methods of distance we might want to consider? 
 
@@ -353,8 +355,11 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "buffer_
 
 ```{r, eval = FALSE, echo = TRUE}
 
-# create new layer (polygons/circles) of 1km buffer around each health facility
+# create new layer (polygons/circles) of 1km buffer
+# around each health facility
+
 sle_hf_outbreak_1k <- st_buffer(sle_hf_outbreak, dist = 1000)
+
 #dist = 1000 is equivalent to 1000 meters
 
 ```
@@ -371,10 +376,10 @@ Adding a buffer layer to ggplot():
 ```{r, eval = FALSE, echo = TRUE}
 
 ggplot() +
-  geom_sf(data = sle_adm3_outbreak) + # outbreak district admin boundaries
+  geom_sf(data = sle_adm3_outbreak) + # outbreak admin boundaries
   geom_sf(data = sle_hf_outbreak,     # each health facility
           color="red")+
-  geom_sf(data = sle_hf_outbreak_1k,  # the radius around each health facility
+  geom_sf(data = sle_hf_outbreak_1k,  # radius around health facilities
           color = "black",
           fill = NA)
 
@@ -443,73 +448,6 @@ Why is it useful to combine buffers together?
 
 class: inverse, center, middle  
 
-# Heat maps
-
----
-
-# Heat maps
-
-Rather than points or lines, we plot the interpolated (smoothed) "density" of points. 
-
-- Overlapping points can obscure the spatial distribution
-- Heat maps allow us to see easily visualise the spatial distribution
-
-`stat_density2d_filled()` function from the {ggplot2} package using the **original** `data= surv` dataframe (**NOT** an *"sf"* object)
-- mapping x to `lon` and `lat` columns
-- play around with `alpha =` to see basemap through heat map layer
-
-```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
-# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
-# It dynamically creates the ../../etc filepath.
-
-knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "heatmaps.png")))
-
-```
----
-
-# Heat maps
-
-How to create a heat map:
-
-1. Open an OpenstreetMap base mp cropped to cases with `base_osm_cropped()`
-2. Add `stat_density2d_filled()` to the ggplot geom layers
-3. Add district boundaries with with white outline on top 
-
-```{r, eval = FALSE, echo = TRUE}
-
-# Add administrative boundaries, cases, facilities
-# You have to use inherit.aes = FALSE is you're using the ggmap basemap
-ggplot()+
-  # base map cropped to cases
-  geom_spatraster_rgb(data = base_osm_cropped)+
-  
-  # density of case points 
-  stat_density2d_filled(data = surv,
-                        mapping = aes(x = lon, y = lat),
-                        alpha = 0.5) +
-  # admin boundaries
-  geom_sf(data = sle_adm3_cropped,
-          fill = NA,
-          color = "white")
-
-```
-
----
-# Heat maps
-```{r, eval = TRUE, echo = FALSE, out.width = "90%"}
-# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
-# It dynamically creates the ../../etc filepath.
-
-knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "heat_map.png")))
-
-```
-
-
-
----
-
-class: inverse, center, middle  
-
 # Interactive maps
 
 ---
@@ -542,6 +480,23 @@ The `leaflet()` function opens an interactive space in the RStudio Viewer pane
 
 # Example interactive plot
 
+```{r, echo=F, eval=T}
+# create color palette function
+palette <- colorFactor(
+  palette = c("red", "black"),
+  domain = c("Death", "Recover"))
+
+surv_adm_map <- leaflet(surv_adm) %>% 
+  addTiles() %>%           # OpenStreetMap
+  addCircleMarkers(popup = ~case_id,
+                   radius = 1,
+             label = ~case_id,
+             color = ~palette(outcome),
+             fillOpacity = 1) 
+
+surv_adm_map
+```
+
 
 ---
 
@@ -557,6 +512,6 @@ class: inverse, center, middle
 
 # Exercise 2
 
----
+
 
 
