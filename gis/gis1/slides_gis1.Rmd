@@ -811,8 +811,8 @@ Source: [Mike Bostock]("https://twitter.com/mbostock/status/1292887409474994176"
 - Most common is WGS84 (EPSG 4326)
       - CRS used for GPS
 - Files with different CRS may **not** work together
-
-Different countries use different types of CRS!
+- Different countries use different types of CRS! 
+      - Do you know what your country uses?
 
 
 .footnote[Image source: https://s3.amazonaws.com/files.zevross.com/workshops/spatial/slides/html/4-crs.html#23]
@@ -1054,7 +1054,16 @@ Remember that although the commands may be long, it is infinitely easier to edit
 
 ---
 
-#Add example simple ggplot of map with points
+#{ggplot2} with map layers
+
+```{r, eval = TRUE, echo = FALSE, out.width = "140%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "ggplot2_map_example.png")))
+```
+
+
 
 ---
 
@@ -1064,7 +1073,7 @@ Remember that although the commands may be long, it is infinitely easier to edit
 - A screenshot of the map area 
 - Called tiles 
     - Smaller images pieced together
-- Added for context (bottom layer of *ggplot*
+- Added for context (bottom layer of {ggplot2} plot)
 - A lot of different tile servers
 - A lot of different R packages
     - We demonstrate {ggspatial}
@@ -1072,30 +1081,59 @@ Remember that although the commands may be long, it is infinitely easier to edit
     - Also have scalebars
 ]
 
-.pull-right[
-```{r, eval = TRUE, echo = FALSE, out.width = "140%"}
-# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
-# It dynamically creates the ../../etc filepath.
+.pull-left[
+```{r, eval = TRUE, echo = FALSE}
 
-knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "basemaps_example.png")))
+# get the bounding box for the shapefile 
+bounding_box <- shapefile %>% 
+  st_bbox()
+# plot a base map including scale bar 
+basemap <- ggplot() +
+  # change the bounding box to an sf object
+  # this defines the area to download map tiles for
+  geom_sf(data = st_as_sfc(bounding_box)) +
+  # download map tiles and add to the plot
+  annotation_map_tile(
+    # define what map tiles to use
+    type =  "cartolight",
+    # define folder to store tile images 
+    cachedir = here::here("data", "map_tiles"),
+    # define if should download tiles each time
+    forcedownload = FALSE,
+    # hide messages about download status and zoom
+    progress = "none" )
+
+basemap
 ```
-
 ]
 ---
 # Bounding boxes
 
-```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+.pull-left[
+- A rectanglur area defined by
+   - 2 longitudes
+   - 2 latitudes
+- Aligned with coordinate axes
+- Identifies a map area specified:
+   - manually with coordinate values 
+   - using reference area or data values to identify the smallest area (box) encompassing a feature of interest
+
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
 knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "bounding_box.png")))
 ```
 
-
+]
 ---
 # Download & plot basemap
 
-.pull-left[
+
 ```{r, echo = TRUE, tidy = FALSE}
 
 # get the bounding box for the shapefile 
@@ -1117,15 +1155,46 @@ basemap <- ggplot() +
     # hide messages about download status and zoom
     progress = "none" )
 ```
-]
 
-.pull-right[
+---
+# Download & plot basemap
 
 ```{r }
 basemap
 ```
 
-]
+---
+# Adding the data
+
+
+Once we have our basemap we might want to consider creating a bounding box around our feature of interest. This could include considering: 
+
+- Where is our outbreak located and which features are we interested in? 
+    - Across the whole country?
+    - Only specific districts? 
+    - Cases and hospitals?
+    - Schools? Specific age groups?
+    - Gender? Severity of case?
+--
+
+Once we've identified our features of interest, we can add these as **another layer** to our **ggplot**
+- Use `geom_sf()` to plot data as layer (e.g. cases)
+- Data object must be of class `sf`
+- End up layering multiple dataframes (objects) with different `geom_sf` layers
+- We will go through this format in the demo shortly
+
+---
+# Example plot
+
+**Note** basemap is centered **around cases** rather than including the whole country. What would this look like if the whole country was included instead? 
+
+```{r, eval = TRUE, echo = FALSE, out.width = "130%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "simulated_ebola_outbreak.png")))
+```
+
 
 ---
 
@@ -1137,7 +1206,6 @@ class: inverse, center, middle
 # Choropleth maps
 
 
-.pull-left[
 
 Sometimes you may not want to show exact location of points, but rather *counts* per *district* or *admin level* instead. We can create *choropleth* maps which show counts by area. 
 
@@ -1147,11 +1215,11 @@ Sometimes you may not want to show exact location of points, but rather *counts*
    - **Join** this with your district or adm shape files 
    - Plot your choropleth with {ggplot2}! 
    - Remember instead of colour for points you will use fill for areas
-]
 
-.pull-right[
 
-```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%", fig.align='center'}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
 # It dynamically creates the ../../etc filepath.
 
@@ -1159,13 +1227,13 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "choropl
 ```
 
 
-]
+
 
 ---
 
 class: inverse, center, middle
 
-## Demo
+# Demo
 
 
 ---
@@ -1183,4 +1251,4 @@ class: inverse, center, middle
 knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "teamwork2.png")))
 ```
 
----
+
