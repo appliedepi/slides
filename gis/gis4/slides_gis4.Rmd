@@ -1,0 +1,201 @@
+---
+title: "Introduction to GIS in R"
+author: "Where do we go from here?"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation 
+  sf,
+  ggspatial
+)
+
+library(countdown)
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png",
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slidesw
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+```{r, echo=F, eval=T}
+surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
+
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+```
+
+
+---
+# Course recap 
+
+So far we have used multiple data sources to learn about: 
+
+- Shapefiles, {sf}, and CRS
+- Spatial joins and admin levels
+- {ggplot2}, basemaps, and bounding boxes
+- Choropleth maps
+- Spatial analysis including NN, buffer analysis, and heat maps
+
+---
+
+# Shapefiles and CRS
+
+.pull-left[
+In future analyses, we need to think about: 
+
+- Where to source shape files from? 
+  - Google is your friend! 
+  - Open source resources 
+  - Open source resources
+  - There are *many more* resources not listed here! 
+- Different regions use different types of CRS
+  - E.g. Sierra Leone
+  - E.g. Fulton county
+  - What does your work region use? *Look it up!* 
+]
+
+.pull-right[
+   
+```{r, eval = TRUE, echo = FALSE, out.width = "85%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "shapefiles_final.png")))
+```
+]
+
+---
+
+# Importance of admin levels
+
+We must always consider which administrative level to use: 
+
+.pull-left[
+
+- admin1, admin2, admin3, country, district, zip codes, etc. 
+- How can we join our survey data and our shape files? 
+ - `st_joins`, `st_within`, and many more options available
+- At what stage do we format our survey data to class `sf`?
+ - Before joining with shape files or after?
+- How do we want our data formatted?
+ - District or admin level choropleths? 
+ - Points of cases using lat and lon
+
+]
+
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "85%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "gis", "adminlevels_final.png")))
+```
+
+
+]
+
+---
+# Spatial analysis 
+
+We have only touched the tip of the iceberg! There are many other more advanced methods. Some examples and tutorials available:  
+
+- Nearest Neighbour analysis using road networks 
+   - Add link to tutorial 
+- Other methods add in when landed
+
+
+
+---
+# Resources available 
+
+- Applied Epi community 
+- Stacke exchange and stack overflow
+- Applied Epi handbook 
+- Other advanced resources for GIS 
+- Help desk applied epi 
+
+--- 
+

@@ -1,0 +1,245 @@
+---
+title: "Introduction to GIS in R"
+author: "COVID-19 GIS case study"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation 
+  sf,
+  ggspatial
+)
+
+library(countdown)
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png",
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slidesw
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+```{r, echo=F, eval=T}
+surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
+
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+```
+
+
+---
+# Data used in this course  
+
+So far we have used the Ebola case study data
+
+* Ebola case study in Sierra Leone
+     * **Surveillance linelist** (primary dataset)  
+     * Hospital linelists from 5 hospitals  
+     * Population data stratified by demographic groups and admin levels
+     * Sierra Leone shape files stratified by admin levels
+     * Health facility shape files
+
+Now we introduce a new case study: 
+
+* COVID-19 case study in USA
+     * **Surveillance linelist** (primary dataset)
+     * Population data stratified by cities
+     * Fulton County, Georgia, USA, shape files
+     * Fulton County, Georgia, USA, map tiles
+     
+.footnote[All data are not real. All files can be found in the course folder.]  
+
+
+---
+
+# First steps in a new analysis
+
+As we are using new data which we have never seen before, it is useful to explore the data first
+- Take a look at which columns are available in our **surveillance linelist** 
+- What geographpic levels (e.g. adm, lat, lon) do we have available in our survey data?
+- What geographic boundaries are available in our shape files? 
+- **Note** we have population data by city
+  - How would we join our surveillance linelist data to our population data? 
+  - How would we join our surveillance linelist dat to our shape files? 
+  - What can we use our population data to calculate?
+
+---
+# Cultural notes: *Zip* codes
+
+If you are not familiar with the hierarchy of government jurisdictions in the USA:
+
+- Georgia (state) contains over 150 different counties
+  - Counties can contain multiple cities and/or municipalities
+- There are over 500 cities within the state of Georgie
+  - **Most** cities fall within one county, but some span across multiple
+- *ZIP* codes are the US postal code system. 
+  - *ZIP* codes can span across cities and counties
+- Fulton county spans across **25** ZIP codes
+
+---
+
+# Cultural notes: *Race vs. ethnicity* 
+
+In the USA, census data often include data on *Race* and *Ethnicity* as two separate columns. 
+
+Ethnicity options are typically:  
+* "Hispanic or Latino" or,
+* "Not Hispanic or Latino"  
+
+Race options often include:  
+
+* "American Indian or Alaska Native" (sometime abbreviated as AI/AN)  
+* "Asian"
+* "Black or African American"
+* "Native Hawaiian or Other Pacific Islander"
+* "White"  
+
+
+---
+
+# Surveillance periods 
+
+We also might want to think about viewing *case counts over time* using **surveillance periods** 
+
+Why might this be useful? 
+
+- Compare *incidence* across **time periods** (e.g. week to week)
+- Observe how and where the outbreak is growing fastest
+- How might we *create surveillance periods* in R for our analysis? 
+   - `floor_date()` from {lubridate} 
+
+
+---
+
+# Surveillance periods
+
+In R, we can set up surveillance periods easily based on our data. 
+
+```{r, echo = TRUE, tidy = FALSE}
+
+# create a date object with most relevant date of complete data
+# minus 5 days to account for lag in reporting lab results
+
+# first day of complete data (accounting for lab reporting delays)
+surveillance_date <- as.Date("2021-06-29") - 5
+
+# create an object to mark start of latest complete week of data 
+# floor_date() rounds down to the closest week here
+surveillance_week_start <- floor_date(
+  # subtract 7 days from surveillance_date
+  surveillance_date - 7,
+  # round down to nearest week start date
+  unit = "week", 
+  # define week to start on Sunday (typical in USA)
+  week_start = 7)
+
+
+# define recent (past 14 days) and previous (28 to 14 days prior)
+recent_period   <- seq(surveillance_week_start  - 13, surveillance_week_start, by = 1)
+previous_period <- seq(surveillance_week_start  - 27, surveillance_week_start - 14, by = 1)
+```
+
+
+How could we set up `surveillance_date` in RMarkdown? Think about the *params* key in *YAML* section. 
+
+---
+
+# Data cleaning and analyses
+
+*NOTE* Data cleaning is not the focal point of this course
+- Data cleaning pipeline provided in the exercsies to copy and paste 
+- Feel free to attempt on your own first, but don't spend too much time on it
+
+The focal point of this session is to apply our newly learned skills to new data. Things to consider: 
+
+- What *class* is our survey analyses object? What *class* does it need to be for GIS? 
+- Which columns can you use for transforming data to *class* `sf`? 
+- What is the CRS of our shapefile? Does this align with our case linelist? 
+- Which `st` join function should we use to join linelist, population, and shape files?
+
+---
+
+class: inverse, center, middle
+
+## Demo & Exercise
+
+---
