@@ -1,0 +1,218 @@
+---
+title: "Advanced RMarkdown Course"
+subtitle: "<br>Module 3"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  flextable,  # for some tables and styling
+  xaringanthemer,  # for styling presentation 
+  countdown
+)
+
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = xfun::relative_path(here::here("images", "logo.png")),
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slides
+  background_image = xfun::relative_path(here::here("images", "logo.png")), 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+
+# Thank you for joining us  
+
+Brief introductions from the instructors  
+
+**Thank you for your service** *to your community in these busy times for public health. We are glad that you are taking the time to learn R with us.*  
+
+
+
+???
+Do a brief round of introductions  
+
+---
+# Intro to Github
+
+
+GitHub is a code hosting platform for version control and collaboration. It lets you and others work together on projects from anywhere.
+
+
+
+---
+# How does Github work?
+
+A **local** version of your code on your computer is linked to an **online** version of the code.
+
+You and your team can collaborate and get access to the most updated code easily.
+
+No more sending code via email or coordinating who is making edits on shared drives.
+
+```{r, eval = TRUE, echo = FALSE, out.width = "40%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd3", "github_viz.png")))
+```
+
+
+---
+# Getting started with Github
+
+First **make an account** at https://www.github.com/login. 
+
+*Click "Create new account" at the bottom of the page.*
+
+```{r, eval = TRUE, echo = FALSE, out.width = "35%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd3", "github_signin.png")))
+```
+
+---
+# Getting started with Github
+
+Follow the prompts to create your account.
+
+*Try to use an email address that will never expire.* 
+
+*Work email addresses are not ideal, but will work.*
+
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd3", "newaccount.png")))
+```
+
+---
+# Github Language
+
+ - Repository or **repo**: folder where your project scripts are stored. 
+ - **Organization**: a collection of repos. 
+ 
+Below is an example landing page. On the left we can see a list of existing repos this person contributes to, and on the right we can see the menu where you can create new repos.
+
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd3", "landing_newrepo.png")))
+```
+ 
+---
+# More Github Language
+
+ - **Pull**: pull changes from github.com to your computer.  
+ - **Commit**: finalize changes from your computer. 
+ - **Push**: push changes from your computer to github.com. 
+
+
+---
+# Github Resources
+
+There are many resources online. Github's mission is to make code accessible, and because of this, they have extremely good documentation online:
+
+https://docs.github.com/en/get-started/quickstart/hello-world
+
+
+

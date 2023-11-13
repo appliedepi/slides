@@ -1,0 +1,475 @@
+---
+title: "Advanced RMarkdown"
+subtitle: "<br>Module 1"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE,
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+xaringanExtra::use_tile_view()
+xaringanExtra::use_panelset()
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  flextable,  # for some tables and styling
+  xaringanthemer,  # for styling presentation 
+  countdown
+)
+
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = xfun::relative_path(here::here("images", "logo.png")),
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slides
+  background_image = xfun::relative_path(here::here("images", "logo.png")), 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+```{r, echo=F, eval=T}
+linelist <- rio::import(xfun::relative_path(here::here("data", "linelist_combined_20141201.rds")))
+```
+
+
+# Thank you for joining us  
+
+Brief introductions from the instructors  
+
+**Thank you for your service** *to your community in these busy times for public health. We are glad that you are taking the time to learn R with us.*  
+
+
+
+???
+Do a brief round of introductions  
+
+---
+
+# What is R Markdown?
+### A place for your code, notes, and output to live together
+
+R Markdown files are designed to be used in three ways:
+
+**.Rmd files** 
+  - Develop code and ideas side by side
+  - Run code in parts or as a whole
+  
+**Dynamic Documents** 
+  - Knit together plots, tables, and results with narrative text
+  - Ouptut in variety of formats - HTML, PDF, word, ppt, etc.
+  
+**Collaboration**
+  - Use for collaborating with others (including future you!)
+  - Anyone can read or run your code 
+
+---
+
+# Demo
+
+---
+
+
+class: middle, center
+# Components of R Markdown
+
+
+---
+# YAML
+.left-column[
+- Specifies document basics
+  - title
+  - date
+  - author
+  - output format
+
+- Can also include
+  - theme
+  - toc
+]
+
+--
+
+.right-column[
+
+Output format                   |Creates 
+--------------------------------|----------
+`html_document`                 |HTML document   
+`pdf_document`                  |PDF document   
+`word_document`                 |Microsoft Word document (docx)
+`flexdashboard::flex_dashboard` | Interactive dashboards
+]
+
+---
+# the `setup` chunk
+
+- Specify universal rules for all other chunks
+  - eg. show/hide code
+  - can over-ride in invidual chunks
+  
+- Could be used to load libraries, datasets that you don't want to explicitly show in the report  
+
+---
+# Caching
+
+Useful when some chunks take long to compute
+- set `cache = TRUE` 
+
+R will skip the execution of this code chunk if it has been executed before and nothing in the code chunk has changed since then.
+
+--
+
+!! Be careful, when using this option. R will not know if your original files have changed i.e. files or data on which the chunk depends. Learn about specifying dependincies [here] (https://bookdown.org/yihui/rmarkdown-cookbook/cache.html) 
+
+---
+# Markdown text
+## Headers
+.panelset[
+.panel[.panel-name[To get this]
+  
+# Header 1  
+## Header 2  
+### Header 3  
+
+]
+.panel[.panel-name[Type this]
+
+
+`# Header 1`  
+`## Header 2`  
+`### Header 3`
+
+
+]
+]
+---
+# Markdown text 
+
+.panelset[
+.panel[.panel-name[To get this]
+*italic*      
+**bold**   
+
+* Item 1   
+* Item 2  
+
+]
+.panel[.panel-name[Type this]
+
+`*italic*`  
+`**bold**`
+
+`* Item 1`  
+`* Item 2`    
+
+]
+]
+
+.footnote[See more options [here](https://rmarkdown.rstudio.com/authoring_basics.html)]
+
+
+---
+class: middle, center
+# Custumizing your RMarkdown Report
+
+---
+# Display Current Date
+
+```{r eval=FALSE}
+---
+title: "Report with static date"
+author: "Meenakshi Kushwaha"
+date: "2023-09-14" #<<
+output: 
+  html_document
+---
+```
+
+--
+
+```{r eval=FALSE}
+---
+title: "Report with current date"
+author: "Meenakshi Kushwaha"
+date: "`r format(Sys.Date(), '%d %B %Y')`" #<<
+output: 
+  html_document  
+---
+```
+
+---
+# Custumizing your RMarkdown Report
+## HTML 
+
+---
+# Built-in themes
+Following are built in themes
+- "cerulean", "journal", "flatly", "readable", "spacelab", "united", and "cosmo"
+
+Other packages for additional themes
+ - Example - [`prettydoc`](https://www.datadreaming.org/post/r-markdown-theme-gallery/)
+--
+
+### YAML example
+```{r eval=FALSE}
+---
+title: "My First RMarkdown Report"
+author: "Meenakshi Kushwaha"
+date: "2022-09-13"
+output: 
+  html_document: 
+    {{theme: flatly}}
+---
+```
+---
+# Custom themes
+
+
+---
+# table of contents
+
+- `toc: true` to include a table of contents (TOC)
+- `toc_depth: n` to specify that the lowest level of headings to add
+- `toc_float: true` so the toc floats and is visible as you scroll through a long document
+
+
+### YAML example
+```{r eval=FALSE}
+---
+title: "My First RMarkdown Report"
+author: "Meenakshi Kushwaha"
+date: "2022-09-13"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+---  
+```
+
+
+---
+# Code-chunk options
+Customize your code chumk output
+- show/hide code
+- show/hide output
+- show/hide warnings and messages
+
+```{r eval = TRUE, echo=FALSE, out.width = '100%'}
+knitr::include_graphics(xfun::relative_path(here::here("images", "template", "chunk-options.png")), error = F)
+```
+
+---
+
+---
+
+# Dynamic Content
+## tables and figures
+
+---
+
+---
+# Flextable
+publication ready tables
+- use the `set_flextable_defaults` function to change the default appearance of the table.
+---
+# Datatable
+
+ability to provide filtering, pagination, and sorting to HTML tables.
+
+---
+# Figures
+
+
+---
+# Inline text
+str_glue
+---
+
+
+---
+
+# Multiple reports using RMarkdown
+## using parameters
+
+---
+# Parametrized reports
+
+R Markdown documents can include one or more parameters whose values can be set when you render the report.
+
+- Used to re-render the same report with distinct values for various key inputs, for example:
+
+  - Running a report specific to a department or geographic region.
+
+  - Running a report that covers a specific period in time.
+
+---
+# Option 1 
+## Set parameters within YAML
+
+```{r eval=FALSE}
+---
+title: "Ebola Report"
+author: "Meenakshi Kushwaha"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output: 
+  html_document
+params: #<<
+  region: "Mountain Rural" #<<
+  date: "2021-04-10"          #<<
+```
+
+
+---
+# Option 2
+## Set parameters within `render()`
+
+```{r, eval=FALSE}
+rmarkdown::render(
+  input = "surveillance_report.Rmd",  
+  output_file = stringr::str_glue("outputs/Report_{Sys.Date()}.docx"),
+  params = list(date = "2021-04-10", hospital  = "Central Hospital"))
+```
+
+**This will over-ride parameters set in YAML**
+---
+# Option 3
+## Set parameters using a Graphical User Interface
+
+---
+# Source other files
+
+---
+
+# Runfiles
+---
+
+# Report templates
+
+---
+# Formatting word documents
+## Logo
+## Headers
+
+---
+# Formatting HTML documents
+
+---
+
+# Auto-naming files
+usethis
+stringr
+
+--- 
+# Share your work
+
+Create a link for your HTML report
+
+
+---
+
+
+# Demo
+
+---

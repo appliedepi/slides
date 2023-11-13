@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Advanced RMarkdown Course</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Advanced RMarkdown Course
+]
+.subtitle[
+## <br>Module 2
+]
+.author[
+### 
+]
+.date[
+### <a href="mailto:contact@appliedepi.org">contact@appliedepi.org</a>
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+&lt;/style&gt;
+
+
+
+&lt;style type="text/css"&gt;
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+&lt;/style&gt;
+
+
+
+
+# Thank you for joining us  
+
+Brief introductions from the instructors  
+
+**Thank you for your service** *to your community in these busy times for public health. We are glad that you are taking the time to learn R with us.*  
+
+
+
+???
+Do a brief round of introductions  
+
+
+
+
+---
+# Looping Reports
+
+- We can take one report RMarkdown file to create multiple reports. 
+
+&lt;img src="../../images/rmd2/loop.png" width="55%" /&gt;
+
+- In an external R-script, we can pass a list of districts, for which we want to create separate reports, to the RMarkdown report script in a loop. 
+
+- This will create a report HTML, PDF, or DOCX for each district. 
+
+---
+# Looping Reports
+
+We use the `render()` function from the `rmarkdown` package. 
+
+The 3 arguments needed are: 
+ - `input`: RMarkdown **Rmd* file to be run for each region 
+ - `output_file`: Naming convention for each output HTML file 
+ - `params`: Parameter that specifies which region we are running the Rmd for
+
+
+```r
+rmarkdown::render(input = here("exercises","scripts","Ebola_Report.Rmd"),
+                  output_file = str_glue("Report_{r}_{Sys.Date()}.html"),
+                  params = list(region = r)
+)
+```
+
+---
+# Dynamic Sections 
+
+- On the other hand, if we want all of these plots in the same document, we can loop through a list of districts within the RMarkdown file and print a section for each district.
+
+&lt;img src="../../images/rmd2/dynamic_sections.png" width="50%" /&gt;
+
+- Even if the number of districts changes within the data, RMarkdown can create sections (and plots) for each of them without the need to specify the districts in the code.
+
+
+---
+# Dynamic Tabs
+
+- If we want all of these plots in the same document but under different tabs, we can loop through a list of districts within the RMarkdown file and print a tab for each district.
+
+&lt;img src="../../images/rmd2/dynamic_tabs.png" width="75%" /&gt;
+
+- Again, RMarkdown can create tabs (and plots) for each of them accurately without specifying the districts in the code.
+
+---
+# Demo
+
+*Looping reports*
+
+*Dynamic tabs*
+
+*Dynamic sections*
+
+---
+# FlexDashboard
+
+* `flexdashboard` makes it easy to create interactive dashboards for R, using R Markdown.
+
+* Because you've already learned to work within the RMarkdown environment, you'll be able to create dashboards, similar to what we've been creating, with some additional tools.
+
+* We'll create tabs with figures, but they'll be editable within your browser.
+
+Learn more here: https://pkgs.rstudio.com/flexdashboard/
+
+---
+# FlexDashboard
+
+Here's the first tab we'll make, with data that is searchable and the same epidemic curve:
+
+&lt;img src="../../images/rmd2/flexdashboard_main.png" width="100%" /&gt;
+
+---
+# FlexDashboard - `htmlwidgets`
+
+Next, we'll be adding `htmlwidgets` to the subsequent tabs. `htmlwidgets` provides us with additional tools to make dynamic figures. 
+
+Just a line or two of R code can be used to create interactive visualizations.
+
+Learn more here: https://www.htmlwidgets.org/
+
+---
+# FlexDashboard - `leaflet`
+
+The `leaflet` package allows us to create dynamic and interactive maps. We can change the view, and we can also zoom in!
+
+You'll see the static map (which we'll also learn to make) on the left. The `leaflet` map is on the right:
+
+&lt;img src="../../images/rmd2/flexdashboard_maps.png" width="100%" /&gt;
+
+---
+# FlexDashboard - `visNework`
+
+At the beginning of an epidemic, it might be useful to visualize transmission events, especially if infector-infectee pairs are known.
+
+We'll make a `visNetwork` visualization from the beginning of the Ebola outbreak, shown below on the left.
+
+&lt;img src="../../images/rmd2/flexdashboard_epi.png" width="100%" /&gt;
+
+---
+# FlexDashboard - `plotly`
+
+We can use the `plotly` package very easily with the `ggplot2` package to make plots dynamic.
+
+`plotly` plots can be changed by legend and by axis, in can you're interested in focusing on one subgroup or one particular time in the epidemic curve. 
+
+---
+# FlexDashboard - `plotly`
+
+The `plotly` plot is shown on the left here, but you'll see what is dynamic about this plot during the demo:
+
+&lt;img src="../../images/rmd2/flexdashboard_epi.png" width="100%" /&gt;
+
+---
+# FlexDashboard - `dygraphs`
+
+`dygraphs` is similar to `plotly`, though it requires a different syntax than `ggplot` does.
+
+Here, we'll use `dygraphs` to plot the case curve along with the death curve:
+
+&lt;img src="../../images/rmd2/flexdashboard_deaths.png" width="100%" /&gt;
+
+
+---
+# Demo
+
+**flexdashboard**
+
+**htmlwidgets**
+
+*leaflet*, *plotly*, *visNetwork*, and *dygraphs*
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
