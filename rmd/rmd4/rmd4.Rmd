@@ -1,0 +1,711 @@
+---
+title: "Advanced RMarkdown"
+subtitle: "<br> A Primer to deploying RMarkdown Outputs on Servers"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  flextable,  # for some tables and styling
+  xaringanthemer,  # for styling presentation 
+  countdown
+)
+
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = xfun::relative_path(here::here("images", "rmd4", "logo.png")),
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slides
+  background_image = xfun::relative_path(here::here("images", "rmd4", "logo.png")), 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+p.caption {
+  font-size: 0.3em;
+}
+```
+
+# Key Terminologies and Concepts
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%", fig.cap="Designed by FreePik", fig.align='center'}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "warning.png")))
+```
+
+---
+## Static vs. Dynamic Content
+
+.pull-left[
+
+#### Static Content
+- Defined as content that does not change after it has been rendered
+- E.g. HTML, PDF, or Word
+
+#### Dynamic Content
+- Defined as content that can change in response to user input or other external conditions
+- E.g. Embedded Shiny applications 
+
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%", fig.cap="Produced using OpenAI DALL-E", fig.align='left'}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "static_dynamic_illustration.png")))
+```
+
+]
+
+???
+Simplified points:
+
+Static Content:
+- Unchanging post-render
+- RMarkdown knit output (HTML, PDF, Word) consistent
+- Ideal for static reports, research papers
+
+Dynamic Content:
+
+- Changes with user input or conditions
+- Embeds Shiny in RMarkdown for interactivity
+- Ideal for dashboards, data exploration
+
+---
+## Static RMarkdown
+
+.pull-left[
+- **Static content** refers to files generated from RMarkdown that are served exactly as stored
+- Once rendered **static outputs** like HTML, PDF, or Word files remain consistent regardless of user or time of access
+- **Ideal** for distributing reports, research findings, and documentation where interactivity may not be required
+- Typically requires less server resources; can be hosted on simple web servers or services like [GitHub Pages](https://pages.github.com/) or [RPubs](https://rpubs.com/)
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, fig.cap="Image by AppliedEpi", out.height="125%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "static_outputs.png")))
+```
+]
+
+
+???
+
+Simplified points:
+
+- Static RMarkdown: unchanging files post-render
+- Formats: HTML, PDF, Word
+- Same view for every user, any time
+- Ideal for fixed reports, papers, docs
+- Simple web server hosting suffices
+- Less resource-intensive than dynamic content
+- GitHub Pages, RPubs common hosts
+
+---
+## Dynamic RMarkdown
+
+- **Dynamic RMarkdown** content is interactive and changes in response to user actions or data updates
+- Includes **Shiny apps** embedded in RMarkdown, which allow users to manipulate data and visualizations in real time
+- Needs a server capable of processing R code on-the-fly, like [Shiny Server](https://posit.co/products/open-source/shinyserver/) or [RStudio Connect](https://www.rstudio.com/tags/connect/)
+
+
+```{r, eval = TRUE, echo = FALSE, fig.align='center', fig.cap="Image by AppliedEpi", out.width = "75%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "dynamic_output.png")))
+```
+
+
+???
+
+Simplified points:
+
+- Dynamic RMarkdown: interactive, user-responsive
+- Integrates RMarkdown with Shiny
+- Needs R code-processing server
+- Updates in real-time, no refresh
+- Increases user engagement
+- Host on Shiny Server, RStudio Connect
+- Suits educational tools, data apps, business dashboards
+
+---
+
+## Understanding Servers
+
+.pull-left[
+
+- **Servers** are specialized computers that store, process, and serve content to users over the internet or an internal network
+- **Server-side (backend)** operations process tasks on the server, providing dynamic content based on user interaction, the **client-side (frontend)** is what the user interacts with directly
+- **Hosting** is the service of providing storage space on a server for a website or application, making it accessible via the internet.
+
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, fig.cap="Produced using OpenAI DALL-E", out.width = "100%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "server_illustration.png")))
+```
+
+]
+
+---
+## Hosting Service Types
+
+| Hosting Type           | Characteristics |
+|------------------------|-----------------|
+| **Shared Hosting**     | Cost-effective, multiple websites on one server, limited resources and less control |
+| **Virtual Private Server (VPS)** | A step up from shared hosting, offers more control and dedicated resources |
+| **Dedicated Hosting**  | An entire server for one website, full control, high performance, and security |
+| **Cloud Hosting**      | Flexible, scalable hosting that uses multiple servers, often pay-as-you-go pricing |
+| **Managed Hosting**    | The hosting provider takes care of server maintenance, security, and support |
+
+???
+Simplified points:
+
+- Shared hosting: cost-effective, shared resources
+- VPS: more control, dedicated resources
+- Dedicated hosting: full control, high performance
+- Cloud hosting: flexible, scalable
+- Managed hosting: provider-managed maintenance and security
+- Choose based on content type, traffic, budget, expertise
+
+---
+## Hosting Rmarkdown outputs
+
+```{r, eval = TRUE, echo = FALSE, fig.cap="Image by AppliedEpi", fig.align='center', out.width = "60%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "hosting_options.png")))
+```
+
+???
+To explain these are options frequently utilsed by users for hosting (much simpler as they require less setup then on-premise servers)
+
+- Free Services for Static Content:
+  - RPubs for simple RMarkdown sharing
+  - Bookdown for long-form content and books
+  - GitHub Pages for static sites from repositories
+
+- Paid Services for Static Content:
+  - Netlify for advanced features: custom domains, HTTPS
+
+- Cost-Effective Options for Dynamic Applications:
+  - Shiny Server Open Source for personal Shiny app hosting
+  - Docker for consistent deployment across environments
+
+- Premium Services for Dynamic Content:
+  - Shinyapps.io for easy Shiny app hosting
+  - RStudio Connect for comprehensive R content hosting
+
+---
+
+## GitHub Pages for Static RMarkdown
+- Quick and Easy Hosting for Static Sites
+- Ideal for personal, project, or documentation websites
+- **Pros**: Free, version control with Git, directly from a repository
+- **Cons**: Limited to static content; no server-side processing
+
+```{r, eval = TRUE, echo = FALSE, fig.align='center', fig.cap="Image by AppliedEpi", out.width = "80%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "githubpages_example.png")))
+```
+
+???
+
+To mention that we provide 3 simple way to host a website- static markdowns in Github Pages on this slide, followed by Shiny apps on Shiny server and shiny proxy
+
+---
+
+## Shiny Server for Dynamic Hosting
+- Interactive RMarkdown Applications 
+- **Pros**: Free for open source, integrates with RStudio
+- **Cons**: Free version limited to 5 apps, 25 active hours per month
+
+```{r, eval = TRUE, echo = FALSE, fig.align='center', fig.cap="Image by AppliedEpi", out.width = "80%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "shinyapps_example.png")))
+```
+
+---
+
+## ShinyProxy for Dynamic Hosting
+- Interactive RMarkdown Applications
+- **Pros**: Free
+- **Cons**: Requires more setup and infrastructure management
+
+```{r, eval = TRUE, echo = FALSE, fig.align='center', fig.cap="Image by AppliedEpi", out.width = "80%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "shinyproxy_example.png")))
+```
+
+---
+
+## Internal Server Hosting for RMarkdown
+
+.pull-left[
+- Internal servers offer a secure and controlled environment for hosting RMarkdown documents and applications
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, fig.cap="Produced using OpenAI DALL-E", out.width = "100%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "rmd_server.png")))
+```
+]
+
+---
+## The Case for Internal Hosting
+
+- Customizable to meet specific organizational **security standards**
+- **Full control** over data storage, access, and backup procedures
+- **Optimized** network and server **performance** for internal users
+- Easier to **comply** with industry **regulations** and data sovereignty requirements
+- Potential **long-term savings** for large-scale operations
+
+**HOWEVER**, 
+It requires IT infrastructure and expertise for setup, maintenance, and security
+
+???
+
+Simplified points:
+
+- Internal servers for secure, controlled RMarkdown hosting
+- Enhanced security, faster on-network access
+- Customizable server settings
+- Full control over updates and maintenance
+- Potential cost savings for large orgs
+- Requires IT infrastructure, expertise
+- Scalability may need hardware investment
+
+---
+
+## Terminology in Internal Hosting
+
+- **Intranet**: A private network within an organization
+- **Data Center**: Facility for servers and network components
+- **Deployment**: Distributing applications across resources
+- **SFTP (Secure File Transfer Protocol)**: A secure method for transferring files over a network
+- **SCP (Secure Copy Protocol)**: A method for securely transferring files between hosts on a network
+- **Web Server Software**: Programs that serve content to the web, such as Apache or Nginx
+- **DNS (Domain Name System)**: The system that translates domain names to IP addresses
+
+???
+
+Simplified points:
+
+- Intranet: private org network
+- Server: provides data/services
+- Data Center: houses IT infrastructure
+- Virtualization: creates virtual IT resources
+- On-Premises: local org IT setup
+- Deployment: distributing apps for use
+- SFTP: secure file transfers
+- SCP: secure file copy between hosts
+- Web Server Software: serves web content
+- DNS: translates domain names to IPs
+
+---
+
+## A note on Server-Side Applications
+
+- **Server-side applications** are software systems that run on a server, handling backend tasks like *data processing* and *database management*
+- They respond to **user requests, perform computations, and serve dynamic content**
+
+Essential for **interactive RMarkdown outputs**
+
+---
+
+## Deployment to Internal Server
+
+**Hosting your Rmarkdown outputs in an internal server can be quite challenging as every server is set up differently. Reach out to you IT teams for technical expertise on hosting Rmarkdown outputs on your server**
+
+```{r, eval = TRUE, echo = FALSE, fig.align='center', fig.cap="Produced using OpenAI DALL-E", out.width = "40%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "collaborate_it.png")))
+```
+
+???
+
+Transition slide meant to highlight the content as sensitisation and not an in depth guide to internal hosting
+
+---
+
+## Deployment to Internal Server
+
+.pull-left[
+
+#### Step 1: Preparing Your Content
+
+- **Render RMarkdown**: Knit your document to HTML
+- **Review Output**: Ensure all content displays as expected
+
+]
+
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, fig.cap="Designed by Freepik. Image by Applied Epi", out.width = "100%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "hosting_step1.png")))
+```
+
+]
+
+???
+
+Simplified points:
+
+- Render RMarkdown to HTML/PDF/Word
+
+---
+
+## Deployment to Internal Server
+
+.pull-left[
+
+#### Step 2: Moving Content to Server
+- **Select Web Server Software**: Such as Apache or Nginx for serving HTML content
+- **Transfer Files**: Use secure methods like SFTP to move your rendered RMarkdown files to the server
+- **Configure Server**: Set file permissions and directories.
+
+]
+
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, fig.cap="Designed by Freepik. Image by Applied Epi", out.width = "100%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "hosting_step2.png")))
+```
+
+]
+
+
+???
+
+Simplified points:
+
+- Choose Apache/Nginx for HTML serving
+- Securely transfer files to server
+- Set file/directory permissions
+
+
+---
+
+## Deployment to Internal Server
+
+.pull-left[
+
+#### Step 3: Moving Content to Server
+- **Update DNS Settings**: Point your domain to the internal server IP, if necessary
+- **Test Accessibility**: Ensure the content is accessible on your intranet
+- **Monitor Performance**: Check load times and server response
+
+]
+
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, fig.cap="Designed by Freepik. Image by Applied Epi", out.width = "100%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "hosting_step3.png")))
+```
+
+]
+
+???
+
+Simplified points:
+
+- Update DNS for domain access
+- Test on intranet for accessibility
+- Monitor performance post-launch
+
+---
+
+## Managing Dynamic Content on Internal Servers
+
+- Deploying dynamic RMarkdown content, like Shiny apps, requires an internal server configured to handle interactive sessions.
+- Utilize Shiny Server or RStudio Connect for application hosting and management.
+- Server resources match the demands of your dynamic content for reliability and performance.
+
+???
+Important to mention here that the process of hosting dynamic content on an internal server is even more complex it may require containersation and then furhter management of containers (orchestration) using software like Kubernetes or Docker Swarm to manage deployment, scaling and load balancing.
+
+Below is a simplified step-by-step
+- Install Shiny Server or RStudio Connect
+- Configure server for dynamic requests
+- Deploy Shiny apps to server
+- Set security and authentication
+- Monitor and allocate resources
+- Maintain with regular updates
+- Troubleshoot as needed
+- Comply with health data regulations
+
+---
+
+## A note on Containerization
+
+.pull-left[
+
+- **Containerization** encapsulates an application in a container with its own operating environment
+- Provides consistent environments across development, testing, and production; improves scalability and efficiency; simplifies version control and dependency management.
+- Ensures **RMarkdown** outputs, especially those with complex dependencies, are portable and can run reliably across different systems.
+
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, fig.cap="Image by AppliedEpi", out.width = "100%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "containerisation.png")))
+```
+
+]
+
+???
+
+- Containerization packages apps + dependencies
+- Runs consistently anywhere
+- Isolates, saves resources vs virtual machines
+- Easy to scale and replicate
+- Ensures dev/test/prod environment uniformity
+- Supports automated workflows
+- Ideal for complex RMarkdown apps/environments
+- Streamlines sharing and deploying RMarkdown work
+- Stable, scalable deployment of Shiny and interactive content
+
+---
+
+## Server Specifications
+
+- **Capacity Planning**: Estimate traffic to determine CPU, RAM, and storage needs.
+- **Software Requirements**: Install R, RStudio, Shiny Server/RStudio Connect, and necessary R packages.
+- **Network Configuration**: Ensure robust network settings for accessibility and speed.
+- **Security Measures**: Implement firewalls, encryption, and access controls.
+
+???
+
+Simplified points:
+
+- CPU, RAM, storage for traffic/load- see your IT for heuristics on these estimations
+- Install R, RStudio, hosting platform
+- High bandwidth, low latency network
+- Firewalls, SSL/TLS, user permissions
+- Regular updates and backups
+- Performance monitoring, disaster recovery plans
+
+---
+
+## Managing Outputs in RMarkdown Hosting
+
+```{r, eval = TRUE, echo = FALSE, fig.align='center', fig.cap="Produced using OpenAI DALL-E", out.width = "50%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "managing.png")))
+```
+
+
+---
+
+## Version Control for RMarkdown
+
+- Use **Git within RStudio** for version control of RMarkdown files as we have discussed here
+- Allows for **Rollback and Auditing**- Managing changes, tracking history, and reverting to previous versions as needed
+- Also facilitate **collaborative work** with branching and merging features
+
+???
+
+Simplified points:
+
+- Git for version control in RStudio
+- Rollback, audit changes
+- Collaborate with branches, merges
+
+---
+
+## Updating Reports with New data
+
+- You can **connect RMarkdown** to databases, APIs, or updated files for current data
+- Use **GitHub Actions for** continuous integration and updating reports
+- Use **workflows** to automate the knitting of RMarkdown documents whenever data or code changes or to run on a schedule using cron syntax
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "github_actions.png")))
+```
+
+???
+
+Simplified points:
+
+- Connect RMarkdown to live data
+- GitHub Actions for automated workflows
+- Real-time data for dynamic reports
+
+---
+
+## cronR and System Schedulers
+
+.pull-left[
+
+- **cronR Package** is used to schedule R scripts within R to automate data retrieval and report updates
+- Set up **one-time or recurring tasks** with simple or complex time intervals for full control over script execution
+
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, fig.cap="Produced using OpenAI DALL-E", out.width = "100%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "cronjob.png")))
+```
+
+]
+
+
+???
+
+Simplified points:
+
+- Schedule with cronR in R
+- Use cron jobs or Task Scheduler
+- Automate for consistent updates
+
+---
+
+## Security Considerations
+
+- Incorporate **security measures** in automated data update processes
+- **Encrypted Connections**: Use secure protocols for data transfers
+- Safely **manage credentials**, using environment variables or vaults
+
+???
+
+Simplified points:
+
+- Encrypt data transfers
+- Manage credentials securely
+- Integrate security in automation
+
+---
+
+.pull-left[
+```{r, eval = TRUE, echo = FALSE, out.width = "150%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd4", "Safety Match - COVID artwork.png")))
+```
+]
+
+.pull-right[
+
+# Questions?
+
+]
