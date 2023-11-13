@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Introduction to GIS in R</title>
+    <title>Advanced RMarkdown Course</title>
     <meta charset="utf-8" />
-    <meta name="author" content="COVID-19 GIS case study" />
+    <meta name="author" content="" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
@@ -12,10 +12,13 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# Introduction to GIS in R
+# Advanced RMarkdown Course
+]
+.subtitle[
+## <br>Module 2
 ]
 .author[
-### COVID-19 GIS case study
+### 
 ]
 .date[
 ### <a href="mailto:contact@appliedepi.org">contact@appliedepi.org</a>
@@ -45,167 +48,190 @@ class: center, middle, inverse, title-slide
     tr:last-child {
     border-bottom: none;
   }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+&lt;/style&gt;
+
+
+
+&lt;style type="text/css"&gt;
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
 &lt;/style&gt;
 
 
 
 
+# Thank you for joining us  
 
-# Data used in this course  
+Brief introductions from the instructors  
 
-So far we have used the Ebola case study data
+**Thank you for your service** *to your community in these busy times for public health. We are glad that you are taking the time to learn R with us.*  
 
-* Ebola case study in Sierra Leone
-     * **Surveillance linelist** (primary dataset)  
-     * Hospital linelists from 5 hospitals  
-     * Population data stratified by demographic groups and admin levels
-     * Sierra Leone shape files stratified by admin levels
-     * Health facility shape files
 
-Now we introduce a new case study: 
 
-* COVID-19 case study in USA
-     * **Surveillance linelist** (primary dataset)
-     * Population data stratified by cities
-     * Fulton County, Georgia, USA, shape files
-     * Fulton County, Georgia, USA, map tiles
-     
-.footnote[All data are not real. All files can be found in the course folder.]  
+???
+Do a brief round of introductions  
+
+
 
 
 ---
+# Looping Reports
 
-# First steps in a new analysis
+- We can take one report RMarkdown file to create multiple reports. 
 
-As we are using new data which we have never seen before, it is useful to explore the data first
+&lt;img src="../../images/rmd2/loop.png" width="55%" /&gt;
 
---
+- In an external R-script, we can pass a list of districts, for which we want to create separate reports, to the RMarkdown report script in a loop. 
 
-Take a look at which columns are available in our **surveillance linelist** 
-- What **geographic levels** (e.g. adm, lat, lon) do we have available in our **survey data**?
-- What **geographic boundaries** are available in our **shape files**? 
-- How would we **join** our surveillance linelist data to our shape files? 
-
---
-
-How is our **population data** formatted? (**by city**)
-- How would we **join** our **surveillance linelist data** to our **population data**? 
-- What can we use our population data to calculate?
+- This will create a report HTML, PDF, or DOCX for each district. 
 
 ---
-# Cultural notes: *Zip* codes
+# Looping Reports
 
-If you are not familiar with the hierarchy of government jurisdictions in the USA:
+We use the `render()` function from the `rmarkdown` package. 
 
-Georgia (state) contains over 150 different counties
-  - Counties can contain multiple cities and/or municipalities
-
---
-
-There are over 500 cities within the state of Georgia
-  - **Most** cities fall within one county, but some span across multiple
-
---
-
-*ZIP* codes are the US postal code system. 
-  - *ZIP* codes can span across cities and counties
-  - Fulton county spans across **25** ZIP codes
-
----
-
-# Cultural notes: *Race vs. ethnicity* 
-
-In the USA, census data often include data on *Race* and *Ethnicity* as two separate columns. 
-
-Ethnicity options can include:  
-
-* "Hispanic or Latino" 
-* "Not Hispanic or Latino"  
-
---
-
-Race options can include:  
-
-* "American Indian or Alaska Native" (sometimes abbreviated as AI/AN)  
-* "Asian"
-* "Black or African American"
-* "Native Hawaiian or Other Pacific Islander"
-* "White"  
-
-
----
-
-# Surveillance periods 
-
-We also might want to think about viewing **case counts over time** using **surveillance periods**. 
-
-Why might this be useful? 
-
-- Compare **incidence** across **time periods** (e.g. week to week)
-- Observe how and where the outbreak is growing fastest
-- How might we **create surveillance periods** in R for our analysis? 
-   - `floor_date()` from {lubridate} 
-
-
----
-
-# Surveillance periods
-
-In R, we can set up surveillance periods easily based on our data. 
+The 3 arguments needed are: 
+ - `input`: RMarkdown **Rmd* file to be run for each region 
+ - `output_file`: Naming convention for each output HTML file 
+ - `params`: Parameter that specifies which region we are running the Rmd for
 
 
 ```r
-# create a date object with most relevant date of complete data
-# minus 5 days to account for lag in reporting lab results
-
-# first day of complete data (accounting for lab reporting delays)
-surveillance_date &lt;- as.Date("2021-06-29") - 5
-
-# create an object to mark start of latest complete week of data 
-# floor_date() rounds down to the closest week here
-surveillance_week_start &lt;- floor_date(
-  # subtract 7 days from surveillance_date
-  surveillance_date - 7,
-  # round down to nearest week start date
-  unit = "week", 
-  # define week to start on Sunday (typical in USA)
-  week_start = 7)
-
-
-# define recent (past 14 days) and previous (28 to 14 days prior)
-recent_period   &lt;- seq(surveillance_week_start  - 13, surveillance_week_start, by = 1)
-previous_period &lt;- seq(surveillance_week_start  - 27, surveillance_week_start - 14, by = 1)
+rmarkdown::render(input = here("exercises","scripts","Ebola_Report.Rmd"),
+                  output_file = str_glue("Report_{r}_{Sys.Date()}.html"),
+                  params = list(region = r)
+)
 ```
 
+---
+# Dynamic Sections 
 
-How could we set up `surveillance_date` in RMarkdown? Think about the *params* key in *YAML* section. 
+- On the other hand, if we want all of these plots in the same document, we can loop through a list of districts within the RMarkdown file and print a section for each district.
+
+&lt;img src="../../images/rmd2/dynamic_sections.png" width="50%" /&gt;
+
+- Even if the number of districts changes within the data, RMarkdown can create sections (and plots) for each of them without the need to specify the districts in the code.
+
 
 ---
+# Dynamic Tabs
 
-# Data cleaning and analyses
+- If we want all of these plots in the same document but under different tabs, we can loop through a list of districts within the RMarkdown file and print a tab for each district.
 
-**NOTE** Data cleaning is not the focal point of this course
-- Data cleaning pipeline provided in the exercsies to copy and paste 
-- Feel free to attempt on your own first, but don't spend too much time on it
+&lt;img src="../../images/rmd2/dynamic_tabs.png" width="75%" /&gt;
 
---
-
-The focal point of this session is to apply our newly learned skills to new data.
-
---
-
-**Things to consider**: 
-
-- What *class* is our survey analyses object? What *class* does it need to be for GIS? 
-- Which columns can you use for transforming data to *class* `sf`? 
-- What is the CRS of our shapefile? Does this align with our case linelist? 
-- Which `st` join function should we use to join linelist, population, and shape files?
+- Again, RMarkdown can create tabs (and plots) for each of them accurately without specifying the districts in the code.
 
 ---
+# Demo
 
-class: inverse, center, middle
+*Looping reports*
 
-## Demo &amp; Exercise
+*Dynamic tabs*
+
+*Dynamic sections*
+
+---
+# FlexDashboard
+
+* `flexdashboard` makes it easy to create interactive dashboards for R, using R Markdown.
+
+* Because you've already learned to work within the RMarkdown environment, you'll be able to create dashboards, similar to what we've been creating, with some additional tools.
+
+* We'll create tabs with figures, but they'll be editable within your browser.
+
+Learn more here: https://pkgs.rstudio.com/flexdashboard/
+
+---
+# FlexDashboard
+
+Here's the first tab we'll make, with data that is searchable and the same epidemic curve:
+
+&lt;img src="../../images/rmd2/flexdashboard_main.png" width="100%" /&gt;
+
+---
+# FlexDashboard - `htmlwidgets`
+
+Next, we'll be adding `htmlwidgets` to the subsequent tabs. `htmlwidgets` provides us with additional tools to make dynamic figures. 
+
+Just a line or two of R code can be used to create interactive visualizations.
+
+Learn more here: https://www.htmlwidgets.org/
+
+---
+# FlexDashboard - `leaflet`
+
+The `leaflet` package allows us to create dynamic and interactive maps. We can change the view, and we can also zoom in!
+
+You'll see the static map (which we'll also learn to make) on the left. The `leaflet` map is on the right:
+
+&lt;img src="../../images/rmd2/flexdashboard_maps.png" width="100%" /&gt;
+
+---
+# FlexDashboard - `visNework`
+
+At the beginning of an epidemic, it might be useful to visualize transmission events, especially if infector-infectee pairs are known.
+
+We'll make a `visNetwork` visualization from the beginning of the Ebola outbreak, shown below on the left.
+
+&lt;img src="../../images/rmd2/flexdashboard_epi.png" width="100%" /&gt;
+
+---
+# FlexDashboard - `plotly`
+
+We can use the `plotly` package very easily with the `ggplot2` package to make plots dynamic.
+
+`plotly` plots can be changed by legend and by axis, in can you're interested in focusing on one subgroup or one particular time in the epidemic curve. 
+
+---
+# FlexDashboard - `plotly`
+
+The `plotly` plot is shown on the left here, but you'll see what is dynamic about this plot during the demo:
+
+&lt;img src="../../images/rmd2/flexdashboard_epi.png" width="100%" /&gt;
+
+---
+# FlexDashboard - `dygraphs`
+
+`dygraphs` is similar to `plotly`, though it requires a different syntax than `ggplot` does.
+
+Here, we'll use `dygraphs` to plot the case curve along with the death curve:
+
+&lt;img src="../../images/rmd2/flexdashboard_deaths.png" width="100%" /&gt;
+
+
+---
+# Demo
+
+**flexdashboard**
+
+**htmlwidgets**
+
+*leaflet*, *plotly*, *visNetwork*, and *dygraphs*
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

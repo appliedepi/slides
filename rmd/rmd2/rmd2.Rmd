@@ -1,0 +1,323 @@
+---
+title: "Advanced RMarkdown Course"
+subtitle: "<br>Module 2"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  flextable,  # for some tables and styling
+  xaringanthemer,  # for styling presentation 
+  countdown
+)
+
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = xfun::relative_path(here::here("images", "logo.png")),
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slides
+  background_image = xfun::relative_path(here::here("images", "logo.png")), 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+```{r, echo=F, eval=T}
+linelist <- rio::import(xfun::relative_path(here::here("data", "linelist_combined_20141201.rds")))
+```
+
+
+# Thank you for joining us  
+
+Brief introductions from the instructors  
+
+**Thank you for your service** *to your community in these busy times for public health. We are glad that you are taking the time to learn R with us.*  
+
+
+
+???
+Do a brief round of introductions  
+
+
+
+
+---
+# Looping Reports
+
+- We can take one report RMarkdown file to create multiple reports. 
+
+```{r, eval = TRUE, echo = FALSE, out.width = "55%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd2", "loop.PNG")))
+```
+
+- In an external R-script, we can pass a list of districts, for which we want to create separate reports, to the RMarkdown report script in a loop. 
+
+- This will create a report HTML, PDF, or DOCX for each district. 
+
+---
+# Looping Reports
+
+We use the `render()` function from the `rmarkdown` package. 
+
+The 3 arguments needed are: 
+ - `input`: RMarkdown **Rmd* file to be run for each region 
+ - `output_file`: Naming convention for each output HTML file 
+ - `params`: Parameter that specifies which region we are running the Rmd for
+
+```{r, echo=T, eval=F}
+rmarkdown::render(input = here("exercises","scripts","Ebola_Report.Rmd"),
+                  output_file = str_glue("Report_{r}_{Sys.Date()}.html"),
+                  params = list(region = r)
+)
+```
+
+---
+# Dynamic Sections 
+
+- On the other hand, if we want all of these plots in the same document, we can loop through a list of districts within the RMarkdown file and print a section for each district.
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd2", "dynamic_sections.png")))
+```
+
+- Even if the number of districts changes within the data, RMarkdown can create sections (and plots) for each of them without the need to specify the districts in the code.
+
+
+---
+# Dynamic Tabs
+
+- If we want all of these plots in the same document but under different tabs, we can loop through a list of districts within the RMarkdown file and print a tab for each district.
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd2", "dynamic_tabs.png")))
+```
+
+- Again, RMarkdown can create tabs (and plots) for each of them accurately without specifying the districts in the code.
+
+---
+# Demo
+
+*Looping reports*
+
+*Dynamic tabs*
+
+*Dynamic sections*
+
+---
+# FlexDashboard
+
+* `flexdashboard` makes it easy to create interactive dashboards for R, using R Markdown.
+
+* Because you've already learned to work within the RMarkdown environment, you'll be able to create dashboards, similar to what we've been creating, with some additional tools.
+
+* We'll create tabs with figures, but they'll be editable within your browser.
+
+Learn more here: https://pkgs.rstudio.com/flexdashboard/
+
+---
+# FlexDashboard
+
+Here's the first tab we'll make, with data that is searchable and the same epidemic curve:
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd2", "flexdashboard_main.png")))
+```
+
+---
+# FlexDashboard - `htmlwidgets`
+
+Next, we'll be adding `htmlwidgets` to the subsequent tabs. `htmlwidgets` provides us with additional tools to make dynamic figures. 
+
+Just a line or two of R code can be used to create interactive visualizations.
+
+Learn more here: https://www.htmlwidgets.org/
+
+---
+# FlexDashboard - `leaflet`
+
+The `leaflet` package allows us to create dynamic and interactive maps. We can change the view, and we can also zoom in!
+
+You'll see the static map (which we'll also learn to make) on the left. The `leaflet` map is on the right:
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd2", "flexdashboard_maps.png")))
+```
+
+---
+# FlexDashboard - `visNework`
+
+At the beginning of an epidemic, it might be useful to visualize transmission events, especially if infector-infectee pairs are known.
+
+We'll make a `visNetwork` visualization from the beginning of the Ebola outbreak, shown below on the left.
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd2", "flexdashboard_epi.png")))
+```
+
+---
+# FlexDashboard - `plotly`
+
+We can use the `plotly` package very easily with the `ggplot2` package to make plots dynamic.
+
+`plotly` plots can be changed by legend and by axis, in can you're interested in focusing on one subgroup or one particular time in the epidemic curve. 
+
+---
+# FlexDashboard - `plotly`
+
+The `plotly` plot is shown on the left here, but you'll see what is dynamic about this plot during the demo:
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd2", "flexdashboard_epi.png")))
+```
+
+---
+# FlexDashboard - `dygraphs`
+
+`dygraphs` is similar to `plotly`, though it requires a different syntax than `ggplot` does.
+
+Here, we'll use `dygraphs` to plot the case curve along with the death curve:
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmd2", "flexdashboard_deaths.png")))
+```
+
+
+---
+# Demo
+
+**flexdashboard**
+
+**htmlwidgets**
+
+*leaflet*, *plotly*, *visNetwork*, and *dygraphs*

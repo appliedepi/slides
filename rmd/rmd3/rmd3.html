@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Introduction to GIS in R</title>
+    <title>Advanced RMarkdown Course</title>
     <meta charset="utf-8" />
-    <meta name="author" content="COVID-19 GIS case study" />
+    <meta name="author" content="" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
@@ -12,10 +12,13 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# Introduction to GIS in R
+# Advanced RMarkdown Course
+]
+.subtitle[
+## <br>Module 3
 ]
 .author[
-### COVID-19 GIS case study
+### 
 ]
 .date[
 ### <a href="mailto:contact@appliedepi.org">contact@appliedepi.org</a>
@@ -45,167 +48,118 @@ class: center, middle, inverse, title-slide
     tr:last-child {
     border-bottom: none;
   }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
 &lt;/style&gt;
 
 
 
+&lt;style type="text/css"&gt;
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+&lt;/style&gt;
 
 
-# Data used in this course  
+# Thank you for joining us  
 
-So far we have used the Ebola case study data
+Brief introductions from the instructors  
 
-* Ebola case study in Sierra Leone
-     * **Surveillance linelist** (primary dataset)  
-     * Hospital linelists from 5 hospitals  
-     * Population data stratified by demographic groups and admin levels
-     * Sierra Leone shape files stratified by admin levels
-     * Health facility shape files
+**Thank you for your service** *to your community in these busy times for public health. We are glad that you are taking the time to learn R with us.*  
 
-Now we introduce a new case study: 
 
-* COVID-19 case study in USA
-     * **Surveillance linelist** (primary dataset)
-     * Population data stratified by cities
-     * Fulton County, Georgia, USA, shape files
-     * Fulton County, Georgia, USA, map tiles
-     
-.footnote[All data are not real. All files can be found in the course folder.]  
+
+???
+Do a brief round of introductions  
+
+---
+# Intro to Github
+
+
+GitHub is a code hosting platform for version control and collaboration. It lets you and others work together on projects from anywhere.
+
 
 
 ---
+# How does Github work?
 
-# First steps in a new analysis
+A **local** version of your code on your computer is linked to an **online** version of the code.
 
-As we are using new data which we have never seen before, it is useful to explore the data first
+You and your team can collaborate and get access to the most updated code easily.
 
---
+No more sending code via email or coordinating who is making edits on shared drives.
 
-Take a look at which columns are available in our **surveillance linelist** 
-- What **geographic levels** (e.g. adm, lat, lon) do we have available in our **survey data**?
-- What **geographic boundaries** are available in our **shape files**? 
-- How would we **join** our surveillance linelist data to our shape files? 
-
---
-
-How is our **population data** formatted? (**by city**)
-- How would we **join** our **surveillance linelist data** to our **population data**? 
-- What can we use our population data to calculate?
-
----
-# Cultural notes: *Zip* codes
-
-If you are not familiar with the hierarchy of government jurisdictions in the USA:
-
-Georgia (state) contains over 150 different counties
-  - Counties can contain multiple cities and/or municipalities
-
---
-
-There are over 500 cities within the state of Georgia
-  - **Most** cities fall within one county, but some span across multiple
-
---
-
-*ZIP* codes are the US postal code system. 
-  - *ZIP* codes can span across cities and counties
-  - Fulton county spans across **25** ZIP codes
-
----
-
-# Cultural notes: *Race vs. ethnicity* 
-
-In the USA, census data often include data on *Race* and *Ethnicity* as two separate columns. 
-
-Ethnicity options can include:  
-
-* "Hispanic or Latino" 
-* "Not Hispanic or Latino"  
-
---
-
-Race options can include:  
-
-* "American Indian or Alaska Native" (sometimes abbreviated as AI/AN)  
-* "Asian"
-* "Black or African American"
-* "Native Hawaiian or Other Pacific Islander"
-* "White"  
+&lt;img src="../../images/rmd3/github_viz.png" width="40%" /&gt;
 
 
 ---
+# Getting started with Github
 
-# Surveillance periods 
+First **make an account** at https://www.github.com/login. 
 
-We also might want to think about viewing **case counts over time** using **surveillance periods**. 
+*Click "Create new account" at the bottom of the page.*
 
-Why might this be useful? 
+&lt;img src="../../images/rmd3/github_signin.png" width="35%" /&gt;
 
-- Compare **incidence** across **time periods** (e.g. week to week)
-- Observe how and where the outbreak is growing fastest
-- How might we **create surveillance periods** in R for our analysis? 
-   - `floor_date()` from {lubridate} 
+---
+# Getting started with Github
+
+Follow the prompts to create your account.
+
+*Try to use an email address that will never expire.* 
+
+*Work email addresses are not ideal, but will work.*
+
+&lt;img src="../../images/rmd3/newaccount.png" width="80%" /&gt;
+
+---
+# Github Language
+
+ - Repository or **repo**: folder where your project scripts are stored. 
+ - **Organization**: a collection of repos. 
+ 
+Below is an example landing page. On the left we can see a list of existing repos this person contributes to, and on the right we can see the menu where you can create new repos.
+
+&lt;img src="../../images/rmd3/landing_newrepo.png" width="80%" /&gt;
+ 
+---
+# More Github Language
+
+ - **Pull**: pull changes from github.com to your computer.  
+ - **Commit**: finalize changes from your computer. 
+ - **Push**: push changes from your computer to github.com. 
 
 
 ---
+# Github Resources
 
-# Surveillance periods
+There are many resources online. Github's mission is to make code accessible, and because of this, they have extremely good documentation online:
 
-In R, we can set up surveillance periods easily based on our data. 
-
-
-```r
-# create a date object with most relevant date of complete data
-# minus 5 days to account for lag in reporting lab results
-
-# first day of complete data (accounting for lab reporting delays)
-surveillance_date &lt;- as.Date("2021-06-29") - 5
-
-# create an object to mark start of latest complete week of data 
-# floor_date() rounds down to the closest week here
-surveillance_week_start &lt;- floor_date(
-  # subtract 7 days from surveillance_date
-  surveillance_date - 7,
-  # round down to nearest week start date
-  unit = "week", 
-  # define week to start on Sunday (typical in USA)
-  week_start = 7)
+https://docs.github.com/en/get-started/quickstart/hello-world
 
 
-# define recent (past 14 days) and previous (28 to 14 days prior)
-recent_period   &lt;- seq(surveillance_week_start  - 13, surveillance_week_start, by = 1)
-previous_period &lt;- seq(surveillance_week_start  - 27, surveillance_week_start - 14, by = 1)
-```
 
-
-How could we set up `surveillance_date` in RMarkdown? Think about the *params* key in *YAML* section. 
-
----
-
-# Data cleaning and analyses
-
-**NOTE** Data cleaning is not the focal point of this course
-- Data cleaning pipeline provided in the exercsies to copy and paste 
-- Feel free to attempt on your own first, but don't spend too much time on it
-
---
-
-The focal point of this session is to apply our newly learned skills to new data.
-
---
-
-**Things to consider**: 
-
-- What *class* is our survey analyses object? What *class* does it need to be for GIS? 
-- Which columns can you use for transforming data to *class* `sf`? 
-- What is the CRS of our shapefile? Does this align with our case linelist? 
-- Which `st` join function should we use to join linelist, population, and shape files?
-
----
-
-class: inverse, center, middle
-
-## Demo &amp; Exercise
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
