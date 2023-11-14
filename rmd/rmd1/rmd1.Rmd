@@ -170,20 +170,23 @@ R Markdown files are designed to be used in three ways:
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
 
-knitr::include_graphics(here::here("images", "rmarkdown", "2_defaultRMD_en.png"))
+knitr::include_graphics(here::here("images", "rmd_1", "2_defaultRMD_en.png"))
 
 ```
 
 ---
-
-
-class: middle, center
 # Components of R Markdown
 
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+
+knitr::include_graphics(here::here("images", "rmd_1", "rmarkdown_translation.png"))
+
+```
 
 ---
 # YAML
-.left-column[
+This section at the top of the RMarkdown file specifies core settings of the document
+.pull-left[
 - Specifies document basics
   - title
   - date
@@ -197,36 +200,31 @@ class: middle, center
 
 --
 
-.right-column[
-
-Output format                   |Creates 
---------------------------------|----------
-`html_document`                 |HTML document   
-`pdf_document`                  |PDF document   
-`word_document`                 |Microsoft Word document (docx)
-`flexdashboard::flex_dashboard` | Interactive dashboards
+.pull-right[
+Settings are written in `key: value` pairs.
+```{r eval=FALSE}
+---
+title: "Surveillance Report"
+author: "Meenakshi Kushwaha"
+date: "2022-09-13"
+output: 
+  html_document
+---
+```
 ]
+
+???
 
 ---
 # the `setup` chunk
 
+- First code chunk of the RMarkdown document
+
 - Specify universal rules for all other chunks
   - eg. show/hide code
-  - can over-ride in invidual chunks
+  - can over-ride in individual chunks
   
 - Could be used to load libraries, datasets that you don't want to explicitly show in the report  
-
----
-# Caching
-
-Useful when some chunks take long to compute
-- set `cache = TRUE` 
-
-R will skip the execution of this code chunk if it has been executed before and nothing in the code chunk has changed since then.
-
---
-
-!! Be careful, when using this option. R will not know if your original files have changed i.e. files or data on which the chunk depends. Learn about specifying dependincies [here] (https://bookdown.org/yihui/rmarkdown-cookbook/cache.html) 
 
 ---
 # Markdown text
@@ -278,95 +276,137 @@ R will skip the execution of this code chunk if it has been executed before and 
 ---
 class: center, middle
 # Dynamic Content
-## text, data, and tables
 ---
 # Dynamic text
-- inline code
-- glue package
+.panelset[
+
+.panel[.panel-name[Inline code]
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+
+knitr::include_graphics(here::here("images", "rmd_1", "inline.png"))
+
+```
+
+will render as
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+
+knitr::include_graphics(here::here("images", "rmd_1", "inline_text.png"))
+
+```
+
+
+]
+
+.panel[.panel-name[Using `str_glue`]
+
+```{r echo=TRUE, eval=FALSE}
+str_glue("Data include {num_cases} cases and are current to {current_date}.\n{n_missing_onset} cases are missing date of onset and not shown",
+         num_cases = nrow(linelist),
+         current_date = format(Sys.Date(), '%d %b %Y'),
+         n_missing_onset = nrow(linelist %>% filter(is.na(date_onset)))
+         )
+```
+
+will render as
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+
+knitr::include_graphics(here::here("images", "rmd_1", "str_glue.png"))
+
+```
+
+
+]
+
+]
 
 ---
 
 # Datatable
+Ability to provide filtering, pagination, and sorting to HTML tables.
 
-ability to provide filtering, pagination, and sorting to HTML tables.
+.panelset[
+.panel[.panel-name[To get this]
+```{r eval=TRUE, echo=FALSE}
+linelist %>% 
+  head(20) %>% 
+  DT::datatable(options =              
+                  list(pageLength=4))  
+```
+
+]
+
+.panel[.panel-name[Type this]
+
+```{r eval=FALSE, echo=TRUE}
+linelist %>% 
+  head(20) %>% 
+  DT::datatable() #<<
+```
+
+]
+
+]
+---
+# Tables for presentation
+
+- Publication ready summary tables using `flextable` package
+- can be inserted into HTML or Word documents and PPT slides
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+
+knitr::include_graphics(here::here("images", "rmd_1", "flex.png"))
+
+```
 
 ---
-# Flextable
-publication ready tables
-- use the `set_flextable_defaults` function to change the default appearance of the table.
+# Customizing reports - HTML
 
----
-# Custumizing your RMarkdown Report
-## HTML 
-
----
-# Built-in themes
-Following are built in themes
-- "cerulean", "journal", "flatly", "readable", "spacelab", "united", and "cosmo"
-
-Other packages for additional themes
- - Example - [`prettydoc`](https://www.datadreaming.org/post/r-markdown-theme-gallery/)
---
+- Several YAML options for
+  - themes
+  - table of contents
+  - showing or hiding code
 
 ### YAML example
 ```{r eval=FALSE}
 ---
-title: "My First RMarkdown Report"
+title: "Surveillance Report"
 author: "Meenakshi Kushwaha"
 date: "2022-09-13"
 output: 
-  html_document: 
-    {{theme: flatly}}
+  html_document:       #<<
+    theme: flatly      #<<
+    toc: TRUE          #<<  
+    toc_float: TRUE    #<<
+    code_folding: hide  #<<
 ---
 ```
 
 ---
-# table of contents
-
-- `toc: true` to include a table of contents (TOC)
-- `toc_depth: n` to specify that the lowest level of headings to add
-- `toc_float: true` so the toc floats and is visible as you scroll through a long document
 
 
-### YAML example
+---   
+# Customizing reports - Word
+
+- Not many YAML options
+- Cannot include HTML or interactive content 
+  - cannot use `DT` package for tables
+- Can use `flextable`  package
+- Create a *template file* using Rmarkdown with custom styles
+- Include the *template file* in YAML
+
 ```{r eval=FALSE}
 ---
-title: "My First RMarkdown Report"
+title: "Surveillance Report"
 author: "Meenakshi Kushwaha"
-date: "2022-09-13"
+date: "`r Sys.Date()`"
 output: 
-  html_document:
-    toc: true
-    toc_depth: 2
----  
+  word_document:                    #<<
+    toc: yes                        #<<
+    refrence_docx: my_template.docx #<<
 ```
 
-
----
-# Code-chunk options
-Customize your code chunk output
-- show/hide code
-- show/hide output
-- show/hide warnings and messages
-
-```{r eval = TRUE, echo=FALSE, out.width = '100%'}
-knitr::include_graphics(xfun::relative_path(here::here("images", "template", "chunk-options.png")), error = F)
-```
-
-
---- 
-# Custom reports - Word
-
-  
----
-
-class: middle, center
-
-# Demo
----
-
-# Multiple reports using RMarkdown
-## using parameters
+The Word doc created by RMarkdown will have the same formatting as specified in `my_template.docx`
 
 ---
 # Parametrized reports
@@ -375,23 +415,28 @@ R Markdown documents can include one or more parameters whose values can be set 
 
 - Used to re-render the same report with distinct values for various key inputs, for example:
 
-  - Running a report specific to a department or geographic region.
+  - Producing a report specific to a department or geographic region.
 
-  - Running a report that covers a specific period in time.
+  - Producing a report that covers a specific period in time.
+  
+  - Producing a report with our without certain sections depending on the audience.
+  
+  
 
 ---
 # Option 1 
 ## Set parameters within YAML
 
+- Provide default parameter value
 ```{r eval=FALSE}
 ---
-title: "Ebola Report"
+title: "Surveillance Report"
 author: "Meenakshi Kushwaha"
-date: "`r format(Sys.Date(), '%d %B %Y')`"
+date: "`r Sys.Date()`"
 output: 
   html_document
 params: #<<
-  region: "Mountain Rural" #<<
+  hospital: "Central Hospital" #<<
   date: "2021-04-10"          #<<
 ```
 
@@ -404,7 +449,7 @@ params: #<<
 rmarkdown::render(
   input = "surveillance_report.Rmd",  
   output_file = stringr::str_glue("outputs/Report_{Sys.Date()}.docx"),
-  params = list(date = "2021-04-10", hospital  = "Central Hospital"))
+  params = list(date = "2021-04-10", hospital  = "Central Hospital")) #<<
 ```
 
 **This will over-ride parameters set in YAML**
@@ -412,8 +457,13 @@ rmarkdown::render(
 # Option 3
 ## Set parameters using a Graphical User Interface
 
----
-# Logical parameters
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+
+knitr::include_graphics(here::here("images", "rmd_1", "params_gui.png"))
+
+```
 
 ---
 class: middle, center
