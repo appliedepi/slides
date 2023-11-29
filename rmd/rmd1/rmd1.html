@@ -28,7 +28,7 @@ class: center, middle, inverse, title-slide
 # Advanced RMarkdown
 ]
 .subtitle[
-## <br>Module 1
+## <br>Module 1: Review and advanced techniques
 ]
 .author[
 ### 
@@ -111,45 +111,59 @@ Do a brief round of introductions
 ---
 
 # What is R Markdown?
-### A place for your code, notes, and output to live together
+### A place for code, notes, and output to live together
 
-R Markdown files are designed to be used in three ways:
-
-**.Rmd files** 
-  - Develop code and ideas side by side
-  - Run code in parts or as a whole
+**.Rmd scripts** 
+  - Write code and narrative interpretation side-by-side
+  - Run commands in parts ("chunks"), or all at once
   
-**Dynamic Documents** 
-  - Knit together plots, tables, and results with narrative text
-  - Ouptut in variety of formats - HTML, PDF, word, ppt, etc.
+**Dynamic outputs** 
+  - Variety of output formats - HTML, Word, PDF, PPT, dashboard...
+  - Outputs integrate text with plots, tables, and results that update automatically
   
 **Collaboration**
-  - Use for collaborating with others (including future you!)
-  - Anyone can read or run your code 
+  - In public health, R Markdown is often used in a *team context*
+  - e.g. periodic surveillance or survey reports, to be run by any team member
+
+
 
 ---
-# R Markdown components
+class: center, middle
+# R Markdown essentials  
 
-&lt;img src="../../images/rmd_1/2_defaultRMD_en.png" width="100%" /&gt;
+## A review
+
 
 ---
-# Components of R Markdown
+# From script to report
 
 &lt;img src="../../images/rmd_1/rmarkdown_translation.png" width="100%" /&gt;
 
 ---
-# YAML
-This section at the top of the RMarkdown file specifies core settings of the document
-.pull-left[
-- Specifies document basics
-  - title
-  - date
-  - author
-  - output format
+# Script components
 
-- Can also include
-  - theme
-  - toc
+&lt;img src="../../images/rmd_1/2_defaultRMD_en.png" width="100%" /&gt;
+
+
+---
+class: center, middle
+# The YAML
+
+---
+# YAML
+This section at the top of the R Markdown script specifies settings of the document
+.pull-left[
+- Document metadata and output type
+  - Title, Subtitle, Date, Author
+  - Output format
+
+- Formatting
+  - Color theme
+  - Table of contents
+  
+- Iteration  
+  - "params" allow production of the report for sub-groups  
+  
 ]
 
 --
@@ -163,68 +177,65 @@ title: "Surveillance Report"
 author: "Meenakshi Kushwaha"
 date: "2022-09-13"
 output: 
-  html_document
+  html_document:
+    toc: true
+    theme: united
+params:
+  district: "Western"
 ---
 ```
 ]
 
 ???
 
+
 ---
-# the `setup` chunk
+class: center, middle
+# "Markdown" text
 
-- First code chunk of the RMarkdown document
-
-- **Specifies universal rules or options for all other chunks**
-  - e.g. echo option to show/hide code in output
-  - can over-ride universal option setting in individual chunks as needed 
-
-  
-- Could be used to load libraries, datasets that you don't want to explicitly show in the report  
-
-&lt;img src="../../images/rmd_1/setup_chunk.png" width="100%" /&gt;
-
-Learn more about code chunk options [here](https://rmarkdown.rstudio.com/lesson-3.html)
 ---
-# Markdown text
-## Headers
+# Report headings and sections
 .panelset[
 .panel[.panel-name[To get this]
   
-# Header 1  
-## Header 2  
-### Header 3  
+# Big heading  
+## Smaller headings
+### Smaller headings
+#### Even smaller headings
 
 ]
 .panel[.panel-name[Type this]
 
 
-`# Header 1`  
-`## Header 2`  
-`### Header 3`
+`# Big heading`  
+`## Smaller headings`  
+`### Smaller headings`  
+`#### Even smaller headings`  
+
 
 
 ]
 ]
 ---
-# Markdown text 
+# Formating text 
 
 .panelset[
 .panel[.panel-name[To get this]
-*italic*      
-**bold**   
+A normal text sentence.  
+*Here is some text to be italicized*      
+**Here is some text to be written in bold**   
 
-* Item 1   
-* Item 2  
+* Bullet point 1   
+* Bullet point 2  
 
 ]
 .panel[.panel-name[Type this]
+A normal text sentence.  
+`*Here is some text to be italicized*`  
+`**Here is some text to be written in bold**`
 
-`*italic*`  
-`**bold**`
-
-`* Item 1`  
-`* Item 2`    
+`* Bullet point 1`  
+`* Bullet point 2`    
 
 ]
 ]
@@ -232,14 +243,184 @@ Learn more about code chunk options [here](https://rmarkdown.rstudio.com/lesson-
 .footnote[See more RMarkdown formatting [here](https://rmarkdown.rstudio.com/authoring_basics.html)]
 
 
+
 ---
 class: center, middle
-# Dynamic Content
+# R code chunks
+
+
 ---
-# Dynamic text
+# Creating code chunks
+
+Code "chunks" are like tiny pieces of R script within the document.  
+
+Parts of a code chunk:
+.pull-left[
+* 3 "backticks" and curly brackets {r}
+* R code  
+* 3 backticks to close the chunk  
+
+*Keyboard shortcut: Ctrl + Alt + i*  
+*Menu shortcut: Code -&gt; Insert Chunk*  
+
+]
+
+.pull-right[
+Normal text above the chunk.
+
+````r
+```{r}
+
+R code will be here.
+
+```
+````
+Normal text below the chunk.
+
+]
+
+---
+# R code in chunks
+.pull-left[
+For best script organisation, use a chunk to perform a specific purpose.  
+
+This chunk is for loading packages.
+]
+
+.pull-right[
+
+````r
+```{r}
+pacman::p_load(
+  rio,      
+  here,     
+  janitor,  
+  tidyverse
+)
+```
+````
+]
+
+
+---
+# Comments in chunks
+.pull-left[
+Like small R scripts, you can write # comments on the lines
+]
+
+.pull-right[
+
+````r
+```{r}
+
+# Load/import my packages
+pacman::p_load(
+  rio,      # import/export
+  here,     # file paths
+  janitor,  # cleaning &amp; simple tables
+  tidyverse # data management &amp; viz
+)
+
+```
+````
+]
+
+
+---
+# Chunk names
+.pull-left[
+Optionally, give your chunk a "name" within the { }
+
+* No spaces  
+* No duplicate names  
+* Name do **not** appear in the output  
+
+]
+
+.pull-right[
+
+````r
+```{r packages} 
+
+# Load/import my packages
+pacman::p_load(
+  rio,      # import/export
+  here,     # file paths
+  janitor,  # cleaning &amp; simple tables
+  tidyverse # data management &amp; viz
+)
+
+```
+````
+]
+
+
+---
+# Chunk options
+.pull-left[
+Adjust the "options" of a chunk inside the { } to determine how it affects the report:  
+
+* Run/not run the chunk: `eval =`  
+* Show/hide the code: `echo =`  
+* Show/hide warnings: `warning =`  
+* Show/hide errors: `error =`  
+* Show/hide output: `include =`  
+
+Note the commas between each option.
+]
+
+.pull-right[
+
+````r
+```{r packages, echo = FALSE, warning = FALSE} 
+
+# Load/import my packages
+pacman::p_load(
+  rio,      # import/export
+  here,     # file paths
+  janitor,  # cleaning &amp; simple tables
+  tidyverse # data management &amp; viz
+)
+
+```
+````
+]
+
+
+
+---
+# The "setup" chunk
+
+- Provided in R Markdown templates  
+- Uses a {knitr} function to *specify the default "options" for all chunks*  
+
+````r
+```{r setup, include=FALSE} 
+
+# set all chunk defaults: 
+# not show code, warning, or error messages in the report
+
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, error = FALSE)
+
+```
+````
+
+Learn more about code chunk options [here](https://rmarkdown.rstudio.com/lesson-3.html)
+
+
+
+---
+class: center, middle
+# Integrating R code and text
+
+
+---
+# Integrating R code and text
 .panelset[
 
-.panel[.panel-name[Inline code]
+.panel[.panel-name[R code into Markdown text]
+
+Often called "inline code":  
 
 &lt;img src="../../images/rmd_1/inline.png" width="100%" /&gt;
 
@@ -249,25 +430,276 @@ will render as
 
 ]
 
-.panel[.panel-name[Using `str_glue`]
+.panel[.panel-name[Within an R command]
 
+Use `str_glue()` to combine text and R code inside graphics captions, titles, etc.
+
+.pull-left[
 
 ```r
-str_glue("Data include {num_cases} cases and are current to {current_date}.\n{n_missing_onset} cases are missing date of onset and not shown",
-         num_cases = nrow(linelist),
-         current_date = format(Sys.Date(), '%d %b %Y'),
-         n_missing_onset = nrow(linelist %&gt;% filter(is.na(date_onset)))
-         )
+ggplot(data = linelist,
+       mapping = aes(x = date_onset))+
+geom_histogram()+
+labs(
+  title = "Simple epicurve with subtitle"
+  subtitle = str_glue(
+    "{num_cases} cases as of {current_date}; {n_miss} missing date of onset.",
+    num_cases = nrow(linelist),
+    current_date = format(Sys.Date(), '%d %b %Y'),
+    n_miss = epikit::fmt_count(linelist, is.na(date_onset))))
+```
+]
+
+.pull-right[
+
+&lt;img src="rmd1_files/figure-html/unnamed-chunk-11-1.png" width="100%" /&gt;
+]
+
+]
+
+]
+
+---
+## All together
+.pull-left[
+
+````md
+*---
+*title: "Surveillance Report"
+*output: html_document
+*---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  error = FALSE)
 ```
 
-will render as
+```{r import, include = FALSE}
+# import the dataset
+surv &lt;- import(here("data", "clean", "linelist.csv"))
+```
 
-&lt;img src="../../images/rmd_1/str_glue.png" width="100%" /&gt;
+## Executive summary
+Report as of `r max(surv$report_date`.  
+There are `r nrow(surv)` cases.  
+`r fmt_count(surv, outcome == 'Died')` died.  
 
+
+## Epidemic curve
+```{r}
+surv %&gt;% 
+  ggplot(mapping = aes(x = date_onset))+ 
+  geom_histogram()
+```
+````
+]
+
+--
+.pull-right[
+First, the YAML heading.  
+
+This script will produce an HTML report.
+]
+
+
+
+---
+## All together
+.pull-left[
+
+````md
+---
+title: "Surveillance Report"
+output: html_document
+---
+
+*```{r setup, include = FALSE}
+*knitr::opts_chunk$set(
+*  echo = FALSE,
+*  warning = FALSE,
+*  error = FALSE)
+*```
+
+```{r import, include = FALSE}
+# import the dataset
+surv &lt;- import(here("data", "clean", "linelist.csv"))
+```
+
+## Executive summary
+Report as of `r max(surv$report_date`.  
+There are `r nrow(surv)` cases.  
+`r fmt_count(surv, outcome == 'Died')` died.  
+
+
+## Epidemic curve
+```{r}
+surv %&gt;% 
+  ggplot(mapping = aes(x = date_onset))+ 
+  geom_histogram()
+```
+````
+]
+
+--
+
+.pull-right[
+A "setup" code chunk to set the default options of all chunks.
+
+This chunk says that no code will show in the report, and no warning or error messages produced by the codes.  
 
 ]
 
+
+---
+## All together
+
+.pull-left[
+
+````md
+---
+title: "Surveillance Report"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  error = FALSE)
+```
+
+*```{r import, include = FALSE}
+*# import the dataset
+*surv &lt;- import(here("data", "clean", "linelist.csv"))
+*```
+
+## Executive summary
+Report as of `r max(surv$report_date`.  
+There are `r nrow(surv)` cases.  
+`r fmt_count(surv, outcome == 'Died')` died.  
+
+
+## Epidemic curve
+```{r}
+surv %&gt;% 
+  ggplot(mapping = aes(x = date_onset))+ 
+  geom_histogram()
+```
+````
 ]
+
+--
+
+.pull-right[
+This separate code chunk imports the dataset.  
+
+It does it silently, this code nor any output will appear in the report.
+
+]
+
+
+---
+## All together
+
+
+.pull-left[
+
+````md
+---
+title: "Surveillance Report"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  error = FALSE)
+```
+
+```{r import, include = FALSE}
+# import the dataset
+surv &lt;- import(here("data", "clean", "linelist.csv"))
+```
+
+*## Executive summary
+*Report as of `r max(surv$report_date`.  
+*There are `r nrow(surv)` cases.  
+*`r fmt_count(surv, outcome == 'Died')` died.  
+
+
+## Epidemic curve
+```{r}
+surv %&gt;% 
+  ggplot(mapping = aes(x = date_onset))+ 
+  geom_histogram()
+```
+````
+]
+
+--
+
+.pull-right[
+This is "markdown" text - headings and sentences that will appear in the report.  
+
+There is embedded "inline" R code, to make the figures in the text dynamically update (e.g. the dates, case counts, etc).
+
+]
+
+---
+## All together
+
+
+.pull-left[
+
+````md
+---
+title: "Surveillance Report"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  error = FALSE)
+```
+
+```{r import, include = FALSE}
+# import the dataset
+surv &lt;- import(here("data", "clean", "linelist.csv"))
+```
+
+## Executive summary
+Report as of `r max(surv$report_date`.  
+There are `r nrow(surv)` cases.  
+`r fmt_count(surv, outcome == 'Died')` died.  
+
+
+*## Epidemic curve
+*```{r}
+*surv %&gt;% 
+*  ggplot(mapping = aes(x = date_onset))+ 
+*  geom_histogram()
+*```
+````
+]
+
+--
+
+.pull-right[
+This final code chunk produces a simple histogram of cases by date of onset.  
+
+The code will not appear in the report, but the output (the epicurve) will display.
+
+]
+
+
+---
+class: center, middle
+# Dynamic tables
 
 ---
 
@@ -276,8 +708,8 @@ Ability to provide filtering, pagination, and sorting to HTML tables.
 
 .panelset[
 .panel[.panel-name[To get this]
-<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-e1ef76b4b3ea5e0502f4" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-e1ef76b4b3ea5e0502f4">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"],["86340d","92d002","544bd1","6056ba","e64e04","5a65bb","2ae019","7ca4c0","30af4f","a06123","27c07d","8f654c","9b5dec","f8cd8f","e4bee8","f23f4e","668458","7bb784","d74a9e","2772c3"],["2014-10-30","2014-08-16","2014-08-29","2014-10-20","2014-10-06","2014-09-21","2014-05-06","2014-09-29",null,"2014-09-10","2014-09-12","2014-10-19","2014-09-07","2014-10-18","2014-06-22","2014-09-14","2014-10-21","2014-10-21","2014-11-12","2014-10-24"],["2014-10-31","2014-08-20","2014-08-30","2014-10-21","2014-10-10","2014-09-22","2014-05-11","2014-09-30","2014-11-10","2014-09-15","2014-09-15","2014-10-19","2014-09-11","2014-10-19","2014-06-25","2014-09-18","2014-10-23","2014-10-22","2014-11-12","2014-10-25"],[1,4,1,1,4,1,5,1,null,5,3,0,4,1,3,4,2,1,0,1],["female","female","female","female","female","male","male","male","female","male","male","female","male","female","female","male","male","male","male","male"],[1,16,10,0,7,4,37,11,6,10,20,6,22,11,3,60,19,9,18,2],["years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","months","years","years"],[1,16,10,0,7,4,37,11,6,10,20,6,22,11,3,60,19,0.75,18,2],["0-9","10-19","10-19","0-9","0-9","0-9","30-39","10-19","0-9","10-19","20-29","0-9","20-29","10-19","0-9","60-69","10-19","0-9","10-19","0-9"],["Port Hospital",null,null,null,null,"Port Hospital","Other","Port Hospital","Port Hospital",null,"Other","Military Hospital","SMMH","Port Hospital","Other","Other","SMMH","Central Hospital","Other",null],["Central II","Mountain Rural","East II","West III","Mountain Rural","Mountain Rural","West III","West III","West I","Mountain Rural","West II","West II","West II","West II","Central I","Central II","West III","Mountain Rural","East II","Central II"],["Mountain Rural","Mountain Rural","East II","West III","Mountain Rural","Mountain Rural","West III","West III","West I","Mountain Rural","West II","West II","West II","West II","Central I","Central II","West III","Mountain Rural","East II","Mountain Rural"],["Central II","Mountain Rural","East II","West III","Mountain Rural","Mountain Rural","West III","West III","West I","Mountain Rural","West II","West II","West II","West II","Central I","Central II","West III","Mountain Rural","East II","Central II"],[true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true],[18,59,39,null,32,41,81,56,30,55,72,37,60,47,30,84,68,79,59,30],[29,133,106,24,91,74,167,163,75,125,151,86,159,114,63,245,153,175,153,67],["yes","yes","yes","yes","no","yes","yes","yes","no","yes","yes","yes","yes","no","yes","yes","no","yes","yes","yes"],["no","no","no","yes","no","yes","no","no","no","no","yes","no","no","no","no","no","yes","no","no","no"],["yes","yes","yes","yes","yes","yes","yes","yes","yes","no","yes","no","yes","yes","yes","no","yes","yes","yes","yes"],["no","no","no","no","yes","no","no","no","no","no","yes","no","no","no","no","no","no","no","no","no"],["no","yes","yes","yes","yes","yes","no","no","yes","no","no","yes","yes","yes","no","yes","no","no","yes","no"],[39.4,39.3,39.3,38.6,36.5,39.1,39.5,38.9,37.5,38,38.8,39.2,38.2,37.5,39.1,38.9,37.2,38.7,38.9,39.8],[214.0309156,33.35406185,34.70986116,-190.9722222,38.64267601,74.87216947,29.04370899,21.07719523,53.33333333,35.2,31.57756239,50.02704164,23.7332384,36.16497384,75.58578987,13.9941691,29.0486565,25.79591837,25.20398137,66.83002896],["SL040102","SL040102","SL040204","SL040208","SL040102","SL040102","SL040208","SL040208","SL040206","SL040102","SL040207","SL040207","SL040207","SL040207","SL040201","SL040202","SL040208","SL040102","SL040204","SL040102"],[true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true],[8.470122275,8.454882422,8.484896061,8.467532548,8.474794458,8.462900412,8.452506081,8.456236008,8.47847955,8.469755298,8.461030291,8.465708204,8.466538458,8.467451204,8.47847094,8.487316046,8.462788073,8.463369754,8.482723023,8.462216115],[-13.21314431,-13.21094789,-13.22525323,-13.26645243,-13.22028905,-13.21564488,-13.26809408,-13.26695002,-13.24747771,-13.21416774,-13.23493492,-13.23316849,-13.23375243,-13.23348154,-13.22992349,-13.23619714,-13.26936217,-13.21540756,-13.212511,-13.22137963],["yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes"],["Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed"],["2014-10-31","2014-08-20","2014-08-30","2014-10-21","2014-10-10","2014-09-22","2014-05-11","2014-09-30","2014-11-10","2014-09-15","2014-09-15","2014-10-19","2014-09-11","2014-10-19","2014-06-25","2014-09-18","2014-10-23","2014-10-22","2014-11-12","2014-10-25"],["12:36","13:34","13:24","","9:42","15:19","7:41","","","18:40","16:46","","19:44","10:49","12:11","","15:50","7:22","","11:15"],["2014-11-15",null,"2014-09-02","2014-11-05","2014-10-12",null,"2014-04-30","2014-10-08","2014-11-14","2014-09-17","2014-09-27","2014-11-13","2014-09-14","2014-10-25",null,null,"2014-10-27","2014-11-07","2014-11-17","2014-11-23"],["Recover","Recover","Death","Death","Death","Recover",null,null,"Death","Recover","Recover","Recover","Death","Death",null,"Recover",null,"Recover","Death",null],[23,20,21,22,19,21,20,22,22,20,20,21,19,20,20,20,22,21,22,23],["2014-10-25","2014-08-09","2014-08-23",null,"2014-09-22","2014-09-18",null,null,"2014-10-23",null,"2014-08-31",null,"2014-08-29","2014-10-11","2014-06-17",null,null,"2014-10-12","2014-11-02","2014-10-09"],["519263","f97626","ada09d",null,"1c7c3f","2f29c3",null,null,"0dd0a1",null,"8ca0e1",null,"d389dc","72ad8f","a6c614",null,null,"e12b54","ffb17e","a8e62e"],["other","other","funeral",null,"other","other",null,null,"other",null,"funeral",null,"other","other","other",null,null,"other","funeral","other"],[19,12,11,16,20,13,3,11,20,13,10,21,10,17,6,11,14,15,12,15]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>case_id<\/th>\n      <th>date_onset<\/th>\n      <th>date_report<\/th>\n      <th>diff<\/th>\n      <th>gender<\/th>\n      <th>age<\/th>\n      <th>age_unit<\/th>\n      <th>age_years<\/th>\n      <th>age_cat<\/th>\n      <th>hospital<\/th>\n      <th>district<\/th>\n      <th>district_res<\/th>\n      <th>district_det<\/th>\n      <th>moved<\/th>\n      <th>wt_kg<\/th>\n      <th>ht_cm<\/th>\n      <th>fever<\/th>\n      <th>chills<\/th>\n      <th>cough<\/th>\n      <th>aches<\/th>\n      <th>vomit<\/th>\n      <th>temp<\/th>\n      <th>bmi<\/th>\n      <th>admin3pcod<\/th>\n      <th>lab_confirmed<\/th>\n      <th>lat<\/th>\n      <th>lon<\/th>\n      <th>epilink<\/th>\n      <th>case_def<\/th>\n      <th>date_hospitalisation<\/th>\n      <th>time_admission<\/th>\n      <th>date_outcome<\/th>\n      <th>outcome<\/th>\n      <th>blood_ct<\/th>\n      <th>date_infection<\/th>\n      <th>infector<\/th>\n      <th>source<\/th>\n      <th>generation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":4,"columnDefs":[{"className":"dt-right","targets":[6,8,15,16,22,23,26,27,34,38]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[4,10,25,50,100]},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-9da67008674c1f186f8c" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-9da67008674c1f186f8c">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"],["86340d","92d002","544bd1","6056ba","e64e04","5a65bb","2ae019","7ca4c0","30af4f","a06123","27c07d","8f654c","9b5dec","f8cd8f","e4bee8","f23f4e","668458","7bb784","d74a9e","2772c3"],["2014-10-30","2014-08-16","2014-08-29","2014-10-20","2014-10-06","2014-09-21","2014-05-06","2014-09-29",null,"2014-09-10","2014-09-12","2014-10-19","2014-09-07","2014-10-18","2014-06-22","2014-09-14","2014-10-21","2014-10-21","2014-11-12","2014-10-24"],["2014-10-31","2014-08-20","2014-08-30","2014-10-21","2014-10-10","2014-09-22","2014-05-11","2014-09-30","2014-11-10","2014-09-15","2014-09-15","2014-10-19","2014-09-11","2014-10-19","2014-06-25","2014-09-18","2014-10-23","2014-10-22","2014-11-12","2014-10-25"],[1,4,1,1,4,1,5,1,null,5,3,0,4,1,3,4,2,1,0,1],["female","female","female","female","female","male","male","male","female","male","male","female","male","female","female","male","male","male","male","male"],[1,16,10,0,7,4,37,11,6,10,20,6,22,11,3,60,19,9,18,2],["years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","years","months","years","years"],[1,16,10,0,7,4,37,11,6,10,20,6,22,11,3,60,19,0.75,18,2],["0-9","10-19","10-19","0-9","0-9","0-9","30-39","10-19","0-9","10-19","20-29","0-9","20-29","10-19","0-9","60-69","10-19","0-9","10-19","0-9"],["Port Hospital",null,null,null,null,"Port Hospital","Other","Port Hospital","Port Hospital",null,"Other","Military Hospital","SMMH","Port Hospital","Other","Other","SMMH","Central Hospital","Other",null],["Central II","Mountain Rural","East II","West III","Mountain Rural","Mountain Rural","West III","West III","West I","Mountain Rural","West II","West II","West II","West II","Central I","Central II","West III","Mountain Rural","East II","Central II"],["Mountain Rural","Mountain Rural","East II","West III","Mountain Rural","Mountain Rural","West III","West III","West I","Mountain Rural","West II","West II","West II","West II","Central I","Central II","West III","Mountain Rural","East II","Mountain Rural"],["Central II","Mountain Rural","East II","West III","Mountain Rural","Mountain Rural","West III","West III","West I","Mountain Rural","West II","West II","West II","West II","Central I","Central II","West III","Mountain Rural","East II","Central II"],[true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true],[18,59,39,null,32,41,81,56,30,55,72,37,60,47,30,84,68,79,59,30],[29,133,106,24,91,74,167,163,75,125,151,86,159,114,63,245,153,175,153,67],["yes","yes","yes","yes","no","yes","yes","yes","no","yes","yes","yes","yes","no","yes","yes","no","yes","yes","yes"],["no","no","no","yes","no","yes","no","no","no","no","yes","no","no","no","no","no","yes","no","no","no"],["yes","yes","yes","yes","yes","yes","yes","yes","yes","no","yes","no","yes","yes","yes","no","yes","yes","yes","yes"],["no","no","no","no","yes","no","no","no","no","no","yes","no","no","no","no","no","no","no","no","no"],["no","yes","yes","yes","yes","yes","no","no","yes","no","no","yes","yes","yes","no","yes","no","no","yes","no"],[39.4,39.3,39.3,38.6,36.5,39.1,39.5,38.9,37.5,38,38.8,39.2,38.2,37.5,39.1,38.9,37.2,38.7,38.9,39.8],[214.0309156,33.35406185,34.70986116,-190.9722222,38.64267601,74.87216947,29.04370899,21.07719523,53.33333333,35.2,31.57756239,50.02704164,23.7332384,36.16497384,75.58578987,13.9941691,29.0486565,25.79591837,25.20398137,66.83002896],["SL040102","SL040102","SL040204","SL040208","SL040102","SL040102","SL040208","SL040208","SL040206","SL040102","SL040207","SL040207","SL040207","SL040207","SL040201","SL040202","SL040208","SL040102","SL040204","SL040102"],[true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true],[8.470122275,8.454882422,8.484896061,8.467532548,8.474794458,8.462900412,8.452506081,8.456236008,8.47847955,8.469755298,8.461030291,8.465708204,8.466538458,8.467451204,8.47847094,8.487316046,8.462788073,8.463369754,8.482723023,8.462216115],[-13.21314431,-13.21094789,-13.22525323,-13.26645243,-13.22028905,-13.21564488,-13.26809408,-13.26695002,-13.24747771,-13.21416774,-13.23493492,-13.23316849,-13.23375243,-13.23348154,-13.22992349,-13.23619714,-13.26936217,-13.21540756,-13.212511,-13.22137963],["yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes","yes"],["Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed","Confirmed"],["2014-10-31","2014-08-20","2014-08-30","2014-10-21","2014-10-10","2014-09-22","2014-05-11","2014-09-30","2014-11-10","2014-09-15","2014-09-15","2014-10-19","2014-09-11","2014-10-19","2014-06-25","2014-09-18","2014-10-23","2014-10-22","2014-11-12","2014-10-25"],["12:36","13:34","13:24","","9:42","15:19","7:41","","","18:40","16:46","","19:44","10:49","12:11","","15:50","7:22","","11:15"],["2014-11-15",null,"2014-09-02","2014-11-05","2014-10-12",null,"2014-04-30","2014-10-08","2014-11-14","2014-09-17","2014-09-27","2014-11-13","2014-09-14","2014-10-25",null,null,"2014-10-27","2014-11-07","2014-11-17","2014-11-23"],["Recover","Recover","Death","Death","Death","Recover",null,null,"Death","Recover","Recover","Recover","Death","Death",null,"Recover",null,"Recover","Death",null],[23,20,21,22,19,21,20,22,22,20,20,21,19,20,20,20,22,21,22,23],["2014-10-25","2014-08-09","2014-08-23",null,"2014-09-22","2014-09-18",null,null,"2014-10-23",null,"2014-08-31",null,"2014-08-29","2014-10-11","2014-06-17",null,null,"2014-10-12","2014-11-02","2014-10-09"],["519263","f97626","ada09d",null,"1c7c3f","2f29c3",null,null,"0dd0a1",null,"8ca0e1",null,"d389dc","72ad8f","a6c614",null,null,"e12b54","ffb17e","a8e62e"],["other","other","funeral",null,"other","other",null,null,"other",null,"funeral",null,"other","other","other",null,null,"other","funeral","other"],[19,12,11,16,20,13,3,11,20,13,10,21,10,17,6,11,14,15,12,15]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>case_id<\/th>\n      <th>date_onset<\/th>\n      <th>date_report<\/th>\n      <th>diff<\/th>\n      <th>gender<\/th>\n      <th>age<\/th>\n      <th>age_unit<\/th>\n      <th>age_years<\/th>\n      <th>age_cat<\/th>\n      <th>hospital<\/th>\n      <th>district<\/th>\n      <th>district_res<\/th>\n      <th>district_det<\/th>\n      <th>moved<\/th>\n      <th>wt_kg<\/th>\n      <th>ht_cm<\/th>\n      <th>fever<\/th>\n      <th>chills<\/th>\n      <th>cough<\/th>\n      <th>aches<\/th>\n      <th>vomit<\/th>\n      <th>temp<\/th>\n      <th>bmi<\/th>\n      <th>admin3pcod<\/th>\n      <th>lab_confirmed<\/th>\n      <th>lat<\/th>\n      <th>lon<\/th>\n      <th>epilink<\/th>\n      <th>case_def<\/th>\n      <th>date_hospitalisation<\/th>\n      <th>time_admission<\/th>\n      <th>date_outcome<\/th>\n      <th>outcome<\/th>\n      <th>blood_ct<\/th>\n      <th>date_infection<\/th>\n      <th>infector<\/th>\n      <th>source<\/th>\n      <th>generation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":4,"columnDefs":[{"className":"dt-right","targets":[6,8,15,16,22,23,26,27,34,38]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[4,10,25,50,100]},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
 
 ]
 
@@ -285,9 +717,9 @@ Ability to provide filtering, pagination, and sorting to HTML tables.
 
 
 ```r
-linelist %&gt;% 
-  head(20) %&gt;% 
-* DT::datatable()
+linelist %&gt;%      # start with full case linelist
+  head(20) %&gt;%    # use only the first 20 rows
+* DT::datatable() # convert to dynamic table
 ```
 
 ]
@@ -296,9 +728,10 @@ linelist %&gt;%
 ---
 
 # Datatable (duplicate slide)
-Ability to provide filtering, pagination, and sorting to HTML tables.
+Allow filtering, pagination, and sorting in HTML tables.
 
 .panelset[
+
 .panel[.panel-name[To get this]
 &lt;img src="../../images/rmd_1/dt1.png" width="100%" /&gt;
 
@@ -319,19 +752,20 @@ linelist %&gt;%
 ---
 # Tables for presentation
 
-- Publication ready summary tables using `flextable` package
-- can be inserted into HTML or Word documents and PPT slides
+- Use `{flextable}` or similar to make summary tables publication-ready  
+- To be displayed in HTML, Word documents, PPT slides, dashboards  
+
 &lt;img src="../../images/rmd_1/flex.png" width="100%" /&gt;
 
 ---
 # Customizing reports - HTML
 
-- Several YAML options for
-  - themes
-  - table of contents
-  - showing or hiding code
-
-### YAML example
+For HTML reports, YAML permits advanced customisation, e.g.  
+  - Themes (colors and aesthetics of the report)
+  - Table of contents (static, floating, etc.)
+  - Clickable-buttons to show/hide code display  
+  - "params" to produce the report for sub-groups  
+  
 
 ```r
 ---
@@ -347,16 +781,17 @@ output:
 ---
 ```
 
+We will cover these in the exercise, in detail.  
+
 ---
 
 # Customizing reports - Word
 
-- Not many YAML options
-- Cannot include HTML or interactive content 
-  - cannot use `DT` package for tables
-- Can use `flextable`  package
-- Create a *template file* using Rmarkdown with custom styles
-- Include the *template file* in YAML
+In Word outputs, no interactive tables or plots, but you can still use `{flextable}`.  
+
+Word outputs have fewer YAML options, but allow use of Word templates:  
+* Create a *template file* with custom styles, logos, etc.
+* Include the *template file* in the YAML
 
 
 ```r
@@ -375,9 +810,7 @@ The Word doc created by RMarkdown will have the same formatting as specified in 
 ---
 # Parametrized reports
 
-R Markdown documents can include one or more parameters whose values can be set when you render the report.
-
-- Used to re-render the same report with distinct values for various key inputs, for example:
+This is a very powerful feature, used to re-render the same report with distinct values, for example:
 
   - Producing a report specific to a department or geographic region.
 
@@ -385,13 +818,16 @@ R Markdown documents can include one or more parameters whose values can be set 
   
   - Producing a report with or without certain sections depending on the audience.
   
+You set default "parameters" in the YAML, and can adjust them every time you render the report.
+
+  
   
 
 ---
-# Option 1 
-## Set parameters within YAML
+# Set params within YAML
 
-- Provide default parameter value
+This YAML sets two params (district and date) with default values.  
+
 
 ```r
 ---
@@ -401,14 +837,17 @@ date: "`r Sys.Date()`"
 output: 
   html_document
 *params:
-* hospital: "Central Hospital"
+* district: "Central Hospital"
 * date: "2021-04-10"
 ```
 
 
 ---
-# Option 2
-## Set parameters within `render()`
+## Edit params within `render()`
+
+The `render()` command can be used to run your report from another script.  
+
+You can set param values in this command, overriding the defaults in the YAML.  
 
 
 ```r
@@ -418,11 +857,13 @@ rmarkdown::render(
 * params = list(date = "2021-04-10", hospital  = "Central Hospital"))
 ```
 
-**This will over-ride parameters set in YAML**
----
-# Option 3
-## Set parameters using a Graphical User Interface
+We will cover this in module 2 of this course.  
 
+---
+
+## Edit params using "Knit" and the user interface
+
+RStudio offers an option to "Knit with parameters", which opens an interface like this prior to rendering:  
 
 
 &lt;img src="../../images/rmd_1/params_gui.png" width="100%" /&gt;
@@ -433,6 +874,10 @@ class: middle, center
 
 # Demo
 
+
+.footnote[
+Slide formatting tips from [Thomas Mock](https://themockup.blog/posts/2021-08-27-displaying-verbatim-code-chunks-in-xaringan-presentations/#distill-output)
+]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

@@ -1,6 +1,6 @@
 ---
 title: "Advanced RMarkdown"
-subtitle: "<br>Module 1"
+subtitle: "<br>Module 1: Review and advanced techniques"
 author: ""
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
@@ -149,33 +149,31 @@ Do a brief round of introductions
 ---
 
 # What is R Markdown?
-### A place for your code, notes, and output to live together
+### A place for code, notes, and output to live together
 
-R Markdown files are designed to be used in three ways:
-
-**.Rmd files** 
-  - Develop code and ideas side by side
-  - Run code in parts or as a whole
+**.Rmd scripts** 
+  - Write code and narrative interpretation side-by-side
+  - Run commands in parts ("chunks"), or all at once
   
-**Dynamic Documents** 
-  - Knit together plots, tables, and results with narrative text
-  - Ouptut in variety of formats - HTML, PDF, word, ppt, etc.
+**Dynamic outputs** 
+  - Variety of output formats - HTML, Word, PDF, PPT, dashboard...
+  - Outputs integrate text with plots, tables, and results that update automatically
   
 **Collaboration**
-  - Use for collaborating with others (including future you!)
-  - Anyone can read or run your code 
+  - In public health, R Markdown is often used in a *team context*
+  - e.g. periodic surveillance or survey reports, to be run by any team member
+
+
 
 ---
-# R Markdown components
+class: center, middle
+# R Markdown essentials  
 
-```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+## A review
 
-knitr::include_graphics(here::here("images", "rmd_1", "2_defaultRMD_en.png"))
-
-```
 
 ---
-# Components of R Markdown
+# From script to report
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
 
@@ -184,18 +182,34 @@ knitr::include_graphics(here::here("images", "rmd_1", "rmarkdown_translation.png
 ```
 
 ---
-# YAML
-This section at the top of the RMarkdown file specifies core settings of the document
-.pull-left[
-- Specifies document basics
-  - title
-  - date
-  - author
-  - output format
+# Script components
 
-- Can also include
-  - theme
-  - toc
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+
+knitr::include_graphics(here::here("images", "rmd_1", "2_defaultRMD_en.png"))
+
+```
+
+
+---
+class: center, middle
+# The YAML
+
+---
+# YAML
+This section at the top of the R Markdown script specifies settings of the document
+.pull-left[
+- Document metadata and output type
+  - Title, Subtitle, Date, Author
+  - Output format
+
+- Formatting
+  - Color theme
+  - Table of contents
+  
+- Iteration  
+  - "params" allow production of the report for sub-groups  
+  
 ]
 
 --
@@ -208,72 +222,65 @@ title: "Surveillance Report"
 author: "Meenakshi Kushwaha"
 date: "2022-09-13"
 output: 
-  html_document
+  html_document:
+    toc: true
+    theme: united
+params:
+  district: "Western"
 ---
 ```
 ]
 
 ???
 
+
 ---
-# the `setup` chunk
+class: center, middle
+# "Markdown" text
 
-- First code chunk of the RMarkdown document
-
-- **Specifies universal rules or options for all other chunks**
-  - e.g. echo option to show/hide code in output
-  - can over-ride universal option setting in individual chunks as needed 
-
-  
-- Could be used to load libraries, datasets that you don't want to explicitly show in the report  
-
-```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-
-knitr::include_graphics(here::here("images", "rmd_1", "setup_chunk.png"))
-
-```
-
-Learn more about code chunk options [here](https://rmarkdown.rstudio.com/lesson-3.html)
 ---
-# Markdown text
-## Headers
+# Report headings and sections
 .panelset[
 .panel[.panel-name[To get this]
   
-# Header 1  
-## Header 2  
-### Header 3  
+# Big heading  
+## Smaller headings
+### Smaller headings
+#### Even smaller headings
 
 ]
 .panel[.panel-name[Type this]
 
 
-`# Header 1`  
-`## Header 2`  
-`### Header 3`
+`# Big heading`  
+`## Smaller headings`  
+`### Smaller headings`  
+`#### Even smaller headings`  
+
 
 
 ]
 ]
 ---
-# Markdown text 
+# Formating text 
 
 .panelset[
 .panel[.panel-name[To get this]
-*italic*      
-**bold**   
+A normal text sentence.  
+*Here is some text to be italicized*      
+**Here is some text to be written in bold**   
 
-* Item 1   
-* Item 2  
+* Bullet point 1   
+* Bullet point 2  
 
 ]
 .panel[.panel-name[Type this]
+A normal text sentence.  
+`*Here is some text to be italicized*`  
+`**Here is some text to be written in bold**`
 
-`*italic*`  
-`**bold**`
-
-`* Item 1`  
-`* Item 2`    
+`* Bullet point 1`  
+`* Bullet point 2`    
 
 ]
 ]
@@ -281,14 +288,184 @@ Learn more about code chunk options [here](https://rmarkdown.rstudio.com/lesson-
 .footnote[See more RMarkdown formatting [here](https://rmarkdown.rstudio.com/authoring_basics.html)]
 
 
+
 ---
 class: center, middle
-# Dynamic Content
+# R code chunks
+
+
 ---
-# Dynamic text
+# Creating code chunks
+
+Code "chunks" are like tiny pieces of R script within the document.  
+
+Parts of a code chunk:
+.pull-left[
+* 3 "backticks" and curly brackets {r}
+* R code  
+* 3 backticks to close the chunk  
+
+*Keyboard shortcut: Ctrl + Alt + i*  
+*Menu shortcut: Code -> Insert Chunk*  
+
+]
+
+.pull-right[
+Normal text above the chunk.
+
+````r
+```{r}`r ''`
+
+R code will be here.
+
+```
+````
+Normal text below the chunk.
+
+]
+
+---
+# R code in chunks
+.pull-left[
+For best script organisation, use a chunk to perform a specific purpose.  
+
+This chunk is for loading packages.
+]
+
+.pull-right[
+
+````r
+```{r}`r ''`
+pacman::p_load(
+  rio,      
+  here,     
+  janitor,  
+  tidyverse
+)
+```
+````
+]
+
+
+---
+# Comments in chunks
+.pull-left[
+Like small R scripts, you can write # comments on the lines
+]
+
+.pull-right[
+
+````r
+```{r}`r ''`
+
+# Load/import my packages
+pacman::p_load(
+  rio,      # import/export
+  here,     # file paths
+  janitor,  # cleaning & simple tables
+  tidyverse # data management & viz
+)
+
+```
+````
+]
+
+
+---
+# Chunk names
+.pull-left[
+Optionally, give your chunk a "name" within the { }
+
+* No spaces  
+* No duplicate names  
+* Name do **not** appear in the output  
+
+]
+
+.pull-right[
+
+````r
+```{r packages}`r ''` 
+
+# Load/import my packages
+pacman::p_load(
+  rio,      # import/export
+  here,     # file paths
+  janitor,  # cleaning & simple tables
+  tidyverse # data management & viz
+)
+
+```
+````
+]
+
+
+---
+# Chunk options
+.pull-left[
+Adjust the "options" of a chunk inside the { } to determine how it affects the report:  
+
+* Run/not run the chunk: `eval =`  
+* Show/hide the code: `echo =`  
+* Show/hide warnings: `warning =`  
+* Show/hide errors: `error =`  
+* Show/hide output: `include =`  
+
+Note the commas between each option.
+]
+
+.pull-right[
+
+````r
+```{r packages, echo = FALSE, warning = FALSE}`r ''` 
+
+# Load/import my packages
+pacman::p_load(
+  rio,      # import/export
+  here,     # file paths
+  janitor,  # cleaning & simple tables
+  tidyverse # data management & viz
+)
+
+```
+````
+]
+
+
+
+---
+# The "setup" chunk
+
+- Provided in R Markdown templates  
+- Uses a {knitr} function to *specify the default "options" for all chunks*  
+
+````r
+```{r setup, include=FALSE}`r ''` 
+
+# set all chunk defaults: 
+# not show code, warning, or error messages in the report
+
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, error = FALSE)
+
+```
+````
+
+Learn more about code chunk options [here](https://rmarkdown.rstudio.com/lesson-3.html)
+
+
+
+---
+class: center, middle
+# Integrating R code and text
+
+
+---
+# Integrating R code and text
 .panelset[
 
-.panel[.panel-name[Inline code]
+.panel[.panel-name[R code into Markdown text]
+
+Often called "inline code":  
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
 
@@ -306,28 +483,287 @@ knitr::include_graphics(here::here("images", "rmd_1", "inline_text.png"))
 
 ]
 
-.panel[.panel-name[Using `str_glue`]
+.panel[.panel-name[Within an R command]
 
+Use `str_glue()` to combine text and R code inside graphics captions, titles, etc.
+
+.pull-left[
 ```{r echo=TRUE, eval=FALSE}
-str_glue("Data include {num_cases} cases and are current to {current_date}.\n{n_missing_onset} cases are missing date of onset and not shown",
-         num_cases = nrow(linelist),
-         current_date = format(Sys.Date(), '%d %b %Y'),
-         n_missing_onset = nrow(linelist %>% filter(is.na(date_onset)))
-         )
+ggplot(data = linelist,
+       mapping = aes(x = date_onset))+
+geom_histogram()+
+labs(
+  title = "Simple epicurve with subtitle"
+  subtitle = str_glue(
+    "{num_cases} cases as of {current_date}; {n_miss} missing date of onset.",
+    num_cases = nrow(linelist),
+    current_date = format(Sys.Date(), '%d %b %Y'),
+    n_miss = epikit::fmt_count(linelist, is.na(date_onset))))
 ```
+]
 
-will render as
+.pull-right[
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+ggplot(data = linelist,
+       mapping = aes(x = date_onset))+
+geom_histogram()+
+labs(
+  title = "Simple epicurve with subtitle",
+  subtitle = str_glue(
+    "{num_cases} cases as of {current_date}; {n_miss} missing date of onset.",
+    num_cases = nrow(linelist),
+    current_date = format(Sys.Date(), '%d %b %Y'),
+    n_miss = epikit::fmt_count(linelist, is.na(date_onset))))+
+  theme_minimal(base_size = 16)
+```
+]
 
-knitr::include_graphics(here::here("images", "rmd_1", "str_glue.png"))
+]
 
+]
+
+---
+## All together
+.pull-left[
+
+````md
+*---
+*title: "Surveillance Report"
+*output: html_document
+*---
+
+```{r setup, include = FALSE}`r ''`
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  error = FALSE)
 ```
 
+```{r import, include = FALSE}`r ''`
+# import the dataset
+surv <- import(here("data", "clean", "linelist.csv"))
+```
+
+## Executive summary
+Report as of `r knitr::inline_expr("max(surv$report_date")`.  
+There are `r knitr::inline_expr("nrow(surv)")` cases.  
+`r knitr::inline_expr("fmt_count(surv, outcome == 'Died')")` died.  
+
+
+## Epidemic curve
+```{r}`r ''`
+surv %>% 
+  ggplot(mapping = aes(x = date_onset))+ 
+  geom_histogram()
+```
+````
+]
+
+--
+.pull-right[
+First, the YAML heading.  
+
+This script will produce an HTML report.
+]
+
+
+
+---
+## All together
+.pull-left[
+
+````md
+---
+title: "Surveillance Report"
+output: html_document
+---
+
+*```{r setup, include = FALSE}`r ''`
+*knitr::opts_chunk$set(
+*  echo = FALSE,
+*  warning = FALSE,
+*  error = FALSE)
+*```
+
+```{r import, include = FALSE}`r ''`
+# import the dataset
+surv <- import(here("data", "clean", "linelist.csv"))
+```
+
+## Executive summary
+Report as of `r knitr::inline_expr("max(surv$report_date")`.  
+There are `r knitr::inline_expr("nrow(surv)")` cases.  
+`r knitr::inline_expr("fmt_count(surv, outcome == 'Died')")` died.  
+
+
+## Epidemic curve
+```{r}`r ''`
+surv %>% 
+  ggplot(mapping = aes(x = date_onset))+ 
+  geom_histogram()
+```
+````
+]
+
+--
+
+.pull-right[
+A "setup" code chunk to set the default options of all chunks.
+
+This chunk says that no code will show in the report, and no warning or error messages produced by the codes.  
 
 ]
 
+
+---
+## All together
+
+.pull-left[
+
+````md
+---
+title: "Surveillance Report"
+output: html_document
+---
+
+```{r setup, include = FALSE}`r ''`
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  error = FALSE)
+```
+
+*```{r import, include = FALSE}`r ''`
+*# import the dataset
+*surv <- import(here("data", "clean", "linelist.csv"))
+*```
+
+## Executive summary
+Report as of `r knitr::inline_expr("max(surv$report_date")`.  
+There are `r knitr::inline_expr("nrow(surv)")` cases.  
+`r knitr::inline_expr("fmt_count(surv, outcome == 'Died')")` died.  
+
+
+## Epidemic curve
+```{r}`r ''`
+surv %>% 
+  ggplot(mapping = aes(x = date_onset))+ 
+  geom_histogram()
+```
+````
 ]
+
+--
+
+.pull-right[
+This separate code chunk imports the dataset.  
+
+It does it silently, this code nor any output will appear in the report.
+
+]
+
+
+---
+## All together
+
+
+.pull-left[
+
+````md
+---
+title: "Surveillance Report"
+output: html_document
+---
+
+```{r setup, include = FALSE}`r ''`
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  error = FALSE)
+```
+
+```{r import, include = FALSE}`r ''`
+# import the dataset
+surv <- import(here("data", "clean", "linelist.csv"))
+```
+
+*## Executive summary
+*Report as of `r knitr::inline_expr("max(surv$report_date")`.  
+*There are `r knitr::inline_expr("nrow(surv)")` cases.  
+*`r knitr::inline_expr("fmt_count(surv, outcome == 'Died')")` died.  
+
+
+## Epidemic curve
+```{r}`r ''`
+surv %>% 
+  ggplot(mapping = aes(x = date_onset))+ 
+  geom_histogram()
+```
+````
+]
+
+--
+
+.pull-right[
+This is "markdown" text - headings and sentences that will appear in the report.  
+
+There is embedded "inline" R code, to make the figures in the text dynamically update (e.g. the dates, case counts, etc).
+
+]
+
+---
+## All together
+
+
+.pull-left[
+
+````md
+---
+title: "Surveillance Report"
+output: html_document
+---
+
+```{r setup, include = FALSE}`r ''`
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  error = FALSE)
+```
+
+```{r import, include = FALSE}`r ''`
+# import the dataset
+surv <- import(here("data", "clean", "linelist.csv"))
+```
+
+## Executive summary
+Report as of `r knitr::inline_expr("max(surv$report_date")`.  
+There are `r knitr::inline_expr("nrow(surv)")` cases.  
+`r knitr::inline_expr("fmt_count(surv, outcome == 'Died')")` died.  
+
+
+*## Epidemic curve
+*```{r}`r ''`
+*surv %>% 
+*  ggplot(mapping = aes(x = date_onset))+ 
+*  geom_histogram()
+*```
+````
+]
+
+--
+
+.pull-right[
+This final code chunk produces a simple histogram of cases by date of onset.  
+
+The code will not appear in the report, but the output (the epicurve) will display.
+
+]
+
+
+---
+class: center, middle
+# Dynamic tables
 
 ---
 
@@ -348,9 +784,9 @@ linelist %>%
 .panel[.panel-name[Type this]
 
 ```{r eval=FALSE, echo=TRUE}
-linelist %>% 
-  head(20) %>% 
-  DT::datatable() #<<
+linelist %>%      # start with full case linelist
+  head(20) %>%    # use only the first 20 rows
+  DT::datatable() # convert to dynamic table #<<
 ```
 
 ]
@@ -359,9 +795,10 @@ linelist %>%
 ---
 
 # Datatable (duplicate slide)
-Ability to provide filtering, pagination, and sorting to HTML tables.
+Allow filtering, pagination, and sorting in HTML tables.
 
 .panelset[
+
 .panel[.panel-name[To get this]
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
 
@@ -385,8 +822,9 @@ linelist %>%
 ---
 # Tables for presentation
 
-- Publication ready summary tables using `flextable` package
-- can be inserted into HTML or Word documents and PPT slides
+- Use `{flextable}` or similar to make summary tables publication-ready  
+- To be displayed in HTML, Word documents, PPT slides, dashboards  
+
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
 
 knitr::include_graphics(here::here("images", "rmd_1", "flex.png"))
@@ -396,12 +834,12 @@ knitr::include_graphics(here::here("images", "rmd_1", "flex.png"))
 ---
 # Customizing reports - HTML
 
-- Several YAML options for
-  - themes
-  - table of contents
-  - showing or hiding code
-
-### YAML example
+For HTML reports, YAML permits advanced customisation, e.g.  
+  - Themes (colors and aesthetics of the report)
+  - Table of contents (static, floating, etc.)
+  - Clickable-buttons to show/hide code display  
+  - "params" to produce the report for sub-groups  
+  
 ```{r eval=FALSE}
 ---
 title: "Surveillance Report"
@@ -416,16 +854,17 @@ output:
 ---
 ```
 
+We will cover these in the exercise, in detail.  
+
 ---
 
 # Customizing reports - Word
 
-- Not many YAML options
-- Cannot include HTML or interactive content 
-  - cannot use `DT` package for tables
-- Can use `flextable`  package
-- Create a *template file* using Rmarkdown with custom styles
-- Include the *template file* in YAML
+In Word outputs, no interactive tables or plots, but you can still use `{flextable}`.  
+
+Word outputs have fewer YAML options, but allow use of Word templates:  
+* Create a *template file* with custom styles, logos, etc.
+* Include the *template file* in the YAML
 
 ```{r eval=FALSE}
 ---
@@ -443,9 +882,7 @@ The Word doc created by RMarkdown will have the same formatting as specified in 
 ---
 # Parametrized reports
 
-R Markdown documents can include one or more parameters whose values can be set when you render the report.
-
-- Used to re-render the same report with distinct values for various key inputs, for example:
+This is a very powerful feature, used to re-render the same report with distinct values, for example:
 
   - Producing a report specific to a department or geographic region.
 
@@ -453,13 +890,16 @@ R Markdown documents can include one or more parameters whose values can be set 
   
   - Producing a report with or without certain sections depending on the audience.
   
+You set default "parameters" in the YAML, and can adjust them every time you render the report.
+
+  
   
 
 ---
-# Option 1 
-## Set parameters within YAML
+# Set params within YAML
 
-- Provide default parameter value
+This YAML sets two params (district and date) with default values.  
+
 ```{r eval=FALSE}
 ---
 title: "Surveillance Report"
@@ -468,14 +908,17 @@ date: "`r Sys.Date()`"
 output: 
   html_document
 params: #<<
-  hospital: "Central Hospital" #<<
+  district: "Central Hospital" #<<
   date: "2021-04-10"          #<<
 ```
 
 
 ---
-# Option 2
-## Set parameters within `render()`
+## Edit params within `render()`
+
+The `render()` command can be used to run your report from another script.  
+
+You can set param values in this command, overriding the defaults in the YAML.  
 
 ```{r, eval=FALSE}
 rmarkdown::render(
@@ -484,11 +927,13 @@ rmarkdown::render(
   params = list(date = "2021-04-10", hospital  = "Central Hospital")) #<<
 ```
 
-**This will over-ride parameters set in YAML**
----
-# Option 3
-## Set parameters using a Graphical User Interface
+We will cover this in module 2 of this course.  
 
+---
+
+## Edit params using "Knit" and the user interface
+
+RStudio offers an option to "Knit with parameters", which opens an interface like this prior to rendering:  
 
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
@@ -503,3 +948,7 @@ class: middle, center
 
 # Demo
 
+
+.footnote[
+Slide formatting tips from [Thomas Mock](https://themockup.blog/posts/2021-08-27-displaying-verbatim-code-chunks-in-xaringan-presentations/#distill-output)
+]
