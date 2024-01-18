@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to R for Applied Epidemiology</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="2022" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle, inverse, title-slide
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+# Introduction to R for Applied Epidemiology
+
+### Pivoting data
+
+contact@appliedepi.org
+---
+
+
+# Restructuring data
+
+*pivoting, reshaping, melting, casting, transforming...* dataframes
+
+&lt;img src="../../../images/joins_pivots/Pivoting_500x500.png" width="222" height="100%" /&gt;
+
+---
+
+# What is pivoting?
+
+* *Excel pivot tables* are a way of summarizing and aggregating data
+
+--
+
+* In R, **pivoting** a dataframe has a **different meaning**
+
+--
+
+* Think of it as *restructuring*, or *reshaping* the dataframe
+
+--
+
+* We will use the `pivot_wider()` and `pivot_longer()` functions from the {tidyr} package
+
+--
+
+* You will often see examples using alternative functions from other packages: 
+     * `melt()` and `cast()` from {reshape2}
+     * `gather()` and `spread()` ancestors of the {tidyr} `pivot_()` functions  
+     * `melt()` and `dcast()` from {data.table}
+     
+     
+     
+     
+
+
+
+---
+# Tidy data
+
+Do you remember the 3 principles of "tidy data"?  
+
+--
+
+1. Each **value** must have its own **cell**
+
+--
+
+2. Each **variable** must have its own **column**
+
+--
+
+3. Each **observation** must have its own **row**  
+
+
+
+
+
+
+
+
+---
+
+# Terminology  
+
+Structurally, "data frames" in R consist of **columns** and **rows**.  
+
+--
+
+However, **"variables"** and **"observations"** are more *abstract* concepts:  
+
+* **Variables** measure one *underlying attribute* (age, outcome, or date of onset)  
+* **Observations** relate to a *unit of analysis*  
+
+--
+
+Ideally, they align: **columns = variables** and **rows = observations**  
+
+&lt;img src="../../../images/data_cleaning/tidy_image_en.png" width="853" height="65%" /&gt;
+
+.footnote[Image source: [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)]
+
+
+
+
+
+---
+# Pivot longer  
+.pull-left[
+Data entry is often in “wide” format  
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 1999 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2000 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2001 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2002 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9250 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10200 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25650 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26800 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27255 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5120 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5860 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+* A subject’s characteristics are stored in a single row  
+* Useful for presentation  
+* **Not** ideal for some types of analysis.
+]
+
+--
+.pull-right[
+**Easier to analyse in "long" format**  
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; cases &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9250 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10200 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25650 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26800 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27255 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5120 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5860 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+]
+
+
+
+
+
+
+
+
+
+
+
+---
+# {ggplot2} example
+
+How to plot cases over time for the three countries?  
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 1999 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2000 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2001 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2002 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9250 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10200 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25650 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26800 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27255 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5120 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5860 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+  
+
+```r
+ggplot(data = example,
+       mapping = aes(x = ???, y = ???))+
+     geom_line()
+```
+
+
+
+
+
+
+---
+# Pivot longer
+
+.pull-left[
+&lt;template id="2fb77959-5fd8-4d46-a509-9e2ba85255b3"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-f9336d42{}.cl-f928849a{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-f92cefd0{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-f92cefda{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-f92d07ae{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f92d07b8{width:0.752in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f92d07cc{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f92d07d6{width:0.752in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f92d07d7{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f92d07e0{width:0.752in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f92d07ea{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f92d07eb{width:0.752in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-f9336d42'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f92d07ae"&gt;&lt;p class="cl-f92cefd0"&gt;&lt;span class="cl-f928849a"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07b8"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07b8"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07b8"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07b8"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f92d07cc"&gt;&lt;p class="cl-f92cefd0"&gt;&lt;span class="cl-f928849a"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07d6"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07d6"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07d6"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07d6"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f92d07d7"&gt;&lt;p class="cl-f92cefd0"&gt;&lt;span class="cl-f928849a"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07e0"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07e0"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07e0"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07e0"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f92d07ea"&gt;&lt;p class="cl-f92cefd0"&gt;&lt;span class="cl-f928849a"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07eb"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07eb"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07eb"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f92d07eb"&gt;&lt;p class="cl-f92cefda"&gt;&lt;span class="cl-f928849a"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="864b7ba9-e65f-490d-b9dc-7949b8b02383"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("864b7ba9-e65f-490d-b9dc-7949b8b02383");
+var template = document.getElementById("2fb77959-5fd8-4d46-a509-9e2ba85255b3");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+* These **column names will be pivoted**  
+
+]
+
+
+
+---
+# Pivot longer
+
+.pull-left[
+&lt;template id="f486f3d4-deb5-47cf-ac62-1d4031343806"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-f95d72b8{}.cl-f952c02a{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-f956ead8{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-f956eae2{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-f956fffa{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f956fffb{width:0.752in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9570004{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f957000e{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9570018{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9570022{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f957002c{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9570036{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-f95d72b8'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f956fffa"&gt;&lt;p class="cl-f956ead8"&gt;&lt;span class="cl-f952c02a"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f956fffb"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f956fffb"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f956fffb"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f956fffb"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9570004"&gt;&lt;p class="cl-f956ead8"&gt;&lt;span class="cl-f952c02a"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f957000e"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f957000e"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f957000e"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f957000e"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9570018"&gt;&lt;p class="cl-f956ead8"&gt;&lt;span class="cl-f952c02a"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9570022"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9570022"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9570022"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9570022"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f957002c"&gt;&lt;p class="cl-f956ead8"&gt;&lt;span class="cl-f952c02a"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9570036"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9570036"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9570036"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9570036"&gt;&lt;p class="cl-f956eae2"&gt;&lt;span class="cl-f952c02a"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="cfc8f986-967f-4f9e-81eb-9fa0368f983a"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("cfc8f986-967f-4f9e-81eb-9fa0368f983a");
+var template = document.getElementById("f486f3d4-deb5-47cf-ac62-1d4031343806");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+* These **values will be re-arranged**    
+
+]
+
+
+
+---
+# Pivot longer
+
+.pull-left[
+&lt;template id="810e50cb-cdec-4468-b763-e4777d4cca42"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-f98516e2{}.cl-f97a3358{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-f97e6c5c{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-f97e6c70{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-f97e846c{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f97e8476{width:0.752in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f97e8480{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f97e848a{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f97e8494{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f97e849e{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f97e849f{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f97e84a0{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-f98516e2'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f97e846c"&gt;&lt;p class="cl-f97e6c5c"&gt;&lt;span class="cl-f97a3358"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e8476"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e8476"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e8476"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e8476"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f97e8480"&gt;&lt;p class="cl-f97e6c5c"&gt;&lt;span class="cl-f97a3358"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e848a"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e848a"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e848a"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e848a"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f97e8494"&gt;&lt;p class="cl-f97e6c5c"&gt;&lt;span class="cl-f97a3358"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e849e"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e849e"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e849e"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e849e"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f97e849f"&gt;&lt;p class="cl-f97e6c5c"&gt;&lt;span class="cl-f97a3358"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e84a0"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e84a0"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e84a0"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f97e84a0"&gt;&lt;p class="cl-f97e6c70"&gt;&lt;span class="cl-f97a3358"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="c0e91a3c-b7e9-4982-b82f-b233634592f7"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("c0e91a3c-b7e9-4982-b82f-b233634592f7");
+var template = document.getElementById("810e50cb-cdec-4468-b763-e4777d4cca42");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+* These **identifiers will be replicated**  
+
+]
+
+
+
+---
+# Pivot longer  
+
+.pull-left[
+&lt;template id="e06a0032-f299-4912-9349-57c142dadd29"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-f9b8ab9c{}.cl-f9abc666{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-f9b1cb4c{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-f9b1cb6a{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-f9b1f0fe{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9b1f112{width:0.752in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9b1f126{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9b1f130{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9b1f131{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9b1f144{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9b1f14e{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9b1f14f{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-f9b8ab9c'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9b1f0fe"&gt;&lt;p class="cl-f9b1cb4c"&gt;&lt;span class="cl-f9abc666"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f112"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f112"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f112"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f112"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9b1f126"&gt;&lt;p class="cl-f9b1cb4c"&gt;&lt;span class="cl-f9abc666"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f130"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f130"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f130"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f130"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9b1f131"&gt;&lt;p class="cl-f9b1cb4c"&gt;&lt;span class="cl-f9abc666"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f144"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f144"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f144"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f144"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9b1f14e"&gt;&lt;p class="cl-f9b1cb4c"&gt;&lt;span class="cl-f9abc666"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f14f"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f14f"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f14f"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9b1f14f"&gt;&lt;p class="cl-f9b1cb6a"&gt;&lt;span class="cl-f9abc666"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="a779cf03-2bf8-4163-b372-7a0fa1c05615"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("a779cf03-2bf8-4163-b372-7a0fa1c05615");
+var template = document.getElementById("e06a0032-f299-4912-9349-57c142dadd29");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+&lt;img src="../../../images/joins_pivots/pivot_command.png" width="100%" /&gt;
+
+* List the columns to pivot  
+* Provide 2 **new column names**  
+
+]
+
+
+.pull-right[
+
+&lt;template id="d197a020-b203-43f5-8071-51ea123a4d63"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-f9ecec5e{}.cl-f9e06e0c{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-f9e56222{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-f9e56236{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-f9e57b36{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9e57b4a{width:0.625in;background-color:rgba(255, 255, 0, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9e57b54{width:0.752in;background-color:rgba(203, 195, 227, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9e57b68{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9e57b72{width:0.625in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9e57b73{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9e57b7c{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9e57b86{width:0.625in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9e57b90{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9e57b91{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9e57b9a{width:0.625in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f9e57b9b{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-f9ecec5e'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b36"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b4a"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;year&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b54"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;cases&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b68"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b72"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b73"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b68"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b72"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b73"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b68"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b72"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b73"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b68"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b72"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b73"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b7c"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b86"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b90"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b7c"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b86"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b90"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b7c"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b86"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b90"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b7c"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b86"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b90"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b7c"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b86"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b90"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b7c"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b86"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b90"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b7c"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b86"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b90"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-f9e57b91"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b9a"&gt;&lt;p class="cl-f9e56222"&gt;&lt;span class="cl-f9e06e0c"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-f9e57b9b"&gt;&lt;p class="cl-f9e56236"&gt;&lt;span class="cl-f9e06e0c"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="41ab3472-748b-458d-8839-3ad6f49823e1"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("41ab3472-748b-458d-8839-3ad6f49823e1");
+var template = document.getElementById("d197a020-b203-43f5-8071-51ea123a4d63");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+# ggplot command
+
+.pull-left[
+
+```r
+example %&gt;%
+  pivot_longer(
+       cols = `1999`:`2002`,
+       names_to = "year",
+       values_to = "cases") %&gt;%
+     
+  ggplot(mapping = aes(
+*           x = year,
+*           y = cases,
+*           color = country,
+*           group = country))+
+  geom_line()
+```
+]
+
+.pull-right[
+
+&lt;img src="module_7-2_files/figure-html/unnamed-chunk-16-1.png" width="504" /&gt;
+
+]
+
+
+---
+# Pivoting wider  
+
+We won't cover pivoting wider in this course, because it is not as frequently used. 
+
+You can explore several examples in these Epi R Handbook chapters:  
+
+* [Pivoting data](https://epirhandbook.com/en/pivoting-data.html#long-to-wide)  
+* [Descriptive tables with {dplyr}](https://epirhandbook.com/en/descriptive-tables.html#tbls_pivot_wider)  
+
+&lt;img src="../../../images/joins_pivots/pivot_wider_new_en.png" width="521" height="100%" /&gt;
+
+
+
+
+---
+# Exercise  
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,0 +1,1232 @@
+---
+title: "Introduction to R for Applied Epidemiology"
+subtitle: "<br>Cleaning data with R"
+author: "2022"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "en"
+---
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,       # for decorating code chunks with colors
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+
+```{r, echo=F, include = F}
+surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic", col_types = "c") %>%
+  clean_names()
+
+mod3 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod3", col_types = "c") %>%
+  clean_names()
+```
+
+# Introduction to R for Applied Epidemiology
+
+### Data cleaning with R (Part 1)
+
+contact@appliedepi.org
+
+---
+# Today: objectives & schedule  
+
+**In this module we aim to help you:**  
+* Gain familiarity of {dplyr} functions used to clean public health data  
+* Apply a series of functions to a data frame using the pipe operator  
+* Begin writing an R script to analyze outbreak data  
+
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  "10 minutes",     "Main" ,     "Review of previous module",
+  "30 minutes",     "Main" ,     "Intro to data cleaning",
+  "15 minutes",     "Main" ,     "Demo of data cleaning",
+  "1h 30 minutes",  "Exercise" ,     "Exercise",
+  "30 minutes",     "Main" ,     "Plenary debrief"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+```
+
+**This is a *long* exercise, but very important.**  
+
+???
+Note stretch breaks throughout.
+
+
+---
+# Review of previous module  
+
+- The versatility, community, and features of R  
+
+--
+
+- R projects, `import()`, and relative file paths with {here}  
+
+--
+
+- Running commands, writing comments, saving objects  
+
+--
+
+- Operators like `<`  `>`  `==`  `%in%`  
+
+--
+
+- Functions, sometimes with multiple arguments  
+
+--
+
+- Reviewing a dataset `skim()`, `summary()`  
+
+--
+
+- Columns and objects have *classes* that can be checked with `class()`  
+
+
+
+
+---
+# Clean data, messy data   
+
+What is involved in "cleaning" a dataset?  
+
+
+.pull-left[
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_broom.png")))
+```
+]
+
+--
+
+.pull-right[
+
+- Prepare for analysis and visualization  
+
+- Standardize column names 
+
+- Subset rows and columns  
+
+- Align spellings  
+
+- Create categorical and calculated variables  
+
+- Join with other data  
+
+- Remove duplicates... 
+ 
+]
+
+
+
+.footnote[]
+
+???
+Ask the participants what steps they take to clean datasets
+
+
+---
+class: inverse, center, middle
+
+## Cleaning data in R 
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "data_cleaning.png")))
+```
+
+
+
+
+
+---
+
+class: medium-large-table
+
+# Review your data  
+
+We will begin working with the *"surveillance_linelist_20141201.csv"*  
+We assigned it the name `surv_raw` when we imported it into R.    
+
+```{r}
+head(surv_raw, 25) %>% 
+  tibble() %>% 
+  DT::datatable(
+    options = list(
+      scrollY = 300,
+      scrollX = 600,
+      pageLength = 25,
+      fontSize = '25%',
+      dom = "ti",
+      ordering = FALSE,
+      rownames = FALSE,
+      options = list(pageLength = 5, scrollX=T),
+      class = 'white-space: nowrap' 
+    )
+  )
+```
+
+???
+Table shows just the first 25 rows, to load faster.  
+
+
+---
+
+# Demo dataset  
+
+Let's use a smaller version to practice with, and explore some core R functions
+```{r, echo=F}
+demo <- surv_raw %>% 
+     head(5) %>% 
+     select(case_id, age, gender, lab_confirmed, `onset date`, `wt (kg)`, `ht (cm)`)
+
+demo <- demo %>% 
+  add_row(demo[4,], .before = 5)
+```
+
+```{r, eval=T}
+demo %>% 
+  knitr::kable()
+     
+```
+
+--
+
+We will name it "**`demo`**"
+
+---
+
+# The {dplyr} package  
+
+.pull-left[
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "dplyr_hex.png")))
+```
+]
+
+.pull-right[
+
+
+* The easiest and most versatile package for data cleaning  
+
+* This package is installed in a universe of {tidyverse} R packages  
+
+* The {tidyverse} has transformed R in the last 5 years  
+
+
+]
+
+.footnote["dplyr" is shorthand for "data plier" - a plier is the handheld tool pictured above]
+
+???
+Tidyverse has made R coding much more user-friendly, intuitive, and accessible to beginner coders  
+
+
+---
+
+# Functions for today  
+
+Function       | Utility                               
+---------------|---------------------------------------
+`filter()`|subset **rows**
+`select()`|subset **columns**
+`clean_names()`|standardise column names  
+`rename()`|rename columns manually 
+`mutate()`|create and transform columns 
+`mdy()`, `dmy()`, `ymd()` |tell R how to understand dates 
+
+
+
+---
+
+# `filter()` rows   
+
+* * 1st argument: a data frame
+
+```{r, eval=F, echo=T}
+filter(demo, ___)
+```
+
+--
+
+* * 2nd+ arguments: logical criteria to apply, to keep rows
+
+```{r eval=FALSE, echo=TRUE}
+filter(demo, age < 18)
+```
+
+--
+
+```{r eval=FALSE, echo=TRUE}
+filter(demo, age < 18, gender == "m")
+```
+
+
+--
+
+The logic can get complex using `&` (AND), `|` (OR), and parentheses
+
+```{r eval=FALSE, echo=TRUE}
+filter(demo, age < 18 & (gender == "m" | lab_confirmed == TRUE))
+```
+
+.footnote[Note use of double equals `==` to test equivalence]
+---
+
+# `filter()` rows   
+
+```{r, eval=F, echo=params$lang == "en"}
+# complete demo data
+filter(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+# données de démo complètes
+filter(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+# полные демонстрационные данные
+filter(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+# datos completos de la demostración
+filter(demo, ___)
+```
+
+```{r, eval=T, echo=F}
+demo %>% knitr::kable()
+```
+
+
+
+---
+
+# `filter()` rows   
+
+
+```{r eval = F, echo=params$lang == "en"}
+# filter applied  
+filter(demo, age < 18)
+```
+
+
+```{r eval = F, echo=params$lang == "fr"}
+# filtre appliqué
+filter(demo, age < 18)
+```
+
+
+```{r eval = F, echo=params$lang == "ru"}
+# применён фильтр
+filter(demo, age < 18)
+```
+
+```{r eval = F, echo=params$lang == "es"}
+# filtro aplicado  
+filter(demo, age < 18)
+```
+
+```{r eval = T, echo=F}
+filter(demo, age < 18) %>% knitr::kable()
+```
+
+
+
+
+---
+
+# `select()` columns 
+
+`select()` also expects a data frame as the first argument
+
+--
+
+```{r, eval=F, echo=params$lang == "en"}
+# complete demo data
+select(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+# données de démo complètes
+select(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+# полные демонстрационные данные
+select(demo, ___)
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+# datos completos de la demostración
+select(demo, ___)
+```
+
+--
+
+```{r, eval=T, echo=F}
+demo %>% knitr::kable()
+```
+
+
+---
+
+# `select()` columns 
+
+You can provide `select()` with column names to *keep*
+
+```{r, eval=F, echo=params$lang == "en"}
+# select() to keep case_id and age columns only
+select(demo, case_id, age)
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+# select() pour ne garder que les colonnes case_id et age
+select(demo, case_id, age)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+#select(), чтобы сохранить только столбцы case_id и age
+select(demo, case_id, age)
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+# select() para mantener sólo las columnas case_id y age
+select(demo, case_id, age)
+```
+
+```{r, eval=T, echo=F}
+select(demo, case_id, age) %>% knitr::kable()
+```
+
+---
+
+# `select()` columns 
+
+You can provide `select()` with column names to *keep*
+
+```{r, eval=F, echo=params$lang == "en"}
+# add gender column
+select(demo, case_id, age, gender)
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+# ajouter la colonne sexe
+select(demo, case_id, age, gender)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+# добавить колонку "пол
+select(demo, case_id, age, gender)
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+# añadir la columna de género
+select(demo, case_id, age, gender)
+```
+
+```{r, eval=T, echo=F}
+select(demo, case_id, age, gender) %>% knitr::kable()
+```
+
+
+---
+
+# `select()` columns 
+
+Or you can provide the columns to *remove* (-)
+
+```{r, eval=F, echo=params$lang == "en"}
+# remove case_id and lab_confirmed columns from original dataset
+select(demo, -case_id, -lab_confirmed)
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+#supprimer les colonnes case_id et lab_confirmed du jeu de données original
+select(demo, -case_id, -lab_confirmed)
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+#удалить столбцы case_id и lab_confirmed из исходного набора данных
+select(demo, -case_id, -lab_confirmed)
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+# eliminar las columnas case_id y lab_confirmed del conjunto de datos original
+select(demo, -case_id, -lab_confirmed)
+```
+
+
+```{r, eval=T, echo=F}
+select(demo, -case_id, -lab_confirmed) %>% knitr::kable()
+```
+
+
+
+
+---
+
+# `filter()` *and* `select()`?
+
+Yes! You can do both (and many more) with the **%>%** "pipe operator".
+
+--
+
+.pull-left[
+
+Most data cleaning happens in a *sequence* of linked steps
+
+* Import  
+* Rename columns  
+* Filter rows  
+* Select columns  
+* Deduplicate  
+* Clean values...
+
+**You can "pipe" (pass) the dataset from one function to the next with the "pipe" operator `%>%`**
+]
+
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "cleaning.png")))
+```
+
+]
+
+
+
+
+---
+# Piping data
+
+Previously, the 1st argument in `filter()` and in `select()` was the data frame
+
+`filter(`**demo**`, age < 18)`
+
+
+--
+
+
+Using pipes, this is now written as:  
+
+**demo** `%>% filter(age < 18)`
+
+--
+
+You can pipe the data through *multiple* functions  
+`demo` **%>%** `filter(age < 18)` 
+
+
+```{r, eval=T, echo=F}
+demo %>% filter(age < 18) %>% knitr::kable()
+```
+
+
+---
+# Piping data
+
+Previously, the 1st argument in `filter()` and in `select()` was the data frame
+
+`filter(`**demo**`, age < 18)`
+
+
+Using pipes, this is now written as:  
+
+**demo** `%>% filter(age < 18)`
+
+
+You can pipe the data through *multiple* functions  
+
+`demo` **%>%** `filter(age < 18)` **%>%** `select(case_id, age, gender)`
+
+
+```{r, eval=T, echo=F}
+demo %>% filter(age < 18) %>% select(case_id, age, gender) %>% knitr::kable()
+```
+
+
+---
+# Vertical coding style
+
+It is better to write in a *vertical* style  
+Newlines and indent will not impact the code, but do make it more readable!
+
+```{r, eval=F, echo=T}
+demo
+```
+
+```{r, eval=T, echo=F}
+demo %>%  
+  #add_row(demo[5,]) %>% 
+  knitr::kable() 
+```
+
+---
+# Vertical coding style
+
+It is better to write in a *vertical* style  
+
+```{r, eval=F, echo=params$lang == "en"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed)        # select columns
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed)        # sélectionner les colonnes
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed)        # выбрать столбцы
+```
+
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed)        # seleccionar columnas
+```
+
+```{r, eval= parms$lang == "en", echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  knitr::kable() 
+```
+
+```{r, eval= params$lang == "fr", echo=F}
+demo %>% 
+  add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # sélectionner les colonnes
+  knitr::kable() 
+```
+
+```{r, eval= params$lang == "ru", echo=F}
+demo %>% 
+  add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
+  knitr::kable() 
+```
+
+```{r, eval= params$lang == "es", echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # de-duplicar
+  knitr::kable() 
+```
+---
+# Vertical coding style
+
+It is better to write in a *vertical* style  
+
+
+```{r, eval=F, echo=params$lang == "en"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct()                                         # de-duplicate
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # sélectionner les colonnes
+  distinct()                                         # dédupliquer 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
+  distinct()                                         # де-дублировать
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # seleccionar columnas
+  distinct()                                         # de-duplicar
+```
+
+```{r, eval=T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct() %>%                                     # de-duplicate
+  knitr::kable() 
+```
+
+---
+# Vertical coding style
+
+It is better to write in a *vertical* style  
+
+
+```{r, eval=F, echo=params$lang == "en"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct() %>%                                     # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE)            # only young children confirmed cases
+```
+
+```{r, eval=F, echo= params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # Sélectionner les colonnes
+  distinct() %>%                                     # dédupliquer 
+  filter(age < 18, lab_confirmed == TRUE)            # uniquement les cas confirmés d'enfants 
+```
+
+```{r, eval=F, echo=params$lang== "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
+  distinct()  %>%                                    # де-дублировать
+  filter(age < 18, lab_confirmed == TRUE)            #подтвержденные случаи заболевания только у маленьких детей
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # seleccionar columnas
+  distinct() %>%                                     # de-duplicar
+  filter(age < 18, lab_confirmed == TRUE)            # sólo los casos confirmados de niños pequeños
+```
+
+```{r, eval=T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct() %>%                                     # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE) %>%        # only young children confirmed cases
+  knitr::kable() 
+```
+
+
+
+---
+# Vertical coding style
+
+It is better to write in a *vertical* style  
+
+
+```{r, eval=F, echo=params$lang == "en"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # select columns
+  distinct() %>%                                     # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE) %>%        # only children cases      
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # create a column      
+ 
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # Sélectionner les colonnes
+  distinct() %>%                                     # dédupliquer 
+  filter(age < 18, lab_confirmed == TRUE) %>%        # uniquement les cas confirmés d'enfants
+  mutate(infant = ifelse(age < 1, "infant", "not infant")) # créer une colonne       
+ 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # выбрать столбцы
+  distinct()  %>%                                    # де-дублировать
+  filter(age < 18, lab_confirmed == TRUE) %>%        # подтвержденные случаи заболевания только у детей младшего возраста                   
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # создать столбец
+ 
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # seleccionar columnas
+  distinct() %>%                                     # de-duplicar
+  filter(age < 18, lab_confirmed == TRUE) %>%        # casos confirmados sólo en niños pequeños      
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # crear una columna      
+ 
+```
+
+```{r, eval=T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%          
+  distinct() %>%                                           
+  filter(age < 18, lab_confirmed == TRUE) %>%              
+  mutate(infant = ifelse(age < 1, "infant", "not infant")) %>% 
+  knitr::kable()
+```
+
+.footnote[Is there a pipe operator at the end of this workflow?]
+
+
+---
+# Vertical coding style
+
+It is better to write in a *vertical* style  
+
+```{r, eval=F, echo=params$lang == "en"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%            # select columns   
+  distinct() %>%                                             # de-duplicate   
+  filter(age < 18, lab_confirmed == TRUE) %>%                # only children cases   
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))   # create a column    
+ 
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%    # Sélectionner les colonnes
+  distinct() %>%                                     # dédupliquer 
+  filter(age < 18, lab_confirmed == TRUE) %>%        # uniquement les cas confirmés d'enfants
+  mutate(infant = ifelse(age < 1, "infant", "not infant")) # créer une colonne       
+ 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%                # выбрать столбцы
+  distinct() %>%                                                 # де-дублировать
+  filter(age < 18, lab_confirmed == TRUE) %>%                    # подтвержденные случаи заболевания только у детей младшего возраста
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))       # создать столбец
+ 
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+demo %>% 
+  select(case_id, age, gender, lab_confirmed) %>%                # seleccionar columnas
+  distinct() %>%                                                 # de-duplicar
+  filter(age < 18, lab_confirmed == TRUE) %>%                    # casos confirmados sólo en niños pequeños
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))       # crear una columna
+ 
+```
+
+```{r, eval=T, echo=F}
+demo %>% 
+  #add_row(demo[5,]) %>% 
+  select(case_id, age, gender, lab_confirmed) %>%          
+  distinct() %>%                                           
+  filter(age < 18, lab_confirmed == TRUE) %>%              
+  mutate(infant = ifelse(age < 1, "infant", "not infant")) %>% 
+  knitr::kable()
+```
+
+The pipes connect all these functions into one, linked command.  
+How would you run this command in RStudio?  
+
+
+
+---
+# Clean column names  
+
+Let's print the column names in `demo` by piping to the function `names()`:  
+
+```{r, echo=T}
+demo %>% 
+  names()
+```
+
+--
+
+Pipe `demo` into `clean_names()` from {janitor} package to standardize  
+
+* removes spaces and special characters  
+* all to lowercase  
+
+```{r, echo=T}
+demo %>% 
+  clean_names() %>%     #<<
+  names()
+```
+(*see the change to final two columns*)  
+
+--
+
+But how do we *edit* the column names?  
+
+---
+
+# Renaming columns
+
+Typically we use `rename()`:  
+
+--
+
+Write the NEW name and the OLD name as below:  
+
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
+demo %>% 
+  clean_names() %>% 
+  rename(
+       # NEW      = OLD
+       age_years  = age,                    #<<
+       date_onset = onset_date) %>%         #<<
+  names()
+```
+
+```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
+demo %>% 
+  clean_names() %>% 
+  rename(
+       # Nouveau  = Ancien
+       age_years  = age,                    #<<
+       date_onset = onset_date) %>%         #<<
+  names()
+```
+
+```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
+demo %>% 
+  clean_names() %>% 
+  rename(
+       # НОВЫЙ = СТАРЫЙ
+
+       age_years  = age,                    #<<
+       date_onset = onset_date) %>%         #<<
+  names()
+```
+
+```{r, eval=params$lang == "es", echo=params$lang == "es"}
+demo %>% 
+  clean_names() %>% 
+  rename(
+       # NUEVO      = ANTIGUO
+       age_years  = age,                    #<<
+       date_onset = onset_date) %>%         #<<
+  names()
+```
+
+
+---
+
+# Printing vs. saving   
+
+Our pipes have only *printed* the modified `demo` - the data frame has **not** changed!  
+
+```{r, echo=params$lang == "en", eval=F}
+demo %>%                    # PRINT only child cases
+  filter(age < 18)
+```
+
+```{r, echo=params$lang == "fr", eval=F}
+demo %>%                    # IMPRIMER uniquement les cas d'enfants
+  filter(age < 18)
+```
+
+```{r, echo=params$lang == "ru", eval=F}
+demo %>%                   # ПЕЧАТАТЬ только детские случаи
+  filter(age < 18)
+```
+
+```{r, echo=params$lang == "es", eval=F}
+demo %>%                    # PRINT only child cases
+  filter(age < 18)
+```
+
+```{r, echo=F, eval=T}
+demo %>%                    # Imprime sólo los casos de niños
+  filter(age < 18) %>% 
+  knitr::kable()
+```
+
+--
+
+
+To save: add the assignment operator **<-** to define a new data frame. 
+
+```{r pipe-assign, eval=F, echo=T}
+demo_children <- demo %>%
+  filter(age < 18)
+```
+
+(No output to the R console, but a new object in the Environment pane)   
+
+???
+Note how the column names in `demo` are old! It's because our changes have not yet been saved.  
+
+---
+
+# `mutate()` to create columns  
+ 
+`mutate()` is used to *create* new columns
+
+```{r, results = "asis", echo = FALSE}
+str_glue("The syntax is: new column name = a function that creates the new values:") %>%
+  flair("new column name", color = "deeppink") %>%
+  flair("function", color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+--
+
+```{r mutate, include = F}
+demo %>% 
+  mutate(age_group = ifelse(age >= 18, 'adult', 'minor')) # creates new T/F column
+```
+
+```{r mutate_flair, echo=F}
+decorate("mutate") %>%
+  flair("age_group", color = "deeppink") %>%
+  flair("ifelse(age >= 18, 'adult', 'minor')", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+--
+
+`ifelse()` applies a logical criteria to each row, returns one value if true, and returns another value if false.  
+
+---
+
+# `mutate()` to edit columns  
+ 
+`mutate()` is also used to *edit* existing columns, such as *recoding* values
+
+Below, `recode()` is used inside `mutate()` to recode the gender column  
+
+--
+
+
+
+```{r echo=params$lang == "en", eval=params$lang == "en"}
+demo %>% 
+  mutate(gender = recode(gender,   #re-define gender as: 
+    'm' = 'male',                  # when "m", change to "male"   
+    'f' = 'female'))               # when "f", change to "female"
+```
+
+```{r echo=params$lang == "fr", eval=params$lang == "fr"}
+demo %>% 
+  mutate(gender = recode(gender,   # redéfinir le genre comme : 
+    'm' = 'male',                  # quand 'm', devient 'male'   
+    'f' = 'female'))               # quand "f", devient 'female'
+```
+
+```{r echo=params$lang == "ru", eval=params$lang == "ru"}
+demo %>% 
+  mutate(gender = recode(gender,   # переопределите пол как:
+    'm' = 'male',                  # когда "m", меняется на "male"
+    'f' = 'female'))               # когда "f", меняется на "female"
+```
+
+```{r echo=params$lang == "es", eval=params$lang == "es"}
+demo %>% 
+  mutate(gender = recode(gender,   # redefinir el género como 
+    'm' = 'male',                  # cuando "m", cambiar a "masculino"   
+    'f' = 'female'))               # cuando "f", cambiar a "mujer"
+```
+
+???
+Explain that there are many nuances to case_when() which you will practice in the breakout exercise
+
+---
+# What about dates?
+
+It is important that R understands dates correctly (not as character values!)   
+
+.pull-left[
+
+The easiest method is to use functions from the {lubridate} package  
+
+**End goal**:  
+
+* (display in data as YYYY-MM-DD) 
+* `class()` of the column is "date" 
+
+More details in this [Epi R Handbook chapter](https://epirhandbook.com/en/working-with-dates.html)
+
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "Dates_500x500.png")))
+```
+
+]
+
+
+---
+# {lubridate} functions   
+
+Use the {lubridate} function that aligns with the *current format*:  
+
+* `ymd()` for YYYY-MM-DD  
+* `dmy()` for DD-MM-YYYY  
+* `mdy()` for MM-DD-YYYY 
+
+--
+
+.pull-left[
+
+```{r, eval=T, echo=T}
+demo %>% 
+  clean_names() %>% 
+  select(case_id, onset_date) %>% 
+  tibble()
+```
+
+]
+
+--
+
+.pull-right[
+ 
+```{r, eval=T, echo=T}
+demo %>% 
+  clean_names() %>% 
+  mutate(onset_date = mdy(onset_date)) %>%  #<<
+  select(case_id, onset_date) %>% 
+  tibble()
+```
+
+]
+
+Using the `tibble()` view, you can see the class of each column above the values
+
+
+
+---
+class: inverse, center, middle
+
+
+
+## Exercise  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "COVID dominoes.png")))
+```

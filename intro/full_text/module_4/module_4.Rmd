@@ -1,0 +1,451 @@
+---
+title: "Introduction to R for Applied Epidemiology"
+subtitle: "<br>Cleaning data with R: Part 2"
+author: "2022"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "en"
+---
+class: inverse, center, middle, title-slide
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,       # for decorating code chunks with colors
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+
+```{r, echo=F, include = F}
+surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic", col_types = "c") %>%
+  clean_names()
+
+mod4 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod4", col_types = "c") %>%
+  clean_names()
+```
+
+# Introduction to R for Applied Epidemiology
+
+### Data cleaning with R (part 2)
+
+contact@appliedepi.org
+
+
+---
+# Today: objectives & schedule  
+
+**In this module we aim to help you:**  
+* Gain familiarity of {dplyr} functions used to clean public health data  
+* Apply a series of functions to a data frame using the pipe operator  
+* Begin writing an R script to analyze outbreak data  
+
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  "15 minutes", "Main", "Review of previous module", 
+  "15 minutes", "Main", "Demo - logical coding",
+  "1hr30 minutes", "Break outs", "Exercise",
+  "30 minutes", "Main", "Plenary debrief"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+```
+
+**This is a *long* exercise, but very important.**   
+
+???
+Note stretch breaks throughout.
+
+
+---
+# mod4_h1_review  
+
+
+
+---
+
+# Demo dataset  
+
+Let's use a smaller version to practice with, and explore some core R functions
+```{r, echo=F}
+demo <- surv_raw %>% 
+     head(5) %>% 
+     select(case_id, age, gender, lab_confirmed, fever, epilink)
+```
+
+```{r, eval=T}
+demo %>% 
+  knitr::kable()
+     
+```
+
+--
+
+We will name it "**`demo`**"
+
+---
+
+# The {dplyr} package  
+
+Some of the {dplyr} functions we will use:   
+
+
+Function       | Utility                               
+---------------|---------------------------------------
+create and transform columns  
+simple logical re-coding of values  
+complex logical re-coding of values   
+create age category column   
+value prioritisation   
+subset and arrange columns  
+
+
+
+
+
+
+---
+
+# Printing vs. saving   
+
+Our pipes have only *printed* the modified `demo` - the data frame has **not** changed! 
+
+```{r, echo=params$lang == "en", eval=F}
+demo %>%                    # PRINT only cases over 10 years
+  filter(age > 10)
+```
+
+```{r, echo=params$lang == "fr", eval=F}
+demo %>%                    # IMPRIMER seulement les cas plus que 10 ans
+  filter(age > 10)
+```
+
+```{r, echo=params$lang == "ru", eval=F}
+demo %>%                    # ПЕЧАТАТЬ только случаи старше 10 лет
+  filter(age > 10)
+```
+
+```{r, echo=params$lang == "es", eval=F}
+demo %>%                    # IMPRIMIR sólo los casos de más de 10 años
+  filter(age > 10)
+```
+
+```{r, echo=F, eval=T}
+demo %>%                    # print only cases over 10 years
+  filter(age > 10) %>% 
+  knitr::kable()
+```
+
+--
+
+
+To save: add the assignment operator **<-** to define a new data frame. 
+
+```{r pipe-assign, eval=F, echo=T}
+demo_over10 <- demo %>%
+  filter(age > 10)
+```
+
+(No output to the R console, but a new object in the Environment pane)   
+
+???
+Note how the column names in `demo` are old! It's because our changes have not yet been saved.  
+
+---
+
+# `mutate()` to edit columns  
+ 
+`mutate()` is also used to *edit* existing columns, such as *recoding* values
+
+Below, `recode()` is used inside `mutate()` to recode the gender column  
+
+--
+
+
+
+```{r, echo=params$lang == "en", eval=params$lang == "en"}
+demo %>% 
+  mutate(gender = recode(gender,   # re-define gender as: 
+    "m" = "male",                  # when "m", change to "male"   
+    "f" = "female"))               # when "f", change to "female"
+```
+
+
+```{r, echo=params$lang == "fr", eval=params$lang == "fr"}
+demo %>% 
+  mutate(gender = recode(gender,   # redéfinir le sexe: 
+    "m" = "male",                  # ou "m" devient "male"
+    "f" = "female"))               # ou "f" devient "female"
+```
+
+
+```{r, echo=params$lang == "ru", eval=params$lang == "ru"}
+demo %>% 
+  mutate(gender = recode(gender,   # переопределить пол как: 
+    "m" = "male",                  # когда "m", меняется на "male" 
+    "f" = "female"))               # когда "f", меняется на "female"  
+```
+
+```{r, echo=params$lang == "es", eval=params$lang == "es"}
+demo %>% 
+  mutate(gender = recode(gender,   #redefinir género como: 
+    "m" = "male",                  # cuando "m", cambiar a "masculino"   
+    "f" = "female"))               # cuando "f", cambiar a "mujer"
+```
+
+
+
+???
+Explain that there are many nuances to case_when() which you will practice in the breakout exercise
+
+
+
+---
+
+# `ifelse()` for simple logic  
+ 
+`ifelse()` within `mutate()` is used to apply simple recoding logic  
+
+```{r, results = "asis", echo = FALSE}
+str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_3", params$lang])}) %>%
+  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_4", params$lang])}), color = "deeppink") %>%
+  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_5", params$lang])}), color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+--
+
+```{r mutate_en, include = FALSE}
+demo %>% 
+  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # creates new T/F column
+```
+
+
+```{r mutate_fr, include = FALSE}
+demo %>% 
+  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # crée une nouvelle colonne vrai-faux
+```
+
+
+```{r mutate_ru, include = FALSE}
+demo %>% 
+  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # создает новый столбец типа истина-ложь
+```
+
+```{r mutate_es, include = FALSE}
+demo %>% 
+  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # crea una nueva columna T/F
+```
+
+```{r mutate_flair_en, echo=F, eval = params$lang == "en"}
+decorate("mutate_en") %>%
+  flair("adult", color = "deeppink") %>%
+  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r mutate_flair_fr, echo=F, eval = params$lang == "fr"}
+decorate("mutate_fr") %>%
+  flair("adult", color = "deeppink") %>%
+  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r mutate_flair_ru, echo=F, eval = params$lang == "ru"}
+decorate("mutate_ru") %>%
+  flair("adult", color = "deeppink") %>%
+  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+```{r mutate_flair_es, echo=F, eval = params$lang == "es"}
+decorate("mutate_en") %>%
+  flair("adult", color = "deeppink") %>%
+  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+--
+
+`ifelse()` applies a logical criteria to each row, returns one value if true, and returns another value if false.  
+
+
+
+---
+
+# Use `case_when()` for complex logic 
+ 
+`case_when()` is used to test a series of logical criteria against each row, and assign a corresponding new value. 
+
+--
+
+```{r, results = "asis", echo = FALSE}
+str_glue({paste0(mod4[mod4$uid == "mod4_tx_casewhen_4", params$lang])}) %>%
+  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_casewhen_5", params$lang])}), color = "orange") %>%
+  flair("~", color = "deeppink") %>%
+  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_casewhen_6", params$lang])}), color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r mutate3, include = F}
+demo %>% 
+  mutate(case_def = case_when(
+    lab_confirmed == TRUE             ~ "Confirmed",
+    epilink == 'yes' & fever == 'yes' ~ "Suspect",
+    TRUE                              ~ "To investigate"))
+```
+
+```{r mutate3_flair, echo=F}
+decorate("mutate3") %>%
+  flair("'Confirmed", color = "cornflowerblue") %>%
+  flair("'Suspect'", color = "cornflowerblue") %>%
+  flair("To investigate)", color = "cornflowerblue") %>%
+  flair("~", color = "deeppink") %>%
+  flair("lab_confirmed == TRUE", color = "orange") %>%
+  flair(" epilink == 'yes' & fever == 'yes'", color = "orange") %>%
+  knit_print.with_flair()
+```
+
+
+Every row in the dataset is evaluated for the criteria (from top-to-bottom). 
+
+
+
+???
+Explain that there are many nuances to case_when() which you will practice in the breakout exercise
+
+
+
+
+
+---
+class: inverse, center, middle
+
+
+
+## Exercise  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "COVID dominoes.png")))
+```

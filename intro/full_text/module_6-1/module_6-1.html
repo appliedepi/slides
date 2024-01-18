@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to R for Applied Epidemiology</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle, inverse, title-slide
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+
+
+&lt;style type="text/css"&gt;
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+&lt;/style&gt;
+
+# Introduction to R for Applied Epidemiology
+
+### Introduction to data visualization with {ggplot2}
+
+contact@appliedepi.org
+---
+
+# Today: objectives &amp; schedule
+
+**In this module we aim to help you:**
+* Understand the {ggplot2} "Grammar of graphics"
+* Build simple box/scatter/bar plots and histograms
+* Adjust the scales, themes, and labels of the plots
+
+&lt;template id="a3b04602-bdb1-426b-8187-9a3856eba9e4"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-3526c9ee{}.cl-35138adc{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-351b45c4{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-351b7832{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b7846{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b7850{width:2.84in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b7864{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b786e{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b7878{width:2.84in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b7882{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b7883{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b788c{width:2.84in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b7896{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78a0{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78aa{width:2.84in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78ab{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78b4{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78b5{width:2.84in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78be{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78bf{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78c8{width:2.84in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78c9{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78d2{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78dc{width:2.84in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78dd{width:1.202in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78e6{width:0.973in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-351b78f0{width:2.84in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-3526c9ee'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-351b7832"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b7846"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b7850"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-351b7864"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b786e"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b7878"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;ggplot2 'Grammar of Graphics' syntax&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-351b7882"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;10 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b7883"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b788c"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Live demonstration&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-351b7896"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;1h30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b78a0"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Breakouts&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b78aa"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Exercise: simple plots&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-351b78ab"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b78b4"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b78b5"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Scales, themes &amp;amp; labels&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-351b78be"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;1 hour&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b78bf"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Breakouts&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b78c8"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Fine-tuning plots&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-351b78c9"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;10 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b78d2"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Main&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-351b78dc"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Plenary debrief&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-351b78dd"&gt;&lt;p class="cl-351b45c4"&gt;&lt;span class="cl-35138adc"&gt;Breaks are incorporated above, but not shown as rows&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="877ae80a-d114-4666-b7de-f25e0d9a6bd1"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("877ae80a-d114-4666-b7de-f25e0d9a6bd1");
+var template = document.getElementById("a3b04602-bdb1-426b-8187-9a3856eba9e4");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+
+
+
+
+---
+class: inverse, center, middle
+
+## Data visualization with {ggplot2}
+
+
+&lt;img src="../../../images/ggplot_intro/ggplot2_hex.png" width="50%" /&gt;
+
+
+
+
+---
+# Visualization options in R
+
+Today we focus on {ggplot2} because it:
+
+* is good for fast data exploration of multi-dimensional data
+* produces very **high quality** final outputs
+* has well-structured grammar =&gt; **high consistency**
+* is accompanied by many packages that expand functionality
+
+See the [R graph gallery](https://www.r-graph-gallery.com/ggplot2-package.html) for inspiration.
+
+.footnote[Other plotting options include [**base** R](https://towardsdatascience.com/base-plotting-in-r-eb365da06b22), [**lattice**](https://www.statmethods.net/advgraphs/trellis.html), and [**plotly**](https://plotly.com/r/).
+]  
+
+
+
+
+
+---
+# Was it made with ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/clustering.png" width="100%" /&gt;
+
+
+
+---
+# Was it made with ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/dumbbell_chart.png" width="50%" /&gt;
+
+
+
+---
+# Was it made with ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/map.png" width="50%" /&gt;
+
+
+
+---
+# Was it made with ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/bike_london.png" width="100%" /&gt;
+
+
+
+---
+# Was it made with ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/swiss_map.png" width="90%" /&gt;
+
+
+
+---
+# Was it made with ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/phylo_tree.png" width="60%" /&gt;
+
+
+
+---
+# Was it made with ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/uk_geography.jpg" width="100%" /&gt;
+
+
+---
+# Was it made with ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/art_ggplot.png" width="50%" /&gt;
+
+
+
+---
+# Was it made with ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/van_gogh.jpg" width="80%" /&gt;
+
+
+
+
+---
+# gg-what??
+
+--
+
+- The {ggplot2} *package* is the most popular data visualization tool in R
+
+--
+
+- Its `ggplot()` *function* is at the core of the package
+
+--
+
+- This whole approach is colloquially known as “ggplotting”
+
+--
+
+- Resulting figures are sometimes affectionately called “ggplots”
+
+--
+
+{ggplot2} is accompanied by numerous packages that extend its functionalities, such as {gganimate}, {ggthemr}, {ggdendro}, {gghighlight}, {ggforce}...
+
+.footnote[
+*Bonus question:* What does the "gg” in these names represent?
+]
+
+???
+- "gg" represents the “grammar of graphics” used to construct the figures 
+
+
+
+
+
+---
+# Grammar of Graphics
+
+Build a plot object by “adding” commands on top of one another that specify plot layers and design elements
+
+
+--
+
+The order of layers will usually look like this:
+
+1) **"Open" the plot** with the `ggplot()` command and specify the dataset
+
+--
+
+2) **"Map" data columns** to "aesthetic" features of the plot such as axes, color, size, shape, fill, transparency
+
+--
+
+3) **Add (`+`) “geom” layers** that visualize data geometrically as shapes
+
+--
+
+4) **Modify "scales"**, such as a color scale or y-axis breaks
+
+--
+
+5) **Add "theme" plot design elements** such as axis labels, title, caption, fonts, text sizes, background themes, or axes rotation
+
+--
+
+These layers are "added" sequentially with **`+`** symbols.
+{ggplot2} commands can be quite long!
+
+
+???
+Remember that although the commands may be long, it is infinitely easier to edit and recycle than in Excel  
+
+
+
+
+
+
+
+---
+# Open the plot
+
+.pull-left[
+
+
+```r
+ggplot()                   
+```
+
+`ggplot()` creates an empty canvas.
+
+
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-17-1.png" width="504" /&gt;
+] 
+
+???
+This is only a blank canvas, we have not defined what should be in the x and y axes. 
+If several data frames are needed, they can be added in their own geoms.
+Piping is useful to make one-time changes to a dataset prior to plotting.  
+
+
+
+---
+# Add the data
+
+.pull-left[
+
+
+```r
+ggplot(data = surv)                   
+```
+
+Assign the data frame to use.
+
+Alternatively, use the `%&gt;%` pipe operator to "pipe" a data frame *into* `ggplot()`
+
+
+```r
+surv %&gt;%
+  ggplot()
+```
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-20-1.png" width="504" /&gt;
+] 
+
+???
+This is only a blank canvas, we have not defined what should be in the x and y axes. 
+If several data frames are needed, they can be added in their own geoms.
+Piping is useful to make one-time changes to a dataset prior to plotting.  
+
+
+
+
+---
+# Add the data
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv)                   
+```
+
+Newlines and indents will not impact the code execution.
+
+They can make longer commands easier to read...
+
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-22-1.png" width="504" /&gt;
+] 
+
+???
+This is only a blank canvas, we have not defined what should be in the x and y axes. 
+If several data frames are needed, they can be added in their own geoms.
+Piping is useful to make one-time changes to a dataset prior to plotting.  
+
+
+
+---
+# Mappings with `aes()`
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+* mapping = aes())
+```
+
+Plot "aesthetics" are features like position, color, shape...
+
+`mapping = aes()` maps "aesthetics" to columns in the data.
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-24-1.png" width="504" /&gt;
+] 
+
+???
+ggplot commands tend to get very vertical (long)  
+
+
+
+
+
+---
+# Mappings with `aes()`
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(        
+*  x = age_years
+   ))               
+```
+
+Aesthetic mappings are placed within `aes()`.
+
+Two basic mappings are axes to columns, via:
+`x = `   
+
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-26-1.png" width="504" /&gt;
+] 
+
+???
+ggplot commands tend to get very vertical (long)  
+
+
+
+
+---
+# Mappings with `aes()`
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(        
+*  x = age_years,
+*  y = ht_cm))
+```
+
+Aesthetic mappings are placed within `aes()`.
+
+Two basic mappings are axes to columns, via:
+`x = ` and `y = `
+
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-28-1.png" width="504" /&gt;
+] 
+
+???
+ggplot commands tend to get very vertical (long)  
+
+
+
+
+
+---
+# Add geometry
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm)) +
+*geom_point()
+```
+
+Data are visualized using "geom" commands, such as `geom_point()`.
+
+These commands are "added"
+with a **`+`** to the `ggplot()` command.
+
+]
+
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-30-1.png" width="504" /&gt;
+
+]
+
+
+
+
+---
+# Geometries
+
+.pull-left[
+
+Some classical “geoms” include:
+
+Geometry   |Geom
+------------------------------------------------------------------------|--------------------------------------------------------------------
+Histograms|`geom_histogram()`  
+Points|`geom_point()`
+
+.footnote[Full list [here](https://ggplot2.tidyverse.org/reference/)
+]  
+
+]
+
+
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-31-1.png" width="504" /&gt;
+
+]
+
+
+
+
+
+---
+# Geometries
+
+.pull-left[
+
+Some classical “geoms” include:
+
+Geometry   |Geom
+------------------------------------------------------------------------|--------------------------------------------------------------------
+Lines|`geom_line()`  
+Bar plots|`geom_bar()` or `geom_col()`  
+
+.footnote[Full list [here](https://ggplot2.tidyverse.org/reference/)]
+
+]
+
+
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-32-1.png" width="504" /&gt;
+
+]
+
+
+
+---
+# Geometries
+
+.pull-left[
+
+Some classical “geoms” include:
+
+Geometry   |Geom
+------------------------------------------------------------------------|--------------------------------------------------------------------
+Boxplots|`geom_boxplot()`  
+Violin plots|`geom_violin())` 
+
+
+.footnote[Full list [here](https://ggplot2.tidyverse.org/reference/)]
+
+]
+
+
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-33-1.png" width="504" /&gt;
+
+]
+
+
+
+
+
+
+
+
+---
+# Adding geoms
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm)) +
+*geom_point()
+```
+
+With axes now mapped, `geom_point()` displays the data as points.
+
+]
+
+.pull-right[
+
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-35-1.png" width="504" /&gt;
+
+] 
+
+
+
+
+
+
+---
+# Adding geoms
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm)) +
+geom_point() +
+*geom_smooth()
+```
+
+We can add additional geoms to the current plot with `+`.
+
+*Geoms appear in the order they are written*: the smoothed line appears over the points.
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-37-1.png" width="504" /&gt;
+] 
+
+.footnote[`geom_smooth()` gives smoothed conditional means, helping to show trends in presence of "over-plotting" (see [documentation](https://ggplot2.tidyverse.org/reference/geom_smooth.html))]
+
+
+???
+- Explain why you might use one or the other
+
+
+
+
+
+
+---
+# A quick note on indentations
+
+Indentations, spaces, and newlines do not impact code execution, and can be varied to improve readability.
+
+
+```r
+ggplot(data = surv, mapping = aes(x = age_years, y = ht_cm))+geom_point()
+```
+
+--
+
+is the same as:
+
+
+```r
+ggplot(data = surv,
+       mapping = aes(x = age_yers, y = ht_cm)) +
+geom_point()
+```
+
+--
+
+is the same as:
+
+
+```r
+ggplot(
+  data = surv,        # use case linelist
+  mapping = aes(      # make aesthetic mappings for all geoms
+    x = age_years,    # assign x-axis to age column
+    y = ht_cm)) +     # assign y-axis to height
+geom_point()          # display data as points
+```
+
+
+
+
+
+
+
+
+
+
+
+???
+- Which of the above is easier to read for you?
+- Explain why you might use one or the other 
+long style can enable informative comments/annotations
+- short style very dense (harder to read for some). Shorter scripts, but so what? The number of lines of your code is not an informative metric.
+- very long lines =&gt; needs to scroll horizontally for people with smaller monitors (not nice)
+- long-ish style makes it easier to see which argument belongs to each function
+- spaces around "=" or "+" =&gt; make it easier to parse to many people
+- other?
+
+
+
+
+
+
+
+
+---
+
+class: large-table
+
+# Other aesthetics
+
+Aside from axes, other common "aesthetics" include:
+
+Argument|Controls
+-------------------------------------------------------------------|--------------------------------------------------------------------
+`shape`      |Display of point as dot, star, triangle, square...
+`fill`       |The *interior* color (e.g of bar or boxplot)
+`color`      |The *exterior* or bar, boxplot - OR point color
+`size`       |Line thickness, point size...
+`alpha`      |Transparency: 0 (invisible) to 1 (opaque)
+`width`      |Width of "bar plot" bars
+`linetype`   |Either solid, dashed, dotted, etc.
+`binwidth`   |Width of histogram bins
+  
+
+
+???
+
+Note that “aesthetic” in ggplot has a specific meaning that you might associate with the word “aesthetics” in common English. In ggplot those details are called “themes” and are adjusted within a theme() command
+
+Each geom accepts certain aesthetics, like `binwidth=` for `geom_histogram()`
+
+
+
+---
+
+class: medium-text
+
+# Aesthetics assignments
+
+
+.pull-left[
+
+Aesthetics can be assigned to either:
+
+* **Static values**: `color = "purple"`
+  - Assigned *outside* `aes()`
+  - Same display for all data
+
+&lt;/br&gt;
+&lt;/br&gt;
+&lt;/br&gt;
+&lt;/br&gt;
+
+
+]
+
+
+.pull-right[
+
+Some examples:
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-45-1.png" width="504" /&gt;
+
+
+
+
+
+
+
+
+]
+
+
+
+---
+
+class: medium-text
+
+# Aesthetics assignments
+
+
+.pull-left[
+
+Aesthetics can be assigned to either:
+
+* **Static values**: `color = "purple"`
+  - Assigned *outside* `aes()`
+  - Same display for all data
+
+&lt;/br&gt;
+&lt;/br&gt;
+&lt;/br&gt;
+&lt;/br&gt;
+
+* **A data column**: `aes(color = hospital)`
+  - Assigned *inside* `aes()`
+  - Displays data as "groups"
+  
+
+]
+
+
+.pull-right[
+
+Some examples:
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-50-1.png" width="504" /&gt;
+
+
+
+
+
+
+
+
+
+
+
+]
+
+
+
+
+
+---
+
+class: medium-text
+
+# Aesthetics assignments
+
+
+.pull-left[
+
+Aesthetics can be assigned to either:
+
+* **Static values**: `color = "purple"`
+  - Assigned *outside* `aes()`
+  - Same display for all data
+  
+&lt;/br&gt;
+&lt;/br&gt;
+&lt;/br&gt;
+&lt;/br&gt;
+
+* **A data column**: `aes(color = hospital)`
+  - Assigned *inside* `aes()`
+  - Displays data as "groups"
+  
+
+]
+
+
+.pull-right[
+
+More examples: 
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-55-1.png" width="504" /&gt;
+
+
+
+
+
+
+
+
+]
+
+
+
+
+
+
+
+---
+# Static aesthetics
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm)) + 
+*geom_point(color = "seagreen")
+```
+
+
+An aesthetic is *static* if it applies the same display to all data points in the geom or plot. Static aesthetics are defined *outside* `aes()` to a *number or character value*.
+
+Other examples:
+`size = 3`  
+`alpha = 0.5`  
+`width = 1.2`  
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-61-1.png" width="504" /&gt;
+] 
+
+
+
+
+
+
+---
+# Dynamic aesthetics
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+*   color = hospital)) +
+geom_point()
+```
+
+
+*Dynamic* aesthetics are mapped to a column name.
+
+This creates "groups" and generates a legend.
+
+This assignment occurs *inside* `aes()`.
+
+Above, `color=` is mapped to column `hospital`
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-63-1.png" width="504" /&gt;
+]
+
+???
+
+
+
+
+
+---
+# Static and dynamic
+
+.pull-left[
+
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+*   color = hospital)) +  
+geom_point(
+* size = 7, 
+* alpha = 0.7) 
+```
+
+Above, `size = 7` and `alpha = 0.7` are assigned statically, outside `aes()`.
+
+`color=` is assigned to column `hospital`, within `aes()`.
+
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-65-1.png" width="504" /&gt;
+]
+
+.footnote[Read more about ggplot aesthetics [here](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html)
+]  
+
+
+???
+As there is only one geom, all aesthetics can be written in `ggplot()`, or in `geom_point()`
+
+
+
+
+
+
+
+---
+# Facets
+
+
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+*facet_wrap(~hospital)
+```
+
+Facets are "small-multiples":
+plots for one unique value
+
+These can be used to display groups in the data.
+
+`facet_wrap()` produces one facet
+per unique value of the column.
+
+Place a "~" before the column name.
+
+
+] 
+
+
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-67-1.png" width="504" /&gt;
+
+]
+
+???
+Also called "small multiples"  
+
+
+
+
+---
+
+# Facets
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+*facet_wrap(~hospital,
+            scales = "free_y")
+```
+
+"Free" auto-scaled axes with `scales=`
+- "free_y"  
+- "free_x"   
+- "free" (both x and y)  
+
+] 
+
+.footnote[
+Alert your audience if you use free axes!
+Also, try `ncol=` and `nrow=`
+
+]
+
+
+.pull-right[
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-69-1.png" width="504" /&gt;
+
+
+
+
+
+
+
+
+]
+
+
+
+
+
+
+
+---
+# Facets + `gghighlight()`
+
+.pull-left[
+
+ggplot extension packages like {gghighlight} are useful.
+
+`gghighlight()` can show a "shadow" behind each facet.
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = date_onset,
+*   fill = hospital)) +
+geom_histogram() +
+facet_wrap(~ hospital) +
+*gghighlight()
+```
+
+] 
+
+
+.pull-right[
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-75-1.png" width="504" /&gt;
+
+]
+
+
+
+
+
+
+---
+# gghighlight
+
+.pull-left[
+
+Add `gghighlight()` to other plots, and specify specific values to highlight
+
+
+```r
+surv %&gt;% 
+  # get weekly counts by hospital
+  count(
+     hospital,
+     week = floor_date(date_onset, "week")) %&gt;%
+
+  # plot
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+```
+
+
+
+
+
+
+
+
+
+
+
+] 
+
+
+.pull-right[
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-81-1.png" width="504" /&gt;
+
+]
+
+
+
+???
+Here we create data frame of cases per week per hospital, and plot with `geom_line()`. The highlight is applied to Port Hospital.  
+
+
+
+---
+
+# Acknowledgements
+
+ggplot images from:
+
+* http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html  
+* https://jcheshire.com/r-spatial-data-hints/great-maps-ggplot2/
+
+
+
+
+---
+class: inverse, center, middle
+
+
+
+## Breakout
+
+
+&lt;img src="../../../images/breakout/Safety Match - COVID artwork.png" width="50%" /&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
