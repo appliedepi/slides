@@ -1,0 +1,209 @@
+---
+title: "Introduction to R for<br>Applied Epidemiology"
+subtitle: "COVID-19 case study"
+author: "March 2022"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "en"
+---
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  sf,         # spatial
+  ggspatial,  # spatial
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation
+  tidyverse  # data management and visualization
+
+)
+
+## load packages from github
+pacman::p_load_gh(
+     "R4IDSR/epichecks"   # bivariate colour maps 
+)
+
+
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic") %>%
+  clean_names()
+
+mod10 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod10", col_types = "c") %>%
+  clean_names()
+```
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+# Introduction to R for Applied Epidemiology
+
+### COVID-19 Case Study
+
+contact@appliedepi.org
+---
+
+# Today: objectives & schedule  
+
+**In this module we aim to help you:**  
+
+* Apply your learning to a new dataset, without code solutions readily available  
+
+--
+
+* See outputs and replicate them using R  
+
+--
+
+* Write original R code that is understandable by someone else  
+
+--
+
+* Review another person's original code  
+
+--
+
+* Complete an end-course feedback survey  
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  "15 minutes",   "Main" ,    "Introduce the COVID-19 case study",
+  "2 hours",      "Break outs", "COVID-19 case study",
+  "45 minutes",   "Main" ,   "Partner code review" ,
+  "5 minutes",    "Main",   "Closing" ,
+  "15 minutes",   "Main" ,    "Feedback survey"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+```
+
+
+---
+
+# COVID-19 report
+
+Fulton County, GA
+
+You will have 2 hours to replicate the report  
+
+
+---
+
+# COVID-19 Data
+
+Scrambled and anonymized  
+
+- Linelist  
+- City populations in Fulton County  
+
+
+---
+
+# Support available  
+
+- Instructors will be available in breakouts room  
+- Each will handle different parts of the report, so go to the room that most fits your question  
+
+
+---
+# Have fun  
+
+This is not a test. Do the best you can. Enjoy reviewing about all that you have learned.  
+
+
+---
+# Code review  
+
+When we re-convene, we will split into partners (randomly-assigned) and you can review the other person's code.  
+
+We will provide a brief guide on how to review code.  
+
+
+---
+# Instructor feedback  
+
+Our instructors will review your work after the course and provide you feedback by email.   
+
