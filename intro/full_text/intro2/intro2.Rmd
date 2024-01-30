@@ -1,7 +1,7 @@
 ---
 title: "Introduction to R for Applied Epidemiology"
 subtitle: "<br>Cleaning data with R"
-author: "2022"
+author: "Applied Epi"
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
   xaringan::moon_reader:
@@ -14,6 +14,8 @@ output:
     css: xaringan-themer.css
 params:
   lang: "en"
+  
+  
 ---
 class: center, middle, inverse, title-slide
 
@@ -125,40 +127,42 @@ style_mono_accent(
 ```{r, echo=F, include = F}
 surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
 
-gen <- googlesheets4::read_sheet(
-  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
-  range = "generic", col_types = "c") %>%
-  clean_names()
-
-mod3 <- googlesheets4::read_sheet(
-  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
-  range = "mod3", col_types = "c") %>%
-  clean_names()
+# gen <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "generic", col_types = "c") %>%
+#   clean_names()
+# 
+# mod3 <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "mod3", col_types = "c") %>%
+#   clean_names()
 ```
 
 # Introduction to R for Applied Epidemiology
 
-### Data cleaning with R (Part 1)
+### The Ebola case study and data cleaning
 
 contact@appliedepi.org
 
 ---
-# Today: objectives & schedule  
+# Objectives & schedule  
 
-**In this module we aim to help you:**  
-* Gain familiarity of {dplyr} functions used to clean public health data  
-* Apply a series of functions to a data frame using the pipe operator  
-* Begin writing an R script to analyze outbreak data  
+* Create an RStudio project for the Ebola case study  
+* Import data from a project subfolder using `here()`  
+* Gain familiarity with {dplyr} data cleaning functions  
+* Begin writing a cleaning command using the `%>%` pipe operator  
 
+</br>
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
-  ~Time, ~Location, ~Topic,
-  "10 minutes",     "Main" ,     "Review of previous module",
-  "30 minutes",     "Main" ,     "Intro to data cleaning",
-  "15 minutes",     "Main" ,     "Demo of data cleaning",
-  "1h 30 minutes",  "Exercise" ,     "Exercise",
-  "30 minutes",     "Main" ,     "Plenary debrief"
+  ~Time,  ~Topic,
+  "10 minutes",      "Review of previous module",
+  "10 minutes",      "Set up the Ebola case study",
+  "30 minutes",      "Functions for data cleaning",
+  "15 minutes",      "Demo of data cleaning",
+  "1h 30 minutes",   "Exercise",
+  "20 minutes",      "Debrief"
 )
 
 outline %>% 
@@ -166,10 +170,223 @@ outline %>%
   flextable::add_footer_lines("Take breaks as you wish during the exercise")
 ```
 
-**This is a *long* exercise, but very important.**  
 
 ???
 Note stretch breaks throughout.
+
+
+
+---
+class: inverse, center, middle  
+
+# The Ebola case study  
+
+Modules 2-8 will use data from a simulated Ebola outbreak in Sierra Leone.  
+
+
+---
+# A new RStudio project  
+
+.pull-left[
+
+This case study needs a new **RStudio project**.  
+
+The exercise will guide you to create this project in the "intro_course/ebola/" folder.  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "85%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "project_briefcase.png")))
+```
+
+]
+
+
+
+.pull-right[
+
+`r emo::ji("folder")` intro_course
+* `r emo::ji("folder")` module1  
+* `r emo::ji("folder")` covid  
+* **`r emo::ji("folder")` ebola**  
+  * **ebola.Rproj**
+  * `r emo::ji("folder")` data  
+  * `r emo::ji("folder")` scripts  
+  * `r emo::ji("folder")` outputs  
+
+
+
+]
+
+???
+We will help 
+You can zip the folder and share it with a colleague, it can be hosted on a shared drive, and can be synced with a Github repository.  
+
+
+
+---
+# A new R Script  
+
+
+
+.pull-left[
+
+In your new "ebola" RStudio project, you will begin writing a new script named  "ebola_analysis.R" to hold your commands.  
+
+The script will be saved in the ebola/scripts/ subfolder.  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%", out.height="200%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "ebola_setup.png")))
+```
+]
+
+
+.pull-right[
+
+`r emo::ji("folder")` intro_course
+* `r emo::ji("folder")` module1  
+* `r emo::ji("folder")` covid  
+* **`r emo::ji("folder")` ebola**  
+  * **ebola.Rproj**
+  * `r emo::ji("folder")` data  
+  * `r emo::ji("folder")` scripts  
+  * `r emo::ji("folder")` outputs  
+  
+
+`r emo::ji("folder")` ebola  
+  * ebola.Rproj
+  * `r emo::ji("folder")` data  
+  * `r emo::ji("folder")` scripts  
+    * **ebola_analysis.R**
+  * `r emo::ji("folder")` outputs  
+
+
+
+]
+
+
+
+
+---
+# Load packages  
+
+What will be your first command in the new R script? What function will it use?  
+
+
+--
+
+It will **load the packages** needed for the analysis, using **`pacman::p_load()`**  
+
+```{r, echo=T, eval=F}
+pacman::p_load(
+     rio,          # for importing data
+     here,         # for relative file paths
+     skimr,        # for reviewing the data
+     janitor,      # for cleaning data
+     epikit,       # for creating age categories
+     tidyverse     # for data management and visualization
+)
+```
+
+
+
+---
+# Import a dataset from a subfolder  
+
+The Ebola case linelist is saved in the subfolder "ebola/data/raw/surveillance_linelist_20141201.csv"  
+
+.pull-left[
+
+`r emo::ji("folder")` ebola  
+  * ebola.Rproj
+  * `r emo::ji("folder")` data  
+    * `r emo::ji("folder")` clean  
+    * `r emo::ji("folder")` raw  
+      * **surveillance_linelist_20141201.csv**  
+  * `r emo::ji("folder")` scripts  
+  * `r emo::ji("folder")` outputs  
+
+]
+
+.pull-right[
+
+Will this command work?
+
+```{r, echo=T, eval=F}
+import("surveillance_linelist_20141201.csv")
+```
+
+]
+
+--
+
+No, you will need to specify which subfolder the data is saved in.  
+
+
+
+
+
+
+---
+# File paths and RStudio projects  
+
+A file path tells R a file's location on your computer - its "address".  
+
+This command tells R to look in `C:` at the folders "Users", "Laura", "Documents"...
+
+```{r, echo=T, eval=F}
+import("C:\Users\Laura\Documents\intro_course\ebola\data\raw\surveillance_linelist_20141201.csv")
+```
+
+Will this "absolute" file path work on *your* computer? No! You do not have a "Laura" folder and may not have a C: drive!  
+
+**RStudio projects** allow for file paths that are **"relative"** - i.e. that begin at the project folder. This allows an `import()` command to be run on any computer.  
+
+
+
+
+
+
+---
+
+# File paths and RStudio projects  
+
+Within a project, the file path *before the project folder* is flexible. 
+
+.pull-left[
+If the dataset is saved in the project root like this:  
+]
+
+.pull-right[
+* `r emo::ji("folder")` module1  
+  * **module1.Rproj**  
+  * `r emo::ji("document")` testing_data.csv  
+
+]
+
+Then this command 
+
+```{r, echo=T, eval=F}
+import("testing_data.csv")
+```
+
+...uses this file path on Laura's Windows computer  
+
+`"C:\Users\Laura\Documents\`**intro_course\linelist.csv"**  
+
+...and uses *this* file path on Rajiv's Mac computer  
+
+`"home/Rajiv/docs/`**intro_course/linelist.csv"**  
+
+
+
+
 
 
 ---
@@ -200,6 +417,11 @@ Note stretch breaks throughout.
 --
 
 - Columns and objects have *classes* that can be checked with `class()`  
+
+
+
+
+
 
 
 
@@ -1077,13 +1299,13 @@ Note how the column names in `demo` are old! It's because our changes have not y
  
 `mutate()` is used to *create* new columns
 
-```{r, results = "asis", echo = FALSE}
-str_glue("The syntax is: new column name = a function that creates the new values:") %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("function", color = "cornflowerblue") %>%
-  flair_all(before = "<h4>", after = "</h4>") %>%
-  cat()
-```
+# ```{r, results = "asis", echo = FALSE}
+# str_glue("The syntax is: new column name = a function that creates the new values:") %>%
+#   flair("new column name", color = "deeppink") %>%
+#   flair("function", color = "cornflowerblue") %>%
+#   flair_all(before = "<h4>", after = "</h4>") %>%
+#   cat()
+# ```
 
 --
 
@@ -1092,12 +1314,12 @@ demo %>%
   mutate(age_group = ifelse(age >= 18, 'adult', 'minor')) # creates new T/F column
 ```
 
-<!-- ```{r mutate_flair, echo=F} -->
-<!-- decorate("mutate") %>% -->
-<!--   flair("age_group", color = "deeppink") %>% -->
-<!--   flair("ifelse(age >= 18, 'adult', 'minor')", color = "cornflowerblue") %>%  -->
-<!--   knit_print() -->
-<!-- ``` -->
+# ```{r mutate_flair, echo=F}
+# decorate("mutate") %>%
+#   flair("age_group", color = "deeppink") %>%
+#   flair("ifelse(age >= 18, 'adult', 'minor')", color = "cornflowerblue") %>%
+#   knit_print()
+# ```
 
 --
 
