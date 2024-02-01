@@ -44,6 +44,10 @@ knitr::opts_chunk$set(echo = FALSE,
 ## but is something to do with background images
 options(htmltools.dir.version = FALSE)
 
+# allow panels in slides
+xaringanExtra::use_panelset()
+
+
 ## install and load necessary packages 
 pacman::p_load(
   rio,        # importing data  
@@ -138,7 +142,7 @@ surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv")
 #   clean_names()
 ```
 
-# Introduction to R for Applied Epidemiology
+# Introduction to R for </br> Applied Epidemiology
 
 ### The Ebola case study and data cleaning
 
@@ -147,8 +151,8 @@ contact@appliedepi.org
 ---
 # Objectives & schedule  
 
-* Create an RStudio project for the Ebola case study  
-* Import data from a project subfolder using `here()`  
+* Create a new RStudio project for the Ebola case study  
+* Import data from a project subfolder using `import()` and `here()`  
 * Gain familiarity with {dplyr} data cleaning functions  
 * Begin writing a cleaning command using the `%>%` pipe operator  
 
@@ -157,11 +161,10 @@ contact@appliedepi.org
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
   ~Time,  ~Topic,
-  "10 minutes",      "Review of previous module",
-  "10 minutes",      "Set up the Ebola case study",
-  "30 minutes",      "Functions for data cleaning",
-  "15 minutes",      "Demo of data cleaning",
-  "1h 30 minutes",   "Exercise",
+  "10 minutes",      "Set up of the Ebola case study",
+  "20 minutes",      "Functions for data cleaning",
+  "10 minutes",      "Demo of data cleaning",
+  "2 hours",         "Exercise",
   "20 minutes",      "Debrief"
 )
 
@@ -173,6 +176,39 @@ outline %>%
 
 ???
 Note stretch breaks throughout.
+
+
+
+
+---
+# Review  
+
+- **RStudio projects** - a home for data and scripts for a particular analysis  
+
+--
+
+- Running commands in **an R script**, with comments  
+
+--
+
+- Creating **objects** with the assignment operator **`<-`**  
+
+--
+
+- Using **functions** like `max()`, `min()`, and `paste()`  
+
+--
+
+- Importing a dataset with **`import()`**  
+
+--
+
+- Reviewing a dataset with `skim()` and `summary()`  
+
+--
+
+- Columns have **classes** that can be checked with `class()`  
+
 
 
 
@@ -189,9 +225,7 @@ Modules 2-8 will use data from a simulated Ebola outbreak in Sierra Leone.
 
 .pull-left[
 
-This case study needs a new **RStudio project**.  
-
-The exercise will guide you to create this project in the "intro_course/ebola/" folder.  
+The exercise will guide you to create a new **RStudio project** in the "intro_course/**ebola**/" folder.  
 
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "85%"}
@@ -220,9 +254,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "functions_pack
 
 ]
 
-???
-We will help 
-You can zip the folder and share it with a colleague, it can be hosted on a shared drive, and can be synced with a Github repository.  
+
 
 
 
@@ -233,9 +265,9 @@ You can zip the folder and share it with a colleague, it can be hosted on a shar
 
 .pull-left[
 
-In your new "ebola" RStudio project, you will begin writing a new script named  "ebola_analysis.R" to hold your commands.  
+You will write a new R script named "ebola_analysis.R" to hold your commands.  
 
-The script will be saved in the ebola/scripts/ subfolder.  
+The script will be saved in the subfolder "ebola/**scripts**/"  
 
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%", out.height="200%"}
@@ -252,20 +284,12 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 `r emo::ji("folder")` intro_course
 * `r emo::ji("folder")` module1  
 * `r emo::ji("folder")` covid  
-* **`r emo::ji("folder")` ebola**  
+* `r emo::ji("folder")` **ebola**  
   * **ebola.Rproj**
   * `r emo::ji("folder")` data  
-  * `r emo::ji("folder")` scripts  
   * `r emo::ji("folder")` outputs  
-  
-
-`r emo::ji("folder")` ebola  
-  * ebola.Rproj
-  * `r emo::ji("folder")` data  
-  * `r emo::ji("folder")` scripts  
-    * **ebola_analysis.R**
-  * `r emo::ji("folder")` outputs  
-
+  * `r emo::ji("folder")` **scripts**  
+      * **ebola_analysis.R**
 
 
 ]
@@ -281,7 +305,7 @@ What will be your first command in the new R script? What function will it use?
 
 --
 
-It will **load the packages** needed for the analysis, using **`pacman::p_load()`**  
+Use **`pacman::p_load()`** to **load the packages** needed for the analysis  
 
 ```{r, echo=T, eval=F}
 pacman::p_load(
@@ -297,130 +321,110 @@ pacman::p_load(
 
 
 ---
-# Import a dataset from a subfolder  
+# Import data from a subfolder  
 
-The Ebola case linelist is saved in the subfolder "ebola/data/raw/surveillance_linelist_20141201.csv"  
+The ebola linelist is saved in the new project's "**data**/**raw**/" subfolder:  
 
-.pull-left[
-
-`r emo::ji("folder")` ebola  
+`r emo::ji("folder")` **ebola**  
   * ebola.Rproj
-  * `r emo::ji("folder")` data  
+  * `r emo::ji("folder")` **data**  
     * `r emo::ji("folder")` clean  
-    * `r emo::ji("folder")` raw  
+    * `r emo::ji("folder")` **raw**  
       * **surveillance_linelist_20141201.csv**  
   * `r emo::ji("folder")` scripts  
   * `r emo::ji("folder")` outputs  
 
-]
+`import()` expects a *file path* - the data's location or "address" on your computer.  
 
-.pull-right[
-
-Will this command work?
+Will this command work to import the Ebola linelist? 
 
 ```{r, echo=T, eval=F}
 import("surveillance_linelist_20141201.csv")
 ```
 
-]
-
 --
 
-No, you will need to specify which subfolder the data is saved in.  
-
-
+**No**, you need to specify which *subfolder* of the project the data is saved in.  
 
 
 
 
 ---
-# File paths and RStudio projects  
+# File paths  
 
-A file path tells R a file's location on your computer - its "address".  
-
-This command tells R to look in `C:` at the folders "Users", "Laura", "Documents"...
+**Avoid** the fragile "absolute" file path *(only works on one computer)*  
 
 ```{r, echo=T, eval=F}
-import("C:\Users\Laura\Documents\intro_course\ebola\data\raw\surveillance_linelist_20141201.csv")
+import("C:/Users/Laura/Documents/intro_course/ebola/data/raw/surveillance_linelist_20141201.csv")
 ```
 
-Will this "absolute" file path work on *your* computer? No! You do not have a "Laura" folder and may not have a C: drive!  
+--
 
-**RStudio projects** allow for file paths that are **"relative"** - i.e. that begin at the project folder. This allows an `import()` command to be run on any computer.  
-
-
-
-
-
-
----
-
-# File paths and RStudio projects  
-
-Within a project, the file path *before the project folder* is flexible. 
-
-.pull-left[
-If the dataset is saved in the project root like this:  
-]
-
-.pull-right[
-* `r emo::ji("folder")` module1  
-  * **module1.Rproj**  
-  * `r emo::ji("document")` testing_data.csv  
-
-]
-
-Then this command 
+**In an RStudio project** the path can start from the project root folder  
 
 ```{r, echo=T, eval=F}
-import("testing_data.csv")
+import("data/raw/surveillance_linelist_20141201.csv") # works on almost any computer
 ```
 
-...uses this file path on Laura's Windows computer  
+--
 
-`"C:\Users\Laura\Documents\`**intro_course\linelist.csv"**  
+**Use `here()` to the file path** as slash-agnostic  
 
-...and uses *this* file path on Rajiv's Mac computer  
+`here("data", "raw", "surveillance_linelist_raw")`  
 
-`"home/Rajiv/docs/`**intro_course/linelist.csv"**  
+--
+
+**The final step** is to place the `here()` file path command *within* `import()`  
+
+```{r, echo=T, eval=F}
+surv_raw <- import(here("data", "raw", "surveillance_linelist_20141201.csv))
+```
+
+*Above, we save the data with the name `surv_raw`.  * 
 
 
+---
+
+class: medium-large-table
+
+# Review your data  
+
+```{r}
+head(surv_raw, 25) %>% 
+  tibble() %>% 
+  DT::datatable(
+    options = list(
+      scrollY = 300,
+      scrollX = 600,
+      pageLength = 25,
+      fontSize = '25%',
+      dom = "ti",
+      ordering = FALSE,
+      rownames = FALSE,
+      options = list(pageLength = 5, scrollX=T),
+      class = 'white-space: nowrap' 
+    )
+  )
+```
+
+???
+Table shows just the first 25 rows, to load faster.  
 
 
 
 
 ---
-# Review of previous module  
+class: inverse, center, middle
 
-- The versatility, community, and features of R  
-
---
-
-- R projects, `import()`, and relative file paths with {here}  
-
---
-
-- Running commands, writing comments, saving objects  
-
---
-
-- Operators like `<`  `>`  `==`  `%in%`  
-
---
-
-- Functions, sometimes with multiple arguments  
-
---
-
-- Reviewing a dataset `skim()`, `summary()`  
-
---
-
-- Columns and objects have *classes* that can be checked with `class()`  
+## Cleaning data in R 
 
 
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
 
-
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "data_cleaning.png")))
+```
 
 
 
@@ -429,7 +433,7 @@ import("testing_data.csv")
 ---
 # Clean data, messy data   
 
-What is involved in "cleaning" a dataset?  
+Now your data are imported. What is typically involved in "cleaning" a dataset?  
 
 
 .pull-left[
@@ -469,59 +473,16 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 Ask the participants what steps they take to clean datasets
 
 
----
-class: inverse, center, middle
-
-## Cleaning data in R 
 
 
-```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
-# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
-# It dynamically creates the ../../etc filepath.
-
-knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "data_cleaning.png")))
-```
-
-
-
-
-
----
-
-class: medium-large-table
-
-# Review your data  
-
-We will begin working with the *"surveillance_linelist_20141201.csv"*  
-We assigned it the name `surv_raw` when we imported it into R.    
-
-```{r}
-head(surv_raw, 25) %>% 
-  tibble() %>% 
-  DT::datatable(
-    options = list(
-      scrollY = 300,
-      scrollX = 600,
-      pageLength = 25,
-      fontSize = '25%',
-      dom = "ti",
-      ordering = FALSE,
-      rownames = FALSE,
-      options = list(pageLength = 5, scrollX=T),
-      class = 'white-space: nowrap' 
-    )
-  )
-```
-
-???
-Table shows just the first 25 rows, to load faster.  
 
 
 ---
 
 # Demo dataset  
 
-Let's use a smaller version to practice with, and explore some core R functions
+Let's use a mini dataset, named "**`demo`**", to practice some core R functions.  
+
 ```{r, echo=F}
 demo <- surv_raw %>% 
      head(5) %>% 
@@ -537,9 +498,8 @@ demo %>%
      
 ```
 
---
 
-We will name it "**`demo`**"
+
 
 ---
 
@@ -1300,8 +1260,8 @@ Note how the column names in `demo` are old! It's because our changes have not y
 `mutate()` is used to *create* new columns
 
 ```{r, results = "asis", echo = FALSE}
- str_glue("The syntax is: new column name = a function that creates the new values:") %>%
-   flair("new column name", color = "deeppink") %>%
+ str_glue("The syntax is: mutate(column name = a function that creates its values):") %>%
+   flair("column name", color = "deeppink") %>%
    flair("function", color = "cornflowerblue") %>%
    flair_all(before = "<h4>", after = "</h4>") %>%
    cat()
@@ -1315,7 +1275,7 @@ demo %>%
 ```
 
 ```{r mutate_flair, echo=F}
- decorate("mutate") %>%
+decorate("mutate") %>%
    flair("age_group", color = "deeppink") %>%
    flair("ifelse(age >= 18, 'adult', 'minor')", color = "cornflowerblue") %>%
    knit_print()
