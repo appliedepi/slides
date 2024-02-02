@@ -122,8 +122,13 @@ style_mono_accent(
 .medium-table table {
   font-size: 8px;     
 }
+
 .medium-large-table table {
   font-size: 10px;     
+}
+
+.medium-large-table2 table {
+  font-size: 11px;     
 }
 ```
 
@@ -355,7 +360,7 @@ import("surveillance_linelist_20141201.csv")
 **Avoid** the fragile "absolute" file path *(only works on one computer)*  
 
 ```{r, echo=T, eval=F}
-import("C:/Users/Laura/Documents/intro_course/ebola/data/raw/surveillance_linelist_20141201.csv")
+import("C:/Users/Me/Docs/intro_course/ebola/data/raw/surveillance_linelist_20141201.csv")
 ```
 
 --
@@ -377,17 +382,20 @@ import("data/raw/surveillance_linelist_20141201.csv") # works on almost any comp
 **The final step** is to place the `here()` file path command *within* `import()`  
 
 ```{r, echo=T, eval=F}
-surv_raw <- import(here("data", "raw", "surveillance_linelist_20141201.csv))
+surv_raw <- import(here("data", "raw", "surveillance_linelist_20141201.csv"))
 ```
+
+--
 
 *The `<-` operator saves the dataset as an object with the name `surv_raw`.*  
 
-
+???
+Ask what the <- is doing
 ---
 
 class: medium-large-table
 
-# Review the data  
+# The data  
 
 ```{r}
 head(surv_raw, 25) %>% 
@@ -406,6 +414,8 @@ head(surv_raw, 25) %>%
     )
   )
 ```
+
+.footnote[Only 25 rows are shown here]  
 
 ???
 Table shows just the first 25 rows, to load faster.  
@@ -476,31 +486,6 @@ Ask the participants what steps they take to clean datasets
 
 
 
-
----
-
-# Demo dataset  
-
-Let's use a mini `surv_raw` dataset to practice some core R functions.  
-
-```{r, echo=F}
-surv_raw <- surv_raw %>% 
-     head(5) %>% 
-     select(case_id, age, sex, lab_confirmed, `onset date`, `wt (kg)`, `ht (cm)`)
-
-surv_raw <- surv_raw %>% 
-  add_row(surv_raw[4,], .before = 5)
-```
-
-```{r, eval=T}
-surv_raw %>% 
-  knitr::kable()
-     
-```
-
-
-
-
 ---
 
 # The {dplyr} package  
@@ -535,6 +520,37 @@ Tidyverse has made R coding much more user-friendly, intuitive, and accessible t
 
 ---
 
+# Practice dataset  
+
+Let's use a mini **`surv_raw`** dataset to practice some core R functions.  
+
+```{r, echo=F}
+surv_raw <- data.frame(
+  stringsAsFactors = FALSE,
+       check.names = FALSE,
+         case_id = c("694928","86340d","92d002","544bd1","544bd1"),
+         age = c(23L, 1L, 16L, 10L, 10L),
+         sex = c("m", "f", "m", "f", "f"), 
+         lab_confirmed = c(FALSE, TRUE, TRUE, TRUE, FALSE),
+         `onset date` = c("11/9/2014", "10/30/2014","8/16/2014","8/29/2014","8/29/2014"),
+         `wt (kg)` = c(70L, 18L, 59L, 39L, 39L)
+                       )
+surv_raw <- surv_raw %>% 
+  add_row(surv_raw[4,], .before = 5)
+```
+
+```{r, eval=T}
+surv_raw %>% 
+  knitr::kable()
+     
+```
+
+
+
+
+
+---
+
 # Functions for today  
 
 Function       | Utility                               
@@ -549,229 +565,235 @@ Function       | Utility
 
 
 ---
+class: medium-large-table2
 
 # `filter()` rows   
 
-* * 1st argument: a data frame
+.pull-left[
+
 
 ```{r, eval=F, echo=T}
-filter(surv_raw, ___)
+filter(surv_raw)
 ```
 
---
+1st argument: a data frame
 
-* * 2nd+ arguments: logical criteria to apply, to keep rows
+]
 
-```{r eval=FALSE, echo=TRUE}
-filter(surv_raw, age < 18)
+.pull-right[
+
+```{r eval = T, echo=F}
+filter(surv_raw) %>% knitr::kable()
 ```
 
---
-
-```{r eval=FALSE, echo=TRUE}
-filter(surv_raw, age < 18, sex == "m")
-```
-
-
---
-
-The logic can get complex using `&` (AND), `|` (OR), and parentheses
-
-```{r eval=FALSE, echo=TRUE}
-filter(surv_raw, age < 18 & (sex == "m" | lab_confirmed == TRUE))
-```
-
-.footnote[Note use of double equals `==` to test equivalence]
----
-
-# `filter()` rows   
-
-```{r, eval=F, echo=params$lang == "en"}
-# complete surv_raw data
-filter(surv_raw, ___)
-```
-
-```{r, eval=F, echo=params$lang == "fr"}
-# données de démo complètes
-filter(surv_raw, ___)
-```
-
-```{r, eval=F, echo=params$lang == "ru"}
-# полные демонстрационные данные
-filter(surv_raw, ___)
-```
-
-```{r, eval=F, echo=params$lang == "es"}
-# datos completos de la demostración
-filter(surv_raw, ___)
-```
-
-```{r, eval=T, echo=F}
-surv_raw %>% knitr::kable()
-```
+]
 
 
 
 ---
+class: medium-large-table2
 
 # `filter()` rows   
 
+.pull-left[
 
-```{r eval = F, echo=params$lang == "en"}
-# filter applied  
+
+```{r, eval=F, echo=T}
 filter(surv_raw, age < 18)
 ```
 
+2nd+ arguments: logical tests for rows to be *kept*  
 
-```{r eval = F, echo=params$lang == "fr"}
-# filtre appliqué
-filter(surv_raw, age < 18)
-```
+]
 
-
-```{r eval = F, echo=params$lang == "ru"}
-# применён фильтр
-filter(surv_raw, age < 18)
-```
-
-```{r eval = F, echo=params$lang == "es"}
-# filtro aplicado  
-filter(surv_raw, age < 18)
-```
+.pull-right[
 
 ```{r eval = T, echo=F}
 filter(surv_raw, age < 18) %>% knitr::kable()
 ```
 
+]
+
 
 
 
 ---
+class: medium-large-table2
 
-# `select()` columns 
+# `filter()` rows   
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+filter(surv_raw, age < 18, sex == "f")
+```
+
+2nd+ arguments: logical tests for rows to be *kept*  
+
+]
+
+.pull-right[
+
+```{r eval = T, echo=F}
+filter(surv_raw,
+       age < 18,
+       sex == "f") %>%
+  knitr::kable()
+```
+
+]
+
+.footnote[Note use of double equals `==` to test equivalence]
+
+
+---
+class: medium-large-table2
+
+# `filter()` rows   
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+filter(surv_raw, 
+    age < 18 & 
+    (sex == "f" | lab_confirmed == TRUE))
+```
+
+*Newlines and indents do not impact code*
+
+The logic can get complex using:
+* `&` (AND) 
+* `|` (OR)
+* Parentheses  
+
+
+]
+
+.pull-right[
+
+```{r eval = T, echo=F}
+filter(surv_raw, age < 18 & (sex == "f" | lab_confirmed == TRUE)) %>%
+  knitr::kable()
+```
+
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+class: medium-large-table2
+
+# `select()` columns   
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+select(surv_raw, ___) 
+```
 
 `select()` also expects a data frame as the first argument
 
---
 
-```{r, eval=F, echo=params$lang == "en"}
-# complete demo data
-select(surv_raw, ___)
+]
+
+.pull-right[
+
+```{r eval = T, echo=F}
+surv_raw %>%
+  knitr::kable()
 ```
 
-```{r, eval=F, echo=params$lang == "fr"}
-# données de démo complètes
-select(surv_raw, ___)
-```
+]
 
-```{r, eval=F, echo=params$lang == "ru"}
-# полные демонстрационные данные
-select(surv_raw, ___)
-```
-
-```{r, eval=F, echo=params$lang == "es"}
-# datos completos de la demostración
-select(surv_raw, ___)
-```
-
---
-
-```{r, eval=T, echo=F}
-surv_raw %>% knitr::kable()
-```
 
 
 ---
+class: medium-large-table2
 
-# `select()` columns 
+# `select()` columns   
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+select(surv_raw, case_id, age)
+```
 
 You can provide `select()` with column names to *keep*
 
-```{r, eval=F, echo=params$lang == "en"}
-# select() to keep case_id and age columns only
-select(surv_raw, case_id, age)
+
+]
+
+.pull-right[
+
+```{r eval = T, echo=F}
+select(surv_raw, case_id, age) %>%
+  knitr::kable()
 ```
 
-```{r, eval=F, echo=params$lang == "fr"}
-# select() pour ne garder que les colonnes case_id et age
-select(surv_raw, case_id, age)
-```
+]
 
-```{r, eval=F, echo=params$lang == "ru"}
-#select(), чтобы сохранить только столбцы case_id и age
-select(surv_raw, case_id, age)
-```
-
-```{r, eval=F, echo=params$lang == "es"}
-# select() para mantener sólo las columnas case_id y age
-select(surv_raw, case_id, age)
-```
-
-```{r, eval=T, echo=F}
-select(surv_raw, case_id, age) %>% knitr::kable()
-```
 
 ---
+class: medium-large-table2
 
-# `select()` columns 
+# `select()` columns   
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+select(surv_raw, case_id, age, sex)
+```
 
 You can provide `select()` with column names to *keep*
 
-```{r, eval=F, echo=params$lang == "en"}
-# add sex column
-select(surv_raw, case_id, age, sex)
+
+]
+
+.pull-right[
+
+```{r eval = T, echo=F}
+select(surv_raw, case_id, age, sex) %>%
+  knitr::kable()
 ```
 
-```{r, eval=F, echo=params$lang == "fr"}
-# ajouter la colonne sexe
-select(surv_raw, case_id, age, sex)
-```
-
-```{r, eval=F, echo=params$lang == "ru"}
-# добавить колонку "пол
-select(surv_raw, case_id, age, sex)
-```
-
-```{r, eval=F, echo=params$lang == "es"}
-# añadir la columna de género
-select(surv_raw, case_id, age, sex)
-```
-
-```{r, eval=T, echo=F}
-select(surv_raw, case_id, age, sex) %>% knitr::kable()
-```
+]
 
 
 ---
+class: medium-large-table2
 
-# `select()` columns 
+# `select()` columns   
 
-Or you can provide the columns to *remove* (-)
+.pull-left[
 
-```{r, eval=F, echo=params$lang == "en"}
-# remove case_id and lab_confirmed columns from original dataset
+```{r, eval=F, echo=T}
 select(surv_raw, -case_id, -lab_confirmed)
 ```
 
-```{r, eval=F, echo=params$lang == "fr"}
-#supprimer les colonnes case_id et lab_confirmed du jeu de données original
-select(surv_raw, -case_id, -lab_confirmed)
-```
-
-```{r, eval=F, echo=params$lang == "ru"}
-#удалить столбцы case_id и lab_confirmed из исходного набора данных
-select(surv_raw, -case_id, -lab_confirmed)
-```
-
-```{r, eval=F, echo=params$lang == "es"}
-# eliminar las columnas case_id y lab_confirmed del conjunto de datos original
-select(surv_raw, -case_id, -lab_confirmed)
-```
+Or you can designate which columns to *remove* with -   
 
 
-```{r, eval=T, echo=F}
-select(surv_raw, -case_id, -lab_confirmed) %>% knitr::kable()
+]
+
+.pull-right[
+
+```{r eval = T, echo=F}
+select(surv_raw, -case_id, -lab_confirmed) %>%
+  knitr::kable()
 ```
+
+]
 
 
 
@@ -780,14 +802,13 @@ select(surv_raw, -case_id, -lab_confirmed) %>% knitr::kable()
 
 # `filter()` *and* `select()`?
 
-Yes! The **%>%** "pipe" operator "passes" the data from one function to the next.  
-
-It is like saying the words **"and then"**.  
+Yes! Use the **%>%** "pipe" operator to "pass" data from one function to the next.  
 
 
---
 
 .pull-left[
+
+It is like saying the words **"and then"**.  
 
 A typical cleaning command contains a *sequence* of linked steps  
 
@@ -816,21 +837,47 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 
 ---
+class: medium-large-table2
 # Piping data
 
-Previously, the 1st argument in `filter()` and in `select()` was the data frame
+Previously, the 1st argument was the data frame
 
 `filter(`**surv_raw**`, age < 18)`
 
-
 --
-
 
 Using pipes, this is now written as:  
 
 **surv_raw** `%>% filter(age < 18)`
 
 --
+
+You can pipe the data through *multiple* functions  
+`surv_raw`  
+
+```{r, eval=T, echo=F}
+surv_raw %>% knitr::kable()
+```
+
+
+
+
+
+---
+class: medium-large-table2
+# Piping data
+
+Previously, the 1st argument was the data frame
+
+`filter(`**surv_raw**`, age < 18)`
+
+
+
+Using pipes, this is now written as:  
+
+**surv_raw** `%>% filter(age < 18)`
+
+
 
 You can pipe the data through *multiple* functions  
 `surv_raw` **%>%** `filter(age < 18)` 
@@ -841,10 +888,12 @@ surv_raw %>% filter(age < 18) %>% knitr::kable()
 ```
 
 
+
 ---
+class: medium-large-table2
 # Piping data
 
-Previously, the 1st argument in `filter()` and in `select()` was the data frame
+Previously, the 1st argument was the data frame
 
 `filter(`**surv_raw**`, age < 18)`
 
@@ -855,7 +904,6 @@ Using pipes, this is now written as:
 
 
 You can pipe the data through *multiple* functions  
-
 `surv_raw` **%>%** `filter(age < 18)` **%>%** `select(case_id, age, sex)`
 
 
@@ -864,11 +912,13 @@ surv_raw %>% filter(age < 18) %>% select(case_id, age, sex) %>% knitr::kable()
 ```
 
 
+
+
+
 ---
 # Vertical coding style
 
-It is better to write in a *vertical* style  
-Newlines and indent will not impact the code, but do make it more readable!
+A *vertical* style with indents does not impact the code, but makes it more readable!
 
 ```{r, eval=F, echo=T}
 surv_raw
@@ -883,11 +933,11 @@ surv_raw %>%
 ---
 # Vertical coding style
 
-It is better to write in a *vertical* style  
+A *vertical* style with indents does not impact the code, but makes it more readable!
 
 ```{r, eval=F, echo=params$lang == "en"}
 surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed)        # select columns
+  select(case_id, age, sex, lab_confirmed)                  # select columns
 ```
 
 ```{r, eval=F, echo=params$lang == "fr"}
@@ -933,16 +983,16 @@ surv_raw %>%
   select(case_id, age, sex, lab_confirmed) %>%    # de-duplicar
   knitr::kable() 
 ```
+
 ---
 # Vertical coding style
 
-It is better to write in a *vertical* style  
-
+The **`%>%`** pipe passes the dataset to the next step  
 
 ```{r, eval=F, echo=params$lang == "en"}
 surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%       # select columns
-  distinct()                                         # de-duplicate
+  select(case_id, age, sex, lab_confirmed) %>%              # select columns
+  distinct()                                                # de-duplicate
 ```
 
 ```{r, eval=F, echo=params$lang == "fr"}
@@ -974,14 +1024,13 @@ surv_raw %>%
 ---
 # Vertical coding style
 
-It is better to write in a *vertical* style  
-
+The **`%>%`** pipe passes the dataset to the next step  
 
 ```{r, eval=F, echo=params$lang == "en"}
 surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%       # select columns
-  distinct() %>%                                     # de-duplicate
-  filter(age < 18, lab_confirmed == TRUE)            # only young children confirmed cases
+  select(case_id, age, sex, lab_confirmed) %>%              # select columns
+  distinct() %>%                                            # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE)                   # only children cases
 ```
 
 ```{r, eval=F, echo= params$lang == "fr"}
@@ -1010,7 +1059,7 @@ surv_raw %>%
   #add_row(surv_raw[5,]) %>% 
   select(case_id, age, sex, lab_confirmed) %>%    # select columns
   distinct() %>%                                     # de-duplicate
-  filter(age < 18, lab_confirmed == TRUE) %>%        # only young children confirmed cases
+  filter(age < 18, lab_confirmed == TRUE) %>%        # only children confirmed cases
   knitr::kable() 
 ```
 
@@ -1019,14 +1068,13 @@ surv_raw %>%
 ---
 # Vertical coding style
 
-It is better to write in a *vertical* style  
-
+The **`%>%`** pipe passes the dataset to the next step  
 
 ```{r, eval=F, echo=params$lang == "en"}
 surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%       # select columns
-  distinct() %>%                                     # de-duplicate
-  filter(age < 18, lab_confirmed == TRUE) %>%        # only children cases      
+  select(case_id, age, sex, lab_confirmed) %>%              # select columns
+  distinct() %>%                                            # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE) %>%               # only children cases      
   mutate(infant = ifelse(age < 1, "infant", "not infant"))  # create a column      
  
 ```
@@ -1068,20 +1116,19 @@ surv_raw %>%
   knitr::kable()
 ```
 
-.footnote[Is there a pipe operator at the end of this workflow?]
 
 
 ---
 # Vertical coding style
 
-It is better to write in a *vertical* style  
+Is there a pipe operator at the end of this workflow?
 
 ```{r, eval=F, echo=params$lang == "en"}
 surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%               # select columns   
-  distinct() %>%                                             # de-duplicate   
-  filter(age < 18, lab_confirmed == TRUE) %>%                # only children cases   
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))   # create a column    
+  select(case_id, age, sex, lab_confirmed) %>%              # select columns
+  distinct() %>%                                            # de-duplicate
+  filter(age < 18, lab_confirmed == TRUE) %>%               # only children cases      
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  #<<      
  
 ```
 
@@ -1096,19 +1143,19 @@ surv_raw %>%
 
 ```{r, eval=F, echo=params$lang == "ru"}
 surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%                # выбрать столбцы
-  distinct() %>%                                                 # де-дублировать
-  filter(age < 18, lab_confirmed == TRUE) %>%                    # подтвержденные случаи заболевания только у детей младшего возраста
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))       # создать столбец
+  select(case_id, age, sex, lab_confirmed) %>%    # выбрать столбцы
+  distinct()  %>%                                    # де-дублировать
+  filter(age < 18, lab_confirmed == TRUE) %>%        # подтвержденные случаи заболевания только у детей младшего возраста                   
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # создать столбец
  
 ```
 
 ```{r, eval=F, echo=params$lang == "es"}
 surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%                # seleccionar columnas
-  distinct() %>%                                                 # de-duplicar
-  filter(age < 18, lab_confirmed == TRUE) %>%                    # casos confirmados sólo en niños pequeños
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))       # crear una columna
+  select(case_id, age, sex, lab_confirmed) %>%    # seleccionar columnas
+  distinct() %>%                                     # de-duplicar
+  filter(age < 18, lab_confirmed == TRUE) %>%        # casos confirmados sólo en niños pequeños      
+  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # crear una columna      
  
 ```
 
@@ -1122,6 +1169,8 @@ surv_raw %>%
   knitr::kable()
 ```
 
+--
+
 The pipes connect all these functions into one, linked command.  
 How would you run this command in RStudio?  
 
@@ -1130,49 +1179,47 @@ How would you run this command in RStudio?
 ---
 # Clean column names  
 
-Let's print the column names in `surv_raw` by piping to the function `names()`:  
+Print the current column names with the function `names()`:  
 
 ```{r, echo=T}
-surv_raw %>% 
-  names()
+names(surv_raw)        # print current column names
 ```
 
 --
 
-Pipe `surv_raw` into `clean_names()` from {janitor} package to standardize  
-
-* removes spaces and special characters  
-* all to lowercase  
+This can be written with a pipe:
 
 ```{r, echo=T}
-surv_raw %>% 
-  clean_names() %>%     #<<
-  names()
+surv_raw %>%           # begin with raw data
+  names()              # print current column names
 ```
-(*see the change to final two columns*)  
+
 
 --
 
-But how do we *edit* the column names?  
+Insert `clean_names()` to standardize (lowercase, no spaces or special characters). *See changes to the final two columns*  
+
+```{r, echo=T}
+surv_raw %>%            # begin with raw data
+  clean_names() %>%     # standardize column names #<<
+  names()               # print current column names
+```
+
+
 
 ---
 
-# Renaming columns
+# `rename()` columns  
 
-Typically we use `rename()`:  
-
---
-
-Write the NEW name and the OLD name as below:  
+Pipe the cleaned column names to `rename()` for manual edits.  
 
 ```{r, eval=params$lang == "en", echo=params$lang == "en"}
-surv_raw %>% 
-  clean_names() %>% 
-  rename(
-       # NEW      = OLD
-       age_years  = age,                    #<<
-       date_onset = onset_date) %>%         #<<
-  names()
+surv_raw %>%                        # begin with raw data
+  clean_names() %>%                 # standardize column names 
+  rename(                           # manual edits #<<
+      age_years  = age,             # NEW = OLD    #<<
+      date_onset = onset_date) %>%                 #<<       
+  names()                           # print current column names
 ```
 
 ```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
@@ -1207,148 +1254,175 @@ surv_raw %>%
 ```
 
 
+
+
+
+
 ---
 
 # Printing vs. saving   
 
-Our pipes have only *printed* the modified `surv_raw` - the data frame has **not** changed!  
+Click the tabs to see the difference.  
 
-```{r, echo=params$lang == "en", eval=F}
-surv_raw %>%                    # PRINT only child cases
-  filter(age < 18)
+.panelset[
+.panel[.panel-name[Printing]
+
+The previous changes to `surv_raw` were **not** saved.  
+
+We only *printed with modifications*.  
+
+```{r, eval=F, echo=params$lang == "en"}
+# modify, then print column names
+surv_raw %>%                        # start with raw data        #<<
+  clean_names() %>%                 # standardize column names 
+  rename(                           # manual edits 
+      age_years  = age,             # NEW = OLD    
+      date_onset = onset_date) %>%                        
+  names()                           # print current column names #<<
 ```
 
-```{r, echo=params$lang == "fr", eval=F}
-surv_raw %>%                    # IMPRIMER uniquement les cas d'enfants
-  filter(age < 18)
+**`surv_raw`** still has the *original column names*!  
+
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
+names(surv_raw) 
 ```
 
-```{r, echo=params$lang == "ru", eval=F}
-surv_raw %>%                   # ПЕЧАТАТЬ только детские случаи
-  filter(age < 18)
+
+
+.panel[.panel-name[Saving]
+
+Use the **`<-`** to save the changes to a new **`surv_clean`** data frame.  
+
+No output is printed, but the new object will appear in the RStudio Environment.  
+
+```{r, eval=T, echo=T}
+# create new data frame
+surv_clean <- surv_raw %>%  #<<
+  clean_names() %>%          
+  rename(                           
+      age_years  = age,                 
+      date_onset = onset_date)
 ```
 
-```{r, echo=params$lang == "es", eval=F}
-surv_raw %>%                    # PRINT only child cases
-  filter(age < 18)
+**`surv_clean`** has the *cleaned column names*!  
+
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
+names(surv_clean) 
 ```
 
-```{r, echo=F, eval=T}
-surv_raw %>%                    # Imprime sólo los casos de niños
-  filter(age < 18) %>% 
-  knitr::kable()
-```
+]
+]
 
---
+]
 
 
-To save: add the assignment operator **<-** to define a new data frame. 
 
-```{r pipe-assign, eval=F, echo=T}
-surv_raw_children <- surv_raw %>%
-  filter(age < 18)
-```
-
-(No output to the R console, but a new object in the Environment pane)   
-
-???
-Note how the column names in `surv_raw` are old! It's because our changes have not yet been saved.  
 
 ---
+class: medium-large-table2
 
-# `mutate()` to create columns  
+# `mutate()` to *create* columns  
  
-`mutate()` is used to *create* new columns
+The syntax is:  
 
-```{r, results = "asis", echo = FALSE}
- str_glue("The syntax is: mutate(column name = a function that creates its values):") %>%
-   flair("column name", color = "deeppink") %>%
-   flair("function", color = "cornflowerblue") %>%
-   flair_all(before = "<h4>", after = "</h4>") %>%
-   cat()
+```{r, echo=T, eval=F}
+DATASET %>% 
+  mutate(NEW_COLUMN_NAME = A_FUNCTION(arguments))
 ```
-
---
-
-```{r mutate, include = F}
-surv_raw %>% 
-  mutate(age_group = ifelse(age >= 18, 'adult', 'minor')) # creates new T/F column
-```
-
-```{r mutate_flair, echo=F}
-decorate("mutate") %>%
-   flair("age_group", color = "deeppink") %>%
-   flair("ifelse(age >= 18, 'adult', 'minor')", color = "cornflowerblue") %>%
-   knit_print()
-
-```
-
---
-
-`ifelse()` applies a logical criteria to each row, returns one value if true, and returns another value if false.  
-
----
-
-# `mutate()` to edit columns  
- 
-`mutate()` is also used to *edit* existing columns, such as *recoding* values
-
-Below, `recode()` is used inside `mutate()` to recode the sex column  
-
---
-
-
-
-```{r echo=params$lang == "en", eval=params$lang == "en"}
-surv_raw %>% 
-  mutate(sex = recode(sex,         # re-define sex as: 
-    'm' = 'male',                  # when "m", change to "male"   
-    'f' = 'female'))               # when "f", change to "female"
-```
-
-```{r echo=params$lang == "fr", eval=params$lang == "fr"}
-surv_raw %>% 
-  mutate(sex = recode(sex,   # redéfinir le genre comme : 
-    'm' = 'male',                  # quand 'm', devient 'male'   
-    'f' = 'female'))               # quand "f", devient 'female'
-```
-
-```{r echo=params$lang == "ru", eval=params$lang == "ru"}
-surv_raw %>% 
-  mutate(sex = recode(sex,   # переопределите пол как:
-    'm' = 'male',                  # когда "m", меняется на "male"
-    'f' = 'female'))               # когда "f", меняется на "female"
-```
-
-```{r echo=params$lang == "es", eval=params$lang == "es"}
-surv_raw %>% 
-  mutate(sex = recode(sex,   # redefinir el género como 
-    'm' = 'male',                  # cuando "m", cambiar a "masculino"   
-    'f' = 'female'))               # cuando "f", cambiar a "mujer"
-```
-
-???
-Explain that there are many nuances to case_when() which you will practice in the breakout exercise
-
----
-# What about dates?
-
-It is important that R understands dates correctly (not as character values!)   
 
 .pull-left[
 
-The easiest method is to use functions from the {lubridate} package  
+```{r, echo=T, eval=F}
+surv_raw %>% 
+  mutate(age_group = ifelse(age >= 18,
+                            "adult",  
+                            "minor")) 
+```
 
-**End goal**:  
+`ifelse()` logically tests each row and writes in the new `age_group` column:  
 
-* (display in data as YYYY-MM-DD) 
-* `class()` of the column is "date" 
-
-More details in this [Epi R Handbook chapter](https://epirhandbook.com/en/working-with-dates.html)
+* "adult" if the test is TRUE  
+* "minor" if the test is FALSE  
 
 ]
 
 .pull-right[
+
+```{r, echo=F, eval=T}
+surv_raw %>% 
+  mutate(age_group = ifelse(age >= 18, 'adult', 'minor')) %>% 
+  knitr::kable()
+```
+
+]
+
+
+
+
+---
+class: medium-large-table2
+
+# `mutate()` to *edit* columns  
+ 
+The syntax is similar:  
+
+```{r, echo=T, eval=F}
+DATASET %>% 
+  mutate(SAME_COLUMN_NAME = A_FUNCTION(arguments))
+```
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+surv_raw %>% 
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))        
+```
+
+Column `sex` is overwritten.  
+
+`recode()` starts with original `sex` column and applies changes:  
+
+* "m" to "male"  
+* "f" to "female"  
+
+
+]
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv_raw %>% 
+  mutate(sex = recode(sex,  
+    'm' = 'male',           
+    'f' = 'female'))  %>% 
+  knitr::kable()
+```
+
+]
+
+
+
+
+---
+# `mutate()` with dates  
+
+The `class()` of date columns should be "date", not "character".  
+
+To change the class, you must *tell* R how to understand the raw dates.  
+
+.pull-left[
+
+Dates come in many formats:  
+
+Is "03/09/2024" the 9th of March, or the 3rd of September?
+
+]
+
+
+.pull-right[
+
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
 # Using here() alone won't work because Rmd folder becomes the rendering root.
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
@@ -1359,24 +1433,24 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 ]
 
+.footnote[More details in this [Epi R Handbook chapter](https://epirhandbook.com/en/working-with-dates.html)]
 
 ---
-# {lubridate} functions   
+# Convert to date class  
 
-Use the {lubridate} function that aligns with the *current format*:  
+Within `mutate()`, use the {lubridate} function that aligns with the *raw date format*.  
 
-* `ymd()` for YYYY-MM-DD  
-* `dmy()` for DD-MM-YYYY  
-* `mdy()` for MM-DD-YYYY 
+* `ymd()` if raw values are YYYY-MM-DD  
+* `dmy()` if raw values are DD-MM-YYYY  
+* `mdy()` if raw values are MM-DD-YYYY 
 
 --
 
 .pull-left[
 
 ```{r, eval=T, echo=T}
-surv_raw %>% 
-  clean_names() %>% 
-  select(case_id, onset_date) %>% 
+surv_clean %>% 
+  select(case_id, date_onset) %>% 
   tibble()
 ```
 
@@ -1387,16 +1461,16 @@ surv_raw %>%
 .pull-right[
  
 ```{r, eval=T, echo=T}
-surv_raw %>% 
-  clean_names() %>% 
-  mutate(onset_date = mdy(onset_date)) %>%  #<<
-  select(case_id, onset_date) %>% 
+surv_clean %>% 
+  mutate(date_onset = mdy(date_onset)) %>%  #<<
+  select(case_id, date_onset) %>% 
   tibble()
 ```
 
 ]
 
-Using the `tibble()` view, you can see the class of each column above the values
+.footnote[The `tibble()` display shows the class of each column above its values.]  
+
 
 
 
