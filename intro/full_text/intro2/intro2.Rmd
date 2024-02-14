@@ -379,7 +379,7 @@ import("data/raw/surveillance_linelist_20141201.csv") # works on almost any comp
 
 **Use `here()` to create the file path** as slash-direction flexible  
 
-`here("data", "raw", "surveillance_linelist_raw")`  
+`here("data", "raw", "surveillance_linelist_raw.csv")`  
 
 --
 
@@ -640,8 +640,8 @@ filter(surv_raw, age < 18, sex == "f")
 
 ```{r eval = T, echo=F}
 filter(surv_raw,
-       age < 18,
-       sex == "f") %>%
+  age < 18,
+  sex == "f") %>%
   knitr::kable()
 ```
 
@@ -659,8 +659,9 @@ class: medium-large-table2
 
 ```{r, eval=F, echo=T}
 filter(surv_raw, 
-    age < 18 & 
-    (sex == "f" | lab_confirmed == TRUE))
+  age < 18 & 
+  (sex == "f" | lab_confirmed == TRUE)
+)
 ```
 
 *Newlines and indents do not impact code*
@@ -1180,31 +1181,28 @@ How would you run this command in RStudio?
 
 
 
+
+
 ---
-# Clean column names  
+# Clean the column names  
 
-Print the current column names with the function `names()`:  
+We can observe changes to column names by printing them with `names()`  
 
-.pull-left[
-
-`surv_raw` can be placed inside:
-
-```{r, echo=T, eval=F}
+```{r, echo=T, eval=T}
 # print current column names
 names(surv_raw)  
 ```
 
-]
+---
+# Clean the column names  
 
-.pull-right[
-
-Or, it can be passed using a pipe:
+Equivalently, `surv_raw` can be passed to `names()` using a **pipe**:
 
 ```{r, echo=T, eval=F}
 surv_raw %>%  # begin with raw data
   names()     # print current column names                           
 ```
-]
+
 
 ```{r, eval=T, echo=F}
 surv_raw %>%           # begin with raw data
@@ -1213,21 +1211,38 @@ surv_raw %>%           # begin with raw data
 
 --
 
-Insert `clean_names()` to standardize (lowercase, no spaces or special characters). *See changes to the final two columns*  
+Apply `clean_names()` to `surv_raw` by inserting it into the pipe sequence.  
+This standardizes column names (lowercase, no spaces or special characters). 
 
-```{r, echo=T}
+```{r, echo=T, eval=T}
 surv_raw %>%            # begin with raw data
   clean_names() %>%     # standardize column names #<<
   names()               # print current column names
 ```
 
+*See changes to the final two columns*  
+
 
 
 ---
+# Clean the column names  
 
-# `rename()` columns  
+Equivalently, `surv_raw` can be passed to `names()` using a **pipe**:
 
-Pipe the cleaned column names to `rename()` for manual edits.  
+```{r, echo=T, eval=F}
+surv_raw %>%  # begin with raw data
+  names()     # print current column names                           
+```
+
+
+```{r, eval=T, echo=F}
+surv_raw %>%           # begin with raw data
+  names()              # print current column names                           
+``` 
+
+--
+
+Now, **pipe** the *cleaned* column names through `rename()` for manual edits.  
 
 ```{r, eval=params$lang == "en", echo=params$lang == "en"}
 surv_raw %>%                        # begin with raw data
@@ -1238,36 +1253,8 @@ surv_raw %>%                        # begin with raw data
   names()                           # print current column names
 ```
 
-```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
-surv_raw %>% 
-  clean_names() %>% 
-  rename(
-       # Nouveau  = Ancien
-       age_years  = age,                    #<<
-       date_onset = onset_date) %>%         #<<
-  names()
-```
 
-```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
-surv_raw %>% 
-  clean_names() %>% 
-  rename(
-       # НОВЫЙ = СТАРЫЙ
 
-       age_years  = age,                    #<<
-       date_onset = onset_date) %>%         #<<
-  names()
-```
-
-```{r, eval=params$lang == "es", echo=params$lang == "es"}
-surv_raw %>% 
-  clean_names() %>% 
-  rename(
-       # NUEVO      = ANTIGUO
-       age_years  = age,                    #<<
-       date_onset = onset_date) %>%         #<<
-  names()
-```
 
 
 
