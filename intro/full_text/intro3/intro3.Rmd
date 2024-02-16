@@ -242,12 +242,12 @@ The **`%>%`** pipe operator means **"and then"** (...do the action on the next l
 Can anyone explain this command verbally?
 
 ```{r, echo=T, eval = F}
-surv <- surv_raw %>%        # define new clean data as: the raw data piped to...
+surv <- surv_raw %>%        # create new clean data as: the raw data piped to...
   clean_names() %>%                           # standardize column names 
   rename(                                     # manual column names edits:
     age_years = age,                            # age to age_years
-    date_onset = onset_date,                    # date of onset
-    date_report = date_of_report) %>%           # date of report
+    date_onset = onset_date,                    # use date_ as prefix
+    date_report = date_of_report) %>%           # use date_ as prefix
   mutate(date_onset = mdy(date_onset)) %>%    # help R understand dates of onset
   mutate(date_report = mdy(date_report)) %>%  # help R understand dates of report
   mutate(sex = recode(sex,                    # edit sex values so that:
@@ -263,6 +263,7 @@ surv <- surv_raw %>%        # define new clean data as: the raw data piped to...
 What is the cause of this error message?  
 
 ```{r, echo=T, eval = F}
+# create clean dataset
 surv <- surv_raw %>% 
   clean_names() %>% 
   rename(
@@ -289,6 +290,7 @@ Error in recode(sex, m = "male", f = "female") : object 'sex' not found
 What is the cause of this error message?  
 
 ```{r, echo=T, eval = F}
+# create clean dataset
 surv <- surv_raw %>% 
   clean_names() %>% 
   rename(
@@ -308,7 +310,7 @@ Error in recode(sex, m = "male", f = "female") : object 'sex' not found
 
 A pipe operator is missing, breaking the chain.  
 
-The `mutate(sex...` has not received the dataset from the previous step, and therefore R has no context of what `sex` is.  
+The `mutate(sex...` has not received the dataset from the previous step, and therefore R has no context of what the column `sex` is.  
 
 
 
@@ -319,6 +321,7 @@ The `mutate(sex...` has not received the dataset from the previous step, and the
 What is the cause of this error message?  
 
 ```{r, echo=T, eval = F}
+# create clean dataset
 surv <- surv_raw %>% 
   clean_names() %>% 
   rename(
@@ -350,6 +353,7 @@ Error in `dplyr::select()`:
 What is the cause of this error message?  
 
 ```{r, echo=T, eval = F}
+# create clean dataset
 surv <- surv_raw %>% 
   clean_names() %>% 
   rename(
@@ -414,7 +418,7 @@ surv <- surv_raw %>% #<<
 
 .pull-right[
 
-* Keep **one cleaning command** only. Add new functions with pipes to the bottom.  
+* Keep **one cleaning command** only. Add new functions with pipes to its end.  
 
 ]
 
@@ -449,7 +453,7 @@ class(surv$date_onset)        # check column class    #<<
 
 .pull-right[
 
-* Keep **one cleaning command** only. Add new functions with pipes to the bottom.  
+* Keep **one cleaning command** only. Add new functions with pipes to its end.  
 * Consolidate other small commands in a **testing area**  
 
 ]
@@ -611,9 +615,9 @@ str_glue({paste0(mod4[mod4$uid == "mod4_tx_casewhen_4", params$lang])}) %>%
 ```{r mutate3, include = F}
 surv_raw %>% 
   mutate(case_def = case_when(
-    lab_confirmed == TRUE             ~ "Confirmed",
-    epilink == 'yes' & fever == 'yes' ~ "Suspect",
-    TRUE                              ~ "To investigate"))
+    lab_confirmed == TRUE             ~ "Confirmed",       # first check this
+    epilink == 'yes' & fever == 'yes' ~ "Suspect",         # then check this
+    TRUE                              ~ "To investigate")) # last resort
 ```
 
 ```{r mutate3_flair, echo=F}
@@ -641,7 +645,19 @@ class: inverse, center, middle
 
 # Tidy data  
 
+## Reflections for the end of this exercise  
 
+
+---
+# Messy data  
+
+Often, raw public health data looks like this:  
+
+```{r}
+knitr::include_graphics(xfun::relative_path(here::here("images", "messy_data.png")))
+```
+
+What challenges do you see for handling this data in R?  
 
 ---
 # Tidy data  
