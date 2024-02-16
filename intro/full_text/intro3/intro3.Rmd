@@ -42,6 +42,9 @@ knitr::opts_chunk$set(echo = FALSE,
 ## but is something to do with background images
 options(htmltools.dir.version = FALSE)
 
+# allow panels in slides
+xaringanExtra::use_panelset()
+
 ## install and load necessary packages 
 pacman::p_load(
   rio,        # importing data  
@@ -125,6 +128,10 @@ style_mono_accent(
 ```{r, echo=F, include = F}
 surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
 
+surv_raw <- surv_raw %>% 
+  filter(row_num %in% c(635, 2, 11, 227, 641)) %>% 
+  select(case_id, age, sex, hospital, lab_confirmed, epilink, fever)
+
 gen <- googlesheets4::read_sheet(
   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
   range = "generic", col_types = "c") %>%
@@ -147,18 +154,17 @@ contact@appliedepi.org
 # Today: objectives & schedule  
 
 **In this module we aim to help you:**  
-* Gain familiarity of {dplyr} functions used to clean public health data  
-* Apply a series of functions to a data frame using the pipe operator  
-* Begin writing an R script to analyze outbreak data  
-
+* Gain familiarity with more functions used to clean public health data  
+* Add complex logical recoding steps to your data cleaning "pipe chain"
+* Be introduced to concepts of "tidy data" structure  
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
   ~Time, ~Topic,
-  "15 minutes",  "Review of previous module", 
-  "15 minutes", "Demo - logical coding",
+  "20 minutes",  "Review of previous module", 
+  "20 minutes", "Demo - logical coding",
   "2.5 hours",  "Exercise",
-  "30 minutes", "Plenary debrief"
+  "20 minutes", "Debrief"
 )
 
 outline %>% 
@@ -166,43 +172,16 @@ outline %>%
   flextable::add_footer_lines("Take breaks as you wish during the exercise")
 ```
 
-**This is a *long* exercise, but very important.**   
-
 ???
 Note stretch breaks throughout.
 
 
----
-# Review of previous module 
-
-
 
 ---
 
-# Demo dataset  
+# More data cleaning functions  
 
-Let's use a smaller version to practice with, and explore some core R functions
-```{r, echo=F}
-demo <- surv_raw %>% 
-     head(5) %>% 
-     select(case_id, age, sex, lab_confirmed, fever, epilink)
-```
-
-```{r, eval=T}
-demo %>% 
-  knitr::kable()
-     
-```
-
---
-
-We will name it "**`demo`**"
-
----
-
-# The {dplyr} package  
-
-Some of the {dplyr} functions we will use:   
+In this module we will address:  
 
 
 Function       | Utility                               
@@ -218,182 +197,407 @@ Function       | Utility
 
 
 
+---
+class: inverse, center, middle
+
+# Review of previous module  
+
+
+
+
+---
+
+# Telling a story with the pipe
+
+A **cleaning command** is a story, a **series of actions** performed on raw data.  
+
+The **`%>%`** pipe operator means **"and then"** (...do the action on the next line).  
+
+Can anyone explain this command verbally?
+
+```{r, echo=T, eval = F}
+surv <- surv_raw %>% 
+  clean_names() %>% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  
+
+```
+
+
+---
+
+# Telling a story with the pipe
+
+A **cleaning command** is a story, a **series of actions** performed on raw data.  
+
+The **`%>%`** pipe operator means **"and then"** (...do the action on the next line).  
+
+Can anyone explain this command verbally?
+
+```{r, echo=T, eval = F}
+surv <- surv_raw %>%        # define new clean data as: the raw data piped to...
+  clean_names() %>%                           # standardize column names 
+  rename(                                     # manual column names edits:
+    age_years = age,                            # age to age_years
+    date_onset = onset_date,                    # date of onset
+    date_report = date_of_report) %>%           # date of report
+  mutate(date_onset = mdy(date_onset)) %>%    # help R understand dates of onset
+  mutate(date_report = mdy(date_report)) %>%  # help R understand dates of report
+  mutate(sex = recode(sex,                    # edit sex values so that:
+    "m" = "male",                               # "m" is now "male"
+    "f" = "female"))                            # "f" is now "female"
+
+```
+
+
+---
+# Common errors
+
+What is the cause of this error message?  
+
+```{r, echo=T, eval = F}
+surv <- surv_raw %>% 
+  clean_names() %>% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) 
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  
+```
+
+
+```{r, echo=T, eval=F}
+Error in recode(sex, m = "male", f = "female") : object 'sex' not found
+```
+
+
+
+---
+# Common errors
+
+What is the cause of this error message?  
+
+```{r, echo=T, eval = F}
+surv <- surv_raw %>% 
+  clean_names() %>% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report))     #<<
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  
+```
+
+```{r, echo=T, eval=F}
+Error in recode(sex, m = "male", f = "female") : object 'sex' not found
+```
+
+A pipe operator is missing, breaking the chain.  
+
+The `mutate(sex...` has not received the dataset from the previous step, and therefore R has no context of what `sex` is.  
+
+
+
+
+---
+# Common errors
+
+What is the cause of this error message?  
+
+```{r, echo=T, eval = F}
+surv <- surv_raw %>% 
+  clean_names() %>% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  %>% 
+
+# make a table with the clean data
+tabyl(surv, sex, district)
+```
+
+
+```{r, echo=T, eval=F}
+Error in `dplyr::select()`:
+! Can't subset columns that don't exist.
+✖ Column `surv` doesn't exist.
+```
+
+
+
+---
+# Common errors
+
+What is the cause of this error message?  
+
+```{r, echo=T, eval = F}
+surv <- surv_raw %>% 
+  clean_names() %>% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>%      
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  %>%       #<<
+
+# make a table with the clean data
+tabyl(surv, sex, district)
+
+```
+
+```{r, echo=T, eval=F}
+Error in `dplyr::select()`:
+! Can't subset columns that don't exist.
+✖ Column `surv` doesn't exist.
+```
+
+An extra "hanging" pipe passed the clean dataset to a *separate* `tabyl()` command.  
+For a function, provide a dataset **either** by a pipe, *OR* as the first argument.  
+
+
+
+---
+# Messy script
+
+.pull-left[
+
+**Avoid this**  
+
+```{r, echo=T, eval = F}
+surv <- surv_raw %>%    #<<
+  clean_names()
+  
+surv <- surv_raw %>%    #<<
+  clean_names() %>% 
+  rename(
+    date_onset = onset_date,
+    date_report = date_of_report)
+
+tabyl(surv, sex, district)
+class(surv$date_onset)
+
+surv <- surv_raw %>% #<<
+  clean_names() %>% 
+  rename(
+    date_onset = onset_date,
+    date_report = report_date) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>%     
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))
+  
+```
+]
+
+.pull-right[
+
+* Keep **one cleaning command** only. Add new functions with pipes to the bottom.  
+
+]
+
+
+
+
+---
+# Clean script
+
+.pull-left[
+
+Clean script  
+
+```{r, echo=T, eval = F}
+# Create clean dataset -------------------------------------
+surv <- surv_raw %>%                                     
+  clean_names() %>% 
+  rename(
+    date_onset = onset_date,
+    date_report = report_date) %>% 
+  mutate(date_onset = mdy(date_onset))  %>% 
+  mutate(date_report = mdy(date_of_report)) %>%     
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))
+  
+# Testing area ---------------------------------------------
+tabyl(surv, sex, district)    # cross-tabulate        #<<
+class(surv$date_onset)        # check column class    #<<
+```
+]
+
+.pull-right[
+
+* Keep **one cleaning command** only. Add new functions with pipes to the bottom.  
+* Consolidate other small commands in a **testing area**  
+
+]
+
+
 
 ---
 
 # Printing vs. saving   
 
-Our pipes have only *printed* the modified `demo` - the data frame has **not** changed! 
+**Printing**  
+
+This command has no **`<-`**, so it only *prints* the modified `surv` to the console. The actual data frame has not changed.  
 
 ```{r, echo=params$lang == "en", eval=F}
-demo %>%                    # PRINT only cases over 10 years
+surv_raw %>%              # PRINT only cases over 10 years  #<<
   filter(age > 10)
 ```
 
 ```{r, echo=params$lang == "fr", eval=F}
-demo %>%                    # IMPRIMER seulement les cas plus que 10 ans
+surv_raw %>%                    # IMPRIMER seulement les cas plus que 10 ans
   filter(age > 10)
 ```
 
 ```{r, echo=params$lang == "ru", eval=F}
-demo %>%                    # ПЕЧАТАТЬ только случаи старше 10 лет
+surv_raw %>%                    # ПЕЧАТАТЬ только случаи старше 10 лет
   filter(age > 10)
 ```
 
 ```{r, echo=params$lang == "es", eval=F}
-demo %>%                    # IMPRIMIR sólo los casos de más de 10 años
+surv_raw %>%                    # IMPRIMIR sólo los casos de más de 10 años
   filter(age > 10)
 ```
 
-```{r, echo=F, eval=T}
-demo %>%                    # print only cases over 10 years
+```{r, echo=F, eval=F}
+surv_raw %>%                    # print only cases over 10 years
   filter(age > 10) %>% 
   knitr::kable()
 ```
 
---
+**Saving**  
 
-
-To save: add the assignment operator **<-** to define a new data frame. 
+Add the assignment operator **<-** to create a new data frame.  
 
 ```{r pipe-assign, eval=F, echo=T}
-demo_over10 <- demo %>%
+surv_over10 <- surv_raw %>%     # create new data frame   #<<
   filter(age > 10)
 ```
 
 (No output to the R console, but a new object in the Environment pane)   
 
 ???
-Note how the column names in `demo` are old! It's because our changes have not yet been saved.  
+Note how the column names in `surv` are old! It's because our changes have not yet been saved.  
+
+
+
+
+
 
 ---
+class: inverse, center, middle
 
-# `mutate()` to edit columns  
- 
-`mutate()` is also used to *edit* existing columns, such as *recoding* values
+# Recoding values  
 
-Below, `recode()` is used inside `mutate()` to recode the sex column  
 
---
+---
+# Example dataset
 
+```{r, eval=T, echo=T}
+surv_raw
+```
+
+
+---
+# `recode()` for manual edits  
+
+Use `recode()` within `mutate()` for extensive manual *recoding*  
 
 
 ```{r, echo=params$lang == "en", eval=params$lang == "en"}
-demo %>% 
-  mutate(sex = recode(sex,   # re-define sex as: 
-    "m" = "male",                  # when "m", change to "male"   
-    "f" = "female"))               # when "f", change to "female"
-```
-
-
-```{r, echo=params$lang == "fr", eval=params$lang == "fr"}
-demo %>% 
-  mutate(sex = recode(sex,   # redéfinir le sexe: 
-    "m" = "male",                  # ou "m" devient "male"
-    "f" = "female"))               # ou "f" devient "female"
-```
-
-
-```{r, echo=params$lang == "ru", eval=params$lang == "ru"}
-demo %>% 
-  mutate(sex = recode(sex,   # переопределить пол как: 
-    "m" = "male",                  # когда "m", меняется на "male" 
-    "f" = "female"))               # когда "f", меняется на "female"  
-```
-
-```{r, echo=params$lang == "es", eval=params$lang == "es"}
-demo %>% 
-  mutate(sex = recode(sex,   #redefinir género como: 
-    "m" = "male",                  # cuando "m", cambiar a "masculino"   
-    "f" = "female"))               # cuando "f", cambiar a "mujer"
+surv_raw %>% 
+  mutate(hospital = recode(hospital,
+      # for reference: OLD = NEW
+      "Mitilary Hospital"  = "Military Hospital",
+      "Port"               = "Port Hospital",
+      "Port Hopital"       = "Port Hospital",
+      "St. Mark's Maternity Hospital (SMMH)" = "SMMH"))
 ```
 
 
 
-???
-Explain that there are many nuances to case_when() which you will practice in the breakout exercise
+
 
 
 
 ---
-
 # `ifelse()` for simple logic  
- 
-`ifelse()` within `mutate()` is used to apply simple recoding logic  
 
-```{r, results = "asis", echo = FALSE}
-str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_3", params$lang])}) %>%
-  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_4", params$lang])}), color = "deeppink") %>%
-  flair(str_glue({paste0(mod4[mod4$uid == "mod4_tx_ifelse_5", params$lang])}), color = "cornflowerblue") %>%
-  flair_all(before = "<h4>", after = "</h4>") %>%
-  cat()
+`ifelse()` within `mutate()` logically tests each row.  
+
+It writes in the new `age_group` column:  
+
+* "adult", if the test yields TRUE  
+* "minor", if the test yields FALSE  
+
+```{r, echo=T, eval=T}
+surv_raw %>% 
+  mutate(age_group = ifelse(
+    test = age >= 18,
+    yes = "adult",  
+    no = "minor")) 
 ```
 
---
-
-```{r mutate_en, include = FALSE}
-demo %>% 
-  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # creates new T/F column
-```
-
-
-```{r mutate_fr, include = FALSE}
-demo %>% 
-  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # crée une nouvelle colonne vrai-faux
-```
-
-
-```{r mutate_ru, include = FALSE}
-demo %>% 
-  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # создает новый столбец типа истина-ложь
-```
-
-```{r mutate_es, include = FALSE}
-demo %>% 
-  mutate(adult = ifelse(age >= 18, 'yes', 'no')) # crea una nueva columna T/F
-```
-
-```{r mutate_flair_en, echo=F, eval = params$lang == "en"}
-decorate("mutate_en") %>%
-  flair("adult", color = "deeppink") %>%
-  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
-  knit_print()
-```
-
-```{r mutate_flair_fr, echo=F, eval = params$lang == "fr"}
-decorate("mutate_fr") %>%
-  flair("adult", color = "deeppink") %>%
-  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
-  knit_print()
-```
-
-```{r mutate_flair_ru, echo=F, eval = params$lang == "ru"}
-decorate("mutate_ru") %>%
-  flair("adult", color = "deeppink") %>%
-  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
-  knit_print()
-```
-
-```{r mutate_flair_es, echo=F, eval = params$lang == "es"}
-decorate("mutate_en") %>%
-  flair("adult", color = "deeppink") %>%
-  flair("ifelse(age >= 18, 'yes', 'no')", color = "cornflowerblue") %>% 
-  knit_print()
-```
-
---
-
-`ifelse()` applies a logical criteria to each row, returns one value if true, and returns another value if false.  
 
 
 
 ---
+# Argument names and order  
 
-# Use `case_when()` for complex logic 
+If arguments are written in the default order as per the function documentation, explicitly writing their names is unnecessary.  
+
+The arguments of `ifelse()` are `ifelse(test = , yes = , no = )`  
+
+This command:  
+
+```{r, echo=T, eval=F}
+surv_raw %>% 
+  mutate(age_group = ifelse(
+    test = age >= 18,
+    yes = "adult",  
+    no = "minor")) 
+```
+
+Can also be written as:  
+
+```{r, echo=T, eval=F}
+surv_raw %>% 
+  mutate(age_group = ifelse(age >= 18, "adult", "minor")) 
+```
+
+.footnote[What are the advantages and disadvantages of this?]  
+
+
+
+---
+# Complex logic 
  
-`case_when()` is used to test a series of logical criteria against each row, and assign a corresponding new value. 
-
---
+Use **`case_when()`** within `mutate()` to test a series of logical criteria against each row, and assign a corresponding new value.  
 
 ```{r, results = "asis", echo = FALSE}
 str_glue({paste0(mod4[mod4$uid == "mod4_tx_casewhen_4", params$lang])}) %>%
@@ -405,7 +609,7 @@ str_glue({paste0(mod4[mod4$uid == "mod4_tx_casewhen_4", params$lang])}) %>%
 ```
 
 ```{r mutate3, include = F}
-demo %>% 
+surv_raw %>% 
   mutate(case_def = case_when(
     lab_confirmed == TRUE             ~ "Confirmed",
     epilink == 'yes' & fever == 'yes' ~ "Suspect",
@@ -414,22 +618,182 @@ demo %>%
 
 ```{r mutate3_flair, echo=F}
 decorate("mutate3") %>%
-  flair("'Confirmed", color = "cornflowerblue") %>%
-  flair("'Suspect'", color = "cornflowerblue") %>%
-  flair("To investigate)", color = "cornflowerblue") %>%
+  flair('"Confirmed"', color = "cornflowerblue") %>%
+  flair('"Suspect"', color = "cornflowerblue") %>%
+  flair('"To investigate"', color = "cornflowerblue") %>%
   flair("~", color = "deeppink") %>%
   flair("lab_confirmed == TRUE", color = "orange") %>%
   flair(" epilink == 'yes' & fever == 'yes'", color = "orange") %>%
+  flair("TRUE", color = "orange") %>%
   knit_print()
 ```
 
+The **order matters**. Write the most specific criteria at the top of the command (to be triggered first) and the most general criteria at the bottom (as a "catch all").  
 
-Every row in the dataset is evaluated for the criteria (from top-to-bottom). 
 
+
+
+
+
+
+---
+class: inverse, center, middle
+
+# Tidy data  
+
+
+
+---
+# Tidy data  
+
+Clean data should also be "tidy". Below are 3 core principles of "tidy data":    
+
+--
+
+1. Each **value** must have its own **cell**  
+
+--
+
+2. Each **variable** must have its own **column** 
+
+--
+
+3. Each **observation** must have its own **row**    
+
+
+
+
+.footnote[Source : [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)  
+]
+
+???
+
+
+
+
+---
+# Values in their own cell    
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+# CREATE EXAMPLE DATA
+#####################
+clean_data_example_5 <- data.frame(case = c("Case 1", "Case 2", "Case 3", "Case 4"), age = c("31, years", "24, years", "18, months", "33, years")) 
+
+clean_data_example_6 <- clean_data_example_5 %>%
+    separate(age, 
+           into = c("age", "age_unit"), 
+           sep = ", "
+           ) %>%
+  mutate(age = as.numeric(age))
+```
+
+.pull-left[
+
+**Messy:** What changes would make this dataset more tidy?    
+
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+
+clean_data_example_5  %>%
+  knitr::kable()
+  
+```
+
+]
+
+--
+
+.pull-right[
+
+**Tidy:** Age and the age unit are separated into distinct cells    
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+
+clean_data_example_6  %>%
+  knitr::kable()
+
+```
+]
 
 
 ???
-Explain that there are many nuances to case_when() which you will practice in the breakout exercise
+Let's start with an easy one...  
+
+
+
+
+---
+
+# Terminology    
+
+Structurally, "data frames" in R consist of **columns** and **rows**.    
+
+--
+
+However, **"variables"** and **"observations"** are more *abstract* concepts:   
+
+* **Variables** measure one *underlying attribute* (age, outcome, or date of onset)   
+* **Observations** relate to a *unit of analysis*   
+
+--
+
+Ideally, they align: **columns = variables** and **rows = observations**    
+
+```{r, eval = TRUE, echo = FALSE, out.height = "65%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+#knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_image.png")))
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", paste0("tidy_image_", params$lang, ".png"))))
+
+```
+
+.footnote[Image source: [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)]
+
+
+
+
+
+---
+# But it is not always clear...    
+
+.pull-left[
+
+**Non-tidy data**
+
+```{r}
+long_example <- tribble(
+     ~country, ~January, ~February, ~March, 
+     "Mozambique", 3200,    3300,      4100,  
+     "Lesotho", 500,     750,       900,   
+     "South Africa", 5100, 6200, 8100,)
+          
+long_example %>%
+  knitr::kable()
+```
+
+* Is "January" a variable?    
+* Where is the variable "month"?   
+* Does it have its own column?   
+* Is each observation a row?    
+
+
+]
+
+--
+
+.pull-right[
+
+**Tidy data**  
+
+```{r}
+long_example %>%
+  pivot_longer(cols=2:4, names_to="month", values_to = "cases") %>% 
+     knitr::kable()
+```
+
+]
 
 
 
