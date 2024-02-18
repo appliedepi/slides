@@ -108,6 +108,9 @@ style_mono_accent(
 ```
 
 ```{css, echo=F}
+    .remark-code {
+      font-size: 70%;
+    }
     .remark-slide table{
       border: none
     }
@@ -116,10 +119,10 @@ style_mono_accent(
     }
     tr:first-child {
       border-top: none;
-  }
+    }
     tr:last-child {
     border-bottom: none;
-  }
+    }
 ```
 
 
@@ -523,11 +526,38 @@ Note that it starts and ends with three dashes, and that placement of spaces and
 
 
 
+---
+# The "setup" chunk
+
+**Chunk "options"** adjust how R code and its outputs are displayed in the report.  
+
+The `setup` chunk near top of the R Markdown uses a {knitr} function to set the **default** "options" for all chunks.  
+
+* Run chunks: `eval = TRUE`  
+* Show the code in the report: `echo = TRUE`  
+* Show warnings in the report: `warning = TRUE`  
+* Show errors in the report: `error = TRUE`  
+* Show output in the report: `include = TRUE`  
+
+Below, the default is set so that R code is printed in the report, but warnings and error messages are not.  
+
+````r
+```{r setup, include=FALSE}`r ''` 
+
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, error = FALSE)
+
+```
+````
+
+
 
 ---
 # Chunk options
+
+To override the defaults, you can adjust each chunk's options:  
+
 .pull-left[
-Adjust chunk "options" inside the `{r }` to set how it displays in the report:  
+Adjust chunk "options" inside the `{r}`  
 
 * Run the chunk: `eval = TRUE`  
 * Show the code: `echo = TRUE`  
@@ -536,6 +566,7 @@ Adjust chunk "options" inside the `{r }` to set how it displays in the report:
 * Show output: `include = TRUE`  
 
 Note the commas between each option.
+
 ]
 
 .pull-right[
@@ -543,7 +574,6 @@ Note the commas between each option.
 ````r
 ```{r packages, echo = FALSE, warning = FALSE}`r ''` 
 
-# Load/import my packages
 pacman::p_load(
   rio,      # import/export
   here,     # file paths
@@ -555,273 +585,11 @@ pacman::p_load(
 ````
 ]
 
-???
-Chunk names cannot contain spaces  
-
-
-
----
-# The "setup" chunk
-
-- Uses a {knitr} function to *specify the default "options" for all chunks*  
-
-Below, all chunks are set to show no code, warnings, or error messages in the report
-
-````r
-```{r setup, include=FALSE}`r ''` 
-
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, error = FALSE)
-
-```
-````
-
 Learn more about code chunk options [here](https://rmarkdown.rstudio.com/lesson-3.html)
 
 
-
-
----
-class: inverse, center, middle
-# All together  
-
-
----
-## All together
-.pull-left[
-
-````md
-*---
-*title: "Surveillance Report"
-*output: html_document
-*---
-
-```{r setup, include = FALSE}`r ''`
-knitr::opts_chunk$set(
-  echo = FALSE,
-  warning = FALSE,
-  error = FALSE)
-```
-
-```{r import, include = FALSE}`r ''`
-# import the dataset
-surv <- import(here("data", "clean", "linelist.csv"))
-```
-
-## Executive summary
-Report as of `r knitr::inline_expr("max(surv$report_date")`.  
-There are `r knitr::inline_expr("nrow(surv)")` cases.  
-`r knitr::inline_expr("fmt_count(surv, outcome == 'Died')")` died.  
-
-
-## Epidemic curve
-```{r}`r ''`
-surv %>% 
-  ggplot(mapping = aes(x = date_onset))+ 
-  geom_histogram()
-```
-````
-]
-
-
-.pull-right[
-First, the YAML heading.  
-
-This script will produce an HTML report.
-]
-
-
-
----
-## All together
-.pull-left[
-
-````md
----
-title: "Surveillance Report"
-output: html_document
----
-
-*```{r setup, include = FALSE}`r ''`
-*knitr::opts_chunk$set(
-*  echo = FALSE,
-*  warning = FALSE,
-*  error = FALSE)
-*```
-
-```{r import, include = FALSE}`r ''`
-# import the dataset
-surv <- import(here("data", "clean", "linelist.csv"))
-```
-
-## Executive summary
-Report as of `r knitr::inline_expr("max(surv$report_date")`.  
-There are `r knitr::inline_expr("nrow(surv)")` cases.  
-`r knitr::inline_expr("fmt_count(surv, outcome == 'Died')")` died.  
-
-
-## Epidemic curve
-```{r}`r ''`
-surv %>% 
-  ggplot(mapping = aes(x = date_onset))+ 
-  geom_histogram()
-```
-````
-]
-
-
-.pull-right[
-A "setup" code chunk to set the default options of all chunks.
-
-This chunk says that no code will show in the report, and no warning or error messages produced by the codes.  
-
-]
-
-
-
----
-## All together
-
-.pull-left[
-
-````md
----
-title: "Surveillance Report"
-output: html_document
----
-
-```{r setup, include = FALSE}`r ''`
-knitr::opts_chunk$set(
-  echo = FALSE,
-  warning = FALSE,
-  error = FALSE)
-```
-
-*```{r import, include = FALSE}`r ''`
-*# import the dataset
-*surv <- import(here("data", "clean", "linelist.csv"))
-*```
-
-## Executive summary
-Report as of `r knitr::inline_expr("max(surv$report_date")`.  
-There are `r knitr::inline_expr("nrow(surv)")` cases.  
-`r knitr::inline_expr("fmt_count(surv, outcome == 'Died')")` died.  
-
-
-## Epidemic curve
-```{r}`r ''`
-surv %>% 
-  ggplot(mapping = aes(x = date_onset))+ 
-  geom_histogram()
-```
-````
-]
-
-
-
-.pull-right[
-This separate code chunk imports the dataset.  
-
-It does it silently, this code nor any output will appear in the report.
-
-]
-
-
----
-## All together
-
-
-.pull-left[
-
-````md
----
-title: "Surveillance Report"
-output: html_document
----
-
-```{r setup, include = FALSE}`r ''`
-knitr::opts_chunk$set(
-  echo = FALSE,
-  warning = FALSE,
-  error = FALSE)
-```
-
-```{r import, include = FALSE}`r ''`
-# import the dataset
-surv <- import(here("data", "clean", "linelist.csv"))
-```
-
-*## Executive summary
-*Report as of `r knitr::inline_expr("max(surv$report_date")`.  
-*There are `r knitr::inline_expr("nrow(surv)")` cases.  
-*`r knitr::inline_expr("fmt_count(surv, outcome == 'Died')")` died.  
-
-
-## Epidemic curve
-```{r}`r ''`
-surv %>% 
-  ggplot(mapping = aes(x = date_onset))+ 
-  geom_histogram()
-```
-````
-]
-
-
-
-.pull-right[
-This is "markdown" text - headings and sentences that will appear in the report.  
-
-There is embedded "inline" R code, to make the figures in the text dynamically update (e.g. the dates, case counts, etc).
-
-]
-
----
-## All together
-
-
-.pull-left[
-
-````md
----
-title: "Surveillance Report"
-output: html_document
----
-
-```{r setup, include = FALSE}`r ''`
-knitr::opts_chunk$set(
-  echo = FALSE,
-  warning = FALSE,
-  error = FALSE)
-```
-
-```{r import, include = FALSE}`r ''`
-# import the dataset
-surv <- import(here("data", "clean", "linelist.csv"))
-```
-
-## Executive summary
-Report as of `r knitr::inline_expr("max(surv$report_date")`.  
-There are `r knitr::inline_expr("nrow(surv)")` cases.  
-`r knitr::inline_expr("fmt_count(surv, outcome == 'Died')")` died.  
-
-
-*## Epidemic curve
-*```{r}`r ''`
-*surv %>% 
-*  ggplot(mapping = aes(x = date_onset))+ 
-*  geom_histogram()
-*```
-````
-]
-
-
-
-.pull-right[
-This final code chunk produces a simple histogram of cases by date of onset.  
-
-The code will not appear in the report, but the output (the epicurve) will display.
-
-]
-
+???
+Chunk names cannot contain spaces  
 
 
 
