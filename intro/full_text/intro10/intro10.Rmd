@@ -1,6 +1,6 @@
 ---
 title: "Introduction to R for<br>Applied Epidemiology"
-subtitle: "COVID-19 case study"
+subtitle: "Introduction to Reprex"
 author: "March 2022"
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
@@ -65,15 +65,15 @@ pacman::p_load_gh(
 # data prep --------------------------------------------------------------------
 surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
 
-gen <- googlesheets4::read_sheet(
-  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
-  range = "generic") %>%
-  clean_names()
+#gen <- googlesheets4::read_sheet(
+#  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#  range = "generic") %>%
+#  clean_names()
 
-mod10 <- googlesheets4::read_sheet(
-  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
-  range = "mod10", col_types = "c") %>%
-  clean_names()
+#mod10 <- googlesheets4::read_sheet(
+#  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#  range = "mod10", col_types = "c") %>%
+#  clean_names()
 ```
 
 ```{r  xaringan-themer, include = FALSE}
@@ -118,7 +118,7 @@ style_mono_accent(
 
 # Introduction to R for Applied Epidemiology
 
-### COVID-19 Case Study
+### How to get code help
 
 contact@appliedepi.org
 ---
@@ -131,7 +131,7 @@ contact@appliedepi.org
 
 --
 
-* See outputs and replicate them using R  
+* Review outputs and replicate them using R  
 
 --
 
@@ -139,7 +139,7 @@ contact@appliedepi.org
 
 --
 
-* Review another person's original code  
+* Make an error and post a reprex (reproducible example) in the Applied Epi community forum
 
 --
 
@@ -148,11 +148,10 @@ contact@appliedepi.org
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
   ~Time, ~Location, ~Topic,
-  "15 minutes",   "Main" ,    "Introduce the COVID-19 case study",
-  "2 hours",      "Break outs", "COVID-19 case study",
-  "45 minutes",   "Main" ,   "Partner code review" ,
-  "5 minutes",    "Main",   "Closing" ,
-  "15 minutes",   "Main" ,    "Feedback survey"
+  "15 minutes",   "Main" ,    "Introduction to reprex",
+  "2 hours 45 mins",   "Breakouts" ,   "You choose dataset; reprex post" ,
+  "10 minutes",    "Breakouts",   "Feedback survey" ,
+  "15 minutes",   "Main" ,    "Closing comments"
 )
 
 outline %>% 
@@ -163,47 +162,113 @@ outline %>%
 
 ---
 
-# COVID-19 report
+# Introduction to reprex 
 
-Fulton County, GA
+Today we want to focus on **how to get help** with R code
 
-You will have 2 hours to replicate the report  
+There are many ways to get help beyond the course! 
+* [Applied Epi R Handbook](https://epirhandbook.com/en/)
+* [Applied Epi Community Forum](https://appliedepi.org/community/)
+* [ChatGPT](https://chat.openai.com/auth/login) or other AI resources
+* [Google search](google.com), [Stackoverflow](https://stackoverflow.com/), or [Stackexchange](https://stackexchange.com/)
+* [Applied Epi Help Desk](support.appliedepi.org) ( you will receive coupons upon course completion)
 
-
----
-
-# COVID-19 Data
-
-Scrambled and anonymized  
-
-- Linelist  
-- City populations in Fulton County  
-
+For many of the search options, it is important to understand how to make a reproducible example. 
 
 ---
 
-# Support available  
+# Introduction to reprex
 
-- Instructors will be available in breakouts room  
-- Each will handle different parts of the report, so go to the room that most fits your question  
+What is a reproducible example (**reprex**)?
+
+* Summarise a problem so readers can re-create it on their own computers
+* Should be **minimal**: 
+    * Include only data and code require to produce the problem
+* Should be **reproducible**: 
+    * Include *all* context required to reproduct the problem
+    * E.g. packages, simlplified dataframe, commands, R version used, etc.
+
+We will go through a demonstration of how to create and post a reprex. 
+
+Don't feel like you have to type along! You will have the oppportunity to create your own in the exercises. 
+
+---
+class: inverse, center, middle  
+
+# Demo: How to make a reprex
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "window.png")))
+```
 
 
 ---
-# Have fun  
+# This session 
 
-This is not a test. Do the best you can. Enjoy reviewing about all that you have learned.  
+Today's session is focused around creating a reprex! 
+
+* Please attempt to post a reprex on the Applied Epi Community Forum
+* The exercises will guide you through a reprex review
+* You will then have the option to work on a dataset of your choosing
+* When you encounter an issue with your data, go to the community forum and post a reprex about your issue! 
+
+Remember, we are here to help, not matter which dataset you are using. 
 
 
 ---
-# Code review  
+# Datasets available 
 
-When we re-convene, we will split into partners (randomly-assigned) and you can review the other person's code.  
+If you have your own data, please feel free to start a new R project with your data! 
 
-We will provide a brief guide on how to review code.  
+Alternatively, you have multiple options for other datasets to use today: 
+* Continue working on your Ebola Report
+* Continue working on your COVID-19 report
+* Start a new R Project with H7N9 outbreak data (available in your course directory)
+* Start a new R Project with data available from the {outbreaks} package
+   * 1861 Measles outbreak dataset
+   * 2015 MERS linelist dataset 
+   * Malaria case counts
+   
+No matter which dataset, remember to consider if you need to start a **new R project**, and **where** the R project should be located! 
 
+For all new datasets, the exercises have some prompts to get you started on working with the data. 
 
 ---
-# Instructor feedback  
+# Remember to post a Reprex! 
 
-Our instructors will review your work after the course and provide you feedback by email.   
+Our instructors will review your reprex posts and respond with solutions! 
+
+* This will give you the opportunity to experience how to solve your own R code problems in the real world. 
+
+As always, remember to have fun! 
+
+* This is not a test, simply an exercise to help guide you to useful resources available. 
+
+---
+# After the exercise
+
+At the end of the session, we will ask you to submit a post course survey. 
+
+We will additionally conduct a final review of the course, as well as showing you where you can use your Help Desk coupons after the course.
+
+---
+# Exercise!
+
+* Go to the course website  
+* Open the exercise for Module 10, and login
+* Follow the exercise to review how to create a reprex
+* Start working on a dataset of your choosing
+* Create a reprex in the Applied Epi Community Forum when you encounter a problem
+* Let an instructor know if you are unsure what to do 
+
+We will recap at the end of the session, including completing the post course survey. 
+
+
+
+
+
 
