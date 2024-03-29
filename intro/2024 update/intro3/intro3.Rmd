@@ -1,0 +1,864 @@
+---
+title: "Introduction to R</br>for Applied Epidemiology"
+subtitle: "<br>Cleaning data with R: Part 2"
+author: "2022"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "en"
+---
+class: inverse, center, middle, title-slide
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+# allow panels in slides
+xaringanExtra::use_panelset()
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,       # for decorating code chunks with colors
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+
+```{r, echo=F, include = F}
+surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
+
+surv_raw <- surv_raw %>% 
+  filter(row_num %in% c(635, 2, 11, 227, 641)) %>% 
+  select(case_id, age, sex, hospital, lab_confirmed, epilink, fever)
+
+# gen <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "generic", col_types = "c") %>%
+#   clean_names()
+# 
+# mod4 <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "mod4", col_types = "c") %>%
+#   clean_names()
+```
+
+# Introduction to R for Applied Epidemiology
+
+### Data cleaning with R (part 2)
+
+contact@appliedepi.org
+
+
+---
+# Today: objectives & schedule  
+
+**In this module we aim to help you:**  
+* Gain familiarity with more functions used to clean public health data  
+* Add complex logical recoding steps to your data cleaning "pipe chain"
+* Be introduced to concepts of "tidy data" structure  
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Topic,
+  "20 minutes",  "Review of previous module", 
+  "20 minutes", "Demo - logical coding",
+  "2.5 hours",  "Exercise",
+  "20 minutes", "Debrief"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+```
+
+???
+Note stretch breaks throughout.
+
+
+
+---
+
+# More data cleaning functions  
+
+In this module we will address:  
+
+
+Function       | Utility                               
+---------------|---------------------------------------
+`mutate()`     | create and transform columns  
+`ifelse()`    | simple logical re-coding of values  
+`case_when()`  | complex logical re-coding of values   
+`age_categories()`    | create age category column   
+`coalesce()`| value prioritisation   
+`select()`     | subset and arrange columns  
+
+
+
+
+
+---
+class: inverse, center, middle
+
+# Review of previous module  
+
+
+
+
+---
+
+# Telling a story with the pipe
+
+A **cleaning command** is a story, a **series of actions** performed on raw data.  
+
+The **`%>%`** pipe operator means **"and then"** (...do the action on the next line).  
+
+Can anyone explain this command verbally?
+
+```{r, echo=T, eval = F}
+surv <- surv_raw %>% 
+  clean_names() %>% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  
+
+```
+
+
+---
+
+# Telling a story with the pipe
+
+A **cleaning command** is a story, a **series of actions** performed on raw data.  
+
+The **`%>%`** pipe operator means **"and then"** (...do the action on the next line).  
+
+Can anyone explain this command verbally?
+
+```{r, echo=T, eval = F}
+surv <- surv_raw %>%        # create new clean data as: the raw data piped to...
+  clean_names() %>%                           # standardize column names 
+  rename(                                     # manual column names edits:
+    age_years = age,                            # age to age_years
+    date_onset = onset_date,                    # use date_ as prefix
+    date_report = date_of_report) %>%           # use date_ as prefix
+  mutate(date_onset = mdy(date_onset)) %>%    # help R understand dates of onset
+  mutate(date_report = mdy(date_report)) %>%  # help R understand dates of report
+  mutate(sex = recode(sex,                    # edit sex values so that:
+    "m" = "male",                               # "m" is now "male"
+    "f" = "female"))                            # "f" is now "female"
+
+```
+
+
+---
+# Common errors
+
+What is the cause of this error message?  
+
+```{r, echo=T, eval = F}
+# create clean dataset
+surv <- surv_raw %>% 
+  clean_names() %>% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) 
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  
+```
+
+
+```{r, echo=T, eval=F}
+Error in recode(sex, m = "male", f = "female") : object 'sex' not found
+```
+
+
+
+---
+# Common errors
+
+What is the cause of this error message?  
+
+```{r, echo=T, eval = F}
+# create clean dataset
+surv <- surv_raw %>% 
+  clean_names() %>% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report))     #<<
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  
+```
+
+```{r, echo=T, eval=F}
+Error in recode(sex, m = "male", f = "female") : object 'sex' not found
+```
+
+A pipe operator is missing, breaking the chain.  
+
+The `mutate(sex...` has not received the dataset from the previous step, and therefore R has no context of what the column `sex` is.  
+
+
+
+
+---
+# Common errors
+
+What is the cause of this error message?  
+
+```{r, echo=T, eval = F}
+# create clean dataset
+surv <- surv_raw %>% 
+  clean_names() %>% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  %>% 
+
+# make a table with the clean data
+tabyl(surv, sex, district)
+```
+
+
+```{r, echo=T, eval=F}
+Error in `dplyr::select()`:
+! Can't subset columns that don't exist.
+✖ Column `surv` doesn't exist.
+```
+
+
+
+---
+# Common errors
+
+What is the cause of this error message?  
+
+```{r, echo=T, eval = F}
+# create clean dataset
+surv <- surv_raw %>% 
+  clean_names() %>% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>%      
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  %>%       #<<
+
+# make a table with the clean data
+tabyl(surv, sex, district)
+
+```
+
+```{r, echo=T, eval=F}
+Error in `dplyr::select()`:
+! Can't subset columns that don't exist.
+✖ Column `surv` doesn't exist.
+```
+
+An extra "hanging" pipe passed the clean dataset to a *separate* `tabyl()` command.  
+For a function, provide a dataset **either** by a pipe, *OR* as the first argument.  
+
+
+
+---
+# Messy script
+
+.pull-left[
+
+**Avoid this**  
+
+```{r, echo=T, eval = F}
+surv <- surv_raw %>%    #<<
+  clean_names()
+  
+surv <- surv_raw %>%    #<<
+  clean_names() %>% 
+  rename(
+    date_onset = onset_date,
+    date_report = date_of_report)
+
+tabyl(surv, sex, district)
+class(surv$date_onset)
+
+surv <- surv_raw %>% #<<
+  clean_names() %>% 
+  rename(
+    date_onset = onset_date,
+    date_report = report_date) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>%     
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))
+  
+```
+]
+
+.pull-right[
+
+* Keep **one cleaning command** only. Add new functions with pipes to its end.  
+
+]
+
+
+
+
+---
+# Clean script
+
+.pull-left[
+
+Clean script  
+
+```{r, echo=T, eval = F}
+# Create clean dataset -------------------------------------
+surv <- surv_raw %>%                       #<<               
+  clean_names() %>% 
+  rename(
+    date_onset = onset_date,
+    date_report = report_date) %>% 
+  mutate(date_onset = mdy(date_onset))  %>% 
+  mutate(date_report = mdy(date_of_report)) %>%     
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))
+```
+]
+
+.pull-right[
+
+* Keep **one cleaning command** only. Add new functions with pipes to its end.  
+
+]
+
+
+---
+# Clean script
+
+.pull-left[
+
+Clean script  
+
+```{r, echo=T, eval = F}
+# Create clean dataset -------------------------------------
+surv <- surv_raw %>%                                     
+  clean_names() %>% 
+  rename(
+    date_onset = onset_date,
+    date_report = report_date) %>% 
+  mutate(date_onset = mdy(date_onset))  %>% 
+  mutate(date_report = mdy(date_of_report)) %>%     
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))
+  
+# Testing area ---------------------------------------------
+tabyl(surv, sex, district)    # cross-tabulate        #<<
+class(surv$date_onset)        # check column class    #<<
+```
+]
+
+.pull-right[
+
+* Consolidate other small commands in a **testing area**  
+
+]
+
+
+
+---
+
+# Printing vs. saving   
+
+**Printing**  
+
+This command has no **`<-`**, so it only *prints* the modified `surv` to the console. The actual data frame has not changed.  
+
+```{r, echo=params$lang == "en", eval=F}
+surv_raw %>%              # PRINT only cases over 10 years  #<<
+  filter(age > 10)
+```
+
+```{r, echo=params$lang == "fr", eval=F}
+surv_raw %>%                    # IMPRIMER seulement les cas plus que 10 ans
+  filter(age > 10)
+```
+
+```{r, echo=params$lang == "ru", eval=F}
+surv_raw %>%                    # ПЕЧАТАТЬ только случаи старше 10 лет
+  filter(age > 10)
+```
+
+```{r, echo=params$lang == "es", eval=F}
+surv_raw %>%                    # IMPRIMIR sólo los casos de más de 10 años
+  filter(age > 10)
+```
+
+```{r, echo=F, eval=F}
+surv_raw %>%                    # print only cases over 10 years
+  filter(age > 10) %>% 
+  knitr::kable()
+```
+
+**Saving**  
+
+Add the assignment operator **<-** to create a new data frame.  
+
+```{r pipe-assign, eval=F, echo=T}
+surv_over10 <- surv_raw %>%     # create new data frame   #<<
+  filter(age > 10)
+```
+
+(No output to the R console, but a new object in the Environment pane)   
+
+???
+Note how the column names in `surv` are old! It's because our changes have not yet been saved.  
+
+
+
+
+
+
+---
+class: inverse, center, middle
+
+# Recoding values  
+
+
+---
+# Example dataset
+
+```{r, eval=T, echo=T}
+surv_raw
+```
+
+
+---
+# `recode()` for manual edits  
+
+Use `recode()` within `mutate()` for extensive manual *recoding*  
+
+
+```{r, echo=params$lang == "en", eval=params$lang == "en"}
+surv_raw %>% 
+  mutate(hospital = recode(hospital,
+      # for reference: OLD = NEW
+      "Mitilary Hospital"  = "Military Hospital",
+      "Port"               = "Port Hospital",
+      "Port Hopital"       = "Port Hospital",
+      "St. Mark's Maternity Hospital (SMMH)" = "SMMH"))
+```
+
+
+
+
+
+
+
+---
+# `ifelse()` for simple logic  
+
+`ifelse()` within `mutate()` logically tests each row.  
+
+It writes in the new `age_group` column:  
+
+* "adult", if the test yields TRUE  
+* "minor", if the test yields FALSE  
+
+```{r, echo=T, eval=T}
+surv_raw %>% 
+  mutate(age_group = ifelse(
+    test = age >= 18,
+    yes = "adult",  
+    no = "minor")) 
+```
+
+
+
+
+---
+# Argument names and order  
+
+If arguments are written in the default order as per the function documentation, explicitly writing their names is unnecessary.  
+
+The arguments of `ifelse()` are `ifelse(test = , yes = , no = )`  
+
+This command:  
+
+```{r, echo=T, eval=F}
+surv_raw %>% 
+  mutate(age_group = ifelse(
+    test = age >= 18,
+    yes = "adult",  
+    no = "minor")) 
+```
+
+Can also be written as:  
+
+```{r, echo=T, eval=F}
+surv_raw %>% 
+  mutate(age_group = ifelse(age >= 18, "adult", "minor")) 
+```
+
+.footnote[What are the advantages and disadvantages of this?]  
+
+
+
+---
+# Complex logic 
+ 
+Use **`case_when()`** within `mutate()` to test a series of logical criteria against each row, and assign a corresponding new value.  
+
+```{r, results = "asis", echo = FALSE}
+str_glue("The case_when() syntax is: logical criteria for row ~ outcome if met") %>%
+  flair("logical criteria for row", color = "orange") %>%
+  flair("~", color = "deeppink") %>%
+  flair("outcome if met", color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r mutate3, include = F}
+surv_raw %>% 
+  mutate(case_def = case_when(
+    lab_confirmed == TRUE             ~ "Confirmed",       # first check this
+    epilink == 'yes' & fever == 'yes' ~ "Suspect",         # then check this
+    TRUE                              ~ "To investigate")) # last resort
+```
+
+```{r mutate3_flair, echo=F}
+decorate("mutate3") %>%
+  flair('"Confirmed"', color = "cornflowerblue") %>%
+  flair('"Suspect"', color = "cornflowerblue") %>%
+  flair('"To investigate"', color = "cornflowerblue") %>%
+  flair("~", color = "deeppink") %>%
+  flair("lab_confirmed == TRUE", color = "orange") %>%
+  flair(" epilink == 'yes' & fever == 'yes'", color = "orange") %>%
+  flair("TRUE", color = "orange") %>%
+  knit_print()
+```
+
+The **order matters**. Write the most specific criteria at the top of the command (to be triggered first) and the most general criteria at the bottom (as a "catch all").  
+
+
+
+
+
+
+
+---
+class: inverse, center, middle
+
+# Tidy data  
+
+## Reflections for the end of this exercise  
+
+
+---
+# Messy data  
+
+Often, raw public health data looks like this:  
+
+```{r}
+knitr::include_graphics(xfun::relative_path(here::here("images", "messy_data.png")))
+```
+
+What challenges do you see for handling this data in R?  
+
+---
+# Tidy data  
+
+Clean data should also be "tidy". Below are 3 core principles of "tidy data":    
+
+--
+
+1. Each **value** must have its own **cell**  
+
+--
+
+2. Each **variable** must have its own **column** 
+
+--
+
+3. Each **observation** must have its own **row**    
+
+
+
+
+.footnote[Source : [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)  
+]
+
+???
+
+
+
+
+---
+# Values in their own cell    
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+# CREATE EXAMPLE DATA
+#####################
+clean_data_example_5 <- data.frame(case = c("Case 1", "Case 2", "Case 3", "Case 4"), age = c("31, years", "24, years", "18, months", "33, years")) 
+
+clean_data_example_6 <- clean_data_example_5 %>%
+    separate(age, 
+           into = c("age", "age_unit"), 
+           sep = ", "
+           ) %>%
+  mutate(age = as.numeric(age))
+```
+
+.pull-left[
+
+**Messy:** What changes would make this dataset more tidy?    
+
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+
+clean_data_example_5  %>%
+  knitr::kable()
+  
+```
+
+]
+
+--
+
+.pull-right[
+
+**Tidy:** Age and the age unit are separated into distinct cells    
+
+```{r, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+
+clean_data_example_6  %>%
+  knitr::kable()
+
+```
+]
+
+
+???
+Let's start with an easy one...  
+
+
+
+
+---
+
+# Terminology    
+
+Structurally, "data frames" in R consist of **columns** and **rows**.    
+
+--
+
+However, **"variables"** and **"observations"** are more *abstract* concepts:   
+
+* **Variables** measure one *underlying attribute* (age, outcome, or date of onset)   
+* **Observations** relate to a *unit of analysis*   
+
+--
+
+Ideally, they align: **columns = variables** and **rows = observations**    
+
+```{r, eval = TRUE, echo = FALSE, out.height = "65%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+#knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_image.png")))
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", paste0("tidy_image_", params$lang, ".png"))))
+
+```
+
+.footnote[Image source: [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)]
+
+
+
+
+
+---
+# But it is not always clear...    
+
+.pull-left[
+
+**Non-tidy data**
+
+```{r}
+long_example <- tribble(
+     ~country, ~January, ~February, ~March, 
+     "Mozambique", 3200,    3300,      4100,  
+     "Lesotho", 500,     750,       900,   
+     "South Africa", 5100, 6200, 8100,)
+          
+long_example %>%
+  knitr::kable()
+```
+
+* Is "January" a variable?    
+* Where is the variable "month"?   
+* Does it have its own column?   
+* Is each observation a row?    
+
+
+]
+
+--
+
+.pull-right[
+
+**Tidy data**  
+
+```{r}
+long_example %>%
+  pivot_longer(cols=2:4, names_to="month", values_to = "cases") %>% 
+     knitr::kable()
+```
+
+]
+
+
+
+
+
+---
+class: inverse, center, middle
+
+
+
+## Exercise!
+
+Go to the course website  
+Open the exercise for Module 3, and login  
+Follow the instructions to open your "ebola" R project and continue coding  
+Let an instructor know if you are unsure what to do 
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "COVID dominoes.png")))
+```

@@ -1,0 +1,473 @@
+---
+title: "Introducción a R para<br>Epidemiología Aplicada"
+subtitle: "Pivoting data"
+author: '2022'
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "es"
+---
+
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flextable,  # make pivot images 
+  flair,      # slides color text
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+
+
+# data prep --------------------------------------------------------------------
+# linelist_raw <- rio::import(here::here("data", "linelist_raw.xlsx"))
+surv <- rio::import(here::here("data", "linelist_combined_20141201.rds"))
+
+# gen <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "generic") %>%
+#   clean_names()
+# 
+# mod7_2 <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "mod7_2", col_types = "c") %>%
+#   clean_names()
+```
+
+```{r xaringan-themer, include=FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+# Introducción a R para la epidemiología aplicada
+
+### Pivotar datos
+
+## [contact@appliedepi.org](mailto:contact@appliedepi.org)
+
+# Datos de reestructuración
+
+*pivotar, remodelar, fundir, moldear, transformar...* marcos de datos
+
+```{r, eval=TRUE, echo=FALSE, out.height="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "Pivoting_500x500.png")))
+```
+
+---
+
+# ¿Qué es pivotar?
+
+- *Tablas dinámicas de Excel* son una forma de resumir y agregar datos
+
+--
+
+- En R, **pivotante** un marco de datos tiene un **significado diferente**
+
+--
+
+- Piensa que *reestructuración* o *remodelación* el marco de datos
+
+--
+
+- Utilizaremos la `pivot_wider()` y `pivot_longer()` de las funciones {tidyr} paquete
+
+--
+
+- A menudo verás ejemplos que utilizan funciones alternativas de otros paquetes:
+  - `melt()` y `cast()` de {reshape2}
+  - `gather()` y `spread()` antepasados de los {tidyr} `pivot_()` funciones
+  - `melt()` y `dcast()` de {data.table}
+
+---
+
+# Datos ordenados
+
+¿Recuerdas los 3 principios de los "datos ordenados"?
+
+--
+
+1. Cada **valor** debe tener su propio **celda**
+
+--
+
+2. Cada **variable** debe tener su propia **columna**
+
+--
+
+3. Cada **observación** debe tener su propia **fila**
+
+---
+
+# Terminología
+
+Estructuralmente, los "marcos de datos" en R consisten en **columnas** y **filas**.
+
+--
+
+Sin embargo, **"variables"** y **"observaciones** son más *abstractas* conceptos:
+
+- **Variables** medida uno *atributo subyacente* (edad, resultado o fecha de inicio)
+- **Observaciones** se refieren a una *unidad de análisis*
+
+--
+
+Idealmente, se alinean: **columnas = variables** y **filas = observacion**
+
+```{r, eval=TRUE, echo=FALSE, out.height="65%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", paste0("tidy_image_", params$lang, ".png"))))
+```
+
+.footnote\[Fuente de la imagen: [R para la Ciencia de Datos](https://r4ds.had.co.nz/tidy-data.html)]
+
+---
+
+# Pivotar más
+
+.tirar-izquierda\[
+La introducción de datos suele ser en formato "ancho
+
+```{r}
+example <- tribble(
+     ~country, ~`1999`, ~`2000`,     ~`2001`,  ~`2002`, 
+     "Nigeria",   8000,    7500,        9250,      10200,    
+     "India",    20100,  25650,      26800,    27255,
+     "Brazil",   4500,    5120,        5100,   5860)
+          
+example %>%
+  knitr::kable()
+```
+
+- Las características de un sujeto se almacenan en una sola fila
+- Útil para la presentación
+- **No** ideal para algunos tipos de análisis.
+  ]
+
+--
+.pull-derecha\[
+**Más fácil de analizar en formato "largo**
+
+```{r}
+example %>%
+  pivot_longer(cols=2:5, names_to="year", values_to = "cases") %>% 
+     knitr::kable()
+```
+
+]
+
+---
+
+# {ggplot2} ejemplo
+
+¿Cómo trazar los casos a lo largo del tiempo para los tres países?
+
+```{r}
+example %>%
+  knitr::kable()
+```
+
+```{r, eval=F, echo=T}
+ggplot(data = example,
+       mapping = aes(x = ???, y = ???))+
+     geom_line()
+```
+
+---
+
+# Pivotar más tiempo
+
+.tirar-izquierda\[
+
+```{r}
+example %>% 
+  qflextable() %>% 
+  bg(j = 1, i = 1, part = "header", bg = "white") %>%          # backgrounds
+  bg(j = 2:5, i = 1, part = "header", bg = "orange") 
+  
+ # bg(j = 1, i = 1:3, part = "body", bg = "#ADD8E6") %>% 
+ # bg(j = 2:5, i = 1:3, part = "body", bg = "#31a354") 
+     
+  #flextable::color(i = 1:3, j = 1:5, "white", part = "body")    # white text
+```
+
+- Estos **nombres de columna pivotarán**
+
+]
+
+---
+
+# Pivotar más tiempo
+
+.tirar-izquierda\[
+
+```{r}
+example %>% 
+  qflextable() %>% 
+  bg(j = 1, i = 1, part = "header", bg = "white") %>%          # backgrounds
+  bg(j = 2:5, i = 1, part = "header", bg = "orange") %>% 
+  
+  #bg(j = 1, i = 1:3, part = "body", bg = "#ADD8E6") %>% 
+  bg(j = 2:5, i = 1:3, part = "body", bg = "#31a354") 
+     
+  #flextable::color(i = 1:3, j = 1:5, "white", part = "body")    # white text
+```
+
+- Estos **valores se reordenarán**
+
+]
+
+---
+
+# Pivotar más tiempo
+
+.tirar-izquierda\[
+
+```{r}
+example %>% 
+  qflextable() %>% 
+  bg(j = 1, i = 1, part = "header", bg = "white") %>%          # backgrounds
+  bg(j = 2:5, i = 1, part = "header", bg = "orange") %>% 
+  
+  bg(j = 1, i = 1:3, part = "body", bg = "#ADD8E6") %>% 
+  bg(j = 2:5, i = 1:3, part = "body", bg = "#31a354") 
+     
+  #flextable::color(i = 1:3, j = 1:5, "white", part = "body")    # white text
+```
+
+- Estos **identificadores se replicarán**
+
+]
+
+---
+
+# Pivotar más tiempo
+
+.tirar-izquierda\[
+
+```{r}
+example %>% 
+  qflextable() %>% 
+  bg(j = 1, i = 1, part = "header", bg = "white") %>%          # backgrounds
+  bg(j = 2:5, i = 1, part = "header", bg = "orange") %>% 
+  
+  bg(j = 1, i = 1:3, part = "body", bg = "#ADD8E6") %>% 
+  bg(j = 2:5, i = 1:3, part = "body", bg = "#31a354") 
+     
+  #flextable::color(i = 1:3, j = 1:5, "white", part = "body")    # white text
+```
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "pivot_command.png")))
+```
+
+- Lista las columnas a pivotar
+- Proporciona 2 **nuevos nombres de columna**
+
+]
+
+.pull-right[
+
+```{r}
+example %>% 
+  pivot_longer(cols=2:5, names_to="year", values_to = "cases") %>% 
+  
+  qflextable() %>% 
+  bg(j = 1, i = 1, part = "header", bg = "white") %>% 
+  bg(j = 2, i = 1, part = "header", bg = "yellow") %>% 
+  bg(j = 3, i = 1, part = "header", bg = "#CBC3E3") %>% 
+
+  #bg(j = 2:3, i = 1, part = "header", bg = "yellow") %>% 
+  
+  bg(j = 1, i = 1:12, part = "body", bg = "#ADD8E6") %>% 
+  bg(j = 2, i = 1:12, part = "body", bg = "orange") %>% 
+  bg(j = 3, i = 1:12, part = "body", bg = "#31a354") 
+
+  #flextable::color(j = 1, i = 1:12, "white", part = "body") %>% 
+  #flextable::color(j = 3, i = 1:12, "white", part = "body")
+
+```
+
+]
+
+```{r pivot, eval=F}
+# Create pivot command (switch to include = F)
+example %>% 
+  pivot_longer(
+       cols = `1999`:`2002`,
+       names_to = "year",
+       values_to = "cases")
+```
+
+```{r pivot_flair, echo=F, eval=F}
+# remove eval = F
+# use to create image of pivot command
+decorate("pivot") %>%
+  flair("`1999`:`2002`", background = "orange") %>%
+  flair("year", background = "yellow") %>%
+  flair("cases", background = "#CBC3E3") %>%
+  knit_print.with_flair()
+```
+
+---
+
+# Comando ggplot
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+example %>%
+  pivot_longer(
+       cols = `1999`:`2002`,
+       names_to = "year",
+       values_to = "cases") %>%
+     
+  ggplot(mapping = aes(
+*           x = year,
+*           y = cases,
+*           color = country,
+*           group = country))+
+  geom_line()
+```
+
+**Nota** este ejemplo se incluye en la carpeta de tu curso como un script de R titulado "ejemplo\_pivot.R" en la subcarpeta "ebola/scripts/ejemplos".
+
+]
+
+.pull-right[
+
+```{r, eval=T, echo=F}
+example %>%
+  pivot_longer(
+       cols = `1999`:`2002`,
+       names_to = "year",
+       values_to = "cases") %>%
+     
+  ggplot(mapping = aes(
+           x = year,
+           y = cases,
+           color = country,
+           group = country))+
+  geom_line(size = 2)+
+  theme_classic(base_size = 16)
+```
+
+]
+
+---
+
+# Giro más amplio
+
+En este curso no trataremos el pivotaje más amplio, porque no se utiliza con tanta frecuencia.
+
+Puedes explorar varios ejemplos en estos capítulos del Manual de Epi R:
+
+- [Pivotar datos](https://epirhandbook.com/en/pivoting-data.html#long-to-wide)
+- [Tablas descriptivas con {dplyr}](https://epirhandbook.com/en/descriptive-tables.html#tbls_pivot_wider)
+
+```{r, eval=TRUE, echo=FALSE, out.height="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", paste0("pivot_wider_new_", params$lang, ".png"))))
+
+```
+
+---
+
+class: inverse, center, middle
+
+# Ejercicio
+
+Ir al sitio web del curso  
+Abre el ejercicio del Módulo 7 parte 2, e inicia sesión  
+Sigue las instrucciones para volver a tu proyecto R "ébola" y continúa codificando en tu script RMD
+Avisa a un instructor si no estás seguro de lo que tienes que hacer
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "window.png")))
+```
+
+

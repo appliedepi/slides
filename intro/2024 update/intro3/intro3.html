@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to Rfor Applied Epidemiology</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="2022" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
+    <script src="libs/tabwid/tabwid.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+class: inverse, center, middle, title-slide
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+
+
+&lt;style type="text/css"&gt;
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+&lt;/style&gt;
+
+
+
+
+# Introduction to R for Applied Epidemiology
+
+### Data cleaning with R (part 2)
+
+contact@appliedepi.org
+
+
+---
+# Today: objectives &amp; schedule  
+
+**In this module we aim to help you:**  
+* Gain familiarity with more functions used to clean public health data  
+* Add complex logical recoding steps to your data cleaning "pipe chain"
+* Be introduced to concepts of "tidy data" structure  
+
+&lt;div class="tabwid"&gt;&lt;style&gt;.cl-47116e4a{}.cl-470435fe{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-4709a570{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-4709c3d4{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4709c3de{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4709c3df{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4709c3e8{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4709c3e9{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4709c3f2{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4709c3f3{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4709c3fc{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4709c3fd{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4709c406{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4709c407{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-4709c408{width:2.119in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table data-quarto-disable-processing='true' class='cl-47116e4a'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;th class="cl-4709c3d4"&gt;&lt;p class="cl-4709a570"&gt;&lt;span class="cl-470435fe"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-4709c3de"&gt;&lt;p class="cl-4709a570"&gt;&lt;span class="cl-470435fe"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-4709c3df"&gt;&lt;p class="cl-4709a570"&gt;&lt;span class="cl-470435fe"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4709c3e8"&gt;&lt;p class="cl-4709a570"&gt;&lt;span class="cl-470435fe"&gt;Review of previous module&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-4709c3e9"&gt;&lt;p class="cl-4709a570"&gt;&lt;span class="cl-470435fe"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4709c3f2"&gt;&lt;p class="cl-4709a570"&gt;&lt;span class="cl-470435fe"&gt;Demo - logical coding&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-4709c3f3"&gt;&lt;p class="cl-4709a570"&gt;&lt;span class="cl-470435fe"&gt;2.5 hours&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4709c3fc"&gt;&lt;p class="cl-4709a570"&gt;&lt;span class="cl-470435fe"&gt;Exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-4709c3fd"&gt;&lt;p class="cl-4709a570"&gt;&lt;span class="cl-470435fe"&gt;20 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-4709c406"&gt;&lt;p class="cl-4709a570"&gt;&lt;span class="cl-470435fe"&gt;Debrief&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="2"class="cl-4709c407"&gt;&lt;p class="cl-4709a570"&gt;&lt;span class="cl-470435fe"&gt;Take breaks as you wish during the exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;
+
+???
+Note stretch breaks throughout.
+
+
+
+---
+
+# More data cleaning functions  
+
+In this module we will address:  
+
+
+Function       | Utility                               
+---------------|---------------------------------------
+`mutate()`     | create and transform columns  
+`ifelse()`    | simple logical re-coding of values  
+`case_when()`  | complex logical re-coding of values   
+`age_categories()`    | create age category column   
+`coalesce()`| value prioritisation   
+`select()`     | subset and arrange columns  
+
+
+
+
+
+---
+class: inverse, center, middle
+
+# Review of previous module  
+
+
+
+
+---
+
+# Telling a story with the pipe
+
+A **cleaning command** is a story, a **series of actions** performed on raw data.  
+
+The **`%&gt;%`** pipe operator means **"and then"** (...do the action on the next line).  
+
+Can anyone explain this command verbally?
+
+
+```r
+surv &lt;- surv_raw %&gt;% 
+  clean_names() %&gt;% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %&gt;% 
+  mutate(date_onset = mdy(date_onset)) %&gt;% 
+  mutate(date_report = mdy(date_report)) %&gt;% 
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  
+```
+
+
+---
+
+# Telling a story with the pipe
+
+A **cleaning command** is a story, a **series of actions** performed on raw data.  
+
+The **`%&gt;%`** pipe operator means **"and then"** (...do the action on the next line).  
+
+Can anyone explain this command verbally?
+
+
+```r
+surv &lt;- surv_raw %&gt;%        # create new clean data as: the raw data piped to...
+  clean_names() %&gt;%                           # standardize column names 
+  rename(                                     # manual column names edits:
+    age_years = age,                            # age to age_years
+    date_onset = onset_date,                    # use date_ as prefix
+    date_report = date_of_report) %&gt;%           # use date_ as prefix
+  mutate(date_onset = mdy(date_onset)) %&gt;%    # help R understand dates of onset
+  mutate(date_report = mdy(date_report)) %&gt;%  # help R understand dates of report
+  mutate(sex = recode(sex,                    # edit sex values so that:
+    "m" = "male",                               # "m" is now "male"
+    "f" = "female"))                            # "f" is now "female"
+```
+
+
+---
+# Common errors
+
+What is the cause of this error message?  
+
+
+```r
+# create clean dataset
+surv &lt;- surv_raw %&gt;% 
+  clean_names() %&gt;% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %&gt;% 
+  mutate(date_onset = mdy(date_onset)) %&gt;% 
+  mutate(date_report = mdy(date_report)) 
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  
+```
+
+
+
+```r
+Error in recode(sex, m = "male", f = "female") : object 'sex' not found
+```
+
+
+
+---
+# Common errors
+
+What is the cause of this error message?  
+
+
+```r
+# create clean dataset
+surv &lt;- surv_raw %&gt;% 
+  clean_names() %&gt;% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %&gt;% 
+  mutate(date_onset = mdy(date_onset)) %&gt;% 
+* mutate(date_report = mdy(date_report))
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  
+```
+
+
+```r
+Error in recode(sex, m = "male", f = "female") : object 'sex' not found
+```
+
+A pipe operator is missing, breaking the chain.  
+
+The `mutate(sex...` has not received the dataset from the previous step, and therefore R has no context of what the column `sex` is.  
+
+
+
+
+---
+# Common errors
+
+What is the cause of this error message?  
+
+
+```r
+# create clean dataset
+surv &lt;- surv_raw %&gt;% 
+  clean_names() %&gt;% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %&gt;% 
+  mutate(date_onset = mdy(date_onset)) %&gt;% 
+  mutate(date_report = mdy(date_report)) %&gt;% 
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))  %&gt;% 
+
+# make a table with the clean data
+tabyl(surv, sex, district)
+```
+
+
+
+```r
+Error in `dplyr::select()`:
+! Can't subset columns that don't exist.
+✖ Column `surv` doesn't exist.
+```
+
+
+
+---
+# Common errors
+
+What is the cause of this error message?  
+
+
+```r
+# create clean dataset
+surv &lt;- surv_raw %&gt;% 
+  clean_names() %&gt;% 
+  rename(
+    age_years = age,
+    date_onset = onset_date,
+    date_report = date_of_report) %&gt;% 
+  mutate(date_onset = mdy(date_onset)) %&gt;% 
+  mutate(date_report = mdy(date_report)) %&gt;%      
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+*   "f" = "female"))  %&gt;%
+
+# make a table with the clean data
+tabyl(surv, sex, district)
+```
+
+
+```r
+Error in `dplyr::select()`:
+! Can't subset columns that don't exist.
+✖ Column `surv` doesn't exist.
+```
+
+An extra "hanging" pipe passed the clean dataset to a *separate* `tabyl()` command.  
+For a function, provide a dataset **either** by a pipe, *OR* as the first argument.  
+
+
+
+---
+# Messy script
+
+.pull-left[
+
+**Avoid this**  
+
+
+```r
+*surv &lt;- surv_raw %&gt;%
+  clean_names()
+  
+*surv &lt;- surv_raw %&gt;%
+  clean_names() %&gt;% 
+  rename(
+    date_onset = onset_date,
+    date_report = date_of_report)
+
+tabyl(surv, sex, district)
+class(surv$date_onset)
+
+*surv &lt;- surv_raw %&gt;%
+  clean_names() %&gt;% 
+  rename(
+    date_onset = onset_date,
+    date_report = report_date) %&gt;% 
+  mutate(date_onset = mdy(date_onset)) %&gt;% 
+  mutate(date_report = mdy(date_report)) %&gt;%     
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))
+```
+]
+
+.pull-right[
+
+* Keep **one cleaning command** only. Add new functions with pipes to its end.  
+
+]
+
+
+
+
+---
+# Clean script
+
+.pull-left[
+
+Clean script  
+
+
+```r
+# Create clean dataset -------------------------------------
+*surv &lt;- surv_raw %&gt;%
+  clean_names() %&gt;% 
+  rename(
+    date_onset = onset_date,
+    date_report = report_date) %&gt;% 
+  mutate(date_onset = mdy(date_onset))  %&gt;% 
+  mutate(date_report = mdy(date_of_report)) %&gt;%     
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))
+```
+]
+
+.pull-right[
+
+* Keep **one cleaning command** only. Add new functions with pipes to its end.  
+
+]
+
+
+---
+# Clean script
+
+.pull-left[
+
+Clean script  
+
+
+```r
+# Create clean dataset -------------------------------------
+surv &lt;- surv_raw %&gt;%                                     
+  clean_names() %&gt;% 
+  rename(
+    date_onset = onset_date,
+    date_report = report_date) %&gt;% 
+  mutate(date_onset = mdy(date_onset))  %&gt;% 
+  mutate(date_report = mdy(date_of_report)) %&gt;%     
+  mutate(sex = recode(sex,  
+    "m" = "male",           
+    "f" = "female"))
+  
+# Testing area ---------------------------------------------
+*tabyl(surv, sex, district)    # cross-tabulate
+*class(surv$date_onset)        # check column class
+```
+]
+
+.pull-right[
+
+* Consolidate other small commands in a **testing area**  
+
+]
+
+
+
+---
+
+# Printing vs. saving   
+
+**Printing**  
+
+This command has no **`&lt;-`**, so it only *prints* the modified `surv` to the console. The actual data frame has not changed.  
+
+
+```r
+*surv_raw %&gt;%              # PRINT only cases over 10 years
+  filter(age &gt; 10)
+```
+
+
+
+
+
+
+
+
+
+**Saving**  
+
+Add the assignment operator **&lt;-** to create a new data frame.  
+
+
+```r
+*surv_over10 &lt;- surv_raw %&gt;%     # create new data frame
+  filter(age &gt; 10)
+```
+
+(No output to the R console, but a new object in the Environment pane)   
+
+???
+Note how the column names in `surv` are old! It's because our changes have not yet been saved.  
+
+
+
+
+
+
+---
+class: inverse, center, middle
+
+# Recoding values  
+
+
+---
+# Example dataset
+
+
+```r
+surv_raw
+```
+
+```
+##   case_id age sex          hospital lab_confirmed epilink fever
+## 1  86340d   1   f     Port Hospital          TRUE     yes   yes
+## 2  699d82  27   m     Port Hospital         FALSE     yes   yes
+## 3  cb7ca3  14   m Mitilary Hospital          TRUE     yes   yes
+## 4  26d162  31   m     Port Hospital          TRUE     yes   yes
+## 5  26d162  31   m              Port          TRUE     yes   yes
+## 6  2ebf95  36   m              Port         FALSE      no   yes
+```
+
+
+---
+# `recode()` for manual edits  
+
+Use `recode()` within `mutate()` for extensive manual *recoding*  
+
+
+
+```r
+surv_raw %&gt;% 
+  mutate(hospital = recode(hospital,
+      # for reference: OLD = NEW
+      "Mitilary Hospital"  = "Military Hospital",
+      "Port"               = "Port Hospital",
+      "Port Hopital"       = "Port Hospital",
+      "St. Mark's Maternity Hospital (SMMH)" = "SMMH"))
+```
+
+```
+##   case_id age sex          hospital lab_confirmed epilink fever
+## 1  86340d   1   f     Port Hospital          TRUE     yes   yes
+## 2  699d82  27   m     Port Hospital         FALSE     yes   yes
+## 3  cb7ca3  14   m Military Hospital          TRUE     yes   yes
+## 4  26d162  31   m     Port Hospital          TRUE     yes   yes
+## 5  26d162  31   m     Port Hospital          TRUE     yes   yes
+## 6  2ebf95  36   m     Port Hospital         FALSE      no   yes
+```
+
+
+
+
+
+
+
+---
+# `ifelse()` for simple logic  
+
+`ifelse()` within `mutate()` logically tests each row.  
+
+It writes in the new `age_group` column:  
+
+* "adult", if the test yields TRUE  
+* "minor", if the test yields FALSE  
+
+
+```r
+surv_raw %&gt;% 
+  mutate(age_group = ifelse(
+    test = age &gt;= 18,
+    yes = "adult",  
+    no = "minor")) 
+```
+
+```
+##   case_id age sex          hospital lab_confirmed epilink fever age_group
+## 1  86340d   1   f     Port Hospital          TRUE     yes   yes     minor
+## 2  699d82  27   m     Port Hospital         FALSE     yes   yes     adult
+## 3  cb7ca3  14   m Mitilary Hospital          TRUE     yes   yes     minor
+## 4  26d162  31   m     Port Hospital          TRUE     yes   yes     adult
+## 5  26d162  31   m              Port          TRUE     yes   yes     adult
+## 6  2ebf95  36   m              Port         FALSE      no   yes     adult
+```
+
+
+
+
+---
+# Argument names and order  
+
+If arguments are written in the default order as per the function documentation, explicitly writing their names is unnecessary.  
+
+The arguments of `ifelse()` are `ifelse(test = , yes = , no = )`  
+
+This command:  
+
+
+```r
+surv_raw %&gt;% 
+  mutate(age_group = ifelse(
+    test = age &gt;= 18,
+    yes = "adult",  
+    no = "minor")) 
+```
+
+Can also be written as:  
+
+
+```r
+surv_raw %&gt;% 
+  mutate(age_group = ifelse(age &gt;= 18, "adult", "minor")) 
+```
+
+.footnote[What are the advantages and disadvantages of this?]  
+
+
+
+---
+# Complex logic 
+ 
+Use **`case_when()`** within `mutate()` to test a series of logical criteria against each row, and assign a corresponding new value.  
+
+&lt;h4&gt;The case_when() syntax is: &lt;span style="color:orange"&gt;logical criteria for row&lt;/span&gt; &lt;span style="color:deeppink"&gt;~&lt;/span&gt; &lt;span style="color:cornflowerblue"&gt;outcome if met&lt;/span&gt;&lt;/h4&gt;
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;surv_raw %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;mutate(case_def = case_when(&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:orange"&gt;lab_confirmed == &lt;span style="color:orange"&gt;TRUE&lt;/span&gt;&lt;/span&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;~&lt;/span&gt; &lt;span style="color:cornflowerblue"&gt;"Confirmed"&lt;/span&gt;, &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# first check this&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:orange"&gt; epilink == 'yes' &amp; fever == 'yes'&lt;/span&gt; &lt;span style="color:deeppink"&gt;~&lt;/span&gt; &lt;span style="color:cornflowerblue"&gt;"Suspect"&lt;/span&gt;, &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# then check this&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:orange"&gt;TRUE&lt;/span&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;~&lt;/span&gt; &lt;span style="color:cornflowerblue"&gt;"To investigate"&lt;/span&gt;)) # last resort&lt;/code&gt;
+
+```
+
+##   case_id age sex          hospital lab_confirmed epilink fever       case_def
+## 1  86340d   1   f     Port Hospital          TRUE     yes   yes      Confirmed
+## 2  699d82  27   m     Port Hospital         FALSE     yes   yes        Suspect
+## 3  cb7ca3  14   m Mitilary Hospital          TRUE     yes   yes      Confirmed
+## 4  26d162  31   m     Port Hospital          TRUE     yes   yes      Confirmed
+## 5  26d162  31   m              Port          TRUE     yes   yes      Confirmed
+## 6  2ebf95  36   m              Port         FALSE      no   yes To investigate
+
+```
+
+The **order matters**. Write the most specific criteria at the top of the command (to be triggered first) and the most general criteria at the bottom (as a "catch all").  
+
+
+
+
+
+
+
+---
+class: inverse, center, middle
+
+# Tidy data  
+
+## Reflections for the end of this exercise  
+
+
+---
+# Messy data  
+
+Often, raw public health data looks like this:  
+
+&lt;img src="../../../images/messy_data.png" width="847" /&gt;
+
+What challenges do you see for handling this data in R?  
+
+---
+# Tidy data  
+
+Clean data should also be "tidy". Below are 3 core principles of "tidy data":    
+
+--
+
+1. Each **value** must have its own **cell**  
+
+--
+
+2. Each **variable** must have its own **column** 
+
+--
+
+3. Each **observation** must have its own **row**    
+
+
+
+
+.footnote[Source : [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)  
+]
+
+???
+
+
+
+
+---
+# Values in their own cell    
+
+
+
+.pull-left[
+
+**Messy:** What changes would make this dataset more tidy?    
+
+
+
+|case   |age        |
+|:------|:----------|
+|Case 1 |31, years  |
+|Case 2 |24, years  |
+|Case 3 |18, months |
+|Case 4 |33, years  |
+
+]
+
+--
+
+.pull-right[
+
+**Tidy:** Age and the age unit are separated into distinct cells    
+
+
+|case   | age|age_unit |
+|:------|---:|:--------|
+|Case 1 |  31|years    |
+|Case 2 |  24|years    |
+|Case 3 |  18|months   |
+|Case 4 |  33|years    |
+]
+
+
+???
+Let's start with an easy one...  
+
+
+
+
+---
+
+# Terminology    
+
+Structurally, "data frames" in R consist of **columns** and **rows**.    
+
+--
+
+However, **"variables"** and **"observations"** are more *abstract* concepts:   
+
+* **Variables** measure one *underlying attribute* (age, outcome, or date of onset)   
+* **Observations** relate to a *unit of analysis*   
+
+--
+
+Ideally, they align: **columns = variables** and **rows = observations**    
+
+&lt;img src="../../../images/data_cleaning/tidy_image_en.png" width="853" height="65%" /&gt;
+
+.footnote[Image source: [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)]
+
+
+
+
+
+---
+# But it is not always clear...    
+
+.pull-left[
+
+**Non-tidy data**
+
+
+|country      | January| February| March|
+|:------------|-------:|--------:|-----:|
+|Mozambique   |    3200|     3300|  4100|
+|Lesotho      |     500|      750|   900|
+|South Africa |    5100|     6200|  8100|
+
+* Is "January" a variable?    
+* Where is the variable "month"?   
+* Does it have its own column?   
+* Is each observation a row?    
+
+
+]
+
+--
+
+.pull-right[
+
+**Tidy data**  
+
+
+|country      |month    | cases|
+|:------------|:--------|-----:|
+|Mozambique   |January  |  3200|
+|Mozambique   |February |  3300|
+|Mozambique   |March    |  4100|
+|Lesotho      |January  |   500|
+|Lesotho      |February |   750|
+|Lesotho      |March    |   900|
+|South Africa |January  |  5100|
+|South Africa |February |  6200|
+|South Africa |March    |  8100|
+
+]
+
+
+
+
+
+---
+class: inverse, center, middle
+
+
+
+## Exercise!
+
+Go to the course website  
+Open the exercise for Module 3, and login  
+Follow the instructions to open your "ebola" R project and continue coding  
+Let an instructor know if you are unsure what to do 
+
+
+&lt;img src="../../../images/breakout/COVID dominoes.png" width="100%" /&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,0 +1,1340 @@
+---
+title: "Introducción a R para<br>Epidemiología Aplicada"
+subtitle: "Welcome and course overview"
+author: '2022'
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css:
+    - xaringan-themer.css
+params:
+  lang: ru
+---
+
+clase: centro, medio, inverso, título-deslizamiento
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+
+library(countdown)
+```
+
+```{r xaringan-themer, include=FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png",
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+```{r, echo=F, eval=T}
+
+surv <- rio::import(xfun::relative_path(here::here("data", "surveillance_linelist_clean_20141201.rds")))
+
+googlesheets4::gs4_deauth()
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic") %>%
+  clean_names()
+
+mod1 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod1", col_types = "c") %>%
+  clean_names()
+```
+
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
+
+### `r paste0(mod1[mod1$uid == "mod1_h1_intro", params$lang])`
+
+[contact@appliedepi.org](mailto:contact@appliedepi.org)
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_thanks", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_thanks", params$lang])`
+
+???
+Haz una breve ronda de presentaciones
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_useful", params$lang])`
+
+## `r paste0(mod1[mod1$uid == "mod1_h2_useful_1", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "stop_epidemic_dominoes2.png")))
+```
+
+???
+Menciona la habilidad comercializable así como la técnica para la respuesta epidémica
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_useful", params$lang])`
+
+## `r paste0(mod1[mod1$uid == "mod1_h2_useful_2", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "freedom_bird.png")))
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_useful", params$lang])`
+
+## `r paste0(mod1[mod1$uid == "mod1_h2_useful_3", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "missing_puzzle.png")))
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_useful", params$lang])`
+
+## `r paste0(mod1[mod1$uid == "mod1_h2_useful_4", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "joy.png")))
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_useful", params$lang])`
+
+## `r paste0(mod1[mod1$uid == "mod1_h2_useful_5", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "artistic.png")))
+```
+
+???
+Mucha gente piensa que codificar es como crear obras de arte... por ejemplo, crear cerámica, escribir poemas, pintar, etc.
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_useful", params$lang])`
+
+## `r paste0(mod1[mod1$uid == "mod1_h2_useful_6", params$lang])`
+
+\--
+
+## `r paste0(mod1[mod1$uid == "mod1_h2_useful_7", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "many_people.png")))
+```
+
+???
+Comunidad de personas que apoyan el software libre, las herramientas de acceso abierto y la democratización e igualación de la ciencia de datos
+
+***
+
+clase: inversa, centro, medio
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_whyR", params$lang])`
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_flexibility", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "interoperability.png")))
+```
+
+???
+
+- R puede leer y escribir en montones de programas y bases de datos diferentes.
+- Puede contener varios conjuntos de datos a la vez
+- También puede producir muchos resultados diferentes
+- Flujos de trabajo automatizados y reproducibles (te ahorran tiempo y quebraderos de cabeza)
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_popularity", params$lang])`
+
+.centro\[
+
+```{r, eval=TRUE, echo=FALSE, out.width="65%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+#knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "r_popularity.png")))
+
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", paste0("R_popularity_", params$lang, ".png"))))
+```
+
+\]
+
+???
+
+- R es gratis - y sin embargo puede hacer más de lo que puede hacer un costoso software con licencia
+- Antes estaba limitado a los estadísticos académicos: R no era "de confianza".
+- Pero ahora incluso las empresas farmacéuticas (p. ej. GSK) y los organismos reguladores están haciendo el cambio
+- Es el lenguaje de programación estadística más utilizado.
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_easylearn", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_op_easylearn", params$lang])`
+
+.pull-izquierda\[
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_easylearn_1", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_easylearn_2", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_easylearn_3", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_sb_easylearn_1", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_sb_easylearn_2", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_sb_easylearn_3", params$lang])`
+    \]
+
+.tirar-derecha\[
+
+```{r, eval=TRUE, echo=FALSE, out.height="65%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+#knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_image.png")))
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", paste0("difficulty_plot-1_", params$lang, ".png"))))
+
+```
+
+\]
+
+???
+
+- Hay un poco de curva de aprendizaje, como con cualquier software.
+- Pero estamos aquí para ayudarte a superar ese bache inicial para que puedas seguir desarrollando.
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_community", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "user_community.png")))
+```
+
+???
+
+- **Internet es tu amigo.**
+- Una vez que te familiarices con lo básico, la gente responde literalmente a cualquier pregunta sobre **¡stackoverflow!**
+- **Manual Epi R**
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_visualization", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="90%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "visualization.png")))
+```
+
+.nota\[
+`r paste0(mod1[mod1$uid == "mod1_fn_visualization", params$lang])`: Paula Bianca Blomquist  
+\]
+
+???
+
+- La visualización de datos es esencial para comprender las tendencias y los brotes de la vigilancia de enfermedades
+- **Una de las características más potentes de R**
+- Diagramas de red, mapas, mapas de calor, figuras integradas, la lista continúa...
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_surveillance", params$lang])`
+
+.pull-izquierda\[
+
+- `r paste0(mod1[mod1$uid == "mod1_op_surveillance", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_surveillance_1", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_surveillance_2", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_surveillance_3", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_sb_surveillance_4", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_sb_surveillance_5", params$lang])`
+    \]
+
+.tirar-derecha\[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "automated_reports.png")))
+```
+
+\]
+
+.nota\[
+`r paste0(mod1[mod1$uid == "mod1_fn_visualization", params$lang])`: Paula Bianca Blomquist  
+`r paste0(mod1[mod1$uid == "mod1_tx_surveillance", params$lang])`
+\]
+
+???
+
+- Elaborar informes a escala, un ejemplo de nuestra colega Paula del EpiRHandbook
+- No es un informe elegante, es un documento plano de Word, ¡pero responde a necesidades específicas!
+- **Ejemplo clave de inteligencia local y de ninguna manera podría prescindir del poder de R**
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_suroutput", params$lang])`
+
+.centro\[
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "automated_dashboard.png")))
+```
+
+\]
+
+.nota\[
+`r paste0(mod1[mod1$uid == "mod1_fn_visualization", params$lang])`: [Organización Mundial de la Salud](https://worldhealthorg.shinyapps.io/covid/)
+
+`r paste0(mod1[mod1$uid == "mod1_tx_dashboard", params$lang])`
+\]
+
+???
+
+- Tablero de mandos público COVID-19 de la OMS
+- Realizado con un paquete llamado {shiny} para crear aplicaciones web interactivas/paneles de control
+- Aquí puedes ver los toggles y las pestañas interactivas
+- Extrae de docenas de fuentes de datos para desplazar los datos por países/regiones
+- Hay una sección en el manual sobre el brillo
+
+***
+
+## `r paste0(mod1[mod1$uid == "mod1_h2_appliedepi", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_op_appliedepi_1", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_op_appliedepi_2", params$lang])`
+
+.pull-izquierda\[
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_appliedepi_1", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_appliedepi_2", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_appliedepi_3", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_appliedepi_4", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_appliedepi_5", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_appliedepi_6", params$lang])`
+
+\]
+
+.tirar-derecha\[
+
+```{r, eval=TRUE, echo=FALSE, out.width="200%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "team_locations.png")))
+```
+
+\]
+
+`r paste0(mod1[mod1$uid == "mod1_tx_appliedepi_1", params$lang])`
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_teampic", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_teampic_1", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="120%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "team_faces.png")))
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_partner", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_partner_1", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="80%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "partners-blur.jpg")))
+```
+
+???
+
+- Lo que nos hace diferentes es que nos centramos en los retos de la epide aplicada, no en la epide académica. Hacemos hincapié en las habilidades que utilizan a diario los epidemiólogos sobre el terreno.
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_offer", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_offer_1", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+#knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", #"Applied_Epi_Offerings.png")))
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", paste0("Applied_Epi_Offerings_", params$lang, ".png"))))
+
+
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_handbook", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "Epi R Handbook Banner Beige 1500x500.png")))
+```
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_handbook_1", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_handbook_2", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_handbook_3", params$lang])`
+
+> `r paste0(mod1[mod1$uid == "mod1_qt_handbook_1", params$lang])`
+
+> `r paste0(mod1[mod1$uid == "mod1_qt_handbook_2", params$lang])`
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_objectives", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_op_objectives", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_objectives_1", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_objectives_2", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_objectives_3", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_objectives_4", params$lang])`
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_format", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_format_1", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_format_2", params$lang])`
+
+.nota\[`r paste0(mod1[mod1$uid == "mod1_fn_format", params$lang])`\]
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_schedule", params$lang])`
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Module, ~Topic,
+  "1",   str_glue({paste0(mod1[mod1$uid == "mod1_tb_schedule_1", params$lang])}),
+  "2",   str_glue({paste0(mod1[mod1$uid == "mod1_tb_schedule_2", params$lang])}),
+  "3",   str_glue({paste0(mod1[mod1$uid == "mod1_tb_schedule_3", params$lang])}),
+  "4",   str_glue({paste0(mod1[mod1$uid == "mod1_tb_schedule_4", params$lang])}),
+  "5",   str_glue({paste0(mod1[mod1$uid == "mod1_tb_schedule_5", params$lang])}),
+  "6",   str_glue({paste0(mod1[mod1$uid == "mod1_tb_schedule_6", params$lang])}),
+  "7",   str_glue({paste0(mod1[mod1$uid == "mod1_tb_schedule_7", params$lang])}),
+  "8",   str_glue({paste0(mod1[mod1$uid == "mod1_tb_schedule_8", params$lang])}),
+  "9",   str_glue({paste0(mod1[mod1$uid == "mod1_tb_schedule_9", params$lang])}),
+  "10",  str_glue({paste0(mod1[mod1$uid == "mod1_tb_schedule_10", params$lang])}),
+  )
+
+outline %>% 
+  flextable::qflextable()
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_data", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_op_data_1", params$lang])`
+  
+  - `r paste0(mod1[mod1$uid == "mod1_bu_data_1_1", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_data_1_2", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_data_1_3", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_data_1_4", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_op_data_2", params$lang])`
+  
+  - `r paste0(mod1[mod1$uid == "mod1_bu_data_2_1", params$lang])`
+
+.nota\[ \]`r paste0(mod1[mod1$uid == "mod1_fn_data", params$lang])`\]
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_exercise", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_exercise", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_exercise_1", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_exercise_2", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_exercise_3", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_exercise_4", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_exercise_5", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_exercise_6", params$lang])`
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_agreement", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_op_agreement_1", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_agreement_1_1", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_agreement_1_2", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_agreement_1_4", params$lang])`
+
+\--
+
+`r paste0(mod1[mod1$uid == "mod1_op_agreement_2", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_agreement_2_1", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_agreement_2_2", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_agreement_2_3", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_agreement_2_4", params$lang])`
+
+???
+Estamos en este curso para triunfar, juntos
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_session", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_session", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_session_1", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_session_2", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_session_3", params$lang])`
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_1_1", params$lang])}),     str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_2_1", params$lang])}),      str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_3_1", params$lang])}),
+  str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_1_2", params$lang])}),     str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_2_2", params$lang])}),      str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_3_2", params$lang])}),
+  str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_1_3", params$lang])}),     str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_2_3", params$lang])}),      str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_3_3", params$lang])}),
+  str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_1_4", params$lang])}),     str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_2_4", params$lang])}),      str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_3_4", params$lang])}),
+  str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_1_5", params$lang])}),        str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_2_5", params$lang])}), str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_3_5", params$lang])}),
+  str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_1_6", params$lang])}),     str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_2_6", params$lang])}),      str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_3_6", params$lang])})
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines(str_glue({paste0(mod1[mod1$uid == "mod1_tb_session_4", params$lang])}))
+```
+
+???
+Observa las pausas para estirar a lo largo del curso.
+
+***
+
+clase: inverso, centro, medio
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_break", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_break", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "stretch.png")))
+```
+
+```{r}
+countdown(minutes = 5, seconds = 00)
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_Rproject", params$lang])`
+
+.pull-izquierda\[
+
+`r paste0(mod1[mod1$uid == "mod1_tx_Rproject_1", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_op_Rproject_1", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_Rproject_1", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_Rproject_2", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_Rproject_3", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_Rproject_4", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_Rproject_2", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_Rproject_3", params$lang])`
+
+\]
+
+.tirar-derecha\[
+
+```{r, eval=TRUE, echo=FALSE, out.width="85%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "project_briefcase.png")))
+```
+
+- `r emo::ji("folder")` intro\_curso
+  - intro\_curso.Rproj
+  - `r emo::ji("document")` **lista.csv**
+  - `r emo::ji("document")` **mi\_análisis.R**
+
+\]
+
+???
+Te ayudaremos
+Puedes comprimir la carpeta y compartirla con un colega, se puede alojar en una unidad compartida, y se puede sincronizar con un repositorio de Github.
+
+***
+
+clase: inverso, centro, medio
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_demo", params$lang])`
+
+## `r paste0(mod1[mod1$uid == "mod1_h2_Rstudio", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "piano_man.jpg")))
+```
+
+***
+
+clase: inversa, centro, medio
+
+.pull-izquierda\[
+
+## `r paste0(mod1[mod1$uid == "mod1_h2_fnc", params$lang])`
+
+## `r paste0(mod1[mod1$uid == "mod1_h2_tool", params$lang])`
+
+\]
+
+.tirar-derecha\[
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "function_tools_pliers.png")))
+```
+
+\]
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_fnc", params$lang])`
+
+### `r paste0(mod1[mod1$uid == "mod1_h3_io", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_op_fnc_1", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_fnc_1_1", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_fnc_1_2", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_fnc_1_3", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_op_fnc_2", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_fnc_2_1", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_fnc_2_2", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_fnc_2_3", params$lang])`
+
+.nota\[`r paste0(mod1[mod1$uid == "mod1_fn_fnc", params$lang])`\]
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_excel", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "excel_functions.png")))
+```
+
+`r paste0(mod1[mod1$uid == "mod1_tx_excel", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_excel_1", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_excel_2", params$lang])`
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_simplefnc", params$lang])`
+
+.pull-izquierda\[
+
+- `sqrt()`
+  
+  - `r paste0(mod1[mod1$uid == "mod1_bu_simplefnc_1", params$lang])`
+
+\]
+
+.tirar-derecha\[
+
+```{r, echo=T, out.width="100%"}
+sqrt(49)
+```
+
+\]
+
+.nota\[`r paste0(mod1[mod1$uid == "mod1_fn_simplefnc_2", params$lang])`\]
+
+???
+Demuestra cada `sqrt(49)`, `sqrt(12)`, `max(1, 15, 2, 9)` (explica las comas)
+Explica los vectores `c(1, 15, 2, 9)` y un vector con nombre `cities <- c("Wuhan", "Milan", "New York")`
+Anota rápidamente los vectores indexados `cities[[2]]`
+y numéricos: `ages <- c(15, 28, 100, 15, 65, 4, 10)` entonces `summary(ages)` y `summary(ages)[2]` y `summary(ages)[[2]]`
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_simplefnc", params$lang])`
+
+.pull-izquierda\[
+
+- `sqrt()`
+  
+  - `r paste0(mod1[mod1$uid == "mod1_bu_simplefnc_1", params$lang])`
+
+- `max()`
+  
+  - `r paste0(mod1[mod1$uid == "mod1_bu_simplefnc_2", params$lang])`
+
+\]
+
+.tirar-derecha\[
+
+```{r, echo=T, out.width="100%"}
+sqrt(49)
+```
+
+<br>
+```{r, echo=T, out.width="100%"}
+max(2, 10, 15, 200, 9)
+```
+
+\]
+
+.nota\[`r paste0(mod1[mod1$uid == "mod1_fn_simplefnc_2", params$lang])`\]
+
+???
+Demuestra cada `sqrt(49)`, `sqrt(12)`, `max(1, 15, 2, 9)` (explica las comas)
+Explica los vectores `c(1, 15, 2, 9)` y un vector con nombre `cities <- c("Wuhan", "Milan", "New York")`
+Anota rápidamente los vectores indexados `cities[[2]]`
+y numéricos: `ages <- c(15, 28, 100, 15, 65, 4, 10)` entonces `summary(ages)` y `summary(ages)[2]` y `summary(ages)[[2]]`
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_simplefnc", params$lang])`
+
+.pull-izquierda\[
+
+- `sqrt()`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_simplefnc_1", params$lang])`
+
+<br>
+
+- `max()`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_simplefnc_2", params$lang])`
+
+<br>
+
+- `c()`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_simplefnc_3", params$lang])`
+  - `r paste0(mod1[mod1$uid == "mod1_bu_simplefnc_4", params$lang])`  
+    \]
+
+.tirar-derecha\[
+
+```{r, echo=T, out.width="100%"}
+sqrt(49)
+```
+
+<br>
+
+```{r, echo=T, out.width="100%"}
+max(2, 10, 15, 200, 9)
+```
+
+```{r, echo=T, out.width="100%"}
+c(2, 5, 9, 12, 47)
+```
+
+\]
+
+.nota\[`r paste0(mod1[mod1$uid == "mod1_fn_simplefnc_2", params$lang])`\]
+
+???
+Demuestra cada `sqrt(49)`, `sqrt(12)`, `max(1, 15, 2, 9)` (explica las comas)
+Explica los vectores `c(1, 15, 2, 9)` y un vector con nombre `cities <- c("Wuhan", "Milan", "New York")`
+Anota rápidamente los vectores indexados `cities[[2]]`
+y numéricos: `ages <- c(15, 28, 100, 15, 65, 4, 10)` entonces `summary(ages)` y `summary(ages)[2]` y `summary(ages)[[2]]`
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_argument", params$lang])`
+
+.pull-izquierda\[
+
+`r paste0(mod1[mod1$uid == "mod1_tx_argument_1", params$lang])`
+
+</br>
+
+`r paste0(mod1[mod1$uid == "mod1_tx_argument_2", params$lang])`
+
+</br>
+
+`r paste0(mod1[mod1$uid == "mod1_tx_argument_3", params$lang])`
+
+</br>
+
+`r paste0(mod1[mod1$uid == "mod1_tx_argument_4", params$lang])`
+
+\]
+
+.tirar-derecha\[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "arguments-buttons.png")))
+```
+
+\]
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_excel1", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "excel_arguments.png")))
+```
+
+`r paste0(mod1[mod1$uid == "mod1_tx_excel1_1", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_excel1_1", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_excel1_2", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_excel1_3", params$lang])`
+
+\--
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_excel1_4", params$lang])`
+
+???
+¿Qué devuelve esta ecuación de Excel?
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_baking", params$lang])`
+
+\--
+
+`r paste0(mod1[mod1$uid == "mod1_tx_baking_1", params$lang])`  
+`r paste0(mod1[mod1$uid == "mod1_tx_baking_2", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_tx_baking_3", params$lang])`
+
+\--
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+#knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", #"Function_Bread_Example.png")))
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", paste0("Function_Bread_Example_", params$lang, ".png"))))
+
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_example", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_example_1", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_example_2", params$lang])`
+
+```{r, include=FALSE}
+surv <- tribble(
+     ~case_def, ~gender, ~age,
+     "Confirmed", "female", 1,
+     "Confirmed", "male", 16,
+     "Suspect", "female", 10,
+     "Suspect", "female", 10,
+     "Confirmed", "male", 64,
+     "Confirmed", "male", 8,
+     "Confirmed", "female", 22,
+     "Confirmed", "female", 31)
+```
+
+```{r, echo=F, eval=T}
+surv %>% knitr::kable()
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_tbl", params$lang])`
+
+```{r, results="asis", echo=FALSE}
+str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_1", params$lang])}) %>%
+  flair("tbl_cross()", color = "cornflowerblue") %>%
+  flair(str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_1_2", params$lang])}), color = "orange") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+\--
+
+```{r, results="asis", echo=FALSE}
+str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_2", params$lang])}) %>%
+  flair("tbl_cross(", color = "cornflowerblue") %>%
+  flair("data =", color = "orange") %>%
+  flair("col =", color = "orange") %>%
+  flair("row =", color = "orange") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_tbl", params$lang])`
+
+```{r, results="asis", echo=FALSE}
+str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_1", params$lang])}) %>%
+  flair("tbl_cross()", color = "cornflowerblue") %>%
+  flair(str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_1_2", params$lang])}), color = "orange") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+`r paste0(mod1[mod1$uid == "mod1_tx_tbl_3", params$lang])`
+
+```{r, results="asis", echo=FALSE}
+str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_4", params$lang])}) %>%
+  flair("tbl_cross(", color = "cornflowerblue") %>%
+  flair("data =", color = "orange") %>%
+  flair("col =", color = "orange") %>%
+  flair("row =", color = "orange") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_tbl", params$lang])`
+
+```{r, results="asis", echo=FALSE}
+str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_1", params$lang])}) %>%
+  flair("tbl_cross()", color = "cornflowerblue") %>%
+  flair(str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_1_2", params$lang])}), color = "orange") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+`r paste0(mod1[mod1$uid == "mod1_tx_tbl_5", params$lang])`
+
+```{r, results="asis", echo=FALSE}
+str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_6", params$lang])}) %>%
+  flair("tbl_cross(", color = "cornflowerblue") %>%
+  flair("data =", color = "orange") %>%
+  flair("col =", color = "orange") %>%
+  flair("row =", color = "orange") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_tbl", params$lang])`
+
+```{r, results="asis", echo=FALSE}
+str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_1", params$lang])}) %>%
+  flair("tbl_cross()", color = "cornflowerblue") %>%
+  flair(str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_1_2", params$lang])}), color = "orange") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+`r paste0(mod1[mod1$uid == "mod1_tx_tbl_7", params$lang])`
+
+```{r, results="asis", echo=FALSE}
+str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_8", params$lang])}) %>%
+  flair("tbl_cross(", color = "cornflowerblue") %>%
+  flair("data =", color = "orange") %>%
+  flair("col =", color = "orange") %>%
+  flair("row =", color = "orange") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_tbl", params$lang])`
+
+```{r, results="asis", echo=FALSE}
+str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_1", params$lang])}) %>%
+  flair("tbl_cross()", color = "cornflowerblue") %>%
+  flair(str_glue({paste0(mod1[mod1$uid == "mod1_tx_tbl_1_2", params$lang])}), color = "orange") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+`r paste0(mod1[mod1$uid == "mod1_tx_tbl_9", params$lang])`
+
+```{r tblcross, include=F}
+tbl_cross(data = surv, row = gender, col = case_def)
+```
+
+```{r tblcross_flair, echo=F}
+decorate("tblcross") %>%
+  flair("tbl_cross(", color = "cornflowerblue") %>%
+  flair("data =", color = "orange") %>%
+  flair("col =", color = "orange") %>%
+  flair("row =", color = "orange") %>%
+  knit_print.with_flair()
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_pkgs", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_pkgs_1", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_pkgs_2", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_pkgs_3", params$lang])`
+
+\--
+
+`r paste0(mod1[mod1$uid == "mod1_tx_pkgs_4", params$lang])`
+
+.pull-izquierda\[
+
+`r paste0(mod1[mod1$uid == "mod1_tx_pkgs_5", params$lang])`
+
+\]
+
+.tirar-derecha\[
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "gt_summary.png")))
+```
+
+\]
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_pkgs", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_op_pkgs_1", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_bu_pkgs_1", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_pkgs_2", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_pkgs_3", params$lang])`
+- `r paste0(mod1[mod1$uid == "mod1_bu_pkgs_4", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="20%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "ggplot2.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "lubridate.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "janitor.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "rmarkdown.png")))
+
+
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_install", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_install_1", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_tx_install_2", params$lang])`
+
+\--
+
+`r paste0(mod1[mod1$uid == "mod1_tx_install_3", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_tx_install_4", params$lang])`
+
+```{r, eval=TRUE, echo=FALSE, out.width="40%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "bookshelf1.png")))
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_pacman", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_pacman_1", params$lang])`
+
+- `r paste0(mod1[mod1$uid == "mod1_tx_pacman_2", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_pacman_3", params$lang])`
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_compare", params$lang])`
+
+`r paste0(mod1[mod1$uid == "mod1_tx_compare_1", params$lang])`
+
+.pull-izquierda\[
+
+`r paste0(mod1[mod1$uid == "mod1_tx_compare_2", params$lang])`
+
+```{r, eval=F, echo=T}
+install.packages(
+     c("rio",
+       "janitor",
+       "gtsummary",
+       "here",
+       "tidyverse"))
+
+library(rio)
+library(janitor)
+library(gtsummary)
+library(here)
+library(tidyverse)
+```
+
+\]
+
+.tirar-derecha\[
+
+`r paste0(mod1[mod1$uid == "mod1_tx_compare_3", params$lang])`
+
+```{r, eval=F, echo=T}
+pacman::p_load(
+  rio,
+  janitor,
+  gtsummary,
+  here,
+  tidyverse)
+```
+
+\]
+
+.nota\[`r paste0(mod1[mod1$uid == "mod1_fn_compare", params$lang])`\]
+
+???
+Esto es R común, donde hay muchas maneras de hacer una tarea. Nuestro trabajo es reducirlo todo y compartir contigo los enfoques más fáciles y sencillos.
+
+***
+
+clase: inverso, centro, medio
+
+## Ejercicio
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "teamwork2.png")))
+```
+
+***
+
+# `r paste0(mod1[mod1$uid == "mod1_h1_instructions", params$lang])`
+
+1) `r paste0(mod1[mod1$uid == "mod1_tx_instructions_1", params$lang])`
+
+2) `r paste0(mod1[mod1$uid == "mod1_tx_instructions_2", params$lang])`
+
+3) `r paste0(mod1[mod1$uid == "mod1_tx_instructions_3", params$lang])`
+
+4) `r paste0(mod1[mod1$uid == "mod1_tx_instructions_4", params$lang])`
+
+5) `r paste0(mod1[mod1$uid == "mod1_tx_instructions_5", params$lang])`
+
+

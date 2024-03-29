@@ -1,0 +1,282 @@
+---
+title: "Introducción a R para<br>Epidemiología Aplicada"
+subtitle: "Introduction to Reprex"
+author: March 2022
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "es"
+---
+
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  sf,         # spatial
+  ggspatial,  # spatial
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation
+  tidyverse  # data management and visualization
+
+)
+
+## load packages from github
+pacman::p_load_gh(
+     "R4IDSR/epichecks"   # bivariate colour maps 
+)
+
+
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+#gen <- googlesheets4::read_sheet(
+#  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#  range = "generic") %>%
+#  clean_names()
+
+#mod10 <- googlesheets4::read_sheet(
+#  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#  range = "mod10", col_types = "c") %>%
+#  clean_names()
+```
+
+```{r xaringan-themer, include=FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+# Introducción a R para la epidemiología aplicada
+
+### Cómo obtener ayuda con el código
+
+## [contact@appliedepi.org](mailto:contact@appliedepi.org)
+
+# Hoy: objetivos y calendario
+
+**En este módulo pretendemos ayudarte a**
+
+- Entender cómo obtener ayuda con tu código
+
+--
+
+- Repasa los códigos de error más comunes y cómo resolverlos
+
+--
+
+- Infórmate sobre la documentación de ayuda y otros recursos de ayuda para el código
+
+--
+
+- Comete un error y publica un reprex (ejemplo reproducible) en el foro de la comunidad Applied Epi
+
+--
+
+- Completar una encuesta de opinión al final del curso
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  "25 minutes",   "Main" ,    "Introduction to reprex",
+  "2 hours 40 mins",   "Breakouts" ,   "Common errors; reprex post" ,
+  "10 minutes",    "Breakouts",   "Feedback survey" ,
+  "15 minutes",   "Main" ,    "Closing comments"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+```
+
+---
+
+# Introducción a reprex
+
+Hoy queremos centrarnos en **cómo obtener ayuda** con el código R
+
+Hay muchas formas de obtener ayuda más allá del curso.
+
+- [Manual de Epi R Aplicada](https://epirhandbook.com/en/)
+- [Foro de la Comunidad de Epi Aplicada](https://appliedepi.org/community/)
+- [ChatGPT](https://chat.openai.com/auth/login) u otros recursos de IA
+- [Búsqueda en Google](google.com), [Stackoverflow](https://stackoverflow.com/) o [Stackexchange](https://stackexchange.com/)
+- [Applied Epi Help Desk](support.appliedepi.org) ( recibirás cupones al finalizar el curso)
+
+Para muchas de las opciones de búsqueda, es importante comprender cómo hacer un ejemplo reproducible.
+
+---
+
+# Introducción a reprex
+
+¿Qué es un ejemplo reproducible (**reprex**)?
+
+- Resume un problema para que los lectores puedan recrearlo en sus propios ordenadores
+- Debe ser **mínimo**:
+  - Incluye sólo los datos y el código necesarios para producir el problema
+- Debe ser **reproducible**:
+  - Incluye *todo* el contexto necesario para reproducir el problema
+  - Por ejemplo, paquetes, marco de datos simplificado, comandos, versión de R utilizada, etc.
+
+Haremos una demostración de cómo crear y publicar un reprex.
+
+¡No te sientas obligado a teclear! Tendrás la oportunidad de crear el tuyo propio en los ejercicios.
+
+---
+
+class: inverse, center, middle
+
+# Demostración: Cómo hacer un reprex
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "window.png")))
+```
+
+---
+
+# Esta sesión
+
+La sesión de hoy se divide en dos partes:
+
+**Errores comunes y obtención de ayuda**
+
+- El cuestionario de error al inicio de la sesión es anónimo, ¡utilízalo para aprender!
+- Puedes recrear los errores si quieres, pero no es necesario.
+- El cuestionario sirve principalmente para enseñarte a comprender los errores
+
+**Crear reprex utilizando el análisis del ébola**
+
+- Tendrás la oportunidad de crear dos ejemplos de reprex
+- ¡Asegúrate de publicarlos en el área de puestos de formación!
+
+Recuerda que estamos aquí para ayudarte, no importa en qué punto del ejercicio te encuentres.
+
+---
+
+# Recuerda publicar el Reprex en el foro
+
+¡Nuestros instructores revisarán algunos de los mensajes reprex y responderán con soluciones!
+
+- Esto te dará la oportunidad de experimentar cómo resolver tus propios problemas de código R en el mundo real.
+
+Como siempre, ¡recuerda divertirte!
+
+- Esto no es un examen, simplemente un ejercicio para orientarte sobre los recursos útiles disponibles.
+
+En el futuro, puedes publicar la página del foro del Código R para obtener ayuda de epidemiólogos de todo el mundo.
+
+---
+
+# Conjuntos de datos disponibles (Extras)
+
+Si terminas antes, ¡no dudes en empezar un nuevo proyecto R con tus propios datos!
+
+Alternativamente, hoy tienes múltiples opciones para utilizar otros conjuntos de datos:
+
+- Seguir trabajando en tu Informe sobre el Ébola
+- Sigue trabajando en tu informe COVID-19
+- Inicia un nuevo Proyecto R con los datos del brote de H7N9 (disponible en el directorio de tu curso)
+- Inicia un nuevo Proyecto R con los datos disponibles en el {outbreaks} paquete
+  - Conjunto de datos del brote de sarampión de 1861
+  - Conjunto de datos de la lista de linfocitos del MERS de 2015
+  - Recuento de casos de malaria
+
+Sea cual sea el conjunto de datos, recuerda tener en cuenta si necesitas iniciar un **nuevo proyecto en R** y **donde** ¡debe ubicarse el proyecto R!
+
+Para todos los conjuntos de datos proporcionados, la sección Extras tiene algunas indicaciones para que empieces a trabajar con los datos.
+
+---
+
+# Después del ejercicio
+
+Al final de la sesión, te pediremos que envíes una encuesta posterior al curso.
+
+Además, realizaremos una revisión final del curso, y te indicaremos dónde puedes utilizar tus cupones del Servicio de Ayuda después del curso.
+
+---
+
+# ¡Ejercicio!
+
+- Ir al sitio web del curso
+- Abre el ejercicio del Módulo 10 e inicia sesión
+- Sigue el ejercicio para repasar los errores más comunes y responder a las preguntas del cuestionario
+- Aprende a obtener ayuda de distintos recursos
+- Crea un reprex en el Foro de la Comunidad de Epi Aplicada en la página de Formación
+- Avisa a un instructor si no estás seguro de qué hacer
+
+Recapitularemos al final de la sesión, incluida la realización de la encuesta posterior al curso.
+
+

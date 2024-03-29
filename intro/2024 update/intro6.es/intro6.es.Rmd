@@ -1,0 +1,829 @@
+---
+title: "Introducción a R para<br>Epidemiología Aplicada"
+subtitle: "Routine reports with {rmarkdown}"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: true
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "es"
+---
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+
+
+
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+xaringanExtra::use_panelset()
+xaringanExtra::use_tile_view()
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  sf,         # spatial
+  scales,     # comma
+  epikit,     # helpers
+  ggspatial,  # spatial
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation
+  tidyverse  # data management and visualization
+
+)
+
+## load packages from github
+pacman::p_load_gh(
+     "R4IDSR/epichecks"   # bivariate colour maps 
+)
+
+
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+# gen <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "generic", col_types = "c") %>%
+#   clean_names()
+# 
+# mod9 <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "mod9", col_types = "c") %>%
+#   clean_names()
+```
+
+```{r xaringan-themer, include=FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colors: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-code {
+      font-size: 70%;
+    }
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+    }
+    tr:last-child {
+    border-bottom: none;
+    }
+```
+
+# Hoy: objetivos y calendario
+
+- Comprender la reducción de R como herramienta para hacer informes rutinarios
+
+- Explora la variedad de formatos e integraciones de los informes R markdown
+
+- Convierte el código de tu estudio de caso Ébola en un informe R markdown
+
+- Haz que el script R Markdown se adapte dinámicamente a las actualizaciones de datos
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Topic,
+  "30 minutes", "R markdown slides & demonstration",
+  "2.5 hours", "Create your Ebola situation report",
+  "30 minutes", "Debrief"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+```
+
+---
+
+# Salud pública e informes rutinarios: una historia de amor
+
+.pull-left[
+
+En salud pública nos encantan los informes.
+
+- Informes de situación de brotes
+- Diapositivas semanales
+- Sesiones informativas para ejecutivos
+- Informes públicos
+- Encuestas sanitarias comunitarias
+- Análisis de encuestas de vacunación
+- ...
+
+**La producción manual es laboriosa y propensa al error humano**
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "automated_reports.png")))
+```
+
+]
+
+---
+
+# Salud pública e informes rutinarios: una historia de amor
+
+.pull-left[
+
+A menudo tenemos que producirlos para muchas subpoblaciones:
+
+- Barrio, código postal
+- Condado, distrito, provincia, estado, país
+- Subpoblaciones étnicas u ocupacionales
+- Grupos de alto riesgo
+- Semanal, trimestral, anual
+
+**La producción manual es laboriosa y propensa al error humano**
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "automated_reports.png")))
+```
+
+]
+
+---
+
+# "Automatización" frente al ojo humano
+
+.tirar-izquierda\[
+
+ El "aprendizaje automático" y la "IA" son temas candentes en estos momentos.
+
+Pero en la mayoría de los escenarios de salud pública y epidemiología aplicada, también se requiere una correcta interpretación de las tendencias:
+
+- Experiencia
+- Conocimiento del contexto local
+- Comprensión del flujo de datos y sus limitaciones
+
+¿Cómo has experimentado las limitaciones de la "automatización" en tu trabajo?
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "human_robot.png")))
+```
+
+]
+
+---
+
+class: inverse, center, middle
+
+# R reducción
+
+## Un lugar para la escritura basada en datos</br>Código, texto y resultados juntos
+
+---
+
+# Varios resultados
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "rmarkdown_overview.png")))
+```
+
+---
+
+# Cuadros de mando
+
+{rmarkdown} puede producir cuadros de mando sencillos para enviarlos por correo electrónico o alojarlos en línea.
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "flexdashboard_output.png")))
+```
+
+.footnote\[Inscríbete en nuestro curso R Markdown Avanzado o consulta el [capítulo del Manual Epi](https://epirhandbook.com/en/dashboards-with-r-markdown.html)!]
+
+---
+
+class: inverse, center, middle
+
+# ¡Incluso estas diapositivas se hicieron con R Markdown!
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "even_slides.png")))
+```
+
+.footnote\[Ver el {xaringan} e inscríbete en nuestro curso avanzado de R Markdown].
+
+---
+
+# Visión general
+
+**Todo el guión es ahora un documento** que integra **frases de texto** con frases **código R** y su **salidas**. Todo se actualiza cuando se ejecuta el script.
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+
+knitr::include_graphics(here::here("images", "rmd_1", "rmarkdown_translation.png"))
+
+```
+
+---
+
+# Vocabulario
+
+- **Markdown (.md)** - un "lenguaje" no específico de R, que permite convertir tu texto plano a html y otros formatos
+
+--
+
+- **R Markdown (.Rmd)** - una variación de markdown específica de R
+
+--
+
+- {rmarkdown} un paquete R utilizado para convertir el markdown (texto) del archivo R markdown en la salida deseada
+
+--
+
+- {knitr} - un paquete R que lee trozos de código R y los "teje" en el documento
+
+--
+
+- **Pandoc** - un software independiente (pero incluido en RStudio) que convierte el resultado en word/pdf/powerpoint, etc.
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "0_rmd.png")))
+```
+
+.footnote[imagen [fuente](https://rmarkdown.rstudio.com/authoring_quick_tour.html)]
+
+???
+Este proceso ocurre en segundo plano, por lo que no necesitas conocer todos estos pasos. Sin embargo, puedes encontrarte con estos nombres.
+
+El archivo .Rmd se alimenta a knitr, que ejecuta los trozos de código R y crea un nuevo archivo .md (markdown) que incluye el código R y su salida renderizada. A continuación, pandoc procesa el archivo .md para crear el producto final: un documento de Microsoft Word, un archivo HTML, un documento de PowerPoint, un pdf, etc.
+
+---
+
+class: center, middle
+
+# Trozos de código R
+
+---
+
+# Trozos de código
+
+En R Markdown, tu código se asienta en "trozos" -pequeñas piezas de script R dentro del documento-. Crea fragmentos para tareas concretas (por ejemplo, cargar paquetes, importar datos, limpiar datos).
+
+.pull-left[
+Partes de un trozo de código:
+
+- 3 "backticks" y `{r}` inician el fragmento
+- **Código R en el medio**
+- 3 backticks cierran el chunk
+
+*Atajo de teclado: Ctrl + Alt + i*  
+*Atajo de menú: Código -> Insertar trozo*
+
+]
+
+.pull-right[
+
+````r
+```{r}`r ''`
+
+R code will be here
+
+```
+````
+
+</br>
+
+````r
+```{r}`r ''`
+
+More R code will be here.
+
+```
+````
+
+]
+
+---
+
+# Script R normal (.R)
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "r_script.png")))
+```
+
+---
+
+# Trozos de código R Markdown (.Rmd)
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "rmd_script.png")))
+```
+
+---
+
+# La salida del informe
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "word_simple.png")))
+```
+
+---
+
+class: inverse, center, middle
+
+# Texto
+
+---
+
+# Texto
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "rmd_text.png")))
+```
+
+---
+
+# Texto
+
+.panelset[
+.panel[.panel-name[To get this]
+Una frase de texto normal.  
+*He aquí un texto para poner en cursiva*  
+**Aquí hay un texto que debe escribirsenegrita**
+
+- Punto 1
+- Punto 2
+
+]
+.panel[.panel-name[Type this]
+Una frase de texto normal.  
+`*Here is some text to be italicized*`  
+`**Here is some text to be written in bold**`
+
+`* Bullet point 1`  
+`* Bullet point 2`
+
+]
+]
+
+.footnote\[Ver más formato RMarkdown [aquí](https://rmarkdown.rstudio.com/authoring_basics.html)]
+
+---
+
+# Rúbricas y secciones del informe
+.panelset[
+.panel[.panel-name[To get this]
+
+# Gran título
+
+## Encabezamiento pequeño
+
+### Títulos más pequeños
+
+#### Encabezamientos aún más pequeños
+
+]
+.panel[.panel-name[Type this]
+
+`# Big heading`  
+`## Smaller headings`  
+`### Smaller headings`  
+`#### Even smaller headings`
+
+
+]
+]
+
+---
+
+# Añade texto al informe
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "word_text.png")))
+```
+
+---
+
+class: inverse, center, middle
+
+# Configuración
+
+---
+
+# Ajustes YAML
+
+Esta sección en el **parte superior del documento** especifica los ajustes básicos para la producción.
+
+Los ajustes se escriben en `key: value` pares.
+
+```{asis}
+---
+title: "Ebola Outbreak Situation Report"
+author: "Neale Batra"
+output: word_document
+date: "`r Sys.Date()`"
+---
+```
+
+???
+Ten en cuenta que empieza y acaba con tres guiones, y que la colocación de los espacios y los dos puntos es muy importante
+
+---
+
+# El fragmento "configuración
+
+**Chunk "opciones** Ajusta cómo se muestran el código R y sus resultados en el informe.
+
+En `setup` cerca de la parte superior del R Markdown utiliza un {knitr} para establecer el **por defecto** "para todos los trozos.
+
+- Ejecuta los trozos: `eval = TRUE`
+- Muestra el código en el informe: `echo = TRUE`
+- Mostrar advertencias en el informe: `warning = TRUE`
+- Mostrar errores en el informe: `error = TRUE`
+- Mostrar salida en el informe: `include = TRUE`
+
+A continuación, se establece por defecto que el código R se imprima en el informe, pero no las advertencias ni los mensajes de error.
+
+````r
+```{r setup, include=FALSE}`r ''` 
+
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, error = FALSE)
+
+```
+````
+
+---
+
+# Opciones de trozos
+
+Para anular los valores por defecto, puedes ajustar las opciones de cada trozo:
+
+.pull-left[
+Ajusta el chunk "opciones" dentro del `{r}`
+
+- Ejecuta el fragmento: `eval = TRUE`
+- Muestra el código: `echo = TRUE`
+- Mostrar advertencias: `warning = TRUE`
+- Mostrar errores: `error = TRUE`
+- Mostrar salida: `include = TRUE`
+
+Observa las comas entre cada opción.
+
+]
+
+.pull-right[
+
+````r
+```{r packages, echo = FALSE, warning = FALSE}`r ''` 
+
+pacman::p_load(
+  rio,      # import/export
+  here,     # file paths
+  janitor,  # cleaning & simple tables
+  tidyverse # data management & viz
+)
+
+```
+````
+
+]
+
+Más información sobre las opciones de trozos de código [aquí](https://rmarkdown.rstudio.com/lesson-3.html)
+
+???
+Los nombres de los trozos no pueden contener espacios
+
+---
+
+# Ejecutar el documento
+
+Pulsa el botón "tejer" de la parte superior. Utiliza el desplegable para las opciones.
+
+```{r, eval=TRUE, echo=FALSE, out.width="10%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "4_knitbutton.png")))
+```
+
+El progreso se mostrará en el panel "R Markdown" (junto a la Consola R)
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "4_progress.png")))
+```
+
+Por defecto, el resultado se guardará junto a tu archivo .Rmd.
+
+???
+Consulta en el Manual las opciones para crear una "Fábrica de informes" donde sea más fácil catalogar las salidas de muchos informes diferentes en carpetas con fecha y hora.
+
+---
+
+class: inverse, center, middle
+
+# Demostración en vivo
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "piano_man.jpg")))
+```
+
+---
+
+class: inverse, center, middle
+
+# Consejos más avanzados
+
+---
+
+# Código R en línea
+
+Este código escrito en línea y texto:
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("verbatim_inline_1_1_", params$lang, ".png"))))
+```
+
+produce esto:
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("verbatim_inline_1_2_", params$lang, ".png"))))
+```
+
+---
+
+# Código R en línea
+
+Este código escrito en línea y texto:
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("verbatim_inline_2_1_", params$lang, ".png"))))
+```
+
+produce esto:
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("verbatim_inline_2_2_", params$lang, ".png"))))
+```
+
+---
+
+# Funciones auxiliares
+
+{epikit}
+
+```{r, eval=TRUE, echo=TRUE}
+epikit::fmt_count(surv, is.na(date_onset))
+```
+
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
+str_glue("{fmt_count(surv, is.na(date_onset))} are missing date of onset and not shown.")
+```
+
+```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
+str_glue("{fmt_count(surv, is.na(date_onset))} cas n'ont pas de date d'apparition et ne sont pas présentés ici.")
+```
+
+```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
+str_glue("{fmt_count(surv, is.na(date_onset))} случаев дата начала заболевания отсутствует и не показана.")
+```
+
+```{r, eval=params$lang == "es", echo=params$lang == "es"}
+str_glue("{fmt_count(surv, is.na(date_onset))} falta la fecha de inicio y no se muestra.")
+```
+
+--
+
+{scales}
+
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
+str_glue("There were {comma(sum(as.numeric(surv$diff), na.rm=T))} total delay days between symptom onset and report.")
+
+```
+
+```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
+str_glue("Il y avait {comma(sum(as.numeric(surv$diff), na.rm=T))} jours de retard total entre l'apparition des symptômes et la déclaration.")
+
+```
+
+```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
+str_glue("Между началом симптомов и сообщением о них прошло {comma(sum(as.numeric(surv$diff), na.rm=T))} всего дней задержки.")
+
+```
+
+```{r, eval=params$lang == "es", echo=params$lang == "es"}
+str_glue("Hubo {comma(sum(as.numeric(surv$diff), na.rm=T))} días totales de retraso entre el inicio de los síntomas y el informe")
+
+```
+
+---
+
+# Tablas estáticas
+
+Esto escrito en tu R markdown:
+
+```
+Column 1 |Column  2 |Column 3
+---------|----------|--------
+Cell A   |Cell B    |Cell C
+Cell D   |Cell E    |Cell F
+```
+
+produce esto:
+
+| Columna 1 | Columna 2 | Columna 3 | 
+| --------- | --------- | --------- |
+| Celda A   | Célula B  | Célula C  | 
+| Célula D  | Célula E  | Célula F  | 
+
+Se pueden crear tablas dinámicas con paquetes como {flextable} y {DT}.
+
+---
+
+# Modo fuente
+
+Tu guión puede llegar a tener este aspecto
+
+```{r, eval=TRUE, echo=FALSE, out.width="80%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("source_mode_", params$lang, ".png"))))
+```
+
+---
+
+# Modo visual
+
+RStudio te permite editar en "Modo Visual", que parece un documento de Word
+
+```{r, eval=TRUE, echo=FALSE, out.width="80%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("visual_mode_", params$lang, ".png"))))
+```
+
+???
+Si escribir el documento en código te intimida, RStudio te permite activar el "Modo Visual", para que tu documento tenga un aspecto similar al de un documento de Word.
+
+---
+
+# `params`
+
+En el YAML, puedes definir `params` para que esté disponible para el informe:
+
+```{asis}
+---
+title: "Surveillance report"
+output: html_document
+params:
+ date: "2021-04-10"
+ hospital: "Central Hospital"
+---
+```
+
+Puedes crear los nombres de estos parámetros
+
+---
+
+# `params`
+
+En el R Markdown, llámalos `params` valores en tu código utilizando `params$`
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_1.png")))
+```
+
+---
+
+# `params`
+
+En el R Markdown, llama a estos `params` valores en tu código utilizando `params$`
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_2.png")))
+```
+
+---
+
+# `params`
+
+En R Markdown, llámalos `params` valores en tu código utilizando `params$`
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_3.png")))
+```
+
+---
+
+# `params`
+
+.pull-left[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_menu_1.png")))
+```
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_menu_2.png")))
+```
+
+]
+
+---
+
+# Plantillas de informes
+
+Puedes proporcionar plantillas R Markdown con Word o PPT (por ejemplo, con logotipos, etc.)
+
+Una vez renderizado el informe, puedes editar el texto para añadir interpretaciones.
+
+---
+
+# Una vez generado el informe, puedes editar el texto para añadir interpretaciones.
+
+Applied Epi colabora con Médicos sin Fronteras (MSF) para ofrecer plantillas R Markdown para informes de situación:
+
+- Cólera/diarrea acuosa aguda
+- Meningitis
+- Sarampión/Rubéola
+- Síndrome de ictericia aguda (a menudo se sospecha que es Hepatitis E)
+
+y para el análisis de encuestas:
+
+- Mortalidad retrospectiva y acceso a la asistencia
+- Cobertura de vacunación
+- Malnutrición
+
+---
+
+# Brotes
+
+
+
