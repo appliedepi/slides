@@ -52,7 +52,8 @@ for (i in 1:length(module_list)) {
 create_LanguageModule <- function(base_directory, module_name, languages) {
   for (lang in languages) {
     # Construct the file and folder names
-    file_name <- paste0(module_name, "_", lang, ".Rmd")
+    file_name <- paste0(module_name, ".", lang, ".Rmd")
+    file_name_new <- paste0(module_name, "_", lang, ".Rmd")
     folder_name <- paste0(module_name, "_", lang)
     file_path <- file.path(base_directory, module_name, file_name)
     new_folder_path <- file.path(base_directory, folder_name)
@@ -66,7 +67,7 @@ create_LanguageModule <- function(base_directory, module_name, languages) {
       }
 
       # Move the .Rmd files
-      file.rename(from = file_path, to = file.path(new_folder_path, file_name))
+      file.rename(from = file_path, to = file.path(new_folder_path, file_name_new))
 
       # Check and copy the xaringan-themer.css file if it exists
       if (file.exists(css_file_path)) {
