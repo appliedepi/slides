@@ -17,11 +17,10 @@ module_list = c(#"intro1",
                 #"intro2",
                 #"intro3",
                 #"intro4",
-                #"intro5_1",
-                #"intro5_2",
+                #"intro5-1",
+                #"intro5-2",
                 "intro6"
-                #"intro7_1",
-                #"intro7_2",
+                #"intro7",
                 #"intro9",
                 #"intro10"
                 )
