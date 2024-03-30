@@ -1,0 +1,229 @@
+---
+title: Introducción a R para<br>Epidemiología Aplicada
+subtitle: Introduction to Reprex
+author: March 2022
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: en
+---
+
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  sf,         # spatial
+  ggspatial,  # spatial
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation
+  tidyverse  # data management and visualization
+
+)
+
+## load packages from github
+pacman::p_load_gh(
+     "R4IDSR/epichecks"   # bivariate colour maps 
+)
+
+
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+#gen <- googlesheets4::read_sheet(
+#  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#  range = "generic") %>%
+#  clean_names()
+
+#mod10 <- googlesheets4::read_sheet(
+#  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#  range = "mod10", col_types = "c") %>%
+#  clean_names()
+```
+
+```{r xaringan-themer, include=FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+# Introducción a R para la epidemiología aplicada
+
+### Solución de errores y obtención de ayuda
+---
+
+## [contact@appliedepi.org](mailto:contact@appliedepi.org)
+
+# Hoy: objetivos y calendario
+
+**En este módulo pretendemos ayudarte a**
+
+- Entender cómo obtener ayuda con tu código
+
+\--
+
+- Repasa los códigos de error más comunes y cómo resolverlos
+
+\--
+
+- Infórmate sobre la documentación de ayuda y otros recursos de ayuda para el código
+
+\--
+
+- Publica un "reprex" (ejemplo reproducible) de un error en el Foro de la Comunidad de Epi Aplicada
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  "25 minutes",   "Main" ,    "Introduction to reprex",
+  "2 hours 40 mins",   "Breakouts" ,   "Common errors; reprex post"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+```
+
+---
+# Introducción al reprex
+
+Hoy queremos centrarnos en **cómo obtener ayuda** con el código R
+
+Hay muchas formas de obtener ayuda más allá del curso.
+
+- [Manual de Epi R Aplicada](https://epirhandbook.com/en/)
+- [Foro de la Comunidad de Epi Aplicada](https://appliedepi.org/community/)
+- [ChatGPT](https://chat.openai.com/auth/login) u otros recursos de IA
+- [Búsqueda en Google](google.com), [Stackoverflow](https://stackoverflow.com/) o [Stackexchange](https://stackexchange.com/)
+- [Applied Epi Help Desk](support.appliedepi.org) ( recibirás cupones al finalizar el curso)
+
+Para muchas de las opciones de búsqueda, es importante comprender cómo hacer un ejemplo reproducible.
+
+---
+# Introducción a reprex
+
+¿Qué es un ejemplo reproducible (**reprex**)?
+
+- Resume un problema para que los lectores puedan recrearlo en sus propios ordenadores
+- Debe ser **mínimo**:
+  - Incluye sólo los datos y el código necesarios para producir el problema
+- Debe ser **reproducible**:
+  - Incluye *todo* el contexto necesario para reproducir el problema
+  - Por ejemplo, paquetes, marco de datos simplificado, comandos, versión de R utilizada, etc.
+
+Haremos una demostración de cómo crear y publicar un reprex.
+
+¡No te sientas obligado a teclear! Tendrás la oportunidad de crear el tuyo propio en los ejercicios.
+
+---
+clase: inverso, centro, medio
+
+# Demostración: Cómo hacer un reprex
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "window.png")))
+```
+
+---
+# Esta sesión
+
+La sesión de hoy está dividida en partes:
+
+**Errores comunes y obtención de ayuda**
+
+- Ejemplos de errores comunes: ¿puedes depurarlos?
+- El test es para enseñarte a entender los errores comunes
+
+**Crear reprexiones utilizando el análisis del ébola**
+
+- Tendrás la oportunidad de crear dos ejemplos reprex
+- Asegúrate de publicarlos en la sección **Formación** ¡para hoy!
+
+Recuerda que estamos aquí para ayudarte, estés donde estés en el ejercicio.
+
+---
+# ¡Ejercítate!
+
+- Ir al sitio web del curso
+- Abre el ejercicio del Módulo 10 e inicia sesión
+- Sigue el ejercicio para repasar los errores más comunes y responder a las preguntas del cuestionario
+- Aprende a obtener ayuda de distintos recursos
+- Crea un reprex en el Foro de la Comunidad de Epi Aplicada en la página de Formación
+- Avisa a un instructor si no estás seguro de qué hacer
+
+Recapitularemos al final de la sesión, incluida la realización de la encuesta posterior al curso.
+
+
