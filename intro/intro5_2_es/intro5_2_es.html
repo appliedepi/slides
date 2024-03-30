@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introducción a R para Epidemiología Aplicada</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+class: center, middle, inverse, title-slide
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+&lt;style type="text/css"&gt;
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+&lt;/style&gt;
+
+# Introducción a R para la epidemiología aplicada
+
+### {ggplot2} - Escalas, temas y etiquetas
+
+[contact@appliedepi.org](mailto:contact@appliedepi.org)
+
+---
+
+# Gramática de los gráficos
+
+## Volvamos a la secuencia que construye un ggplot.
+
+El orden de las capas suele ser el siguiente:
+
+1) **"Abrir" la trama**
+
+--
+
+2) **"Mapear" columnas de datos**
+
+--
+
+3) **Añade (`+`) "capas "geom**
+
+--
+
+4) **Modificar "escalas"** como la escala de color o los saltos del eje y
+
+--
+
+5) **Añade elementos "temáticos" al diseño de la trama** como etiquetas de ejes, título, leyenda, fuentes, tamaños de texto, temas de fondo o rotación de ejes
+
+???
+Recuerda que aunque los comandos sean largos, es infinitamente más fácil editar y reciclar que en Excel
+
+---
+
+class: inverse, center, middle
+
+## Escalas en {ggplot2}
+
+&lt;img src="../../images/ggplot_scales_themes/scales.png" width="50%" /&gt;
+
+---
+
+# Escalas - visión general
+
+Los comandos de Escala sustituyen a los valores por defecto de cómo se muestra la estética, por ejemplo:
+
+- *Qué* colores o formas mostrar
+- *Cómo* se escriben la fecha o las proporciones en las etiquetas de los ejes
+- El mín/máx y la frecuencia de las interrupciones de los ejes
+
+--
+
+
+
+
+
+
+
+&lt;h4&gt;Fórmula genérica: &lt;span style="color:darkgreen"&gt;scale&lt;/span&gt;_&lt;span style="color:cornflowerblue"&gt;aesthetic&lt;/span&gt;_&lt;span style="color:deeppink"&gt;method&lt;/span&gt;()&lt;/h4&gt;
+
+--
+
+
+
+
+
+
+
+&lt;h4&gt;1) &lt;span style="color:darkgreen"&gt;scale&lt;/span&gt;_ : este prefijo nunca cambia&lt;/h4&gt;
+
+--
+
+
+
+
+
+
+
+
+
+--
+
+
+
+
+
+
+
+&lt;h4&gt;3) &lt;span style="color:deeppink"&gt;method&lt;/span&gt;: _continuous() o _discrete() или _manual() o _date() etc.&lt;/h4&gt;
+
+--
+
+&lt;h4&gt;&lt;span style="color:darkgreen"&gt;scale&lt;/span&gt;_&lt;span style="color:cornflowerblue"&gt;color&lt;/span&gt;_&lt;span style="color:deeppink"&gt;continuous&lt;/span&gt;()&lt;/h4&gt;
+
+&lt;h4&gt;&lt;span style="color:darkgreen"&gt;scale&lt;/span&gt;_&lt;span style="color:cornflowerblue"&gt;x&lt;/span&gt;_&lt;span style="color:deeppink"&gt;date&lt;/span&gt;()&lt;/h4&gt;
+
+&lt;h4&gt;&lt;span style="color:darkgreen"&gt;scale&lt;/span&gt;_&lt;span style="color:cornflowerblue"&gt;x&lt;/span&gt;_&lt;span style="color:deeppink"&gt;manual&lt;/span&gt;()&lt;/h4&gt;
+
+---
+
+# Ejemplos de escalas
+
+Algunos ejemplos de comandos de escala:
+
+| Quieres ajustar                                 | Comando Escala     | 
+| ----------------------------------------------- | ------------------ |
+| eje y continuo                                  | `scale_y_continuous()`                   | 
+| fecha eje x                                     | `scale_x_date()`                   | 
+| eje x categórico                                | `scale_x_discrete()`                   | 
+| relleno, continuo                               | `scale_fill_continuous()`                   | 
+| relleno, continuo                               | `scale_fill_gradient()`                   | 
+| color, asignación manual                        | `scale_color_manual()`                   | 
+
+---
+
+# Escalas - por defecto
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = district,
+    fill = sex)) +
+geom_bar()
+```
+
+Más arriba, el relleno de un gráfico de barras utiliza la función **colores por defecto y los saltos de eje**:
+
+]
+
+.pull-right[
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-26-1.png" width="504" /&gt;
+
+]
+
+???
+Ignora las etiquetas superpuestas del eje x, por simplicidad de código no las ajustamos en esta diapositiva.
+
+---
+
+# Balanzas - relleno ajustado
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = district,
+    fill = sex)) +
+geom_bar() +
+*scale_fill_manual(        
+*  values = c(
+*    "male"     = "violetred", 
+*    "female"   = "aquamarine"))
+```
+
+En `scale_fill_manual()` proporcionamos **manual** tareas  
+dentro de un vector `c()`.
+
+.footnote[Utilizar *na.value = "gris"* para valores perdidos
+]
+
+]
+
+.pull-right[
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-28-1.png" width="504" /&gt;
+
+]
+
+???
+Discute los argumentos na.value= en la mayoría de los comandos de escala, y la diferencia entre tener valores NA en los datos y tener un valor omitido explícito como "Desconocido".
+
+---
+
+# Escalas - colorbrewer
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = district,
+    fill = sex)) +
+geom_bar() +
+*scale_fill_brewer(
+*   type = "qual",
+*   na.value = "grey50")
+```
+
+Escalas - colorbrewer
+
+.footnote[Usar *na.value = "gris"* para valores perdidos
+]
+
+]
+
+.pull-right[
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-30-1.png" width="504" /&gt;
+
+]
+
+???
+Menciona brevemente `na.value=` de la mayoría de los comandos de escala, y la diferencia entre tener valores NA en los datos y tener un valor omitido explícito como "Desconocido".
+
+---
+
+# Escalas - eje y ajustado
+
+.tirar-izquierda\[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = district,
+    fill = sex)) +
+geom_bar() +
+scale_fill_manual(        
+  values = c(
+     "male" = "violetred", 
+     "female" = "aquamarine")) +
+*scale_y_continuous(
+*  breaks = seq(from = 0,
+*               to = 250,
+*               by = 10))
+```
+
+En `scale_y_continuous()` ajustamos los saltos del eje y utilizando `seq()` para definir una secuencia numérica.
+
+]
+
+.pull-right[
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-32-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Escalas - inicia los ejes en 0
+
+.tirar-izquierda\[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = district,
+    fill = sex)) +
+geom_bar() +
+scale_fill_manual(        
+  values = c(
+     "male" = "violetred", 
+     "female" = "aquamarine")) +
+scale_y_continuous(
+  breaks = seq(from = 0,
+               to = 250,
+               by = 10),
+* expand = c(0, 0)) +
+*scale_x_discrete(
+*  expand = c(0, 0))
+```
+
+En `scale_x_` o `scale_y_` utiliza `expand = c(0,0)` para eliminar el espacio sobrante alrededor de la trama.
+
+]
+
+.pull-right[
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-34-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Escalas - etiquetas de los ejes de fecha
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram()
+```
+
+La escala por defecto para los ejes de fecha variará según el rango de tus datos.
+
+]
+
+.pull-right[
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-36-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Escalas - roturas de etiquetas de fecha
+
+.pull-left[
+
+
+
+
+
+
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+*scale_x_date(
+*  date_breaks = "2 months") #2 meses
+```
+
+Ajusta las etiquetas de los ejes con `scale_x_date()`.
+
+Utiliza `date_breaks=` valores como "1 semana", "2 semanas" o "3 meses".
+
+Estos ajustan la ruptura del eje *etiquetas* y no los intervalos del histograma.
+
+]
+
+.pull-right[
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-41-1.png" width="504" /&gt;
+
+]
+
+???
+Para obtener consejos sobre los intervalos de geom\_histogram(), consulta la página epicurvas del Manual de Epi R
+
+---
+
+# Escalas - etiquetas de los ejes de fecha
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+scale_x_date(
+  date_breaks = "2 months",
+* date_labels = "%d %b\n%Y")
+```
+
+Especifica el formato de la etiqueta de fecha para `date_labels=` utilizando  
+["sintaxis "strptime](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime)
+
+`"%d %b %Y"` para DD MM AAAA.
+
+.footnote[Ver Manual Epi R [Epicurves](https://epirhandbook.com/epidemic-curves.html) y [Cuerdas](https://epirhandbook.com/characters-and-strings.html) capítulos
+]
+
+]
+
+.pull-right[
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-43-1.png" width="504" /&gt;
+
+]
+
+???
+/n es una nueva línea
+
+---
+
+# Escalas - etiquetas autoeficaces
+
+.pull-left[
+
+
+
+
+
+
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+scale_x_date(
+* date_breaks = "2 weeks", #2 semanas
+* labels = label_date_short() )
+```
+
+O, simplemente, asigna `labels=` a `label_date_short()` desde [{scales}](https://scales.r-lib.org/)
+
+El año no se repite en cada etiqueta.
+
+]
+
+.pull-right[
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-48-1.png" width="504" /&gt;
+
+]
+
+---
+
+class: inverse, center, middle
+
+## Etiquetas en {ggplot2}
+
+&lt;img src="../../images/ggplot_scales_themes/labels.png" width="50%" /&gt;
+
+---
+
+# Etiquetas de parcela
+
+.tirar-izquierda\[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = date_onset,
+    fill = hospital)) +
+geom_histogram() +
+scale_x_date(
+  date_breaks = "2 weeks",
+  labels = label_date_short() )+
+scale_fill_brewer(type = "qual",
+                  na.value = "grey50")
+```
+
+]
+
+.pull-right[
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-51-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Etiquetas de parcela
+
+.tirar-izquierda\[
+
+
+
+
+
+
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = date_onset,
+    fill = hospital)) +
+geom_histogram() +
+scale_x_date(
+  date_breaks = "2 weeks",
+  labels = label_date_short() )+
+scale_fill_brewer(type = "qual",
+                  na.value = "grey50")+
+*labs(
+*  title = "Curva epidémica del brote de ébola",
+*  subtitle = "Casos confirmados, 2014",
+*  x = "Fecha",
+*  y = "Número de casos",
+*  caption = "Datos ficticios sobre el ébola",
+*  fill = "Hospital"
+) +
+```
+
+Utiliza `labs()` como arriba. Nota: edita el título de la leyenda mediante la estética que creó la leyenda (por ejemplo `fill=`).
+
+]
+
+.pull-right[
+
+
+
+
+
+
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-59-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Etiquetas dinámicas
+
+Incrustar código dentro `str_glue("text here {CODE HERE} text here")`  
+El código se actualizará con los datos.
+
+
+
+
+
+
+
+
+```r
+str_glue("Datos a partir de {Sys.Date()}")
+```
+
+--
+
+
+
+
+
+
+
+
+```r
+str_glue("{fmt_count(surv, is.na(date_onset))} casos que faltan para el inicio y no se muestran")
+```
+
+```
+## 33 (5.2%) casos que faltan para el inicio y no se muestran
+```
+
+.footnote[Ver el [capítulo sobre cadenas del Manual de Epi](https://epirhandbook.com/characters-and-strings.html#dynamic-strings) y el capítulo {stringr} paquete.
+
+]
+
+???
+Explica que en str\_glue, todo lo que esté entre llaves se ejecutará como código R.
+
+---
+
+class: inverse, center, middle
+
+## Temas en {ggplot2}
+
+&lt;img src="../../images/ggplot_scales_themes/themes.png" width="50%" /&gt;
+
+---
+
+# Temas
+
+Los temas son **sin datos** de diseño, por ejemplo:
+
+- Fondo del lienzo de trama
+- Tamaño, color y orientación del texto
+- Posición de la leyenda
+
+--
+
+El poder de {ggplot2} - puedes hacer ajustes extremadamente pequeños
+
+... si quieres.
+
+---
+
+# Temas
+
+.pull-left[
+
+["Temas completos"](https://ggplot2.tidyverse.org/reference/ggtheme.html) son fáciles de añadir.
+
+
+
+
+
+
+
+
+```r
+# Prueba uno de estos...
+theme_minimal()
+theme_light()
+theme_bw()
+theme_gray()
+theme_dark()
+theme_void()
+theme_classic()
+```
+
+Prueba el argumento `base_size = 16` para aumentar rápidamente el tamaño del texto.
+
+]
+
+.pull-right[
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-73-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Microajustes
+
+Realiza microajustes dentro de `theme()`.
+
+Proporciona argumentos para cada pequeño cambio que quieras hacer, por ejemplo:
+
+| Componente de trama                             | Argumento temático | 
+| ----------------------------------------------- | ------------------ |
+| posición de la leyenda                          | `legend.position = `                   | 
+| dirección de la leyenda (horizontal o vertical) | `legend.direction = `                   | 
+
+--
+
+Pueden ser *muy muy* específicos:
+
+| Componente de la trama                          | Argumento temático | 
+| ----------------------------------------------- | ------------------ |
+| Longitud de las marcas del eje X                | `axis.ticks.length.x = `                   | 
+
+Hay literalmente cientos de opciones.
+
+???
+Piensa en todos los minúsculos ajustes que haces al crear un gráfico en Excel. ¿Cuántas veces tienes que rehacer todos esos pasos? Todos esos pasos pueden codificarse, lo que hace que el gráfico sea ajustable.
+
+---
+
+# Temas
+
+.pull-left[
+
+Realiza microajustes dentro de `theme()`.
+
+
+
+
+
+
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+    color = sex),    
+    alpha = 0.3) +
+geom_point() +
+labs(
+  title = "Altura por edad",
+  x = "Edad (años)",
+  y = "Altura (cm)",
+  color = "Género")+
+theme_minimal(base_size = 16) +
+*theme(
+* legend.position = "bottom",
+* plot.title = element_text(
+*   color = "red",
+*   face = "bold"),
+* axis.title.y = element_text(angle = 90))
+```
+
+]
+
+.pull-right[
+
+La sintaxis requiere práctica - véase [esta lista](https://ggplot2.tidyverse.org/reference/theme.html) de argumentos específicos de cada función.
+
+
+
+
+
+
+
+&lt;img src="intro5_2_es_files/figure-html/unnamed-chunk-81-1.png" width="504" /&gt;
+
+]
+
+???
+Habla de estos argumentos de theme() y de cómo constan de dos partes, igual que `mapping = aes()`.
+Explica que nadie los tiene todos memorizados, pero que los más comunes son fáciles de recordar una vez que los utilizas lo suficiente.  
+Recuerda añadirlos DESPUÉS de los temas completos.
+
+---
+
+# Temas - `element_text()`
+
+Si cambias *texto* a menudo hay que hacer microajustes *en* `element_text()`
+
+
+```r
+theme(
+ legend.position = "bottom",
+* plot.title = element_text(
+*   color = "red",
+*   face = "bold"),
+* axis.title.y = element_text(angle = 90))
+```
+
+Es una sintaxis similar a `mapping = aes()`
+
+???
+Habla de estos argumentos de theme() y de cómo constan de dos partes, igual que `mapping = aes()`.
+Explica que nadie los tiene todos memorizados, pero que los más comunes son fáciles de recordar una vez que los utilizas lo suficiente.
+
+---
+
+class: inverse, center, middle
+
+## ¡Ejercítate!
+
+Ir al sitio web del curso  
+Abre el ejercicio del Módulo 5 parte 2, e inicia sesión  
+Sigue las instrucciones para continuar codificando en tu proyecto R "ébola
+Avisa a un instructor si no estás seguro de lo que tienes que hacer
+
+&lt;img src="../../images/breakout/teamwork3.png" width="50%" /&gt;
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

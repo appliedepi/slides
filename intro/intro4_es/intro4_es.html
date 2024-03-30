@@ -1,0 +1,2639 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introducción a R para Epidemiología Aplicada</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Applied Epi" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
+    <script src="libs/tabwid/tabwid.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+class: center, middle, inverse, title-slide
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+&lt;style type="text/css"&gt;
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+&lt;/style&gt;
+
+# Introducción a R para la epidemiología aplicada
+
+### Agrupar datos
+
+[contact@appliedepi.org](mailto:contact@appliedepi.org)
+
+---
+
+# Agrupar datos
+
+&lt;img src="../../images/grouping/Grouping_1500x500.png" width="100%" /&gt;
+
+---
+
+# Hoy: objetivos y calendario
+
+**En este módulo pretendemos ayudarte a**
+
+- Practicar el uso de {janitor} para crear rápidamente tabulaciones sencillas
+- Practica utilizando {dplyr} para resumir datos con versatilidad
+- Practica el uso de {gtsummary} para hacer tablas listas para publicar
+- Haz tablas de calidad imprimible y exporta como PNG, Word, etc.
+
+&lt;div class="tabwid"&gt;&lt;style&gt;.cl-b6337fb4{}.cl-b620c554{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-b629be5c{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-b629ea58{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b629ea6c{width:3.504in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b629ea6d{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b629ea76{width:3.504in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b629ea80{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b629ea8a{width:3.504in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b629ea8b{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b629eab2{width:3.504in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b629eab3{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b629eabc{width:3.504in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table data-quarto-disable-processing='true' class='cl-b6337fb4'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;th class="cl-b629ea58"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-b629ea6c"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b629ea6d"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;15 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b629ea76"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;Review of previous module&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b629ea80"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b629ea8a"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;Approaches for grouping and summarizing data&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b629ea80"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;45 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b629ea8a"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;Demo &amp;amp; Exercise: janitor&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b629ea80"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;45 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b629ea8a"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;Demo &amp;amp; Exercise: dplyr&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b629ea80"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;45 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b629ea8a"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;Demo &amp;amp; Exercise: gtsummary&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b629ea8b"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;30 minutes&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b629eab2"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;Plenary debrief &amp;amp; flextable demo&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="2"class="cl-b629eab3"&gt;&lt;p class="cl-b629be5c"&gt;&lt;span class="cl-b620c554"&gt;Take breaks as you wish during the exercise&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;
+
+???
+Ten en cuenta las pausas de estiramiento.
+
+---
+
+class: inverse, center, middle
+
+## {janitor} - velocidad
+
+## {tidyverse} - flexibilidad
+
+## {gtsummary} - belleza
+
+---
+
+class: inverse, center, middle
+
+## {janitor} - velocidad
+
+&lt;img src="../../images/grouping/simple_table.png" width="65%" /&gt;
+
+---
+
+# `tabyl()`
+
+.pull-left[
+
+
+```r
+surv %&gt;% 
+* tabyl(district)
+```
+
+]
+
+--
+
+.pull-right[
+
+
+```
+##        district   n     percent valid_percent
+##       Central I  33 0.051886792    0.05205047
+##      Central II  42 0.066037736    0.06624606
+##          East I  28 0.044025157    0.04416404
+##         East II  76 0.119496855    0.11987382
+##        East III  11 0.017295597    0.01735016
+##  Mountain Rural 197 0.309748428    0.31072555
+##          West I  15 0.023584906    0.02365931
+##         West II 120 0.188679245    0.18927445
+##        West III 112 0.176100629    0.17665615
+##            &lt;NA&gt;   2 0.003144654            NA
+```
+
+]
+
+---
+
+# `adorn_()` funciones
+
+.pull-left[
+
+
+```r
+surv %&gt;% 
+  tabyl(district) %&gt;% 
+* adorn_totals()
+```
+
+]
+
+.pull-right[
+
+
+```
+##        district   n     percent valid_percent
+##       Central I  33 0.051886792    0.05205047
+##      Central II  42 0.066037736    0.06624606
+##          East I  28 0.044025157    0.04416404
+##         East II  76 0.119496855    0.11987382
+##        East III  11 0.017295597    0.01735016
+##  Mountain Rural 197 0.309748428    0.31072555
+##          West I  15 0.023584906    0.02365931
+##         West II 120 0.188679245    0.18927445
+##        West III 112 0.176100629    0.17665615
+##            &lt;NA&gt;   2 0.003144654            NA
+##           Total 636 1.000000000    1.00000000
+```
+
+]
+
+---
+
+# `adorn_()` funciones
+
+.pull-left[
+
+
+```r
+surv %&gt;% 
+  tabyl(district) %&gt;% 
+  adorn_totals() %&gt;% 
+* adorn_pct_formatting()
+```
+
+]
+
+.pull-right[
+
+
+```
+##        district   n percent valid_percent
+##       Central I  33    5.2%          5.2%
+##      Central II  42    6.6%          6.6%
+##          East I  28    4.4%          4.4%
+##         East II  76   11.9%         12.0%
+##        East III  11    1.7%          1.7%
+##  Mountain Rural 197   31.0%         31.1%
+##          West I  15    2.4%          2.4%
+##         West II 120   18.9%         18.9%
+##        West III 112   17.6%         17.7%
+##            &lt;NA&gt;   2    0.3%             -
+##           Total 636  100.0%        100.0%
+```
+
+]
+
+---
+
+# `tabyl()` tabulación cruzada
+
+.pull-left[
+
+
+```r
+surv %&gt;% 
+* tabyl(district, sex)
+```
+
+]
+
+--
+
+.pull-right[
+
+
+```
+##        district female male NA_
+##       Central I     18   14   1
+##      Central II     19   22   1
+##          East I     11   15   2
+##         East II     37   38   1
+##        East III      4    6   1
+##  Mountain Rural    108   82   7
+##          West I      8    5   2
+##         West II     60   57   3
+##        West III     50   56   6
+##            &lt;NA&gt;      1    1   0
+```
+
+]
+
+---
+
+# `tabyl()` tabulación cruzada
+
+.pull-left[
+
+
+```r
+surv %&gt;% 
+* tabyl(district, sex, show_na = FALSE)
+```
+
+Elimina los valores que faltan de la tabla.
+
+]
+
+.pull-right[
+
+
+```
+##        district female male
+##       Central I     18   14
+##      Central II     19   22
+##          East I     11   15
+##         East II     37   38
+##        East III      4    6
+##  Mountain Rural    108   82
+##          West I      8    5
+##         West II     60   57
+##        West III     50   56
+```
+
+]
+
+---
+
+# `adorn_()` tabulación cruzada
+
+.pull-left[
+
+
+```r
+surv %&gt;% 
+  tabyl(district, sex, show_na = FALSE) %&gt;% 
+* adorn_totals(where = "both")
+```
+
+Añade totales tanto para las filas como para las columnas.
+
+]
+
+.pull-right[
+
+
+```
+##        district female male Total
+##       Central I     18   14    32
+##      Central II     19   22    41
+##          East I     11   15    26
+##         East II     37   38    75
+##        East III      4    6    10
+##  Mountain Rural    108   82   190
+##          West I      8    5    13
+##         West II     60   57   117
+##        West III     50   56   106
+##           Total    315  295   610
+```
+
+]
+
+---
+
+# `adorn_()` tabulación cruzada
+
+.pull-left[
+
+
+```r
+surv %&gt;% 
+  tabyl(district, sex, show_na = FALSE) %&gt;% 
+  adorn_totals(where = "both") %&gt;% 
+* adorn_percentages() %&gt;%
+* adorn_pct_formatting()
+```
+
+Añade porcentajes formateados con estos dos comandos.
+
+]
+
+.pull-right[
+
+
+```
+##        district female  male  Total
+##       Central I  56.2% 43.8% 100.0%
+##      Central II  46.3% 53.7% 100.0%
+##          East I  42.3% 57.7% 100.0%
+##         East II  49.3% 50.7% 100.0%
+##        East III  40.0% 60.0% 100.0%
+##  Mountain Rural  56.8% 43.2% 100.0%
+##          West I  61.5% 38.5% 100.0%
+##         West II  51.3% 48.7% 100.0%
+##        West III  47.2% 52.8% 100.0%
+##           Total  51.6% 48.4% 100.0%
+```
+
+]
+
+---
+
+# `adorn_()` tabulación cruzada
+
+.pull-left[
+
+
+```r
+surv %&gt;% 
+  tabyl(district, sex, show_na = FALSE) %&gt;% 
+  adorn_totals(where = "both") %&gt;% 
+  adorn_percentages() %&gt;%     
+* adorn_pct_formatting(digits = 0)
+```
+
+Establece el número de dígitos decimales.
+
+]
+
+.pull-right[
+
+
+```
+##        district female male Total
+##       Central I    56%  44%  100%
+##      Central II    46%  54%  100%
+##          East I    42%  58%  100%
+##         East II    49%  51%  100%
+##        East III    40%  60%  100%
+##  Mountain Rural    57%  43%  100%
+##          West I    62%  38%  100%
+##         West II    51%  49%  100%
+##        West III    47%  53%  100%
+##           Total    52%  48%  100%
+```
+
+]
+
+???
+Esto puede parecer feo, pero puedes convertirlo en una imagen bonita muy fácilmente
+
+---
+
+# {flextable}
+
+Canaliza fácilmente la mesa a `qflextable()` para imprimirla bien como html.
+
+.pull-left[
+
+
+```r
+surv %&gt;% 
+  tabyl(district, sex, show_na = FALSE) %&gt;% 
+  adorn_totals(where = "both") %&gt;% 
+  adorn_percentages() %&gt;%     
+  adorn_pct_formatting(digits = 0) %&gt;% 
+* qflextable()
+```
+
+]
+
+.pull-right[
+
+&lt;div class="tabwid"&gt;&lt;style&gt;.cl-b726efa0{}.cl-b719c05a{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-b71e9fee{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-b71ebf92{width:1.321in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b71ebf9c{width:0.744in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b71ebfa6{width:0.616in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b71ebfa7{width:0.676in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b71ebfb0{width:1.321in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b71ebfba{width:0.744in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b71ebfbb{width:0.616in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b71ebfc4{width:0.676in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b71ebfc5{width:1.321in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b71ebfce{width:0.744in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b71ebfcf{width:0.616in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-b71ebfd0{width:0.676in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table data-quarto-disable-processing='true' class='cl-b726efa0'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;th class="cl-b71ebf92"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;district&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-b71ebf9c"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;female&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-b71ebfa6"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;male&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-b71ebfa7"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;Total&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b71ebfb0"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;Central I&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfba"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;56%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfbb"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;44%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfc4"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b71ebfb0"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;Central II&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfba"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;46%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfbb"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;54%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfc4"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b71ebfb0"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;East I&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfba"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;42%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfbb"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;58%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfc4"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b71ebfb0"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;East II&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfba"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;49%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfbb"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;51%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfc4"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b71ebfb0"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;East III&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfba"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;40%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfbb"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;60%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfc4"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b71ebfb0"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;Mountain Rural&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfba"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;57%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfbb"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;43%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfc4"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b71ebfb0"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;West I&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfba"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;62%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfbb"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;38%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfc4"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b71ebfb0"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;West II&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfba"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;51%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfbb"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;49%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfc4"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b71ebfb0"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;West III&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfba"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;47%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfbb"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;53%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfc4"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-b71ebfc5"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;Total&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfce"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;52%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfcf"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;48%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-b71ebfd0"&gt;&lt;p class="cl-b71e9fee"&gt;&lt;span class="cl-b719c05a"&gt;100%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+
+]
+
+.footnote[`qflextable()` significa "flexible rápido"]
+
+---
+
+class: inverse, center, middle
+
+## {tidyverse} - flexibilidad
+
+&lt;img src="../../images/grouping/flexibility.png" width="65%" /&gt;
+
+---
+
+# Funciones
+
+Funciones comunes de agrupación/resumen, todas del {tidyverse}:
+
+- `count()`
+- `group_by()`
+- `summarise()`
+- `arrange()`
+
+---
+
+# `count()`
+
+Pasa los datos a `count()` y proporciona un nombre de columna.
+
+Devuelve el número de filas por valor único (por grupo)
+
+--
+
+
+```r
+surv %&gt;% 
+* count(hospital)
+```
+
+```
+##            hospital   n
+## 1  Central Hospital  49
+## 2 Military Hospital  91
+## 3             Other  96
+## 4     Port Hospital 203
+## 5              SMMH  40
+## 6              &lt;NA&gt; 157
+```
+
+???
+Muy rápido y ágil
+
+---
+
+# `count()`
+
+Puedes incluir varias columnas de agrupación
+
+--
+
+
+```r
+surv %&gt;% 
+* count(hospital, sex)
+```
+
+```
+##             hospital    sex   n
+## 1   Central Hospital female  19
+## 2   Central Hospital   male  29
+## 3   Central Hospital   &lt;NA&gt;   1
+## 4  Military Hospital female  38
+## 5  Military Hospital   male  47
+## 6  Military Hospital   &lt;NA&gt;   6
+## 7              Other female  49
+## 8              Other   male  43
+## 9              Other   &lt;NA&gt;   4
+## 10     Port Hospital female 107
+## 11     Port Hospital   male  89
+## 12     Port Hospital   &lt;NA&gt;   7
+## 13              SMMH female  24
+## 14              SMMH   male  15
+## 15              SMMH   &lt;NA&gt;   1
+## 16              &lt;NA&gt; female  79
+## 17              &lt;NA&gt;   male  73
+## 18              &lt;NA&gt;   &lt;NA&gt;   5
+```
+
+???
+Muy rápido y ágil
+
+---
+
+# group\_by() y resumir()
+
+Pero, ¿y si quieres algo más que los recuentos?
+
+--
+
+"¿Cuál es la edad media en cada grupo?"
+
+--
+
+"¿Cuál es la fecha más tardía de aparición de los síntomas en cada grupo?"
+
+--
+
+"¿Cuál es el número de muertes entre los varones de cada grupo?"
+
+--
+
+`group_by()` y `summarise()` juntas permiten la flexibilidad de crear una **nuevo marco de datos resumido** con **estadísticas por grupo**.
+
+.footnote[`summarise()` y `summarize()` son equivalentes]
+
+---
+
+# group\_by() y resumir()
+
+
+```r
+surv %&gt;% 
+  group_by(hospital)
+```
+
+No hay cambios perceptibles en el conjunto de datos *hasta* otro {dplyr} función.
+
+--
+
+Si se imprime, el `Groups:` aparecen encima de los datos.
+
+
+```
+## # A tibble: 636 × 29
+## # Groups:   hospital [6]
+##    case_id date_onset date_report diff   sex      age age_unit age_years age_cat
+##    &lt;chr&gt;   &lt;date&gt;     &lt;date&gt;      &lt;drtn&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt; &lt;fct&gt;  
+##  1 86340d  2014-10-30 2014-10-31  1 days female     1 years            1 0-9    
+##  2 92d002  2014-08-16 2014-08-20  4 days female    16 years           16 10-19  
+##  3 544bd1  2014-08-29 2014-08-30  1 days female    10 years           10 10-19  
+##  4 6056ba  2014-10-20 2014-10-21  1 days female     0 years            0 0-9    
+##  5 eb5aeb  2014-10-28 2014-11-01  4 days female     8 years            8 0-9    
+##  6 e64e04  2014-10-06 2014-10-10  4 days female     7 years            7 0-9    
+##  7 5a65bb  2014-09-21 2014-09-22  1 days male       4 years            4 0-9    
+##  8 2ae019  2014-05-06 2014-05-11  5 days male      37 years           37 30-39  
+##  9 7ca4c0  2014-09-29 2014-09-30  1 days male      11 years           11 10-19  
+## 10 699d82  2014-11-27 2014-11-28  1 days male      27 years           27 20-29  
+## # ℹ 626 more rows
+## # ℹ 20 more variables: hospital &lt;chr&gt;, district &lt;chr&gt;, district_res &lt;chr&gt;,
+## #   district_det &lt;chr&gt;, moved &lt;lgl&gt;, wt_kg &lt;int&gt;, ht_cm &lt;int&gt;, fever &lt;chr&gt;,
+## #   chills &lt;chr&gt;, cough &lt;chr&gt;, aches &lt;chr&gt;, vomit &lt;chr&gt;, temp &lt;dbl&gt;, bmi &lt;dbl&gt;,
+## #   admin3pcod &lt;chr&gt;, lab_confirmed &lt;lgl&gt;, lat &lt;dbl&gt;, lon &lt;dbl&gt;, epilink &lt;chr&gt;,
+## #   case_def &lt;chr&gt;
+```
+
+???
+Observa la `groups: hospital`, en la parte superior del tibble
+
+---
+
+# group\_by() y resumir()
+
+En `summarise()`, *crear columnas en un **nuevo** conjunto de datos resumido.*
+
+--
+
+&lt;h4&gt;summarise(&lt;span style="color:deeppink"&gt;new column name&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;a function&lt;/span&gt; to apply to each group of rows)&lt;/h4&gt;
+
+--
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;surv %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;group_by(hospital) %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;summarise()&lt;/code&gt;
+
+```
+
+## # A tibble: 6 × 1
+##   hospital         
+##   &lt;chr&gt;            
+## 1 Central Hospital 
+## 2 Military Hospital
+## 3 Other            
+## 4 Port Hospital    
+## 5 SMMH             
+## 6 &lt;NA&gt;
+
+```
+
+---
+
+# group\_by() y resumir()
+
+Dentro del paréntesis, *enumera las nuevas columnas para el **nuevo** conjunto de datos resumido.*
+
+&lt;h4&gt;summarise(&lt;span style="color:deeppink"&gt;new column name&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;a function&lt;/span&gt; to apply to each group of rows)&lt;/h4&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;surv %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;group_by(hospital) %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;summarise(&lt;span style="color:deeppink"&gt;n_rows&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;n()&lt;/span&gt;) &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# &lt;span style="color:cornflowerblue"&gt;n()&lt;/span&gt; cuenta el número de filas del grupo&lt;/code&gt;
+
+```
+
+## # A tibble: 6 × 2
+##   hospital          n_rows
+##   &lt;chr&gt;              &lt;int&gt;
+## 1 Central Hospital      49
+## 2 Military Hospital     91
+## 3 Other                 96
+## 4 Port Hospital        203
+## 5 SMMH                  40
+## 6 &lt;NA&gt;                 157
+
+```
+
+---
+
+# group\_by() y resumir()
+
+entre paréntesis, *enumera nuevas columnas para **nuevo** conjunto de datos resumido.*
+
+&lt;h4&gt;summarise(&lt;span style="color:deeppink"&gt;new column name&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;a function&lt;/span&gt; to apply to each group of rows)&lt;/h4&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;surv %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;group_by(hospital) %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;summarise(&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;n_rows&lt;/span&gt; &amp;nbsp;= &lt;span style="color:cornflowerblue"&gt;n()&lt;/span&gt;, &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# &lt;span style="color:cornflowerblue"&gt;n()&lt;/span&gt; cuenta el número de filas por grupo&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;age_avg&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;mean(age_years, na.rm = T)&lt;/span&gt;) &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# edad media del grupo&lt;/code&gt;
+
+```
+
+## # A tibble: 6 × 3
+##   hospital          n_rows age_avg
+##   &lt;chr&gt;              &lt;int&gt;   &lt;dbl&gt;
+## 1 Central Hospital      49    14.9
+## 2 Military Hospital     91    15.8
+## 3 Other                 96    16.3
+## 4 Port Hospital        203    15.3
+## 5 SMMH                  40    14.7
+## 6 &lt;NA&gt;                 157    17.7
+
+```
+
+---
+
+# group\_by() y resumir()
+
+entre paréntesis, *crea columnas en **nuevo** conjunto de datos resumido.*
+
+&lt;h4&gt;summarise(&lt;span style="color:deeppink"&gt;new column name&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;a function&lt;/span&gt; to apply to each group of rows)&lt;/h4&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;surv %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;group_by(hospital) %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;summarise(&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;n_rows&lt;/span&gt; &amp;nbsp;= &lt;span style="color:cornflowerblue"&gt;n()&lt;/span&gt;, &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# &lt;span style="color:cornflowerblue"&gt;n()&lt;/span&gt; cuenta el número de filas por grupo&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;age_avg&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;mean(age_years, na.rm = T)&lt;/span&gt;, &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# edad media del grupo&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;max_onset&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;max(date_onset, na.rm=T)&lt;/span&gt;) &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# Fecha de inicio más tardía&lt;/code&gt;
+
+```
+
+## # A tibble: 6 × 4
+##   hospital          n_rows age_avg max_onset 
+##   &lt;chr&gt;              &lt;int&gt;   &lt;dbl&gt; &lt;date&gt;    
+## 1 Central Hospital      49    14.9 2014-11-26
+## 2 Military Hospital     91    15.8 2014-11-25
+## 3 Other                 96    16.3 2014-11-26
+## 4 Port Hospital        203    15.3 2014-11-28
+## 5 SMMH                  40    14.7 2014-11-28
+## 6 &lt;NA&gt;                 157    17.7 2014-11-27
+
+```
+
+---
+
+# group\_by() y resumir()
+
+entre paréntesis, *crea columnas en **nuevo** conjunto de datos resumido.*
+
+&lt;h4&gt;summarise(&lt;span style="color:deeppink"&gt;new column name&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;a function&lt;/span&gt; to apply to each group of rows)&lt;/h4&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;surv %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;group_by(hospital) %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;summarise(&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;n_rows&lt;/span&gt; &amp;nbsp;= &lt;span style="color:cornflowerblue"&gt;n()&lt;/span&gt;, &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# &lt;span style="color:cornflowerblue"&gt;n()&lt;/span&gt; cuenta el número de filas por grupo&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;age_avg&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;mean(age_years, na.rm = T)&lt;/span&gt;, &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# edad media del grupo&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;max_onset&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;max(date_onset, na.rm=T)&lt;/span&gt;, &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# Fecha de inicio más tardía&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt; n_female &lt;/span&gt;= &lt;span style="color:cornflowerblue"&gt;sum(sex == 'female', na.rm=T)&lt;/span&gt;) # número de mujeres en el grupo&lt;/code&gt;
+
+```
+
+## # A tibble: 6 × 5
+##   hospital          n_rows age_avg max_onset  n_female
+##   &lt;chr&gt;              &lt;int&gt;   &lt;dbl&gt; &lt;date&gt;        &lt;int&gt;
+## 1 Central Hospital      49    14.9 2014-11-26       19
+## 2 Military Hospital     91    15.8 2014-11-25       38
+## 3 Other                 96    16.3 2014-11-26       49
+## 4 Port Hospital        203    15.3 2014-11-28      107
+## 5 SMMH                  40    14.7 2014-11-28       24
+## 6 &lt;NA&gt;                 157    17.7 2014-11-27       79
+
+```
+
+---
+
+# group\_by() y resumir()
+
+entre paréntesis, *crea columnas en **nuevo** conjunto de datos resumido.*
+
+&lt;h4&gt;summarise(&lt;span style="color:deeppink"&gt;new column name&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;a function&lt;/span&gt; to apply to each group of rows)&lt;/h4&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;code class ='r hljs remark-code'&gt;surv %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;group_by(hospital) %&gt;% &lt;br&gt;&amp;nbsp;&amp;nbsp;summarise(&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt; n_rows &lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;n()&lt;/span&gt;, &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# &lt;span style="color:cornflowerblue"&gt;n()&lt;/span&gt; cuenta el número de filas por grupo&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;age_avg&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;mean(age_years, na.rm = T)&lt;/span&gt;, &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# edad media del grupo&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;max_onset&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;max(date_onset, na.rm=T)&lt;/span&gt;, &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# Fecha de inicio más tardía&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt; n_female &lt;/span&gt;= &lt;span style="color:cornflowerblue"&gt;sum(sex == 'female', na.rm=T)&lt;/span&gt;, # número de mujeres en el grupo&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;span style="color:deeppink"&gt;pct_female&lt;/span&gt; = &lt;span style="color:cornflowerblue"&gt;percent(n_female / n_rows)&lt;/span&gt;) &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;# Porcentaje de mujeres en el grupo&lt;/code&gt;
+
+```
+
+## # A tibble: 6 × 6
+##   hospital          n_rows age_avg max_onset  n_female pct_female
+##   &lt;chr&gt;              &lt;int&gt;   &lt;dbl&gt; &lt;date&gt;        &lt;int&gt; &lt;chr&gt;     
+## 1 Central Hospital      49    14.9 2014-11-26       19 39%       
+## 2 Military Hospital     91    15.8 2014-11-25       38 42%       
+## 3 Other                 96    16.3 2014-11-26       49 51%       
+## 4 Port Hospital        203    15.3 2014-11-28      107 53%       
+## 5 SMMH                  40    14.7 2014-11-28       24 60%       
+## 6 &lt;NA&gt;                 157    17.7 2014-11-27       79 50%
+
+```
+
+---
+
+# `arrange()`
+
+Ordena la tabla colocando la columna o columnas a ordenar dentro de `arrange()`
+
+
+
+
+
+
+
+
+```r
+surv %&gt;% 
+  group_by(hospital) %&gt;% 
+  summarise(
+    n_rows  = n(),                               # n() cuenta el número de filas por grupo
+    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
+    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
+    n_female = sum(sex == 'female', na.rm=T), # número de mujeres en el grupo
+    pct_female = percent(n_female / n_rows)) %&gt;% # Porcentaje de mujeres en el grupo
+* arrange(n_rows)
+```
+
+```
+## # A tibble: 6 × 6
+##   hospital          n_rows age_avg max_onset  n_female pct_female
+##   &lt;chr&gt;              &lt;int&gt;   &lt;dbl&gt; &lt;date&gt;        &lt;int&gt; &lt;chr&gt;     
+## 1 SMMH                  40    14.7 2014-11-28       24 60%       
+## 2 Central Hospital      49    14.9 2014-11-26       19 39%       
+## 3 Military Hospital     91    15.8 2014-11-25       38 42%       
+## 4 Other                 96    16.3 2014-11-26       49 51%       
+## 5 &lt;NA&gt;                 157    17.7 2014-11-27       79 50%       
+## 6 Port Hospital        203    15.3 2014-11-28      107 53%
+```
+
+---
+
+# `arrange()`
+
+Envuelve la(s) columna(s) en `desc()` para invertir la ordenación
+
+
+
+
+
+
+
+
+```r
+surv %&gt;% 
+  group_by(hospital) %&gt;% 
+  summarise(
+    n_rows  = n(),                               # n() cuenta el número de filas por grupo
+    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
+    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
+    n_female = sum(sex == 'female', na.rm=T), # número de mujeres en el grupo
+    pct_female = percent(n_female / n_rows)) %&gt;% # Porcentaje de mujeres en el grupo
+  arrange(-n_rows) 
+```
+
+```
+## # A tibble: 6 × 6
+##   hospital          n_rows age_avg max_onset  n_female pct_female
+##   &lt;chr&gt;              &lt;int&gt;   &lt;dbl&gt; &lt;date&gt;        &lt;int&gt; &lt;chr&gt;     
+## 1 Port Hospital        203    15.3 2014-11-28      107 53%       
+## 2 &lt;NA&gt;                 157    17.7 2014-11-27       79 50%       
+## 3 Other                 96    16.3 2014-11-26       49 51%       
+## 4 Military Hospital     91    15.8 2014-11-25       38 42%       
+## 5 Central Hospital      49    14.9 2014-11-26       19 39%       
+## 6 SMMH                  40    14.7 2014-11-28       24 60%
+```
+
+---
+
+# flextable
+
+Como con {janitor} tubo a `qflextable()` para obtener una tabla HTML rápida.
+
+
+
+
+
+
+
+
+```r
+surv %&gt;% 
+  group_by(hospital) %&gt;% 
+  summarise(
+    n_rows  = n(),                               # n() cuenta el número de filas por grupo
+    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
+    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
+    n_female = sum(sex == 'female', na.rm=T), # número de mujeres en el grupo
+    pct_female = percent(n_female / n_rows)) %&gt;% # Porcentaje de mujeres en el grupo
+  arrange(-n_rows) %&gt;% 
+* qflextable()
+```
+
+&lt;div class="tabwid"&gt;&lt;style&gt;.cl-bad53166{}.cl-bac69ade{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-bacc385e{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-bacc3872{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-bacc6518{width:1.372in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6522{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc652c{width:0.922in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc652d{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6536{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6537{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6538{width:1.372in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6540{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc654a{width:0.922in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc654b{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6554{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6555{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc655e{width:1.372in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6568{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6569{width:0.922in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6572{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6573{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc657c{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc657d{width:1.372in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6586{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6587{width:0.922in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6590{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc6591{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc659a{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc659b{width:1.372in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc65a4{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc65ae{width:0.922in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc65af{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc65b0{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc65b8{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc65b9{width:1.372in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc65c2{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc65c3{width:0.922in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc65cc{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc65cd{width:0.914in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-bacc65d6{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table data-quarto-disable-processing='true' class='cl-bad53166'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;th class="cl-bacc6518"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;hospital&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-bacc6522"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;n_rows&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-bacc652c"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;age_avg&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-bacc652d"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;max_onset&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-bacc6536"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;n_female&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-bacc6537"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;pct_female&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-bacc6538"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;Port Hospital&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6540"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;203&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc654a"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;15.31072&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc654b"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;2014-11-28&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6554"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;107&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6555"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;53%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-bacc655e"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6568"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;157&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6569"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;17.70701&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6572"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;2014-11-27&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6573"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;79&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc657c"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;50%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-bacc655e"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;Other&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6568"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;96&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6569"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;16.26862&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6572"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;2014-11-26&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6573"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;49&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc657c"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;51%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-bacc657d"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;Military Hospital&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6586"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;91&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6587"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;15.78409&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6590"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;2014-11-25&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc6591"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;38&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc659a"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;42%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-bacc659b"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;Central Hospital&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc65a4"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;49&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc65ae"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;14.85204&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc65af"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;2014-11-26&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc65b0"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;19&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc65b8"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;39%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-bacc65b9"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;SMMH&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc65c2"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;40&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc65c3"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;14.67500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc65cc"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;2014-11-28&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc65cd"&gt;&lt;p class="cl-bacc3872"&gt;&lt;span class="cl-bac69ade"&gt;24&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-bacc65d6"&gt;&lt;p class="cl-bacc385e"&gt;&lt;span class="cl-bac69ade"&gt;60%&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+
+---
+
+class: inverse, center, middle
+
+## {gtsummary} - belleza
+
+&lt;img src="../../images/grouping/beauty.png" width="65%" /&gt;
+
+---
+
+# `tbl_summary()`
+
+- La salida por defecto debe ser *listo para publicar*
+
+--
+
+.pull-left[
+
+
+```r
+surv %&gt;% 
+* select(hospital, age_years)
+```
+
+Selecciona las columnas a resumir.  
+Para demostración:
+
+- Columna de un carácter (`hospital`)
+- Una columna numérica (`age_years`)
+
+]
+
+---
+
+# `tbl_summary()`
+
+- La salida por defecto debe ser *listo para publicar*
+
+.pull-left[
+
+
+```r
+surv %&gt;% 
+  select(hospital, age_years) %&gt;% 
+* tbl_summary()
+```
+
+Selecciona las columnas a resumir.  
+Para demostración:
+
+- Columna de un carácter (`hospital`)
+- Una columna numérica (`age_years`)
+
+]
+
+--
+
+.pull-right[
+
+<div id="vgksqniptl" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#vgksqniptl table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#vgksqniptl thead, #vgksqniptl tbody, #vgksqniptl tfoot, #vgksqniptl tr, #vgksqniptl td, #vgksqniptl th {
+  border-style: none;
+}
+
+#vgksqniptl p {
+  margin: 0;
+  padding: 0;
+}
+
+#vgksqniptl .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#vgksqniptl .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#vgksqniptl .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#vgksqniptl .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#vgksqniptl .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#vgksqniptl .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#vgksqniptl .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#vgksqniptl .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#vgksqniptl .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#vgksqniptl .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#vgksqniptl .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#vgksqniptl .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#vgksqniptl .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#vgksqniptl .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#vgksqniptl .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#vgksqniptl .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#vgksqniptl .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#vgksqniptl .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#vgksqniptl .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#vgksqniptl .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#vgksqniptl .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#vgksqniptl .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#vgksqniptl .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#vgksqniptl .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#vgksqniptl .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#vgksqniptl .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#vgksqniptl .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#vgksqniptl .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#vgksqniptl .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#vgksqniptl .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#vgksqniptl .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#vgksqniptl .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#vgksqniptl .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#vgksqniptl .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#vgksqniptl .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#vgksqniptl .gt_left {
+  text-align: left;
+}
+
+#vgksqniptl .gt_center {
+  text-align: center;
+}
+
+#vgksqniptl .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#vgksqniptl .gt_font_normal {
+  font-weight: normal;
+}
+
+#vgksqniptl .gt_font_bold {
+  font-weight: bold;
+}
+
+#vgksqniptl .gt_font_italic {
+  font-style: italic;
+}
+
+#vgksqniptl .gt_super {
+  font-size: 65%;
+}
+
+#vgksqniptl .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#vgksqniptl .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#vgksqniptl .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#vgksqniptl .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#vgksqniptl .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#vgksqniptl .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#vgksqniptl .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Characteristic&lt;/strong&gt;"><strong>Characteristic</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;N = 636&lt;/strong&gt;&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>N = 636</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers="label" class="gt_row gt_left">hospital</td>
+<td headers="stat_0" class="gt_row gt_center"></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Central Hospital</td>
+<td headers="stat_0" class="gt_row gt_center">49 (10%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Military Hospital</td>
+<td headers="stat_0" class="gt_row gt_center">91 (19%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Other</td>
+<td headers="stat_0" class="gt_row gt_center">96 (20%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Port Hospital</td>
+<td headers="stat_0" class="gt_row gt_center">203 (42%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    SMMH</td>
+<td headers="stat_0" class="gt_row gt_center">40 (8.4%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Unknown</td>
+<td headers="stat_0" class="gt_row gt_center">157</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">age_years</td>
+<td headers="stat_0" class="gt_row gt_center">13 (6, 23)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Unknown</td>
+<td headers="stat_0" class="gt_row gt_center">9</td></tr>
+  </tbody>
+  
+  <tfoot class="gt_footnotes">
+    <tr>
+      <td class="gt_footnote" colspan="2"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span> n (%); Median (IQR)</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+
+]
+
+---
+
+# `tbl_summary()`
+
+- Estratificar por otra variable
+
+.tirar-izquierda\[
+
+
+```r
+surv %&gt;% 
+  select(hospital, age_years, sex) %&gt;% 
+* tbl_summary(by = sex)
+```
+
+Consulta los consejos de personalización en [Manual de Epi R capítulo sobre Tablas descriptivas](https://epirhandbook.com/en/descriptive-tables.html#tbl_gt))
+]
+
+--
+
+.pull-right[
+
+<div id="dtucfinoom" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#dtucfinoom table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#dtucfinoom thead, #dtucfinoom tbody, #dtucfinoom tfoot, #dtucfinoom tr, #dtucfinoom td, #dtucfinoom th {
+  border-style: none;
+}
+
+#dtucfinoom p {
+  margin: 0;
+  padding: 0;
+}
+
+#dtucfinoom .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#dtucfinoom .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#dtucfinoom .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#dtucfinoom .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#dtucfinoom .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#dtucfinoom .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dtucfinoom .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#dtucfinoom .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#dtucfinoom .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#dtucfinoom .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#dtucfinoom .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#dtucfinoom .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#dtucfinoom .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#dtucfinoom .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#dtucfinoom .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#dtucfinoom .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#dtucfinoom .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#dtucfinoom .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#dtucfinoom .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dtucfinoom .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#dtucfinoom .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#dtucfinoom .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#dtucfinoom .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dtucfinoom .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#dtucfinoom .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#dtucfinoom .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dtucfinoom .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dtucfinoom .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#dtucfinoom .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dtucfinoom .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#dtucfinoom .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dtucfinoom .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#dtucfinoom .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dtucfinoom .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#dtucfinoom .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dtucfinoom .gt_left {
+  text-align: left;
+}
+
+#dtucfinoom .gt_center {
+  text-align: center;
+}
+
+#dtucfinoom .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#dtucfinoom .gt_font_normal {
+  font-weight: normal;
+}
+
+#dtucfinoom .gt_font_bold {
+  font-weight: bold;
+}
+
+#dtucfinoom .gt_font_italic {
+  font-style: italic;
+}
+
+#dtucfinoom .gt_super {
+  font-size: 65%;
+}
+
+#dtucfinoom .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#dtucfinoom .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#dtucfinoom .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#dtucfinoom .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#dtucfinoom .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#dtucfinoom .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#dtucfinoom .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Characteristic&lt;/strong&gt;"><strong>Characteristic</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;female&lt;/strong&gt;, N = 316&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>female</strong>, N = 316<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;male&lt;/strong&gt;, N = 296&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>male</strong>, N = 296<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers="label" class="gt_row gt_left">age_years</td>
+<td headers="stat_1" class="gt_row gt_center">11 (5, 19)</td>
+<td headers="stat_2" class="gt_row gt_center">17 (7, 28)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">hospital</td>
+<td headers="stat_1" class="gt_row gt_center"></td>
+<td headers="stat_2" class="gt_row gt_center"></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Central Hospital</td>
+<td headers="stat_1" class="gt_row gt_center">19 (8.0%)</td>
+<td headers="stat_2" class="gt_row gt_center">29 (13%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Military Hospital</td>
+<td headers="stat_1" class="gt_row gt_center">38 (16%)</td>
+<td headers="stat_2" class="gt_row gt_center">47 (21%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Other</td>
+<td headers="stat_1" class="gt_row gt_center">49 (21%)</td>
+<td headers="stat_2" class="gt_row gt_center">43 (19%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Port Hospital</td>
+<td headers="stat_1" class="gt_row gt_center">107 (45%)</td>
+<td headers="stat_2" class="gt_row gt_center">89 (40%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    SMMH</td>
+<td headers="stat_1" class="gt_row gt_center">24 (10%)</td>
+<td headers="stat_2" class="gt_row gt_center">15 (6.7%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Unknown</td>
+<td headers="stat_1" class="gt_row gt_center">79</td>
+<td headers="stat_2" class="gt_row gt_center">73</td></tr>
+  </tbody>
+  
+  <tfoot class="gt_footnotes">
+    <tr>
+      <td class="gt_footnote" colspan="3"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span> Median (IQR); n (%)</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+
+]
+
+---
+
+# `tbl_summary()`
+
+- Ajustar etiquetas
+
+.pull-left[
+
+
+
+
+
+
+
+
+```r
+surv %&gt;% 
+  select(hospital, age_years, sex) %&gt;% 
+  tbl_summary(
+       by = sex,
+       label = list(
+         age_years = "Edad (años)", 
+         hospital = "Hospital"))     
+```
+
+Consulta los consejos sobre personalización en [Manual de Epi R capítulo sobre Tablas descriptivas](https://epirhandbook.com/en/descriptive-tables.html#tbl_gt))
+]
+
+--
+
+.pull-right[
+
+
+
+
+
+
+
+<div id="kiwbrfeikd" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#kiwbrfeikd table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#kiwbrfeikd thead, #kiwbrfeikd tbody, #kiwbrfeikd tfoot, #kiwbrfeikd tr, #kiwbrfeikd td, #kiwbrfeikd th {
+  border-style: none;
+}
+
+#kiwbrfeikd p {
+  margin: 0;
+  padding: 0;
+}
+
+#kiwbrfeikd .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#kiwbrfeikd .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#kiwbrfeikd .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#kiwbrfeikd .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#kiwbrfeikd .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#kiwbrfeikd .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#kiwbrfeikd .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#kiwbrfeikd .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#kiwbrfeikd .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#kiwbrfeikd .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#kiwbrfeikd .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#kiwbrfeikd .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#kiwbrfeikd .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#kiwbrfeikd .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#kiwbrfeikd .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#kiwbrfeikd .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#kiwbrfeikd .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#kiwbrfeikd .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#kiwbrfeikd .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kiwbrfeikd .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#kiwbrfeikd .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#kiwbrfeikd .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#kiwbrfeikd .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kiwbrfeikd .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#kiwbrfeikd .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#kiwbrfeikd .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#kiwbrfeikd .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kiwbrfeikd .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#kiwbrfeikd .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#kiwbrfeikd .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#kiwbrfeikd .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#kiwbrfeikd .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#kiwbrfeikd .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kiwbrfeikd .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#kiwbrfeikd .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kiwbrfeikd .gt_left {
+  text-align: left;
+}
+
+#kiwbrfeikd .gt_center {
+  text-align: center;
+}
+
+#kiwbrfeikd .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#kiwbrfeikd .gt_font_normal {
+  font-weight: normal;
+}
+
+#kiwbrfeikd .gt_font_bold {
+  font-weight: bold;
+}
+
+#kiwbrfeikd .gt_font_italic {
+  font-style: italic;
+}
+
+#kiwbrfeikd .gt_super {
+  font-size: 65%;
+}
+
+#kiwbrfeikd .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#kiwbrfeikd .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#kiwbrfeikd .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#kiwbrfeikd .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#kiwbrfeikd .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#kiwbrfeikd .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#kiwbrfeikd .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Characteristic&lt;/strong&gt;"><strong>Characteristic</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;female&lt;/strong&gt;, N = 316&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>female</strong>, N = 316<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;male&lt;/strong&gt;, N = 296&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>male</strong>, N = 296<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers="label" class="gt_row gt_left">Hospital</td>
+<td headers="stat_1" class="gt_row gt_center"></td>
+<td headers="stat_2" class="gt_row gt_center"></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Central Hospital</td>
+<td headers="stat_1" class="gt_row gt_center">19 (8.0%)</td>
+<td headers="stat_2" class="gt_row gt_center">29 (13%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Military Hospital</td>
+<td headers="stat_1" class="gt_row gt_center">38 (16%)</td>
+<td headers="stat_2" class="gt_row gt_center">47 (21%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Other</td>
+<td headers="stat_1" class="gt_row gt_center">49 (21%)</td>
+<td headers="stat_2" class="gt_row gt_center">43 (19%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Port Hospital</td>
+<td headers="stat_1" class="gt_row gt_center">107 (45%)</td>
+<td headers="stat_2" class="gt_row gt_center">89 (40%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    SMMH</td>
+<td headers="stat_1" class="gt_row gt_center">24 (10%)</td>
+<td headers="stat_2" class="gt_row gt_center">15 (6.7%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">    Unknown</td>
+<td headers="stat_1" class="gt_row gt_center">79</td>
+<td headers="stat_2" class="gt_row gt_center">73</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Edad (años)</td>
+<td headers="stat_1" class="gt_row gt_center">11 (5, 19)</td>
+<td headers="stat_2" class="gt_row gt_center">17 (7, 28)</td></tr>
+  </tbody>
+  
+  <tfoot class="gt_footnotes">
+    <tr>
+      <td class="gt_footnote" colspan="3"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span> n (%); Median (IQR)</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+
+]
+
+---
+
+class: inverse, center, middle
+
+## ¿Cuál utilizar?
+
+En R, tienes muchas opciones.  
+Siéntete cómodo con una herramienta que funcione para ti.
+
+&lt;img src="../../images/grouping/choices.png" width="90%" /&gt;
+
+---
+
+class: inverse, center, middle
+
+## Ejercicio
+
+Ir al sitio web del curso  
+Abre el ejercicio del Módulo 4 e inicia sesión  
+Sigue las instrucciones para abrir tu proyecto R "ébola" y continuar codificando  
+Avisa a un instructor si no estás seguro de lo que tienes que hacer
+
+&lt;img src="../../images/breakout/COVID dominoes.png" width="100%" /&gt;
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

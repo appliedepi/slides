@@ -1,0 +1,1790 @@
+---
+title: "Introducción a R para<br>Epidemiología Aplicada"
+subtitle: "<br>{ggplot2} for data visualization"
+author: ''
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "es"
+---
+
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # dates
+  ggExtra,    # extras
+  scales,     # formatting of scales
+  tidyverse,  # data management and visualization
+  xaringanthemer  # for styling presentation 
+)
+
+
+```
+
+```{r xaringan-themer, include=FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+
+options(htmltools.dir.version = FALSE)
+
+```
+
+```{r, include=FALSE}
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+# gen <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "generic") %>%
+#   clean_names()
+# 
+# mod6_1 <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "mod6_1", col_types = "c") %>%
+#   clean_names()
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+```{css, echo=F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+# Introducción a R para la epidemiología aplicada
+
+### Introducción a la visualización de datos con {ggplot2}
+
+## [contact@appliedepi.org](mailto:contact@appliedepi.org)
+---
+
+# Hoy: objetivos y calendario
+
+**En este módulo pretendemos ayudarte a**
+
+- Comprender {ggplot2} "Gramática de los gráficos".
+- Construye gráficos de caja, de dispersión, de barras e histogramas sencillos
+- Ajusta las escalas, temas y etiquetas de los gráficos
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Part, ~Topic,
+  "20 minutes",     "Part 1", "Slides: ggplot2 'Grammar of Graphics'",
+  "10 minutes",     "", "Demo",
+  "1hr 30 minutes", "", "Exercise",
+  "20 minutes",     "Part 2", "Slides: Scales, themes & labels",
+  "1 hour",         "", "Exercise",
+  "10 minutes",     "-", "Debrief"
+  )
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Take breaks as you wish during the exercise") %>% 
+  flextable::merge_at(i = 1:3, j = 2) %>% 
+  flextable::valign(j = 2, valign = "top")
+```
+
+---
+
+class: inverse, center, middle
+
+## Visualización de datos con {ggplot2}
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "ggplot2_hex.png")))
+```
+
+---
+
+# Opciones de visualización en R
+
+Hoy nos centramos en {ggplot2} porque
+
+- es bueno para la exploración rápida de datos multidimensionales
+- produce datos muy **alta calidad** resultados finales
+- tiene una gramática bien estructurada => **gran coherencia**
+- se acompaña de muchos paquetes que amplían la funcionalidad
+
+Consulta el [Galería de gráficos R](https://www.r-graph-gallery.com/ggplot2-package.html) para inspirarte.
+
+.footnote\[Otras opciones de trazado son [**base** R](https://towardsdatascience.com/base-plotting-in-r-eb365da06b22), [**red**](https://www.statmethods.net/advgraphs/trellis.html) y [**plotly**](https://plotly.com/r/).
+]
+
+---
+
+# ¿Se hizo con ggplot?
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "clustering.png")))
+```
+
+.footnote[Fuentes de imágenes [aquí](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html) y [aquí](https://jcheshire.com/r-spatial-data-hints/great-maps-ggplot2/)]
+
+---
+
+# ¿Se hizo con ggplot?
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "dumbbell_chart.png")))
+```
+
+---
+
+# ¿Se hizo con ggplot?
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "map.png")))
+```
+
+---
+
+# ¿Se hizo con ggplot?
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "bike_london.png")))
+```
+
+---
+
+# ¿Se hizo con ggplot?
+
+```{r, eval=TRUE, echo=FALSE, out.width="90%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "swiss_map.png")))
+```
+
+---
+
+# ¿Se hizo con ggplot?
+
+```{r, eval=TRUE, echo=FALSE, out.width="60%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "phylo_tree.png")))
+```
+
+---
+
+# ¿Se hizo con ggplot?
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "uk_geography.jpg")))
+```
+
+---
+
+# ¿Se hizo con ggplot?
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "art_ggplot.png")))
+```
+
+---
+
+# ¿Se hizo con ggplot?
+
+```{r, eval=TRUE, echo=FALSE, out.width="80%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "van_gogh.jpg")))
+```
+
+---
+
+# ¿gg-qué?
+
+--
+
+- En {ggplot2} *paquete* es la herramienta de visualización de datos más popular de R
+
+--
+
+- Su `ggplot()` *función* es el núcleo del paquete
+
+--
+
+- Todo este enfoque se conoce coloquialmente como "ggplotting".
+
+--
+
+- Las figuras resultantes a veces se llaman cariñosamente "ggplots".
+
+--
+
+{ggplot2} se acompaña de numerosos paquetes que amplían sus funcionalidades, como {gganimate}, {ggthemr}, {ggdendro}, {gghighlight}, {ggforce}...
+
+.footnote[
+*Pregunta extra:* ¿Qué representa la "gg" en estos nombres?
+]
+
+???
+
+- "gg" representa la "gramática de los gráficos" utilizada para construir las figuras
+
+---
+
+# Gramática de los gráficos
+
+Construye un gráfico añadiendo capas de funciones que especifiquen datos y elementos de diseño
+
+--
+
+El orden suele ser el siguiente:
+
+1) **"Abre" la parcela** con el botón `ggplot()` y **especifica el conjunto de datos**
+
+--
+
+2) **"Mapear" columnas de datos** a características "estéticas" del gráfico (ejes, color, tamaño, forma)
+
+--
+
+3) **Mostrar los datos** como capas "geom
+
+--
+
+4) **Modificar "escalas"** como la escala de color o los puntos de ruptura del eje y
+
+--
+
+5) **Ajusta los elementos "temáticos" que no sean datos** como las etiquetas de los ejes, el título, la leyenda y los tipos de letra
+
+Estas capas se "añaden" secuencialmente con **`+`** símbolos.
+
+???
+Recuerda que aunque los comandos sean largos, es infinitamente más fácil editar y reciclar que en Excel
+
+---
+
+# Abrir el gráfico
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
+ggplot()                   
+```
+
+`ggplot()` crea un lienzo vacío.
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, eval=TRUE}
+ggplot()
+```
+
+]
+
+???
+Esto es sólo un lienzo en blanco, no hemos definido qué debe haber en los ejes x e y.
+Si se necesitan varios marcos de datos, se pueden añadir en sus propios geoms.
+La canalización es útil para hacer cambios puntuales en un conjunto de datos antes de trazarlo.
+
+---
+
+# Añade los datos
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
+ggplot(data = surv)                   
+```
+
+Asigna el marco de datos a utilizar.
+
+Alternativamente, utiliza la función `%>%` para "canalizar" un marco de datos *en* `ggplot()`
+
+```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
+surv %>%
+  ggplot()
+```
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, eval=TRUE}
+ggplot(data = surv)
+```
+
+]
+
+???
+Esto es sólo un lienzo en blanco, no hemos definido qué debe haber en los ejes x e y.
+Si se necesitan varios marcos de datos, se pueden añadir en sus propios geoms.
+La canalización es útil para hacer cambios puntuales en un conjunto de datos antes de trazarlo.
+
+---
+
+# Añade los datos
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
+ggplot(
+  data = surv)                   
+```
+
+Las nuevas líneas y las sangrías no afectarán a la ejecución del código.
+
+Pueden hacer que los comandos más largos sean más fáciles de leer...
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, eval=TRUE}
+ggplot(data = surv)
+```
+
+]
+
+???
+Esto es sólo un lienzo en blanco, no hemos definido qué debe haber en los ejes x e y.
+Si se necesitan varios marcos de datos, se pueden añadir en sus propios geoms.
+La canalización es útil para hacer cambios puntuales en un conjunto de datos antes de trazarlo.
+
+---
+
+# Asignaciones con `aes()`
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+ggplot(
+  data = surv,
+  mapping = aes())        #<<
+```
+
+La "estética" de la parcela son características como la posición, el color, la forma...
+
+`mapping = aes()` asigna la "estética" a las columnas de los datos.
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, eval=TRUE}
+ggplot(
+  data = surv,
+  mapping = aes())+
+theme_grey(base_size = 16)
+```
+
+]
+
+???
+los comandos ggplot tienden a ponerse muy verticales (largos)
+
+---
+
+# Asignaciones con `aes()`
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+ggplot(
+  data = surv,
+  mapping = aes(        
+   x = age_years       #<<
+   ))               
+```
+
+Las asignaciones estéticas se colocan dentro de `aes()`.
+
+Dos mapeados básicos son ejes a columnas, mediante:  
+`x = `
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, eval=TRUE}
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years))+
+theme_grey(base_size = 16)
+```
+
+]
+
+???
+los comandos ggplot tienden a ponerse muy verticales (largos)
+
+---
+
+# Asignaciones con `aes()`
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+ggplot(
+  data = surv,
+  mapping = aes(        
+   x = age_years,       #<<
+   y = ht_cm))          #<<
+```
+
+Las asignaciones estéticas se colocan dentro de `aes()`.
+
+Dos mapeados básicos son ejes a columnas, mediante:  
+`x = ` y `y = `
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, eval=TRUE}
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm))+
+theme_grey(base_size = 16)
+```
+
+]
+
+???
+los comandos ggplot tienden a ponerse muy verticales (largos)
+
+---
+
+# Añadir geometría
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm)) +
+*geom_point()
+```
+
+Los datos se visualizan mediante comandos "geom", como `geom_point()`.
+
+Estos comandos se "añaden"  
+con un **`+`** al comando `ggplot()` comando.
+
+]
+
+.pull-right[
+
+```{r, eval=T, echo=F, message=F, warning=F}
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm)) +
+geom_point() + 
+theme_grey(base_size = 16)
+```
+
+]
+
+---
+
+# Geometrías
+
+.pull-left[
+
+Algunos "geoms" típicos son
+
+| Tipo de parcela    | Geom                                                                 | 
+| ------------------ | -------------------------------------------------------------------- |
+| Histogramas        | `geom_histogram()`                                                                     | 
+| Puntos             | `geom_point()`                                                                     | 
+
+.footnote[Lista completa [aquí](https://ggplot2.tidyverse.org/reference/)
+]
+
+]
+
+.pull-right[
+
+```{r, message=F, warning=F}
+
+# Histogram
+histogram <- ggplot(
+    data = surv,
+    mapping = aes(
+      x = date_onset))+
+  geom_histogram(fill = "darkorange")+
+  labs(title = "geom_histogram()")+
+  theme_minimal(base_size = 16)
+  
+
+points <- ggplot(
+    data = surv,
+    mapping = aes(
+      x = age_years,       
+      y = ht_cm)
+    )+
+  geom_point()+
+  labs(title = "geom_point()")+
+  theme_minimal(base_size = 16)
+
+
+cowplot::plot_grid(histogram, points,
+                          nrow = 2, rel_widths = c(2,2))
+
+#cowplot::plot_grid(top, lines, ncol = 1)
+
+```
+
+]
+
+---
+
+# Geometrías
+
+.pull-left[
+
+Algunos "geoms" típicos son
+
+| Tipo de parcela    | Geom                                                                 | 
+| ------------------ | -------------------------------------------------------------------- |
+| Líneas             | `geom_line()`                                                                     | 
+| Gráficos de barras | `geom_bar()` o</br> `geom_col()`                                                                   | 
+
+.footnote\[La elección entre `geom_bar()` y `geom_col()` depende de la estructura de tus datos. Lista completa de geoms [aquí](https://ggplot2.tidyverse.org/reference/)]
+
+]
+
+.pull-right[
+
+```{r, message=F, warning=F}
+
+lines <- surv %>% 
+  group_by(hospital,
+           week_report = lubridate::floor_date(date_onset, "week")) %>% 
+  summarise(n_cases = n()) %>% 
+  drop_na(week_report) %>% 
+  ggplot(
+    mapping = aes(
+      x = week_report,       
+      y = n_cases,
+      color = hospital),
+    size = 4
+    )+
+  geom_line()+
+  labs(title = "geom_line()")+
+  theme_minimal(base_size = 16)
+
+bars <- surv %>% 
+  ggplot(mapping = aes(
+      y = sex,
+      fill = sex))+
+  geom_bar()+
+  labs(title = "geom_bar()")+
+  theme_minimal(base_size = 16)+
+  theme(legend.position = "none")
+
+cowplot::plot_grid(lines, bars,
+                   nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+]
+
+---
+
+# Geometrías
+
+.pull-left[
+
+Algunos "geoms" típicos son
+
+| Tipo de parcela    | Geom                                                                 | 
+| ------------------ | -------------------------------------------------------------------- |
+| Gráficos de caja   | `geom_boxplot()`                                                                     | 
+| Gráficos de violín | `geom_violin()`                                                                     | 
+
+.footnote[Lista completa [aquí](https://ggplot2.tidyverse.org/reference/)]
+
+]
+
+.pull-right[
+
+```{r, message=F, warning=F}
+
+boxplots <- ggplot(
+    data = surv,
+    mapping = aes(
+      x = fever,       
+      y = temp)
+    )+
+  geom_boxplot()+
+  labs(title = "geom_boxplot()")+
+  theme_minimal(base_size = 16)
+
+
+
+violins <- ggplot(
+    data = surv,
+    mapping = aes(
+      x = fever,       
+      y = temp,
+      fill = fever)
+    )+
+  geom_violin()+
+  labs(title = "geom_violin()")+
+  theme_minimal(base_size = 16)
+
+
+cowplot::plot_grid(boxplots, violins,
+                          #smooth, density,
+                          
+                          nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+]
+
+---
+
+# Añadir geoms
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm)) +
+*geom_point()
+```
+
+Con los ejes ahora mapeados, `geom_point()` muestra los datos como puntos.
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm)) +
+geom_point() +
+theme_grey(base_size = 16)
+```
+
+]
+
+---
+
+# Añadir geoms
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm)) +
+geom_point() +
+*geom_smooth()
+```
+
+Podemos añadir geoms adicionales a la trama actual con `+`.
+
+*Los geomas aparecen en el orden en que est*: la línea suavizada aparece sobre los puntos.
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm)) +
+geom_point() +
+geom_smooth() +
+theme_grey(base_size = 16)
+```
+
+]
+
+.footnote[`geom_smooth()` proporciona medias condicionales suavizadas, lo que ayuda a mostrar tendencias en presencia de "sobretrazado" (véase [documentación](https://ggplot2.tidyverse.org/reference/geom_smooth.html))]
+
+???
+
+- Explica por qué podrías utilizar uno u otro
+
+---
+
+# Una nota rápida sobre las sangrías
+
+Las sangrías, los espacios y las nuevas líneas no afectan a la ejecución del código, y pueden variarse para mejorar la legibilidad.
+
+```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
+ggplot(data = surv, mapping = aes(x = age_years, y = ht_cm)) + geom_point()
+```
+
+--
+
+es lo mismo que:
+
+```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
+ggplot(data = surv,
+       mapping = aes(x = age_years, y = ht_cm)) +
+geom_point()
+```
+
+--
+
+es lo mismo que:
+
+```{r, echo=params$lang == "en", eval=FALSE, tidy=FALSE}
+ggplot(
+  data = surv,        # use case linelist
+  mapping = aes(      # make aesthetic mappings for all geoms
+    x = age_years,    # assign x-axis to age column
+    y = ht_cm)) +     # assign y-axis to height
+geom_point()          # display data as points
+```
+
+```{r, echo=params$lang == "fr", eval=FALSE, tidy=FALSE}
+ggplot(
+  data = surv,        # utiliser le cas linelist
+  mapping = aes(      # faire des mappings esthétiques pour tous les géomètres
+    x = age_years,    # assigner la colonne d'âge à l'axe des x 
+    y = ht_cm)) +     # assigner la colonne d'hauteur à l'axe des y 
+geom_point()          # afficher les données sous forme de points
+```
+
+```{r, echo=params$lang == "ru", eval=FALSE, tidy=FALSE}
+ggplot(
+  data = surv,     # использование линейного списка
+  mapping = aes(   # создаем эстетические отображения для всех геомов
+    x = age_years, # присвоить ось x столбцу возраста
+    y = ht_cm)) +  # присвоить ось y росту
+geom_point()       # отображение данных в виде точек
+```
+
+```{r, echo=params$lang == "es", eval=FALSE, tidy=FALSE}
+ggplot(
+  data = surv,        # caso de uso lista de líneas
+  mapping = aes(      # hacer mapeos estéticos para todos los geoms
+    x = age_years,    # asignar el eje x a la columna de edad
+    y = ht_cm)) +     # asignar el eje y a la altura
+geom_point()          # mostrar los datos en forma de puntos
+```
+
+.nota[¿Qué prefieres?]
+
+???
+
+- ¿Cuál de los dos es más fácil de leer para ti?
+- Explica por qué utilizarías uno u otro
+  el estilo largo puede permitir comentarios/anotaciones informativas
+- el estilo corto es muy denso (más difícil de leer para algunos). Guiones más cortos, pero ¿y qué? El número de líneas de tu código no es una métrica informativa.
+- líneas muy largas => es necesario desplazarse horizontalmente para las personas con monitores más pequeños (no es agradable)
+- el estilo alargado facilita ver qué argumento pertenece a cada función
+- los espacios alrededor de "=" o "+" => facilitan el análisis a mucha gente
+- ¿Otros?
+
+---
+
+class: large-table
+
+# Otras estéticas
+
+Aparte de los ejes, otras "estéticas" comunes son:
+
+| Argumento          | Controla                                                             | 
+| ------------------ | -------------------------------------------------------------------- |
+| `shape`                   | Visualización del punto como punto, estrella, triángulo, cuadrado... | 
+| `fill`                   | En *interior* color (por ejemplo, de barra o boxplot)                                                                  | 
+| `color`                   | En *exterior* o barra, boxplot - O color del punto                                                                  | 
+| `size`                   | Grosor de línea, tamaño de punto...                                  | 
+| `alpha`                   | Transparencia: de 0 (invisible) a 1 (opaco)                          | 
+| `width`                   | Anchura de las barras del "diagrama de barras                        | 
+| `linetype`                   | Sólidas, discontinuas, punteadas, etc.                               | 
+| `binwidth`                   | Anchura de los intervalos del histograma                             | 
+
+???
+
+Ten en cuenta que "estética" en ggplot tiene un significado específico que podrías asociar con la palabra "aesthetics" en inglés común. En ggplot esos detalles se llaman "temas" y se ajustan dentro de un comando theme()
+
+Cada geom acepta determinadas estéticas, como `binwidth=` para `geom_histogram()`
+
+<!-- --- -->
+
+<!-- clase: medio-texto -->
+
+<!-- # Tareas de estética -->
+
+<!-- .pull-izquierda[ -->
+
+<!-- La estética puede asignarse a: -->
+
+<!-- **Valores estáticos**:  -->
+
+<!-- - Asignados **fuera de `aes()`** -->
+
+<!-- - Misma visualización para todos los datos -->
+
+<!-- ```{r, echo=T, eval=F} -->
+
+<!-- ggplot( -->
+
+<!-- datos = sobrevivir, -->
+
+<!-- mapeo = aes( -->
+
+<!-- x = edad_años, -->
+
+<!-- y = ht_cm))+ -->
+
+<!-- geom_point(color = "púrpura") # estático #<< -->
+
+<!-- ``` -->
+
+<!-- ] -->
+
+<!-- .pull-right[ -->
+
+<!-- Algunos ejemplos: -->
+
+<!-- ```{r,eval = params$lang == "en", message=F, warning=F} -->
+
+<!-- color_púrpura <- ggplot(data = surv, aes(x = edad_años, y = ht_cm))+ -->
+
+<!-- geom_point(color = "púrpura")+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = 'Usar color = "púrpura"') -->
+
+<!-- color_hospital <- ggplot() + tema_vacío() -->
+
+<!-- cowplot::trama_rejilla(color_púrpura, color_hospital, -->
+
+<!-- nrow = 2, rel_widths = c(2,2)) -->
+
+<!-- ``` -->
+
+<!-- ```{r, eval = params$lang == "fr", message=F, warning=F} -->
+
+<!-- color_púrpura <- ggplot(data = surv, aes(x = edad_años, y = ht_cm))+ -->
+
+<!-- geom_point(color = "púrpura")+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Color utilisante = 'púrpura' (malva)") -->
+
+<!-- color_hospital <- ggplot() + tema_vacío() -->
+
+<!-- cowplot::trama_rejilla(color_púrpura, color_hospital, -->
+
+<!-- nrow = 2, rel_widths = c(2,2)) -->
+
+<!-- ``` -->
+
+<!-- ```{r, eval = params$lang == "ru", message=F, warning=F} -->
+
+<!-- color_púrpura <- ggplot(data = surv, aes(x = edad_años, y = ht_cm))+ -->
+
+<!-- geom_point(color = "púrpura")+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Использование цвета = 'morado'") -->
+
+<!-- color_hospital <- ggplot() + theme_void() -->
+
+<!-- cowplot::trama_rejilla(color_púrpura, color_hospital, -->
+
+<!-- nrow = 2, rel_widths = c(2,2)) -->
+
+<!-- ``` -->
+
+<!-- ```{r,eval = params$lang == "es", message=F, warning=F} -->
+
+<!-- color_púrpura <- ggplot(data = surv, aes(x = edad_años, y = ht_cm))+ -->
+
+<!-- geom_point(color = "púrpura")+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Utilizar el color = 'morado' (púrpura)") -->
+
+<!-- color_hospital <- ggplot() + tema_vacío() -->
+
+<!-- cowplot::trama_rejilla(color_púrpura, color_hospital, -->
+
+<!-- nrow = 2, rel_widths = c(2,2)) -->
+
+<!-- ``` -->
+
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- clase: medio-texto -->
+
+<!-- # Tareas de estética -->
+
+<!-- .pull-izquierda[ -->
+
+<!-- La estética puede asignarse a: -->
+
+<!-- **Valores estáticos**:  -->
+
+<!-- - Asignados **fuera de `aes()`** -->
+
+<!-- - Misma visualización para todos los datos -->
+
+<!-- ```{r, echo=T, eval=F} -->
+
+<!-- ggplot( -->
+
+<!-- datos = superviviente, -->
+
+<!-- mapeo = aes( -->
+
+<!-- x = edad_años, -->
+
+<!-- y = ht_cm))+ -->
+
+<!-- geom_point(color = "púrpura") # estático #<< -->
+
+<!-- ``` -->
+
+<!-- **Una columna de datos**:   -->
+
+<!-- - Asignada **dentro de `aes()`** -->
+
+<!-- - Muestra los datos como "grupos" -->
+
+<!-- ```{r, echo=T, eval=F} -->
+
+<!-- ggplot( -->
+
+<!-- datos = sobrevivir, -->
+
+<!-- mapeo = aes( -->
+
+<!-- x = edad_años, -->
+
+<!-- y = ht_cm, -->
+
+<!-- color = hospital))+ # dinámico #<< -->
+
+<!-- geom_point() -->
+
+<!-- ``` -->
+
+<!-- ] -->
+
+<!-- .pull-right[ -->
+
+<!-- Algunos ejemplos: -->
+
+<!-- ```{r, eval = params$lang == "en", message=F, warning=F} -->
+
+<!-- color_púrpura <- ggplot(data = surv, aes(x = edad_años, y = ht_cm))+ -->
+
+<!-- geom_point(color = "púrpura")+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Usando color = 'morado'") -->
+
+<!-- color_hospital <- ggplot(data = surv, aes(x = edad_años, y = ht_cm))+ -->
+
+<!-- geom_point(aes(color = hospital))+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Usando aes(color = hospital)") -->
+
+<!-- cowplot::trama_rejilla(color_púrpura, color_hospital, -->
+
+<!-- nrow = 2, rel_widths = c(2,2)) -->
+
+<!-- ``` -->
+
+<!-- ```{r, eval = params$lang == "fr", message=F, warning=F} -->
+
+<!-- color_púrpura <- ggplot(data = surv, aes(x = edad_años, y = ht_cm))+ -->
+
+<!-- geom_point(color = "púrpura")+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Color utilisante = 'púrpura' (malva)") -->
+
+<!-- color_hospital <- ggplot(datos = supervivientes, aes(x = edad_años, y = ht_cm))+ -->
+
+<!-- geom_point(aes(color = hospital))+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Utilizando aes(color = hospital)") -->
+
+<!-- cowplot::trama_rejilla(color_púrpura, color_hospital, -->
+
+<!-- nrow = 2, rel_widths = c(2,2)) -->
+
+<!-- ``` -->
+
+<!-- ```{r, eval = params$lang == "ru", message=F, warning=F} -->
+
+<!-- color_púrpura <- ggplot(data = surv, aes(x = edad_años, y = ht_cm))+ -->
+
+<!-- geom_point(color = "púrpura")+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Использование цвета = 'púrpura' (сиреневый)") -->
+
+<!-- color_hospital <- ggplot(data = surv, aes(x = edad_años, y = ht_cm))+ -->
+
+<!-- geom_point(aes(color = hospital))+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Использование aes(color = hospital), больница") -->
+
+<!-- cowplot::trama_rejilla(color_púrpura, color_hospital, -->
+
+<!-- nrow = 2, rel_widths = c(2,2)) -->
+
+<!-- ``` -->
+
+<!-- ```{r, eval = params$lang == "es", message=F, warning=F} -->
+
+<!-- color_púrpura <- ggplot(data = surv, aes(x = edad_años, y = ht_cm))+ -->
+
+<!-- geom_point(color = "púrpura")+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Utilizar el color = 'morado' (púrpura)") -->
+
+<!-- color_hospital <- ggplot(datos = sobrevivir, aes(x = edad_años, y = ht_cm))+ -->
+
+<!-- geom_point(aes(color = hospital))+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Utilizar aes(color = hospital)") -->
+
+<!-- cowplot::trama_rejilla(color_púrpura, color_hospital, -->
+
+<!-- nrow = 2, rel_widths = c(2,2)) -->
+
+<!-- ``` -->
+
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- clase: medio-texto -->
+
+<!-- # Tareas de estética -->
+
+<!-- .pull-izquierda[ -->
+
+<!-- La estética puede asignarse a: -->
+
+<!-- **Valores estáticos**:   -->
+
+<!-- Misma visualización para todos los datos -->
+
+<!-- ```{r, echo=T, eval=F} -->
+
+<!-- ggplot( -->
+
+<!-- datos = sobrevivir, -->
+
+<!-- mapeo = aes(x = inicio_fecha)) + -->
+
+<!-- geom_histograma(relleno = "púrpura") # estático #<< -->
+
+<!-- ``` -->
+
+<!-- **Una columna de datos (dinámica)**:   -->
+
+<!-- Muestra los datos como "grupos" -->
+
+<!-- ```{r, echo=T, eval=F} -->
+
+<!-- ggplot( -->
+
+<!-- datos = sobrevivir, -->
+
+<!-- mapeo = aes( -->
+
+<!-- x = date_onset, -->
+
+<!-- color = distrito)) + # dinámico #<< -->
+
+<!-- geom_histograma() -->
+
+<!-- ``` -->
+
+<!-- ] -->
+
+<!-- .pull-right[ -->
+
+<!-- Más ejemplos:  -->
+
+<!-- ```{r, eval = params$lang == "en", message=F, warning=F} -->
+
+<!-- fill_purple <- ggplot(data = surv, aes(x = date_onset))+ -->
+
+<!-- geom_histograma(relleno = "púrpura")+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Usando relleno = 'púrpura'") -->
+
+<!-- relleno_hospital <- ggplot(datos = superviviente, aes(x = fecha_inicio))+ -->
+
+<!-- geom_histograma(aes(relleno = hospital))+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Usando aes(relleno = hospital)") -->
+
+<!-- cowplot::trama_rejilla( -->
+
+<!-- relleno_púrpura, relleno_hospital, -->
+
+<!-- nrow = 2, rel_widths = c(2,2)) -->
+
+<!-- ``` -->
+
+<!-- ```{r,eval = params$lang == "fr", message=F, warning=F} -->
+
+<!-- fill_purple <- ggplot(data = surv, aes(x = date_onset))+ -->
+
+<!-- geom_histograma(relleno = "púrpura")+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Utilisant fill = 'purple' (mauve)") -->
+
+<!-- relleno_hospital <- ggplot(datos = superviviente, aes(x = fecha_inicio))+ -->
+
+<!-- geom_histograma(aes(relleno = hospital))+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Utilizando aes(fill = hospital)") -->
+
+<!-- cowplot::trama_rejilla( -->
+
+<!-- llenar_púrpura, llenar_hospital, -->
+
+<!-- nrow = 2, rel_widths = c(2,2)) -->
+
+<!-- ``` -->
+
+<!-- ```{r, eval = params$lang == "ru", message=F, warning=F} -->
+
+<!-- fill_purple <- ggplot(data = surv, aes(x = date_onset))+ -->
+
+<!-- geom_histograma(relleno = "púrpura")+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Использование fill = 'purple' (сиреневый)") -->
+
+<!-- fill_hospital <- ggplot(data = surv, aes(x = date_onset))+ -->
+
+<!-- geom_histograma(aes(relleno = hospital))+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Использование aes(fill= hospital), больница") -->
+
+<!-- cowplot::trama_rejilla( -->
+
+<!-- relleno_púrpura, relleno_hospital, -->
+
+<!-- nrow = 2, rel_widths = c(2,2)) -->
+
+<!-- ``` -->
+
+<!-- ```{r, eval = params$lang == "es", message=F, warning=F} -->
+
+<!-- fill_purple <- ggplot(data = surv, aes(x = date_onset))+ -->
+
+<!-- geom_histograma(relleno = "púrpura")+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Utilizar relleno = 'púrpura' (púrpura)") -->
+
+<!-- relleno_hospital <- ggplot(datos = superviviente, aes(x = fecha_inicio))+ -->
+
+<!-- geom_histograma(aes(relleno = hospital))+ -->
+
+<!-- tema_minimo(tamaño_base = 16)+ -->
+
+<!-- labs(title = "Utilizar aes(fill = hospital)") -->
+
+<!-- cowplot::trama_rejilla( -->
+
+<!-- relleno_púrpura, relleno_hospital, -->
+
+<!-- nrow = 2, rel_widths = c(2,2)) -->
+
+<!-- ``` -->
+
+<!-- ] -->
+
+---
+
+# Asignación estética estática
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm)) + 
+*geom_point(color = "seagreen")
+```
+
+**Estática** las asignaciones estéticas son a un **valor numérico o de carácter**.
+
+El cambio se aplica a **todos los** puntos de datos.
+
+Escrito **fuera de `aes()`**.
+
+Otros ejemplos estáticos que podrías utilizar:  
+`size = 3`  
+`alpha = 0.5`  
+`fill = "purple"`
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+     x = age_years,
+     y = ht_cm)) +
+geom_point(color = "seagreen") +
+theme_grey(base_size = 16)
+```
+
+]
+
+---
+
+# Asignación estética dinámica
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+*   color = hospital)) +
+geom_point()
+```
+
+**Dinámico** las asignaciones estéticas se asignan a un **nombre de columna**.
+
+Esto crea **grupos** en el gráfico y genera una leyenda.
+
+Ésta se escribe **dentro de `aes()`**.
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+    color = hospital)) +   
+geom_point()+
+theme_grey(base_size = 16)
+```
+
+]
+
+???
+
+---
+
+# Estática y dinámica
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+*   color = hospital)) +  
+geom_point(
+* size = 7, 
+* alpha = 0.6) 
+```
+
+Arriba, `size = 7` y `alpha = 0.5` se asignan estáticamente, fuera de `aes()`.
+
+`color=` se asigna a la columna `hospital` dentro de `aes()`.
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+    color = hospital))+      # color varies by outcome
+geom_point(size = 7,         # all points 7x size
+           alpha = 0.5)+     # transparency 
+theme_grey(base_size = 16)     
+```
+
+]
+
+.footnote\[Leer más sobre la estética de ggplot [aquí](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html)
+]
+
+???
+Como sólo hay un geom, todas las estéticas pueden escribirse en `ggplot()` o en `geom_point()`
+
+---
+
+# Facetas
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+*facet_wrap(~hospital)
+```
+
+Los grupos también pueden mostrarse de esta forma.
+
+Las facetas son "pequeños-múltiplos"
+
+`facet_wrap()` produce una trama  
+por cada valor único de la columna.
+
+"~" antes del nombre de la columna es como la palabra "por" (... "por hospital")
+
+]
+
+.pull-right[
+
+```{r}
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~ hospital)+
+theme_grey(base_size = 16)
+```
+
+]
+
+???
+También llamados "múltiplos pequeños"
+
+---
+
+# Facetas
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+*facet_wrap(~hospital,
+            scales = "free_y")
+```
+
+ Ejes autoescalados "libres" con `scales=`
+
+- "libre\_y"
+- "free\_x"
+- "libre" (tanto x como y)
+
+]
+
+.footnote[
+¡Alerta a tu público si utilizas ejes libres!
+Además, prueba `ncol=` y `nrow=`
+
+]
+
+.pull-right[
+
+```{r, eval=params$lang == "en", echo=F}
+ggplot(data = surv,
+       mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~hospital,
+           scales = "free_y") +
+labs(caption = "Note the free y-axis")+
+theme_grey(base_size = 16)
+```
+
+```{r, eval=params$lang == "fr", echo=F}
+ggplot(data = surv,
+       mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~hospital,
+           scales = "free_y") +
+labs(caption = "Notez l'axe y libre")+
+theme_grey(base_size = 16)
+```
+
+```{r, eval=params$lang == "ru", echo=F}
+ggplot(data = surv,
+       mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~hospital,
+           scales = "free_y") +
+labs(caption = "Обратите внимание на свободную ось y")+
+theme_grey(base_size = 16)
+```
+
+```{r, eval=params$lang == "es", echo=F}
+ggplot(data = surv,
+       mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~hospital,
+           scales = "free_y") +
+labs(caption = "Obsérvese el eje y libre")+
+theme_grey(base_size = 16)
+```
+
+]
+
+---
+
+# Facetas + `gghighlight()`
+
+.pull-left[
+
+paquetes de extensión ggplot como {gghighlight} son útiles.
+
+`gghighlight()` proyecta una "sombra" detrás de cada faceta.
+
+```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = date_onset,
+*   fill = hospital)) +
+geom_histogram() +
+facet_wrap(~ hospital) +
+*gghighlight()
+```
+
+]
+
+.pull-right[
+
+```{r}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = date_onset,
+    fill = hospital)) +
+geom_histogram() +
+facet_wrap(~ hospital) +
+gghighlight::gghighlight() +
+theme_minimal(base_size = 14)
+```
+
+]
+
+---
+
+# gghighlight
+
+.pull-left[
+
+`gghighlight()` también puede resaltar valores específicos en otros tipos de gráficos
+
+```{r, echo=params$lang == "en", eval=F}
+surv %>% 
+  # get weekly counts by hospital
+  group_by(
+     hospital,
+     week = floor_date(date_onset, "week")
+     ) %>%
+  count() %>% 
+  
+  # plot
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+  
+```
+
+```{r, echo=params$lang == "fr", eval=F}
+surv %>% 
+  # obtenir des comptages hebdomadaires par hôpital
+  group_by(
+     hospital,
+     week = floor_date(date_onset, "week")) %>%
+  count() %>% 
+  
+  # graphique
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+  
+```
+
+```{r, echo=params$lang == "ru", eval=F}
+surv %>% 
+  # получить еженедельные подсчеты по больницам
+  group_by(
+     hospital,
+     week = floor_date(date_onset, "week")) %>%
+  count() %>% 
+  
+  # сюжет
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+  
+```
+
+```{r, echo=params$lang == "es", eval=F}
+surv %>% 
+  # Obtenga los recuentos semanales por hospital
+  group_by(
+     hospital,
+     week = floor_date(date_onset, "week")) %>%
+  count() %>% 
+  
+  # parcela
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+  
+```
+
+]
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+surv %>% 
+  # get daily counts by zip code
+  group_by(
+     hospital,
+     week = floor_date(date_onset, "week")) %>%
+  count() %>% 
+  
+  # plot
+  ggplot(
+    mapping = aes(
+      x = week, 
+      y = n,
+      color = hospital)) +
+  geom_line()+
+  gghighlight::gghighlight(hospital == "Port Hospital") +
+  theme(legend.position = "none")+
+  theme_light(base_size = 16)+
+  labs(title = "Weekly cases by hospital", subtitle = "Port Hospital highlighted")
+```
+
+]
+
+.nota[El código agrega los casos por semana y hospital, y pasa los recuentos a ggplot]
+
+???
+Aquí creamos un marco de datos de casos por semana y por hospital, y lo trazamos con `geom_line()`. El punto culminante se aplica al Hospital del Puerto.
+
+---
+
+class: inverse, center, middle
+
+## Ejercicio
+
+Ir a la página web del curso  
+Abre el primer ejercicio del Módulo 5 e inicia sesión  
+Sigue las instrucciones para abrir tu proyecto R "ébola" y continuar codificando  
+Avisa a un instructor si no estás seguro de lo que tienes que hacer
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "Safety Match - COVID artwork.png")))
+```
+
+

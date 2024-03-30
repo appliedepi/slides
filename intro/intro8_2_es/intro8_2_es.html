@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introducción a R para Epidemiología Aplicada</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="2022" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
+    <script src="libs/tabwid/tabwid.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+class: center, middle, inverse, title-slide
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+# Introducción a R para la epidemiología aplicada
+
+### Pivotar datos
+
+## [contact@appliedepi.org](mailto:contact@appliedepi.org)
+---
+
+# Datos de reestructuración
+
+*pivotar, remodelar, fundir, moldear, transformar...* marcos de datos
+
+&lt;img src="../../images/joins_pivots/Pivoting_500x500.png" width="222" height="100%" /&gt;
+
+---
+
+# ¿Qué es pivotar?
+
+- *Tablas dinámicas de Excel* son una forma de resumir y agregar datos
+
+--
+
+- En R, **pivotante** un marco de datos tiene un **significado diferente**
+
+--
+
+- Piensa que *reestructuración* o *remodelación* el marco de datos
+
+--
+
+- Utilizaremos la `pivot_wider()` y `pivot_longer()` de las funciones {tidyr} paquete
+
+--
+
+- A menudo verás ejemplos que utilizan funciones alternativas de otros paquetes:
+  - `melt()` y `cast()` de {reshape2}
+  - `gather()` y `spread()` antepasados de los {tidyr} `pivot_()` funciones
+  - `melt()` y `dcast()` de {data.table}
+
+---
+
+# Datos ordenados
+
+¿Recuerdas los 3 principios de los "datos ordenados"?
+
+--
+
+1. Cada **valor** debe tener su propio **celda**
+
+--
+
+2. Cada **variable** debe tener su propia **columna**
+
+--
+
+3. Cada **observación** debe tener su propia **fila**
+
+---
+
+# Terminología
+
+Estructuralmente, los "marcos de datos" en R consisten en **columnas** y **filas**.
+
+--
+
+Sin embargo, **"variables"** y **"observaciones** son más *abstractas* conceptos:
+
+- **Variables** medida uno *atributo subyacente* (edad, resultado o fecha de inicio)
+- **Observaciones** se refieren a una *unidad de análisis*
+
+--
+
+Idealmente, se alinean: **columnas = variables** y **filas = observacion**
+
+&lt;img src="../../images/data_cleaning/tidy_image_es.png" width="746" height="65%" /&gt;
+
+.footnote\[Fuente de la imagen: [R para la Ciencia de Datos](https://r4ds.had.co.nz/tidy-data.html)]
+
+---
+
+# Pivotar más
+
+.tirar-izquierda\[
+La introducción de datos suele ser en formato "ancho
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 1999 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2000 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2001 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2002 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9250 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10200 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25650 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26800 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27255 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5120 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5860 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+- Las características de un sujeto se almacenan en una sola fila
+- Útil para la presentación
+- **No** ideal para algunos tipos de análisis.
+  ]
+
+--
+.pull-derecha\[
+**Más fácil de analizar en formato "largo**
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; cases &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9250 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10200 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25650 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26800 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27255 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5120 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5860 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+---
+
+# {ggplot2} ejemplo
+
+¿Cómo trazar los casos a lo largo del tiempo para los tres países?
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 1999 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2000 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2001 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2002 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9250 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10200 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25650 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26800 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27255 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5120 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5860 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+```r
+ggplot(data = example,
+       mapping = aes(x = ???, y = ???))+
+     geom_line()
+```
+
+---
+
+# Pivotar más tiempo
+
+.tirar-izquierda\[
+
+&lt;div class="tabwid"&gt;&lt;style&gt;.cl-8c82fd8a{}.cl-8c75a3a6{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-8c7b59e0{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-8c7b59f4{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-8c7b7b78{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8c7b7b82{width:0.752in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8c7b7b83{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8c7b7b8c{width:0.752in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8c7b7b8d{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8c7b7b8e{width:0.752in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8c7b7b96{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8c7b7b97{width:0.752in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table data-quarto-disable-processing='true' class='cl-8c82fd8a'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;th class="cl-8c7b7b78"&gt;&lt;p class="cl-8c7b59e0"&gt;&lt;span class="cl-8c75a3a6"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8c7b7b82"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8c7b7b82"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8c7b7b82"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8c7b7b82"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8c7b7b83"&gt;&lt;p class="cl-8c7b59e0"&gt;&lt;span class="cl-8c75a3a6"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8c7b7b8c"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8c7b7b8c"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8c7b7b8c"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8c7b7b8c"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8c7b7b8d"&gt;&lt;p class="cl-8c7b59e0"&gt;&lt;span class="cl-8c75a3a6"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8c7b7b8e"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8c7b7b8e"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8c7b7b8e"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8c7b7b8e"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8c7b7b96"&gt;&lt;p class="cl-8c7b59e0"&gt;&lt;span class="cl-8c75a3a6"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8c7b7b97"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8c7b7b97"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8c7b7b97"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8c7b7b97"&gt;&lt;p class="cl-8c7b59f4"&gt;&lt;span class="cl-8c75a3a6"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+
+- Estos **nombres de columna pivotarán**
+
+]
+
+---
+
+# Pivotar más tiempo
+
+.tirar-izquierda\[
+
+&lt;div class="tabwid"&gt;&lt;style&gt;.cl-8cd5c6aa{}.cl-8cc0a022{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-8cc9ead8{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-8cc9eaec{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-8cca10b2{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cca10c6{width:0.752in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cca10c7{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cca10c8{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cca10d0{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cca10d1{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cca10da{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cca10db{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table data-quarto-disable-processing='true' class='cl-8cd5c6aa'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;th class="cl-8cca10b2"&gt;&lt;p class="cl-8cc9ead8"&gt;&lt;span class="cl-8cc0a022"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8cca10c6"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8cca10c6"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8cca10c6"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8cca10c6"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8cca10c7"&gt;&lt;p class="cl-8cc9ead8"&gt;&lt;span class="cl-8cc0a022"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cca10c8"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cca10c8"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cca10c8"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cca10c8"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8cca10d0"&gt;&lt;p class="cl-8cc9ead8"&gt;&lt;span class="cl-8cc0a022"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cca10d1"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cca10d1"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cca10d1"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cca10d1"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8cca10da"&gt;&lt;p class="cl-8cc9ead8"&gt;&lt;span class="cl-8cc0a022"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cca10db"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cca10db"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cca10db"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cca10db"&gt;&lt;p class="cl-8cc9eaec"&gt;&lt;span class="cl-8cc0a022"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+
+- Estos **valores se reordenarán**
+
+]
+
+---
+
+# Pivotar más tiempo
+
+.tirar-izquierda\[
+
+&lt;div class="tabwid"&gt;&lt;style&gt;.cl-8cfd6278{}.cl-8cf1f636{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-8cf6669e{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-8cf666b2{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-8cf68070{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cf6807a{width:0.752in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cf6807b{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cf68084{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cf68085{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cf68086{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cf6808e{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8cf6808f{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table data-quarto-disable-processing='true' class='cl-8cfd6278'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;th class="cl-8cf68070"&gt;&lt;p class="cl-8cf6669e"&gt;&lt;span class="cl-8cf1f636"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8cf6807a"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8cf6807a"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8cf6807a"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8cf6807a"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8cf6807b"&gt;&lt;p class="cl-8cf6669e"&gt;&lt;span class="cl-8cf1f636"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cf68084"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cf68084"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cf68084"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cf68084"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8cf68085"&gt;&lt;p class="cl-8cf6669e"&gt;&lt;span class="cl-8cf1f636"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cf68086"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cf68086"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cf68086"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cf68086"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8cf6808e"&gt;&lt;p class="cl-8cf6669e"&gt;&lt;span class="cl-8cf1f636"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cf6808f"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cf6808f"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cf6808f"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8cf6808f"&gt;&lt;p class="cl-8cf666b2"&gt;&lt;span class="cl-8cf1f636"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+
+- Estos **identificadores se replicarán**
+
+]
+
+---
+
+# Pivotar más tiempo
+
+.tirar-izquierda\[
+
+&lt;div class="tabwid"&gt;&lt;style&gt;.cl-8d247a34{}.cl-8d1868a2{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-8d1cb9c0{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-8d1cb9ca{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-8d1ccf82{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d1ccf8c{width:0.752in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d1ccf96{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d1ccf97{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d1ccfa0{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d1ccfa1{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d1ccfa2{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d1ccfaa{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table data-quarto-disable-processing='true' class='cl-8d247a34'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;th class="cl-8d1ccf82"&gt;&lt;p class="cl-8d1cb9c0"&gt;&lt;span class="cl-8d1868a2"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8d1ccf8c"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8d1ccf8c"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8d1ccf8c"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8d1ccf8c"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d1ccf96"&gt;&lt;p class="cl-8d1cb9c0"&gt;&lt;span class="cl-8d1868a2"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d1ccf97"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d1ccf97"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d1ccf97"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d1ccf97"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d1ccfa0"&gt;&lt;p class="cl-8d1cb9c0"&gt;&lt;span class="cl-8d1868a2"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d1ccfa1"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d1ccfa1"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d1ccfa1"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d1ccfa1"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d1ccfa2"&gt;&lt;p class="cl-8d1cb9c0"&gt;&lt;span class="cl-8d1868a2"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d1ccfaa"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d1ccfaa"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d1ccfaa"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d1ccfaa"&gt;&lt;p class="cl-8d1cb9ca"&gt;&lt;span class="cl-8d1868a2"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+
+&lt;img src="../../images/joins_pivots/pivot_command.png" width="100%" /&gt;
+
+- Lista las columnas a pivotar
+- Proporciona 2 **nuevos nombres de columna**
+
+]
+
+.pull-right[
+
+&lt;div class="tabwid"&gt;&lt;style&gt;.cl-8d505686{}.cl-8d44d8ba{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-8d491290{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-8d49129a{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-8d49361c{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d493630{width:0.625in;background-color:rgba(255, 255, 0, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d493631{width:0.752in;background-color:rgba(203, 195, 227, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d493644{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d493645{width:0.625in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d493646{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d49364e{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d49364f{width:0.625in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d493658{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d493659{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d493662{width:0.625in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8d493663{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table data-quarto-disable-processing='true' class='cl-8d505686'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;th class="cl-8d49361c"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8d493630"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;year&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-8d493631"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;cases&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d493644"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493645"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493646"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d493644"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493645"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493646"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d493644"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493645"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493646"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d493644"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493645"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493646"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d49364e"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d49364f"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493658"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d49364e"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d49364f"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493658"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d49364e"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d49364f"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493658"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d49364e"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d49364f"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493658"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d49364e"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d49364f"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493658"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d49364e"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d49364f"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493658"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d49364e"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d49364f"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493658"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-8d493659"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493662"&gt;&lt;p class="cl-8d491290"&gt;&lt;span class="cl-8d44d8ba"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-8d493663"&gt;&lt;p class="cl-8d49129a"&gt;&lt;span class="cl-8d44d8ba"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+
+]
+
+
+
+
+
+---
+
+# Comando ggplot
+
+.pull-left[
+
+
+```r
+example %&gt;%
+  pivot_longer(
+       cols = `1999`:`2002`,
+       names_to = "year",
+       values_to = "cases") %&gt;%
+     
+  ggplot(mapping = aes(
+*           x = year,
+*           y = cases,
+*           color = country,
+*           group = country))+
+  geom_line()
+```
+
+**Nota** este ejemplo se incluye en la carpeta de tu curso como un script de R titulado "ejemplo\_pivot.R" en la subcarpeta "ebola/scripts/ejemplos".
+
+]
+
+.pull-right[
+
+&lt;img src="intro8_2_es_files/figure-html/unnamed-chunk-16-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Giro más amplio
+
+En este curso no trataremos el pivotaje más amplio, porque no se utiliza con tanta frecuencia.
+
+Puedes explorar varios ejemplos en estos capítulos del Manual de Epi R:
+
+- [Pivotar datos](https://epirhandbook.com/en/pivoting-data.html#long-to-wide)
+- [Tablas descriptivas con {dplyr}](https://epirhandbook.com/en/descriptive-tables.html#tbls_pivot_wider)
+
+&lt;img src="../../images/joins_pivots/pivot_wider_new_es.png" width="406" height="100%" /&gt;
+
+---
+
+class: inverse, center, middle
+
+# Ejercicio
+
+Ir al sitio web del curso  
+Abre el ejercicio del Módulo 7 parte 2, e inicia sesión  
+Sigue las instrucciones para volver a tu proyecto R "ébola" y continúa codificando en tu script RMD
+Avisa a un instructor si no estás seguro de lo que tienes que hacer
+
+&lt;img src="../../images/breakout/window.png" width="50%" /&gt;
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

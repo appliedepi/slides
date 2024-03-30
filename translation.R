@@ -13,12 +13,20 @@ Sys.setenv(DEEPL_API_KEY = "287d5481-9d96-8500-228c-6f98cfb3c576")
 
 
 # 3. Indicate modules to be translated
-module_list = c("intro1",
-                "intro2", "intro3", "intro4", "intro5_1", "intro5_2",
-                "intro6", "intro7_1", "intro7_2", "intro9",
-                "intro10")
+module_list = c(#"intro1",
+                #"intro2",
+                #"intro3",
+                #"intro4",
+                #"intro5_1",
+                #"intro5_2",
+                "intro6"
+                #"intro7_1",
+                #"intro7_2",
+                #"intro9",
+                #"intro10"
+                )
 
-base_directory <- here::here("intro", "2024 update")
+base_directory <- here::here("intro")
 
 languages <- c("es") # "fr", "pt" Add more languages as needed
 
@@ -44,8 +52,8 @@ for (i in 1:length(module_list)) {
 create_LanguageModule <- function(base_directory, module_name, languages) {
   for (lang in languages) {
     # Construct the file and folder names
-    file_name <- paste0(module_name, ".", lang, ".Rmd")
-    folder_name <- paste0(module_name, ".", lang)
+    file_name <- paste0(module_name, "_", lang, ".Rmd")
+    folder_name <- paste0(module_name, "_", lang)
     file_path <- file.path(base_directory, module_name, file_name)
     new_folder_path <- file.path(base_directory, folder_name)
     css_file_path <- file.path(base_directory, module_name, "xaringan-themer.css") # Path to the CSS file
