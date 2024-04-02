@@ -348,15 +348,6 @@ HTMLWidgets.widget({
     var table = $table.DataTable(options);
     $el.data('datatable', table);
 
-    if ('rowGroup' in options) {
-      // Maintain RowGroup dataSrc when columns are reordered (#1109)
-      table.on('column-reorder', function(e, settings, details) {
-        var oldDataSrc = table.rowGroup().dataSrc();
-        var newDataSrc = details.mapping[oldDataSrc];
-        table.rowGroup().dataSrc(newDataSrc);
-      });
-    }
-
     // Unregister previous Crosstalk event subscriptions, if they exist
     if (instance.ctfilterSubscription) {
       instance.ctfilterHandle.off("change", instance.ctfilterSubscription);
@@ -441,13 +432,10 @@ HTMLWidgets.widget({
         regex = options.search.regex,
         ci = options.search.caseInsensitive !== false;
       }
-      // need to transpose the column index when colReorder is enabled
-      if (table.colReorder) i = table.colReorder.transpose(i);
       return table.column(i).search(value, regex, !regex, ci);
     };
 
     if (data.filter !== 'none') {
-      if (!data.hasOwnProperty('filterSettings')) data.filterSettings = {};
 
       filterRow.each(function(i, td) {
 
@@ -505,13 +493,11 @@ HTMLWidgets.widget({
               $input.parent().hide(); $x.show().trigger('show'); filter[0].selectize.focus();
             },
             input: function() {
-              var v1 = JSON.stringify(filter[0].selectize.getValue()), v2 = $input.val();
-              if (v1 === '[]') v1 = '';
-              if (v1 !== v2) filter[0].selectize.setValue(v2 === '' ? [] : JSON.parse(v2));
+              if ($input.val() === '') filter[0].selectize.setValue([]);
             }
           });
           var $input2 = $x.children('select');
-          filter = $input2.selectize($.extend({
+          filter = $input2.selectize({
             options: $input2.data('options').map(function(v, i) {
               return ({text: v, value: v});
             }),
@@ -523,14 +509,15 @@ HTMLWidgets.widget({
               if (value.length) $input.trigger('input');
               $input.attr('title', $input.val());
               if (server) {
-                searchColumn(i, value.length ? JSON.stringify(value) : '').draw();
+                table.column(i).search(value.length ? JSON.stringify(value) : '').draw();
                 return;
               }
               // turn off filter if nothing selected
               $td.data('filter', value.length > 0);
               table.draw();  // redraw table, and filters will be applied
             }
-          }, data.filterSettings.select));
+          });
+          if (searchCol) filter[0].selectize.setValue(JSON.parse(searchCol));
           filter[0].selectize.on('blur', function() {
             $x.hide().trigger('hide'); $input.parent().show(); $input.trigger('blur');
           });
@@ -539,12 +526,10 @@ HTMLWidgets.widget({
           var fun = function() {
             searchColumn(i, $input.val()).draw();
           };
-          // throttle searching for server-side processing
-          var throttledFun = $.fn.dataTable.util.throttle(fun, options.searchDelay);
-          $input.on('input', function(e, immediate) {
-            // always bypass throttling when immediate = true (via the updateSearch method)
-            (immediate || !server) ? fun() : throttledFun();
-          });
+          if (server) {
+            fun = $.fn.dataTable.util.throttle(fun, options.searchDelay);
+          }
+          $input.on('input', fun);
         } else if (inArray(type, ['number', 'integer', 'date', 'time'])) {
           var $x0 = $x;
           $x = $x0.children('div').first();
@@ -630,11 +615,13 @@ HTMLWidgets.widget({
               filter.val(v);
             }
           });
-          var formatDate = function(d) {
+          var formatDate = function(d, isoFmt) {
             d = scaleBack(d, scale);
             if (type === 'number') return d;
             if (type === 'integer') return parseInt(d);
             var x = new Date(+d);
+            var fmt = ('filterDateFmt' in data) ? data.filterDateFmt[i] : undefined;
+            if (fmt !== undefined && isoFmt === false) return x[fmt.method].apply(x, fmt.params);
             if (type === 'date') {
               var pad0 = function(x) {
                 return ('0' + x).substr(-2, 2);
@@ -655,7 +642,7 @@ HTMLWidgets.widget({
             start: [r1, r2],
             range: {min: r1, max: r2},
             connect: true
-          }, opts, data.filterSettings.slider));
+          }, opts));
           if (scale > 1) (function() {
             var t1 = r1, t2 = r2;
             var val = filter.val();
@@ -670,28 +657,13 @@ HTMLWidgets.widget({
                 start: [t1, t2],
                 range: {min: t1, max: t2},
                 connect: true
-              }, opts, data.filterSettings.slider), true);
+              }, opts), true);
               val = filter.val();
             }
             r1  = t1; r2 = t2;
           })();
-          // format with active column renderer, if defined
-          var colDef = data.options.columnDefs.find(function(def) {
-            return (def.targets === i || inArray(i, def.targets)) && 'render' in def;
-          });
           var updateSliderText = function(v1, v2) {
-            // we only know how to use function renderers
-            if (colDef && typeof colDef.render === 'function') {
-              var restore = function(v) {
-                v = scaleBack(v, scale);
-                return inArray(type, ['date', 'time']) ? new Date(+v) : v;
-              }
-              $span1.text(colDef.render(restore(v1), 'display'));
-              $span2.text(colDef.render(restore(v2), 'display'));
-            } else {
-              $span1.text(formatDate(v1));
-              $span2.text(formatDate(v2));
-            }
+            $span1.text(formatDate(v1, false)); $span2.text(formatDate(v2, false));
           };
           updateSliderText(r1, r2);
           var updateSlider = function(e) {
@@ -708,7 +680,7 @@ HTMLWidgets.widget({
             updateSliderText(val[0], val[1]);
             if (e.type === 'slide') return;  // no searching when sliding only
             if (server) {
-              searchColumn(i, $td.data('filter') ? ival : '').draw();
+              table.column(i).search($td.data('filter') ? ival : '').draw();
               return;
             }
             table.draw();
@@ -724,7 +696,7 @@ HTMLWidgets.widget({
         // processing
         if (server) {
           // if a search string has been pre-set, search now
-          if (searchCol) $input.trigger('input').trigger('change');
+          if (searchCol) searchColumn(i, searchCol).draw();
           return;
         }
 
@@ -770,7 +742,15 @@ HTMLWidgets.widget({
         $.fn.dataTable.ext.search.push(customFilter);
 
         // search for the preset search strings if it is non-empty
-        if (searchCol) $input.trigger('input').trigger('change');
+        if (searchCol) {
+          if (inArray(type, ['factor', 'logical'])) {
+            filter[0].selectize.setValue(JSON.parse(searchCol));
+          } else if (type === 'character') {
+            $input.trigger('input');
+          } else if (inArray(type, ['number', 'integer', 'date', 'time'])) {
+            $input.trigger('change');
+          }
+        }
 
       });
 
@@ -1390,7 +1370,7 @@ HTMLWidgets.widget({
     changeInput('cell_clicked', {});
 
     // do not trigger table selection when clicking on links unless they have classes
-    table.on('mousedown.dt', 'tbody td a', function(e) {
+    table.on('click.dt', 'tbody td a', function(e) {
       if (this.className === '') e.stopPropagation();
     });
 
@@ -1418,9 +1398,8 @@ HTMLWidgets.widget({
           console.log('The search keyword for column ' + i + ' is undefined')
           return;
         }
-        // Update column search string and values on linked filter widgets.
-        // 'input' for factor and char filters, 'change' for numeric filters.
-        $(td).find('input').first().val(v).trigger('input', [true]).trigger('change');
+        $(td).find('input').first().val(v);
+        searchColumn(i, v);
       });
       table.draw();
     }
