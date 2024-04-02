@@ -147,26 +147,25 @@ surv_raw <- surv_raw %>%
 
 ---
 
-# Hoy: objetivos y calendario
 
-**En este módulo pretendemos ayudarte a**
+# Objetivos y agenda
 
-- Familiarizarte con más funciones utilizadas para limpiar datos de salud pública
-- Añade pasos complejos de recodificación lógica a tu "cadena de tuberías" de limpieza de datos
-- Introdúcete en los conceptos de estructura de "datos ordenados
+- Familiarizarte con más funciones utilizadas para limpiar datos en un contexto de salud pública
+- Añade pasos avanzados de re-codificación lógica a tu "cadena de comandos" de limpieza de datos
+- Introducción de los conceptos de estructura de "datos ordenados"
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
-  ~Time, ~Topic,
-  "20 minutes",  "Review of previous module", 
-  "20 minutes", "Demo - logical coding",
-  "2.5 hours",  "Exercise",
-  "20 minutes", "Debrief"
+  ~Tiempo, ~Tema,
+  "20 minutos", "Revisión del módulo anterior", 
+  "20 minutos", "Demostración - codificación lógica",
+  "2.5 horas",  "Ejercicio",
+  "20 minutos", "Repaso"
 )
 
 outline %>% 
   flextable::qflextable() %>% 
-  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+  flextable::add_footer_lines("Toma los descansos que necesites durante los ejercicios")
 ```
 
 ???
@@ -185,7 +184,7 @@ En este módulo abordaremos:
 | `case_when()`           | recodificación lógica compleja de valores | 
 | `age_categories()`           | crear columna de categoría de edad        | 
 | `coalesce()`           | priorización de valores                   | 
-| `select()`           | subconjuntar y ordenar columnas           | 
+| `select()`           | subconjuntos y ordenar columnas           | 
 
 ---
 
@@ -195,13 +194,13 @@ class: inverse, center, middle
 
 ---
 
-# Contar una historia con la pipa
+# Contar una historia con el operador pipe
 
-A **orden de limpieza** es una historia, una **serie de acciones** realizadas sobre datos brutos.
+El **orden de la limpieza** es una historia, una **serie de acciones** realizadas sobre datos sin procesar.
 
-En **`%>%`** operador de tuberías significa **"y entonces"** (...realiza la acción en la línea siguiente).
+En operador **`%>%`** "pipe" significa **"y entonces"** (...realiza la acción en la línea siguiente).
 
-¿Alguien puede explicar verbalmente este comando?
+¿Alguien puede explicar verbalmente este código, comando por comando?
 
 ```{r, echo=T, eval=F}
 surv <- surv_raw %>% 
@@ -220,26 +219,26 @@ surv <- surv_raw %>%
 
 ---
 
-# Contar una historia con la pipa
+# Contar una historia con el operador pipe
 
-A **orden de limpieza** es una historia, una **serie de acciones** realizadas sobre datos brutos.
+A **orden de limpieza** es una historia, una **serie de acciones** realizadas a los datos en "crudo".
 
-En **`%>%`** operador de tuberías significa **"y entonces"** (...realiza la acción en la línea siguiente).
+En operador pipe (**`%>%`**)  significa **"y entonces"** (...realiza la acción en la línea siguiente).
 
 ¿Alguien puede explicar verbalmente este comando?
 
 ```{r, echo=T, eval=F}
-surv <- surv_raw %>%        # create new clean data as: the raw data piped to...
-  clean_names() %>%                           # standardize column names 
-  rename(                                     # manual column names edits:
-    age_years = age,                            # age to age_years
-    date_onset = onset_date,                    # use date_ as prefix
-    date_report = date_of_report) %>%           # use date_ as prefix
-  mutate(date_onset = mdy(date_onset)) %>%    # help R understand dates of onset
-  mutate(date_report = mdy(date_report)) %>%  # help R understand dates of report
-  mutate(sex = recode(sex,                    # edit sex values so that:
-    "m" = "male",                               # "m" is now "male"
-    "f" = "female"))                            # "f" is now "female"
+surv <- surv_raw %>%        # crea un nuevo objeto como: el objeto crudo canalizado a.....
+  clean_names() %>%                           # estandarizar los nombres de las columnas 
+  rename(                                     # editar el nombre de las columnas manualmente
+    age_years = age,                            # edad a edad en años
+    date_onset = onset_date,                    # usa date_ como prefijo
+    date_report = date_of_report) %>%           # usa date_ como prefijo
+  mutate(date_onset = mdy(date_onset)) %>%    # ayuda R a entender fecha de inicio de sintomas (convertir a objeto de fecha)
+  mutate(date_report = mdy(date_report)) %>%  # ayuda R a entender fecha de reporte
+  mutate(sex = recode(sex,                    # edita los valores de sexo para que:
+    "m" = "male",                               # "m" is now "masculino"
+    "f" = "female"))                            # "f" is now "femenino"
 
 ```
 
@@ -250,7 +249,7 @@ surv <- surv_raw %>%        # create new clean data as: the raw data piped to...
 ¿Cuál es la causa de este mensaje de error?
 
 ```{r, echo=T, eval=F}
-# create clean dataset
+# crea una base de datos limpia
 surv <- surv_raw %>% 
   clean_names() %>% 
   rename(
@@ -293,9 +292,9 @@ surv <- surv_raw %>%
 Error in recode(sex, m = "male", f = "female") : object 'sex' not found
 ```
 
-Falta un operador de tubería, lo que rompe la cadena.
+Falta un operador pipe, lo que rompe la cadena.
 
-La dirección `mutate(sex...` no ha recibido el conjunto de datos del paso anterior, y por tanto R no tiene contexto de lo que la columna `sex` es.
+La función `mutate(sex...` no ha recibido la base de datos del paso anterior, y por tanto R no tiene contexto de lo que la columna `sex` es.
 
 ---
 
@@ -358,12 +357,10 @@ Error in `dplyr::select()`:
 ✖ Column `surv` doesn't exist.
 ```
 
-Una tubería "colgante" adicional pasó el conjunto de datos limpio a un *separado* `tabyl()` separado.  
-Para una función, proporciona un conjunto de datos **ya sea** mediante una tubería, *O* como primer argumento.
-
+Un operador pipe "colgante" o adicional pasó el conjunto de datos limpio a un comando *separado* (`tabyl()`) que no debe de formar parte de los comandos de limpieza.  
 ---
 
-# Guión desordenado
+# Script desordenado
 
 .pull-left[
 
@@ -399,7 +396,8 @@ surv <- surv_raw %>% #<<
 
 .pull-right[
 
-- Guarda **un comando de limpieza** solamente. Añade nuevas funciones con tuberías a su final.
+- Guarda **un solo comando de limpieza** . 
+Añade nuevas funciones o comandos conectados con operadores pipe.
 
 ]
 
@@ -409,7 +407,7 @@ surv <- surv_raw %>% #<<
 
 .pull-left[
 
-Guión limpio
+Script limpio
 
 ```{r, echo=T, eval=F}
 # Create clean dataset -------------------------------------
@@ -429,7 +427,8 @@ surv <- surv_raw %>%                       #<<
 
 .pull-right[
 
-- Guarda **un comando de limpieza** solamente. Añade nuevas funciones con tuberías a su final.
+- Guarda **un solo comando de limpieza** . 
+Añade nuevas funciones o comandos conectados con operadores pipe.
 
 ]
 
@@ -463,20 +462,20 @@ class(surv$date_onset)        # check column class    #<<
 
 .pull-right[
 
-- Consolida otros pequeños comandos en un **zona de pruebas**
+- Para mejor lectura del código, coloca estos comandos simples en el **Área de pruebas**
 
 ]
 
 ---
 
-# Imprimir vs. guardar
+# Presentar vs. guardar
 
-**Imprimir**
+**Presentar**
 
-Este comando no tiene **`<-`**, por lo que sólo *imprime* lo modificado `surv` en la consola. El marco de datos real no ha cambiado.
+Este comando no tiene el operador **`<-`**, por lo que sólo *presenta* lo modificado `surv` en la consola. La base de datos de origen no ha cambiado.
 
 ```{r, echo=params$lang == "en", eval=F}
-surv_raw %>%              # PRINT only cases over 10 years  #<<
+surv_raw %>%              #  only cases over 10 years  #<<
   filter(age > 10)
 ```
 
@@ -491,7 +490,7 @@ surv_raw %>%                    # ПЕЧАТАТЬ только случаи с�
 ```
 
 ```{r, echo=params$lang == "es", eval=F}
-surv_raw %>%                    # IMPRIMIR sólo los casos de más de 10 años
+surv_raw %>%              # presenta solo los casos mayores de 10 años  #<<
   filter(age > 10)
 ```
 
@@ -503,14 +502,14 @@ surv_raw %>%                    # print only cases over 10 years
 
 **Guardar**
 
-Añadir el operador de asignación **\<-** para crear un nuevo marco de datos.
+Añadir el operador de asignación **<-** para crear un nuevo objeto dataframe o base de datos.
 
 ```{r pipe-assign, eval=F, echo=T}
-surv_over10 <- surv_raw %>%     # create new data frame   #<<
+surv_over10 <- surv_raw %>%     # crea un nuevo objeto dataframe   #<<
   filter(age > 10)
 ```
 
-(No hay salida en la consola de R, pero sí un nuevo objeto en el panel Entorno)
+(No hay salida en la consola de R, pero sí un nuevo objeto en el panel Entorno R)
 
 ???
 Observa cómo los nombres de las columnas en `surv` ¡son antiguos! Es porque nuestros cambios aún no se han guardado.
@@ -523,7 +522,7 @@ class: inverse, center, middle
 
 ---
 
-# Ejemplo de conjunto de datos
+# Ejemplo de base de datos
 
 ```{r, eval=T, echo=T}
 surv_raw
@@ -531,11 +530,11 @@ surv_raw
 
 ---
 
-# `recode()` para ediciones manuales
+## `recode()` para ediciones manuales
 
-Utiliza `recode()` en `mutate()` para un manual extenso *recodificación*
+Utiliza `recode()` dentro de `mutate()` para *re-codificación* manual o directa
 
-```{r, echo=params$lang == "en", eval=params$lang == "en"}
+```{r, echo=params$lang == "es", eval=params$lang == "es"}
 surv_raw %>% 
   mutate(hospital = recode(hospital,
       # for reference: OLD = NEW
@@ -547,26 +546,26 @@ surv_raw %>%
 
 ---
 
-# `ifelse()` para una lógica simple
+## Uso de `ifelse()` para una re-codificiación con lógica simple
 
-`ifelse()` en `mutate()` comprueba lógicamente cada fila.
+`ifelse()` dentro de `mutate()` comprueba lógicamente cada fila.
 
-Escribe en el nuevo `age_group` columna:
+Crea una nueva columna llamada `age_group`:
 
-- "adulto", si la prueba da VERDADERO
-- "menor", si el resultado es FALSO
+- "adulto", si la evaluación da VERDADERA
+- "menor", si la evaluación es FALSA
 
 ```{r, echo=T, eval=T}
 surv_raw %>% 
   mutate(age_group = ifelse(
-    test = age >= 18,
-    yes = "adult",  
-    no = "minor")) 
+    test = age >= 18, #evaluación
+    yes = "adulto",    #Si es verdadera
+    no = "menor"))    #si es falsa
 ```
 
 ---
 
-# Nombres y orden de los argumentos
+## Nombres y orden de los argumentos
 
 Si los argumentos se escriben en el orden predeterminado según la documentación de la función, no es necesario escribir explícitamente sus nombres.
 
@@ -593,15 +592,15 @@ surv_raw %>%
 
 ---
 
-# Lógica compleja
+## Re-codificación con lógica compleja
 
-Utiliza **`case_when()`** en `mutate()` para comprobar una serie de criterios lógicos en cada fila y asignar el nuevo valor correspondiente.
+Utiliza la función **`case_when()`** en `mutate()` para comprobar una serie de criterios lógicos en cada fila y asignar el nuevo valor correspondiente.
 
 ```{r, results="asis", echo=FALSE}
-str_glue("La syntaxe case_when() est la suivante : critères logiques pour la ligne ~ résultat si satisfait") %>%
-  flair("critères logiques pour la ligne", color = "orange") %>%
+str_glue("La sintaxis case_when() es la siguiente: criterios logicos para la file ~ resultado si se satisface") %>%
+  flair("criterios lógicos", color = "orange") %>%
   flair("~", color = "deeppink") %>%
-  flair("résultat si atteint", color = "cornflowerblue") %>%
+  flair("resultado si estos se cumplen", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -626,7 +625,7 @@ decorate("mutate3") %>%
   knit_print()
 ```
 
-En **orden importa**. Escribe los criterios más específicos en la parte superior del comando (para que se activen primero) y los criterios más generales en la parte inferior (como un "cajón de sastre").
+En **orden importa**. Escribe los criterios más específicos en la parte superior del comando (para que se activen primero) y los criterios más generales en la parte inferior.
 
 ---
 
@@ -723,7 +722,7 @@ Empecemos por una fácil...
 
 # Terminología
 
-Estructuralmente, los "marcos de datos" en R consisten en **columnas** y **filas**.
+Estructuralmente, los "dataframes" (base de datos) en R consisten en **columnas** y **filas**.
 
 --
 
@@ -758,7 +757,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 ```{r}
 long_example <- tribble(
-     ~country, ~January, ~February, ~March, 
+     ~País, ~Enero, ~Febrero, ~Marzo, 
      "Mozambique", 3200,    3300,      4100,  
      "Lesotho", 500,     750,       900,   
      "South Africa", 5100, 6200, 8100,)
@@ -782,7 +781,7 @@ long_example %>%
 
 ```{r}
 long_example %>%
-  pivot_longer(cols=2:4, names_to="month", values_to = "cases") %>% 
+  pivot_longer(cols=2:4, names_to="Mes", values_to = "casos") %>% 
      knitr::kable()
 ```
 
@@ -796,7 +795,7 @@ class: inverse, center, middle
 
 Ir al sitio web del curso  
 Abre el ejercicio del Módulo 3 e inicia sesión  
-Sigue las instrucciones para abrir tu proyecto R "ébola" y continuar codificando  
+Sigue las instrucciones para abrir tu proyecto R "ebola" y continuar codificando  
 Avisa a un instructor si no estás seguro de lo que tienes que hacer
 
 ```{r, eval=TRUE, echo=FALSE, out.width="100%"}
@@ -805,5 +804,7 @@ Avisa a un instructor si no estás seguro de lo que tienes que hacer
 
 knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "COVID dominoes.png")))
 ```
+
+
 
 
