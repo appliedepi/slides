@@ -36,7 +36,7 @@ translate_r_script <- function(file_path, translation_data) {
 translation_data <- read_excel("eng_to_es.xlsx")
 
 # Get a list of all R script files in the folder
-script_files <- list.files(path = "intro/intro02_es/",
+script_files <- list.files(path = "intro/intro05_es/",
                            pattern = "\\.Rmd$",
                            full.names = T)
 
