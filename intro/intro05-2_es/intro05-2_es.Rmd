@@ -44,17 +44,17 @@ options(htmltools.dir.version = FALSE)
 
 ## install and load necessary packages 
 pacman::p_load(
-  rio,        # importing data  
+  rio,        # importing datos  
   here,       # relative file pathways  
-  janitor,    # data cleaning and tables
-  epikit,     # age categories
+  janitor,    # datos cleaning and tables
+  epikit,     # edad categories
   lubridate,  # working with dates
   ggrepel,    # smart labels
   ggExtra,    # extras
   scales,     # formatting of scales
   cowplot,    # combining plots
   flair,      # flair colored text
-  tidyverse,  # data management and visualization
+  tidyverse,  # datos management and visualization
   xaringanthemer,  # for styling presentation 
 )
 
@@ -81,11 +81,11 @@ style_mono_accent(
   base_color = "#00538c", 
   link_color = "#48a878", 
   ## add logo to the title page (bit bigger)
-  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_image = "https://brutos.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
   title_slide_background_position = "95% 95%", 
   title_slide_background_size = "25%", 
   ## add logo to all following slides
-  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_image = "https://brutos.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
   background_size = "10%",
   background_position = "100% 0%"
 )
@@ -95,8 +95,8 @@ options(htmltools.dir.version = FALSE)
 ```
 
 ```{r, include=FALSE}
-# data prep --------------------------------------------------------------------
-surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+# datos prep --------------------------------------------------------------------
+vig <- rio::import(here::here("datos", "listado_vigilancia_limpio_20141201.rds"))
 
 # gen <- googlesheets4::read_sheet(
 #   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
@@ -408,10 +408,10 @@ Algunos ejemplos de comandos de escala:
 
 ```{r, eval=F, echo=T}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = district,
-    fill = sex)) +
+    x = distrito,
+    fill = sexo)) +
 geom_bar()
 ```
 
@@ -423,10 +423,10 @@ Más arriba, el relleno de un gráfico de barras utiliza la función **colores p
 
 ```{r, eval=T, echo=F}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = district,
-    fill = sex)) +
+    x = distrito,
+    fill = sexo)) +
 geom_bar() +
 theme_gray(base_size = 18)
 ```
@@ -444,15 +444,15 @@ Ignora las etiquetas superpuestas del eje x, por simplicidad de código no las a
 
 ```{r, eval=F, echo=T}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = district,
-    fill = sex)) +
+    x = distrito,
+    fill = sexo)) +
 geom_bar() +
 *scale_fill_manual(        
 *  values = c(
-*    "male"     = "violetred", 
-*    "female"   = "aquamarine"))
+*    "hombre"     = "violetred", 
+*    "mujer"   = "aquamarine"))
 
 
 ```
@@ -469,15 +469,15 @@ dentro de un vector `c()`.
 
 ```{r, eval=T, echo=F}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = district,
-    fill = sex)) +
+    x = distrito,
+    fill = sexo)) +
 geom_bar() +
 scale_fill_manual(        
   values = c(
-     "male" = "violetred", 
-     "female" = "aquamarine")) +
+     "hombre" = "violetred", 
+     "mujer" = "aquamarine")) +
 theme_gray(base_size = 16)
 ```
 
@@ -494,10 +494,10 @@ Discute los argumentos na.value= en la mayoría de los comandos de escala, y la 
 
 ```{r, eval=F, echo=T}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = district,
-    fill = sex)) +
+    x = distrito,
+    fill = sexo)) +
 geom_bar() +
 *scale_fill_brewer(
 *   type = "qual",
@@ -516,10 +516,10 @@ Escalas - colorbrewer
 
 ```{r, eval=T, echo=F}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = district,
-    fill = sex)) +
+    x = distrito,
+    fill = sexo)) +
 geom_bar() +
 scale_fill_brewer(type = "qual", na.value = "grey50")+
 theme_gray(base_size = 16)
@@ -538,15 +538,15 @@ Menciona brevemente `na.value=` de la mayoría de los comandos de escala, y la d
 
 ```{r, eval=F, echo=T}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = district,
-    fill = sex)) +
+    x = distrito,
+    fill = sexo)) +
 geom_bar() +
 scale_fill_manual(        
   values = c(
-     "male" = "violetred", 
-     "female" = "aquamarine")) +
+     "hombre" = "violetred", 
+     "mujer" = "aquamarine")) +
 *scale_y_continuous(
 *  breaks = seq(from = 0,
 *               to = 250,
@@ -561,15 +561,15 @@ En `scale_y_continuous()` ajustamos los saltos del eje y utilizando `seq()` para
 
 ```{r}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = district,
-    fill = sex)) +
+    x = distrito,
+    fill = sexo)) +
 geom_bar() +
 scale_fill_manual(        
   values = c(
-     "male" = "violetred", 
-     "female" = "aquamarine")) +
+     "hombre" = "violetred", 
+     "mujer" = "aquamarine")) +
 scale_y_continuous(
   breaks = seq(from = 0,
                to = 250,
@@ -587,15 +587,15 @@ theme_gray(base_size = 18)
 
 ```{r, eval=F, echo=T}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = district,
-    fill = sex)) +
+    x = distrito,
+    fill = sexo)) +
 geom_bar() +
 scale_fill_manual(        
   values = c(
-     "male" = "violetred", 
-     "female" = "aquamarine")) +
+     "hombre" = "violetred", 
+     "mujer" = "aquamarine")) +
 scale_y_continuous(
   breaks = seq(from = 0,
                to = 250,
@@ -613,15 +613,15 @@ En `scale_x_` o `scale_y_` utiliza `expand = c(0,0)` para eliminar el espacio so
 
 ```{r}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = district,
-    fill = sex)) +
+    x = distrito,
+    fill = sexo)) +
 geom_bar() +
 scale_fill_manual(        
   values = c(
-     "male" = "violetred", 
-     "female" = "aquamarine")) +
+     "hombre" = "violetred", 
+     "mujer" = "aquamarine")) +
 scale_y_continuous(
   breaks = seq(from = 0,
                to = 250,
@@ -642,8 +642,8 @@ theme_grey(base_size = 18)
 
 ```{r, eval=F, echo=T}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram()
 ```
 
@@ -655,8 +655,8 @@ La escala por defecto para los ejes de fecha variará según el rango de tus dat
 
 ```{r}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram()+
 theme_grey(base_size = 18)
 
@@ -672,41 +672,41 @@ theme_grey(base_size = 18)
 
 ```{r, eval=F, echo=params$lang == "en"}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram() +
 *scale_x_date(
-*  date_breaks = "2 months") #2 months
+*  date_breaks = "2 meses") #2 meses
 
 ```
 
 ```{r, eval=F, echo=params$lang == "fr"}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram() +
 *scale_x_date(
-*  date_breaks = "2 months") #2 mois
+*  date_breaks = "2 meses") #2 mois
 
 ```
 
 ```{r, eval=F, echo=params$lang == "ru"}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram() +
 *scale_x_date(
-*  date_breaks = "2 months") #2 месяца
+*  date_breaks = "2 meses") #2 месяца
 
 ```
 
 ```{r, eval=F, echo=params$lang == "es"}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram() +
 *scale_x_date(
-*  date_breaks = "2 months") #2 meses
+*  date_breaks = "2 meses") #2 meses
 
 ```
 
@@ -722,11 +722,11 @@ Estos ajustan la ruptura del eje *etiquetas* y no los intervalos del histograma.
 
 ```{r}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram() +
 scale_x_date(
-  date_breaks = "2 months") +
+  date_breaks = "2 meses") +
 theme_grey(base_size = 18)
 
 ```
@@ -744,11 +744,11 @@ Para obtener consejos sobre los intervalos de geom\_histogram(), consulta la pá
 
 ```{r, eval=F, echo=T}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram() +
 scale_x_date(
-  date_breaks = "2 months",
+  date_breaks = "2 meses",
 * date_labels = "%d %b\n%Y")
 
 ```
@@ -767,11 +767,11 @@ Especifica el formato de la etiqueta de fecha para `date_labels=` utilizando
 
 ```{r}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram() +
 scale_x_date(
-  date_breaks = "2 months",
+  date_breaks = "2 meses",
   date_labels = "%d %b\n%Y"
 ) +
 theme_grey(base_size = 18)
@@ -791,8 +791,8 @@ theme_grey(base_size = 18)
 
 ```{r, eval=F, echo=params$lang == "en"}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram() +
 scale_x_date(
 * date_breaks = "2 weeks", #2 weeks
@@ -802,8 +802,8 @@ scale_x_date(
 
 ```{r, eval=F, echo=params$lang == "fr"}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram() +
 scale_x_date(
 * date_breaks = "2 weeks", # 2 semaines
@@ -813,8 +813,8 @@ scale_x_date(
 
 ```{r, eval=F, echo=params$lang == "ru"}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram() +
 scale_x_date(
 * date_breaks = "2 weeks", # 2 недели
@@ -824,8 +824,8 @@ scale_x_date(
 
 ```{r, eval=F, echo=params$lang == "es"}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram() +
 scale_x_date(
 * date_breaks = "2 weeks", #2 semanas
@@ -843,8 +843,8 @@ El año no se repite en cada etiqueta.
 
 ```{r}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas)) +
 geom_histogram() +
 scale_x_date(
   date_breaks = "2 weeks",
@@ -876,9 +876,9 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_scales_
 
 ```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = date_onset,
+    x = fecha_sintomas,
     fill = hospital)) +
 geom_histogram() +
 scale_x_date(
@@ -894,8 +894,8 @@ scale_fill_brewer(type = "qual",
 
 ```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset, fill = hospital)) +
+  datos = vig,
+  mapping = aes(x = fecha_sintomas, fill = hospital)) +
 geom_histogram() +
 scale_x_date(
   date_breaks = "2 weeks",
@@ -915,9 +915,9 @@ theme_grey(base_size = 18)
 
 ```{r, echo=params$lang == "en", eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = date_onset,
+    x = fecha_sintomas,
     fill = hospital)) +
 geom_histogram() +
 scale_x_date(
@@ -930,16 +930,16 @@ scale_fill_brewer(type = "qual",
 *  subtitle = "Confirmed cases, 2014",
 *  x = "Date",
 *  y = "Number of cases",
-*  caption = "Fictional Ebola data",
+*  caption = "Fictional Ebola datos",
 *  fill = "Hospital"
 ) +
 ```
 
 ```{r, echo=params$lang == "fr", eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = date_onset,
+    x = fecha_sintomas,
     fill = hospital)) +
 geom_histogram() +
 scale_x_date(
@@ -959,9 +959,9 @@ scale_fill_brewer(type = "qual",
 
 ```{r, echo=params$lang == "ru", eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = date_onset,
+    x = fecha_sintomas,
     fill = hospital)) +
 geom_histogram() +
 scale_x_date(
@@ -981,9 +981,9 @@ scale_fill_brewer(type = "qual",
 
 ```{r, echo=params$lang == "es", eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = date_onset,
+    x = fecha_sintomas,
     fill = hospital)) +
 geom_histogram() +
 scale_x_date(
@@ -1009,9 +1009,9 @@ Utiliza `labs()` como arriba. Nota: edita el título de la leyenda mediante la e
 
 ```{r, echo=FALSE, eval=params$lang == "en", tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = date_onset,
+    x = fecha_sintomas,
     fill = hospital)) +
 geom_histogram() +
 scale_x_date(
@@ -1024,7 +1024,7 @@ labs(
   subtitle = "Confirmed cases, 2014",
   x = "Date",
   y = "Number of cases",
-  caption = "Fictional Ebola data",
+  caption = "Fictional Ebola datos",
   fill = "Hospital"
 ) +
 theme_grey(base_size = 18)
@@ -1032,9 +1032,9 @@ theme_grey(base_size = 18)
 
 ```{r, echo=FALSE, eval=params$lang == "fr", tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = date_onset,
+    x = fecha_sintomas,
     fill = hospital)) +
 geom_histogram() +
 scale_x_date(
@@ -1055,9 +1055,9 @@ theme_grey(base_size = 18)
 
 ```{r, echo=FALSE, eval=params$lang == "ru", tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = date_onset,
+    x = fecha_sintomas,
     fill = hospital)) +
 geom_histogram() +
 scale_x_date(
@@ -1078,9 +1078,9 @@ theme_grey(base_size = 18)
 
 ```{r, echo=FALSE, eval=params$lang == "es", tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = date_onset,
+    x = fecha_sintomas,
     fill = hospital)) +
 geom_histogram() +
 scale_x_date(
@@ -1127,19 +1127,19 @@ str_glue("Datos a partir de {Sys.Date()}")
 --
 
 ```{r, eval=params$lang == "en", echo=params$lang == "en"}
-str_glue("{fmt_count(surv, is.na(date_onset))} cases missing onset and not shown")
+str_glue("{fmt_count(vig, is.na(fecha_sintomas))} cases missing onset and not shown")
 ```
 
 ```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
-str_glue("La date d'apparition est manquante pour {fmt_count(surv, is.na(date_onset))}")
+str_glue("La date d'apparition est manquante pour {fmt_count(vig, is.na(fecha_sintomas))}")
 ```
 
 ```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
-str_glue("{fmt_count(surv, is.na(date_onset))} случаи с отсутствующим началом и не показаны")
+str_glue("{fmt_count(vig, is.na(fecha_sintomas))} случаи с отсутствующим началом и не показаны")
 ```
 
 ```{r, eval=params$lang == "es", echo=params$lang == "es"}
-str_glue("{fmt_count(surv, is.na(date_onset))} casos que faltan para el inicio y no se muestran")
+str_glue("{fmt_count(vig, is.na(fecha_sintomas))} casos que faltan para el inicio y no se muestran")
 ```
 
 .footnote[Ver el [capítulo sobre cadenas del Manual de Epi](https://epirhandbook.com/characters-and-strings.html#dynamic-strings) y el capítulo {stringr} paquete.
@@ -1238,84 +1238,84 @@ Prueba el argumento `base_size = 16` para aumentar rápidamente el tamaño del t
 
 ```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
 
-minimal <- ggplot(data = surv,
+minimal <- ggplot(datos = vig,
        mapping = aes(
-         x = age_years,
-         y = ht_cm),    
+         x = edad_anios,
+         y = alt_cm),    
        alpha = 0.3)+
   geom_point()+
   labs(
     title = "theme_minimal()",
-    x = "Age (years)",
+    x = "Age (anios)",
     y = "Height (cm)")+
   theme_minimal(base_size = 18)
 
 
 
-bw <- ggplot(data = surv,
+bw <- ggplot(datos = vig,
        mapping = aes(
-         x = age_years,
-         y = ht_cm),    
+         x = edad_anios,
+         y = alt_cm),    
        alpha = 0.3)+
   geom_point()+
   labs(
     title = "theme_bw()",
-    x = "Age (years)",
+    x = "Age (anios)",
     y = "Height (cm)")+
   theme_bw(base_size = 18)
 
 
 
-grey <- ggplot(data = surv,
+grey <- ggplot(datos = vig,
        mapping = aes(
-         x = age_years,
-         y = ht_cm),    
+         x = edad_anios,
+         y = alt_cm),    
        alpha = 0.3)+
   geom_point()+
   labs(
     title = "theme_grey()",
-    x = "Age (years)",
+    x = "Age (anios)",
     y = "Height (cm)")+
   theme_grey(base_size = 18)
 
 
-dark <- ggplot(data = surv,
+dark <- ggplot(datos = vig,
        mapping = aes(
-         x = age_years,
-         y = ht_cm),    
+         x = edad_anios,
+         y = alt_cm),    
        alpha = 0.3)+
   geom_point()+
   labs(
     title = "theme_dark()",
-    x = "Age (years)",
+    x = "Age (anios)",
     y = "Height (cm)")+
   theme_dark(base_size = 18)
 
 
 
-void <- ggplot(data = surv,
+void <- ggplot(datos = vig,
        mapping = aes(
-         x = age_years,
-         y = ht_cm),    
+         x = edad_anios,
+         y = alt_cm),    
        alpha = 0.3)+
   geom_point()+
   labs(
     title = "theme_void()",
-    x = "Age (years)",
+    x = "Age (anios)",
     y = "Height (cm)")+
   theme_void(base_size = 18)
 
 
 
-light <- ggplot(data = surv,
+light <- ggplot(datos = vig,
        mapping = aes(
-         x = age_years,
-         y = ht_cm),    
+         x = edad_anios,
+         y = alt_cm),    
        alpha = 0.3)+
   geom_point()+
   labs(
     title = "theme_light()",
-    x = "Age (years)",
+    x = "Age (anios)",
     y = "Height (cm)")+
   theme_light(base_size = 18)
 
@@ -1368,18 +1368,18 @@ Realiza microajustes dentro de `theme()`.
 
 ```{r, echo=params$lang == "en", eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = age_years,
-    y = ht_cm,
-    color = sex),    
+    x = edad_anios,
+    y = alt_cm,
+    color = sexo),    
     alpha = 0.3) +
 geom_point() +
 labs(
-  title = "Height by age",
-  x = "Age (years)",
+  title = "Height by edad",
+  x = "Age (anios)",
   y = "Height (cm)",
-  color = "sex")+
+  color = "sexo")+
 theme_minimal(base_size = 16) +
 *theme(
 * legend.position = "bottom",
@@ -1391,11 +1391,11 @@ theme_minimal(base_size = 16) +
 
 ```{r, echo=params$lang == "fr", eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = age_years,
-    y = ht_cm,
-    color = sex),    
+    x = edad_anios,
+    y = alt_cm,
+    color = sexo),    
     alpha = 0.3) +
 geom_point() +
 labs(
@@ -1414,11 +1414,11 @@ theme_minimal(base_size = 16) +
 
 ```{r, echo=params$lang == "ru", eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = age_years,
-    y = ht_cm,
-    color = sex),    
+    x = edad_anios,
+    y = alt_cm,
+    color = sexo),    
     alpha = 0.3) +
 geom_point() +
 labs(
@@ -1437,11 +1437,11 @@ theme_minimal(base_size = 16) +
 
 ```{r, echo=params$lang == "es", eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = age_years,
-    y = ht_cm,
-    color = sex),    
+    x = edad_anios,
+    y = alt_cm,
+    color = sexo),    
     alpha = 0.3) +
 geom_point() +
 labs(
@@ -1466,18 +1466,18 @@ La sintaxis requiere práctica - véase [esta lista](https://ggplot2.tidyverse.o
 
 ```{r, echo=FALSE, eval=params$lang == "en", tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = age_years,
-    y = ht_cm,
-    color = sex),    
+    x = edad_anios,
+    y = alt_cm,
+    color = sexo),    
     alpha = 0.3) +
 geom_point() +
 labs(
-  title = "Height by age",
-  x = "Age (years)",
+  title = "Height by edad",
+  x = "Age (anios)",
   y = "Height (cm)",
-  color = "sex")+
+  color = "sexo")+
   theme_minimal(base_size = 16)+
   theme(
     legend.position = "bottom",
@@ -1489,11 +1489,11 @@ labs(
 
 ```{r, echo=FALSE, eval=params$lang == "fr", tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = age_years,
-    y = ht_cm,
-    color = sex),    
+    x = edad_anios,
+    y = alt_cm,
+    color = sexo),    
     alpha = 0.3) +
 geom_point() +
 labs(
@@ -1512,11 +1512,11 @@ labs(
 
 ```{r, echo=FALSE, eval=params$lang == "ru", tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = age_years,
-    y = ht_cm,
-    color = sex),    
+    x = edad_anios,
+    y = alt_cm,
+    color = sexo),    
     alpha = 0.3) +
 geom_point() +
 labs(
@@ -1535,11 +1535,11 @@ labs(
 
 ```{r, echo=FALSE, eval=params$lang == "es", tidy=FALSE}
 ggplot(
-  data = surv,
+  datos = vig,
   mapping = aes(
-    x = age_years,
-    y = ht_cm,
-    color = sex),    
+    x = edad_anios,
+    y = alt_cm,
+    color = sexo),    
     alpha = 0.3) +
 geom_point() +
 labs(
