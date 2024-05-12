@@ -114,62 +114,62 @@ style_mono_accent(
 
 # Introducción a R para la epidemiología aplicada
 
-### Unir marcos de datos
+### Unir tablas de datos (objetos "dataframe")
 
 ## [contact@appliedepi.org](mailto:contact@appliedepi.org)
 ---
 
-# Hoy: objetivos y calendario
+# Objetivos y agenda
 
 **En este módulo pretendemos ayudarte a**
 
-- Aprende a unir dos o más marcos de datos
-- Conoce las diferentes uniones y el uso de las columnas clave/identificador
-- Practica el pivotaje de datos de formato ancho a largo para crear "líneas de tiempo" de pacientes
-- Convertir variables en clase "factor" con la función {forcats} paquete
+- Aprender a unir dos o más tablas de datos
+- Conocer las diferentes uniones y el uso de las columnas clave/identificadoras
+- Practicar el pivotaje de datos de un formato ancho a largo para crear "líneas de tiempo" de pacientes
+- Convertir variables a la clase "factor" con el paquete {forcats}
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
-  ~Time, ~Topic,
-  "20 minutes", "Demo: Joins",
-  "1h 15 minutes", "Exercise: Joining data", 
-  "15 minutes", "Demo: Pivoting data", 
-  "1 hour",  "Exercise: Pivoting data & Factors", 
-  "10 minutes", "Plenary debrief" 
+  ~Tiempo, ~Tema,
+  "20 min", "Demo: Uniones",
+  "1 hora 15 min", "Ejercicio: Unir dataframes", 
+  "15 min", "Demo: Pivotar", 
+  "1 hora",  "Ejercicio: Pivotar datos & factores", 
+  "10 min", "Repaso general" 
 
 )
 
 outline %>% 
   flextable::qflextable() %>% 
-  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+  flextable::add_footer_lines("Toma los descansos necesarios durante los ejercicios")
 ```
 
 ---
 
 class: inverse, center, middle
 
-# Unir marcos de datos
+# Unir tablas de datos ("dataframes")
 
-*Unir, fusionar, unir, combinar, ensamblar, enlazar, emparejar, unir* marcos de datos
+*Unir, fusionar, juntar, combinar, ensamblar, enlazar, emparejar, integrar*... tablas de datos
 
-.nota[Gracias a Garrick Aden-Buie por proporcionar los gifs utilizados en estas diapositivas]
+.footnote[Gracias a Garrick Aden-Buie por proporcionar los gifs utilizados en estas diapositivas]
 
 ???
 
 Explícalo:
 
 - las personas procedentes de distintos entornos pueden tener palabras diferentes para este tipo de operación: unir, juntar, fusionar, combinar, ensamblar...
-- En este módulo, utilizaremos la palabra "unir" para ceñirnos a la `join_` familia de funciones de tidyverse, así como funciones bien conocidas de SQL. El equivalente en R es `merge`.
+- En este módulo, utilizaremos la palabra "unir" o 'join' para ceñirnos a la `join_` familia de funciones de tidyverse, así como funciones bien conocidas de SQL. El equivalente en R base es `merge`.
 
 ---
 
-# Situación: los datos están dispersos entre marcos de datos
+# Situación: los datos están dispersos entre tablas de datos
 
 ???
 
-Pon ejemplos de situaciones con las que podrían encontrarse para poner de relieve lo común que es:
+Pon ejemplos de situaciones con las que podrían encontrarse para enfatizar lo común que es:
 
-- conectar los datos de laboratorio con los resultados clínicos de los pacientes
+- conectar los datos del laboratorio con los resultados clínicos de los pacientes
 - conectar los datos de los pacientes con los datos del SIG,
 - conectar los datos de movilidad de Google con las tendencias de las enfermedades infecciosas
 - otro ejemplo relevante para su trabajo insinuado por la encuesta de los participantes
@@ -180,16 +180,16 @@ Pon ejemplos de situaciones con las que podrían encontrarse para poner de relie
 
 #### Tipos de uniones
 
-- **Uniones mutantes** Añadir una nueva variable a un marco de datos
-  - **Unión izquierda** / **Unión der** Añadir datos a un marco de datos
-  - **Unión completa**: combina dos marcos de datos completos
-  - **Unión interna**: toma la intersección de dos marcos de datos
-- **Filtrar uniones** filtrar un marco de datos a partir de otro
+- **Uniones para transformar** Añadir una nueva variable a una tabla de datos
+  - **Unión izquierda** / **Unión derecha** añadir datos a una tabla de datos
+  - **Unión completa**: combinar dos tablas de datos completas
+  - **Unión interna**: tomar la intersección de dos tablas de datos
+- **Uniones para filtrar** filtrar una tabla de datos a partir de otro
   - **Antiunión** / **semiunión**
 
 #### Sintaxis general
 
-- Utilizamos la `join` funciones de {dplyr} paquete
+- Utilizamos las funciones `join` del paquete {dplyr} 
 - Sintaxis homogénea:
 
 ```{r, include=TRUE, echo=TRUE, eval=FALSE}
@@ -198,36 +198,36 @@ xxx_join(dataframe_1, dataframe_2,
 ```
 
 ???
-Insiste en que existen globalmente dos tipos de uniones, las uniones mutantes, que añadirán nuevas columnas, y potencialmente afectarán al número de líneas, y las uniones de filtrado, que no añadirán ninguna columna nueva, sólo cambiarán las filas de un conjunto de datos.
+Insiste en que existen globalmente dos tipos de uniones, las uniones mutantes, que añadirán nuevas columnas, y potencialmente afectarán al número de líneas, y las uniones de filtrado, que no añadirán ninguna columna nueva, sólo cambiarán las filas de una tabla de datos.
 
-Explica que la función siempre tiene esta forma, dos marcos de datos, el primero se apoda *izquierda* y el segundo se llama *derecho* derecho. La dirección *por* proporciona columnas utilizadas para identificar coincidencias entre observaciones
+Explica que la función siempre tiene esta forma, dos tablas de datos o dataframes, el primero se apoda dataframe *_izquierdo_* y el segundo se llama dataframe *_derecho_*. El argumento *by* proporciona las columnas necesarias para identificar coincidencias entre observaciones
 
 ---
 
 # Ejemplo: añadir resultados de pacientes
 
 ```{r, include=FALSE, echo=F}
-# Make smaller linelists for exemple purpose
+# Crear listados más pequeños como ejemplos
 # patients <- linelist_surv %>% 
 #      select(case_id, age, age_unit, sex) %>% 
 #      arrange(case_id) %>% 
 #      head(5)
 
-patients <- tribble(
-     ~case_id, ~age, ~age_unit, ~sex,
-     "5fe599", 2, "years", "m",
-     "8689b7", 3, "years", "f",
-     "11f8ea", 56, "years", "m",
-     "b8812a", 18, "years", "f",
-     "893f25", 3, "years", "m")
+pacientes <- tribble(
+     ~id_caso, ~edad, ~edad_unidad, ~sexo,
+     "5fe599", 2, "anios", "m",
+     "8689b7", 3, "anios", "f",
+     "11f8ea", 56, "anios", "m",
+     "b8812a", 18, "anios", "f",
+     "893f25", 3, "anios", "m")
 
 
 hosp <- tribble(
-     ~id_patient, ~outcome,
-      "5fe599", "Died",
-      "8689b7", "Recovered",
-      "11f8ea", "Recovered",
-      "ebd24z", "Died")
+     ~id_paciente, ~resultado,
+      "5fe599", "Muerte",
+      "8689b7", "Recuperacion",
+      "11f8ea", "Recuperacion",
+      "ebd24z", "Muerte")
 
 
 # hosp <- linelist_surv %>% 
@@ -236,14 +236,14 @@ hosp <- tribble(
 #      head(3)
 ```
 
-Hagamos una demostración con estos pequeños conjuntos de datos: queremos *unir* ambos marcos de datos:
+Hagamos una demostración con estas pequeñas tablas de datos: queremos *unir* ambas tablas de datos:
 
 .pull-left[
 
-`patients` *(Información sobre pacientes)*
+`pacientes` *(Información sobre pacientes)*
 
 ```{r, include=TRUE, echo=FALSE}
-patients %>% 
+pacientes %>% 
      # head(5) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 1, bg = "yellow")
@@ -266,25 +266,25 @@ hosp %>%
 
 <br>
 
-El **CLAVE** que vinculan los dos marcos de datos son **id\_caso** y **id\_paciente**
+La **CLAVE** que vincula las dos tablas de datos son **id\_caso** y **id\_paciente**
 
 ???
-A efectos de las diapositivas, creamos dos *mini* marcos de datos para ver lo que ocurre, uno con las características del paciente (edad y sexo) y otro con el hospital en el que ha estado ingresado.
+A efectos de las diapositivas, creamos dos *mini* tablas de datos o dataframe para ver lo que ocurre, una con las características del paciente (edad y sexo) y otra con el hospital en el que ha estado ingresado.
 **Observa que ambos conjuntos de datos tienen en común el ID del paciente, pero un nombre ligeramente distinto (una situación muy común)**. A esta columna la llamamos CLAVE, o columna identificadora. Permite *coincidir con* observaciones en ambos marcos de datos.
 
 ---
 
-# Unión izquierda
+# Unión izquierda ("left_join")
 
 .pull-left[
 
-- Las uniones a la izquierda suelen utilizarse para **añadir columnas** a un marco de datos.
+- Las uniones a la izquierda suelen utilizarse para **añadir columnas** a una tabla de datos.
 
-- Todas las filas del marco de datos inicial (izquierdo) se mantienen
+- Todas las filas de la tabla de datos inicial (izquierda) se mantienen
 
-- Se unen las filas del segundo marco de datos (derecho) que coincidan
+- Se unen las filas de la segunda tabla de datos (derecha) que coincidan
 
-- Se añaden las columnas del segundo marco de datos (con `NA` rellenando los huecos)
+- Se añaden las columnas e la segunda tabla de datos (rellenando los espacios con `NA`)
 
 ]
 
@@ -297,16 +297,16 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 ]
 
 ???
-A veces llamado Izquierda *exterior* join
+A veces llamado unión izquierda *exterior* 
 
 ---
 
-# Unión izquierda
+# Unión izquierda ("left_join")
 
 .pull-left[
 
 ```{r, include=TRUE, echo=FALSE}
-patients %>% 
+pacientes %>% 
      # head(5) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 1, bg = "yellow")
@@ -329,9 +329,9 @@ hosp %>%
 .pull-left[
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
-left_join(patients, hosp,      
+left_join(pacientes, hosp,      
   by = c(
-    "case_id" = "id_patient")) #<<
+    "id_caso" = "id_paciente")) #<<
 ```
 
 ]
@@ -339,9 +339,9 @@ left_join(patients, hosp,
 .pull-right[
 
 ```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
-left_join(patients, 
+left_join(pacientes, 
           hosp, 
-     by = c("case_id" = "id_patient")) %>% 
+     by = c("id_caso" = "id_paciente")) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 1, bg = "yellow")
 
@@ -353,12 +353,12 @@ left_join(patients,
 
 ---
 
-# Unión izquierda
+# Unión izquierda ("left_join")
 
 .pull-left[
 
 ```{r, include=TRUE, echo=FALSE}
-patients %>% 
+pacientes %>% 
      # head(5) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 1, bg = "yellow")
@@ -384,9 +384,9 @@ hosp %>%
 .pull-left[
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
-left_join(patients, hosp,      
+left_join(pacientes, hosp,      
   by = c(
-    "case_id" = "id_patient")) #<<
+    "id_caso" = "id_paciente")) #<<
 ```
 
 ]
@@ -394,9 +394,9 @@ left_join(patients, hosp,
 .pull-right[
 
 ```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
-left_join(patients, 
+left_join(pacientes, 
           hosp, 
-     by = c("case_id" = "id_patient")) %>% 
+     by = c("id_caso" = "id_paciente")) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 1, bg = "yellow") %>% 
      bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
@@ -409,17 +409,17 @@ left_join(patients,
 
 ---
 
-# Junta derecha
+# Unión derecha ("right_join")
 
 .pull-left[
 
 - No se utiliza muy a menudo
 
-- Mantiene las filas coincidentes del marco de datos de referencia
+- Mantiene las filas coincidentes de la tabla de datos de referencia
 
-- Añade *las no coincidentes* filas del segundo marco de datos
+- Añade las filas *no coincidentes* de la segunda tabla de datos
 
-- Añade columnas del segundo marco de datos
+- Añade columnas de la segunda tabla de datos
 
 ]
 
@@ -433,12 +433,12 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 ---
 
-# Junta derecha
+# Unión derecha ("right_join")
 
 .pull-left[
 
 ```{r, include=TRUE, echo=FALSE}
-patients %>% 
+pacientes %>% 
      # head(5) %>% 
      qflextable() %>% 
      bg(part = "body",   i = 4:5, j = 1:4, bg = "red")
@@ -460,9 +460,9 @@ hosp %>%
 .pull-left[
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
-right_join(patients, hosp,      
+right_join(pacientes, hosp,      
   by = c(
-    "case_id" = "id_patient")) 
+    "id_caso" = "id_paciente")) 
 ```
 
 ]
@@ -470,9 +470,9 @@ right_join(patients, hosp,
 .pull-right[
 
 ```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
-right_join(patients, 
+right_join(pacientes, 
           hosp, 
-     by = c("case_id" = "id_patient")) %>% 
+     by = c("id_caso" = "id_paciente")) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
      bg(part = "body",   i = 1:4, j = 5, bg = "lightgreen") %>% 
@@ -488,13 +488,13 @@ No se utiliza muy a menudo.
 
 ---
 
-# Uniones completas
+# Uniones completas ("full_join")
 
 .pull-left[
 
 - La más inclusiva de las uniones
 
-- Conserva **todas las filas de ambos marcos de datos**
+- Conserva **todas las filas de ambas tablas de datos**
 
 - Rellena los espacios con `NA` según sea necesario
 
@@ -508,16 +508,16 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 ]
 
-.footnote[A veces llamada *Unión externa completa* o *Unión ext*]
+.footnote[A veces llamada *Unión externa completa* o *Unión externa*]
 
 ---
 
-# A veces llamada *Unión externa completa* o *Unión ext*
+# A veces llamada *Unión externa completa* o *Unión externa*
 
 .pull-left[
 
 ```{r, include=TRUE, echo=FALSE}
-patients %>% 
+pacientes %>% 
      # head(5) %>% 
      qflextable()
 ```
@@ -537,9 +537,9 @@ hosp %>%
 .pull-left[
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
-full_join(patients, hosp,       
+full_join(pacientes, hosp,       
   by = c(
-    "case_id" = "id_patient")) 
+    "id_caso" = "id_paciente")) 
 ```
 
 ]
@@ -547,9 +547,9 @@ full_join(patients, hosp,
 .pull-right[
 
 ```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
-full_join(patients, 
+full_join(pacientes, 
           hosp, 
-     by = c("case_id" = "id_patient")) %>% 
+     by = c("id_caso" = "id_paciente")) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
      bg(part = "body",   i = c(1:3, 6), j = 5, bg = "lightgreen") %>% 
@@ -561,19 +561,19 @@ full_join(patients,
 ]
 
 ???
-Ahora es un buen momento para insistir en lo coherentes que son los argumentos de la familia de funciones join: siempre se escriben de la misma manera
+Ahora es un buen momento para insistir en lo consistentes que son los argumentos de la familia de funciones join: siempre se escriben de la misma manera
 
 ---
 
-# Unión interna
+# Unión interna ("inner_join")
 
 .pull-left[
 
-- Lo más **restrictivo** de uniones
+- La union más **restrictiva** 
 
-- Toma el **intersección** entre dos marcos de datos: mantiene sólo las filas que coinciden
+- Toma la **intersección** entre dos tablas de datos: mantiene sólo las filas que coinciden
 
-- **Descarta** filas sin coincidencias
+- **Descarta** las filas sin coincidencias
 
 ]
 
@@ -588,16 +588,16 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 .footnote[También llamada *unión natural*]
 
 ???
-Bueno, todas las viñetas dicen más o menos lo mismo, pero creo que es bueno asegurarse de que todo el mundo entiende lo que significa tomar el *intersección*.
+Bueno, todas las viñetas dicen más o menos lo mismo, pero creo que es bueno asegurarse de que todo el mundo entiende lo que significa tomar la *intersección*.
 
 ---
 
-# Unión interna
+# Unión interna ("inner_join")
 
 .pull-left[
 
 ```{r, include=TRUE, echo=FALSE}
-patients %>% 
+pacientes %>% 
      # head(5) %>% 
      qflextable() %>% 
      bg(part = "body",   i = 4:5, j = 1:4, bg = "red")
@@ -621,9 +621,9 @@ hosp %>%
 .pull-left[
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
-inner_join(patients, hosp,       
+inner_join(pacientes, hosp,       
   by = c(
-    "case_id" = "id_patient")) 
+    "id_caso" = "id_paciente")) 
 ```
 
 ]
@@ -631,9 +631,9 @@ inner_join(patients, hosp,
 .pull-right[
 
 ```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
-inner_join(patients, 
+inner_join(pacientes, 
           hosp, 
-     by = c("case_id" = "id_patient")) %>% 
+     by = c("id_caso" = "id_paciente")) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
      bg(part = "body",   i = c(1:3), j = 5, bg = "lightgreen") 
@@ -646,47 +646,47 @@ inner_join(patients,
 
 # Consejos de sintaxis
 
-- Las uniones pueden utilizarse en **canalizaciones** (el marco de datos canalizado es el *izquierda* izquierda):
+- Las uniones pueden utilizarse en **canalizaciones** (la tabla de datos canalizada es la de la *izquierda*):
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
-patients %>%               
+pacientes %>%               
      left_join(hosp, by = c("case_id" = "id_patient")) %>%  #<<
      filter(age > 25)
 ```
 
 --
 
-- Sintaxis simple si **la columna identificadora tiene el mismo** en ambos marcos de datos:
+- Sintaxis simple si **la columna identificadora tiene el mismo nombre** en ambas tablas de datos:
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
-left_join(patients, hosp,       
-           by = "case_id")   #<<
+left_join(pacientes, hosp,       
+           by = "id_caso")   #<<
 ```
 
 --
 
-- Pasa **varias columnas** para utilizarlas como identificadores:
+- Pasa **varias columnas** para utilizarlas como identificadoras:
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
 left_join(dataframe1, dataframe2,       
-           by = c("name" = "first_name",  
-                  "age",       #<<
-                  "sex"))   #<<
+           by = c("nombre" = "primer_nombre",  
+                  "edad",       #<<
+                  "sexo"))   #<<
 ```
 
 ---
 
-# Filtrar uniones
+# Uniones para filtrar
 
-- Las uniones filtrantes se utilizan para **filtrar filas** de la *línea de base* basándose en las coincidencias del segundo marco de datos.
-- Filtrado de uniones *no añadir columnas ni filas*
+- Las uniones para filtrar se utilizan para **filtrar filas** de la tabla de datos *base* basándose en las coincidencias de la segunda tabla de datos.
+- Las uniones para filtrar *no añaden columnas ni filas*
 
 .pull-left[
 
-#### Anti join
+#### Unión 'anti'
 
 Mantiene las filas base  
-**sin coincidencias en otro marco de datos**
+**sin coincidencias en otra tabla de datos**
 
 ```{r, eval=TRUE, echo=FALSE, out.width="50%"}
 knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "anti-join.gif")))
@@ -699,7 +699,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 #### Semiunión
 
 Mantiene las filas base  
-**con una coincidencia en otro marco de datos**
+**con coincidencias en otra tabla de datos**
 
 ```{r, eval=TRUE, echo=FALSE, out.width="50%"}
 knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "semi-join.gif")))
@@ -710,7 +710,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 **Las uniones filtrantes nunca duplican filas, sólo pueden eliminarlas**
 
 ???
-Las uniones anti son muy útiles para ver qué filas de un conjunto de datos *no* coinciden con
+Las uniones anti son muy útiles para ver qué filas de una tabla de datos *no* coinciden con otra tabla de datos
 
 ---
 
@@ -728,7 +728,7 @@ df2 <- tibble(ID = c("id_1", "id_2", "id_5"), age = c(5, 5, 7), sexe = c("F", "F
 .pull-left[
 
 ```{r, eval=TRUE, echo=FALSE}
-patients %>% 
+pacientes %>% 
      qflextable() %>% 
      bg(part = "body", i = 1:5, j = 2, bg = "orange") %>% 
      bg(part = "header", i = 1, j = 2, bg = "orange")
@@ -741,7 +741,7 @@ patients %>%
 
 ```{r, eval=TRUE, echo=FALSE}
 hosp %>%
-     mutate(age = c(2, 3, 56, 40)) %>% 
+     mutate(edad = c(2, 3, 56, 40)) %>% 
      qflextable() %>% 
      bg(part = "body", i = c(1:4), j = 3, bg = "orange") %>% 
      bg(part = "header", i = 1, j = 3, bg = "orange") 
@@ -753,9 +753,9 @@ hosp %>%
 .pull-left[
 
 ```{r, eval=FALSE, echo=TRUE}
-left_join(patients, hosp,
+left_join(pacientes, hosp,
   by = c(
-   "case_id" = "id_patient"))
+   "id_caso" = "id_paciente"))
 ```
 
 ]
@@ -763,9 +763,9 @@ left_join(patients, hosp,
 .pull-right[
 
 ```{r, eval=TRUE, echo=FALSE}
-left_join(patients,
-          hosp %>% mutate(age = c(2, 3, 56, 40)),
-  by = c("case_id" = "id_patient")) %>% 
+left_join(pacientes,
+          hosp %>% mutate(edad = c(2, 3, 56, 40)),
+  by = c("id_caso" = "id_paciente")) %>% 
   qflextable() %>% 
   bg(part = "header", i = 1, j = 2, bg = "orange") %>% 
   bg(part = "header", i = 1, j = 6, bg = "orange") 
@@ -774,7 +774,7 @@ left_join(patients,
 ]
 
 ???
-Si las columnas son comunes, R cambiará su nombre para desambiguarlas.
+Si las columnas coinciden, R cambiará su nombre para desambiguarlas.
 
 - Si estás seguro de que ambas columnas contienen la misma información, elimínalas de uno de los marcos de datos antes de la unión
 - Si no estás seguro, puedes compararlas fácilmente después de la unión.
@@ -787,7 +787,7 @@ Si las columnas son comunes, R cambiará su nombre para desambiguarlas.
 .pull-left[
 
 ```{r, eval=TRUE, echo=FALSE}
-patients %>% 
+pacientes %>% 
      qflextable() %>% 
      bg(part = "body", i = 1:5, j = 2, bg = "orange") %>% 
      bg(part = "header", i = 1, j = 2, bg = "orange")
@@ -800,7 +800,7 @@ patients %>%
 
 ```{r, eval=TRUE, echo=FALSE}
 hosp %>%
-     mutate(age = c(2, 3, 56, 40)) %>% 
+     mutate(edad = c(2, 3, 56, 40)) %>% 
      qflextable() %>% 
      bg(part = "body", i = c(1:4), j = 3, bg = "orange") %>% 
      bg(part = "header", i = 1, j = 3, bg = "orange") 
@@ -812,10 +812,10 @@ hosp %>%
 .pull-left[
 
 ```{r, eval=FALSE, echo=TRUE}
-left_join(patients, hosp,
+left_join(pacientes, hosp,
   by = c(
-   "case_id" = "id_patient",
-   "age"))    #<<
+   "id_caso" = "id_paciente",
+   "edad"))    #<<
 ```
 
 ]
@@ -823,9 +823,9 @@ left_join(patients, hosp,
 .pull-right[
 
 ```{r, eval=TRUE, echo=FALSE}
-left_join(patients,
-          hosp %>% mutate(age = c(2, 3, 56, 40)),
-  by = c("case_id" = "id_patient", "age")) %>% 
+left_join(pacientes,
+          hosp %>% mutate(edad = c(2, 3, 56, 40)),
+  by = c("id_caso" = "id_paciente", "edad")) %>% 
   qflextable() %>% 
   bg(part = "header", i = 1, j = 2, bg = "orange")
 ```
@@ -833,9 +833,9 @@ left_join(patients,
 ]
 
 ???
-Si las columnas son comunes, R cambiará su nombre para desambiguarlas.
+Si las columnas coinciden, R cambiará su nombre para desambiguarlas.
 
-- Si estás seguro de que ambas columnas contienen la misma información, elimínalas de uno de los marcos de datos antes de la unión
+- Si estás seguro de que ambas columnas contienen la misma información, elimínalas de uno de las tablas de datos antes de la unión
 - Si no estás seguro, puedes compararlas fácilmente después de la unión.
   Menciona oralmente que existe un argumento "sufijo" y que puedes darle un vector para renombrarlo en lugar de .x y .y
 
@@ -846,7 +846,7 @@ Si las columnas son comunes, R cambiará su nombre para desambiguarlas.
 .pull-left[
 
 ```{r, eval=TRUE, echo=FALSE}
-patients %>% 
+pacientes %>% 
      qflextable() %>% 
      bg(part = "body", i = 1, j = 1:4, bg = "orange")
 ```
@@ -857,12 +857,12 @@ patients %>%
 ```{r, eval=TRUE, echo=FALSE}
 
 hosp_dup <- tribble(
-     ~id_patient, ~outcome,
-      "5fe599", "Died",
-      "5fe599", "Alive",
-      "8689b7", "Recovered",
-      "11f8ea", "Recovered",
-      "ebd24z", "Died")
+     ~id_paciente, ~resultado,
+      "5fe599", "Muerte",
+      "5fe599", "Vive",
+      "8689b7", "Recuperacion",
+      "11f8ea", "Reuperacion",
+      "ebd24z", "Muerte")
 
 hosp_dup %>%
     qflextable() %>% 
@@ -870,21 +870,21 @@ hosp_dup %>%
 ```
 
 ]
-.pull-left[ ]
+.pull-left[
 
 ```{r, eval=FALSE, echo=TRUE}
-left_join(patients, hosp,
+left_join(pacientes, hosp,
   by = c(
-   "case_id" = "id_patient"))
+   "id_caso" = "id_paciente"))
 ```
 
 ]
-.pull-derecha\[ ]
+.pull-right[
 
 ```{r, eval=TRUE, echo=FALSE}
-left_join(patients,
+left_join(pacientes,
           hosp_dup,
-  by = c("case_id" = "id_patient")) %>% 
+  by = c("id_caso" = "id_paciente")) %>% 
   qflextable() %>% 
   bg(part = "body", i = 1:2, j = 1:5, bg = "orange")
 ```
@@ -899,23 +899,23 @@ left_join(patients,
 
 ```{r, eval=TRUE, echo=FALSE}
 
-patients_dup <- tribble(
-     ~case_id, ~age, ~age_unit, ~sex,
-     "5fe599", 2, "years", "m",
-     "5fe599", 2, "years", "m",
-     "8689b7", 3, "years", "f",
-     "11f8ea", 56, "years", "m",
-     "b8812a", 18, "years", "f",
-     "893f25", 3, "years", "m")
+pacientes_dup <- tribble(
+     ~id_caso, ~edad, ~edad_unidad, ~sexo,
+     "5fe599", 2, "anios", "m",
+     "5fe599", 2, "anios", "m",
+     "8689b7", 3, "anios", "f",
+     "11f8ea", 56, "anios", "m",
+     "b8812a", 18, "anios", "f",
+     "893f25", 3, "anios", "m")
 
 
-patients_dup %>% 
+pacientes_dup %>% 
      qflextable() %>% 
      bg(part = "body", i = 1:2, j = 1:4, bg = "orange")
 ```
 
 ]
-.pull-derecha\[ ]
+.pull-right[
 
 ```{r, eval=TRUE, echo=FALSE}
 
@@ -925,21 +925,21 @@ hosp %>%
 ```
 
 ]
-.pull-left[ ]
+.pull-left[
 
 ```{r, eval=FALSE, echo=TRUE}
-left_join(patients, hosp,
+left_join(pacientes, hosp,
   by = c(
-   "case_id" = "id_patient"))
+   "id_caso" = "id_paciente"))
 ```
 
 ]
-.pull-derecha\[ ]
+.pull-right[
 
 ```{r, eval=TRUE, echo=FALSE}
-left_join(patients_dup,
+left_join(pacientes_dup,
           hosp,
-  by = c("case_id" = "id_patient")) %>% 
+  by = c("id_caso" = "id_paciente")) %>% 
   qflextable() %>% 
   bg(part = "body", i = 1:2, j = 1:5, bg = "orange")
 ```
@@ -952,14 +952,14 @@ left_join(patients_dup,
 
 Utiliza `semi_join()` y `anti_join()` para **entender por qué se eliminan filas**
 
-"¿Qué `hosp` filas no se unirán por la izquierda a `patients`?" Examina por qué con `anti_join()`
+"¿Qué filas de `hosp` no se unirán por unión izquierda a `pacientes`?" Examina por qué con `anti_join()`
 
 ```{r, eval=FALSE, echo=TRUE}
-anti_join(hosp, patients, by = c("id_patient" = "case_id"))
+anti_join(hosp, pacientes, by = c("id_paciente" = "id_caso"))
 ```
 
 ```{r, eval=TRUE, echo=FALSE}
-anti_join(hosp, patients, by = c("id_patient" = "case_id")) %>% 
+anti_join(hosp, pacientes, by = c("id_paciente" = "id_caso")) %>% 
      qflextable()
 ```
 
@@ -967,10 +967,10 @@ anti_join(hosp, patients, by = c("id_patient" = "case_id")) %>%
 
 # Buenas prácticas
 
-**Comprueba las dimensiones** ¡de los marcos de datos antes y después de la fusión!
+**Comprueba las dimensiones** ¡de las tablas de datos antes y después de la unión!
 
 ```{r, eval=TRUE, echo=TRUE}
-nrow(patients)
+nrow(pacientes)
 ```
 
 ```{r, eval=TRUE, echo=TRUE}
@@ -978,7 +978,7 @@ nrow(hosp)
 ```
 
 ```{r, eval=TRUE, echo=TRUE}
-left_join(patients, hosp, by = c("case_id" = "id_patient")) %>%
+left_join(pacientes, hosp, by = c("id_caso" = "id_paciente")) %>%
   nrow()
 ```
 
@@ -994,7 +994,8 @@ class: inverse, center, middle
 Ir al sitio web del curso  
 Abre el ejercicio del Módulo 7 parte 1, e inicia sesión  
 Sigue las instrucciones para abrir tu proyecto R "ebola" y continúa codificando en tu script RMD
-Avisa a un instructor si no estás seguro de lo que tienes que hacer
+
+Avísale a una instructora si no estás segura de lo que tienes que hacer
 
 ```{r, eval=TRUE, echo=FALSE, out.width="50%"}
 # Using here() alone won't work because Rmd folder becomes the rendering root.
