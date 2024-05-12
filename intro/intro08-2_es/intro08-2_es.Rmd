@@ -119,9 +119,9 @@ style_mono_accent(
 ## [contact@appliedepi.org](mailto:contact@appliedepi.org)
 ---
 
-# Datos de reestructuración
+# Restructurando datos
 
-*pivotar, remodelar, fundir, moldear, transformar...* marcos de datos
+*pivotar, remodelar, fundir, moldear, transformar...* tablas de datos
 
 ```{r, eval=TRUE, echo=FALSE, out.height="100%"}
 # Using here() alone won't work because Rmd folder becomes the rendering root.
@@ -134,25 +134,25 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 # ¿Qué es pivotar?
 
-- *Tablas dinámicas de Excel* son una forma de resumir y agregar datos
+- Las *tablas dinámicas de Excel* son una forma de resumir y agregar datos
 
 --
 
-- En R, **pivotante** un marco de datos tiene un **significado diferente**
+- En R, **pivotar** una tabla de datos tiene un **significado diferente**
 
 --
 
-- Piensa que *reestructuración* o *remodelación* el marco de datos
+- Piensa que significa *restructar* o *manipular* la tabla de datos
 
 --
 
-- Utilizaremos la `pivot_wider()` y `pivot_longer()` de las funciones {tidyr} paquete
+- Utilizaremos las funciones `pivot_wider()` y `pivot_longer()` del paquete {tidyr}
 
 --
 
 - A menudo verás ejemplos que utilizan funciones alternativas de otros paquetes:
   - `melt()` y `cast()` de {reshape2}
-  - `gather()` y `spread()` antepasados de los {tidyr} `pivot_()` funciones
+  - `gather()` y `spread()` los 'antepasados' de las funciones `pivot_()` de {tidyr}
   - `melt()` y `dcast()` de {data.table}
 
 ---
@@ -163,7 +163,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 --
 
-1. Cada **valor** debe tener su propio **celda**
+1. Cada **valor** debe tener su propia **celda**
 
 --
 
@@ -177,18 +177,18 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 # Terminología
 
-Estructuralmente, los "marcos de datos" en R consisten en **columnas** y **filas**.
+Estructuralmente, las tablas de datos ("dataframes") en R tienen **columnas** y **filas**.
 
 --
 
-Sin embargo, **"variables"** y **"observaciones** son más *abstractas* conceptos:
+Sin embargo, las **"variables"** y **"observaciones"** representan conceptos más *abstractos*:
 
-- **Variables** medida uno *atributo subyacente* (edad, resultado o fecha de inicio)
-- **Observaciones** se refieren a una *unidad de análisis*
+- Las **variables** miden un *atributo subyacente* (edad, resultado, o fecha de inicio de síntomas)
+- Las **observaciones** se refieren a una *unidad de análisis*
 
 --
 
-Idealmente, se alinean: **columnas = variables** y **filas = observacion**
+Idealmente, se alinean: **columnas = variables** y **filas = observaciones**
 
 ```{r, eval=TRUE, echo=FALSE, out.height="65%"}
 # Using here() alone won't work because Rmd folder becomes the rendering root.
@@ -197,38 +197,39 @@ Idealmente, se alinean: **columnas = variables** y **filas = observacion**
 knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", paste0("tidy_image_", params$lang, ".png"))))
 ```
 
-.footnote\[Fuente de la imagen: [R para la Ciencia de Datos](https://r4ds.had.co.nz/tidy-data.html)]
+.footnote[Fuente de la imagen: [R para la Ciencia de Datos](https://r4ds.had.co.nz/tidy-data.html)]
 
 ---
 
-# Pivotar más
+# Pivotar a lo largo
 
-.tirar-izquierda\[
-La introducción de datos suele ser en formato "ancho
+.pull-left[
+
+La entrada de datos suele ser en formato "ancho"
 
 ```{r}
-example <- tribble(
-     ~country, ~`1999`, ~`2000`,     ~`2001`,  ~`2002`, 
+ejemplo <- tribble(
+     ~pais, ~`1999`, ~`2000`,     ~`2001`,  ~`2002`, 
      "Nigeria",   8000,    7500,        9250,      10200,    
      "India",    20100,  25650,      26800,    27255,
      "Brazil",   4500,    5120,        5100,   5860)
           
-example %>%
+ejemplo %>%
   knitr::kable()
 ```
 
 - Las características de un sujeto se almacenan en una sola fila
-- Útil para la presentación
-- **No** ideal para algunos tipos de análisis.
-  ]
+- Útil para presentar
+- **No** es ideal para algunos tipos de análisis.
+]
 
 --
-.pull-derecha\[
-**Más fácil de analizar en formato "largo**
+.pull-right[
+**Más fácil de analizar en formato "largo"**
 
 ```{r}
-example %>%
-  pivot_longer(cols=2:5, names_to="year", values_to = "cases") %>% 
+ejemplo %>%
+  pivot_longer(cols=2:5, names_to="anio", values_to = "casos") %>% 
      knitr::kable()
 ```
 
@@ -236,29 +237,29 @@ example %>%
 
 ---
 
-# {ggplot2} ejemplo
+# Ejemplo en {ggplot2}
 
-¿Cómo trazar los casos a lo largo del tiempo para los tres países?
+¿Cómo graficamos los casos a lo largo del tiempo para los tres países?
 
 ```{r}
-example %>%
+ejemplo %>%
   knitr::kable()
 ```
 
 ```{r, eval=F, echo=T}
-ggplot(data = example,
+ggplot(data = ejemplo,
        mapping = aes(x = ???, y = ???))+
      geom_line()
 ```
 
 ---
 
-# Pivotar más tiempo
+# Pivotar a lo largo
 
-.tirar-izquierda\[
+.pull-left[
 
 ```{r}
-example %>% 
+ejemplo %>% 
   qflextable() %>% 
   bg(j = 1, i = 1, part = "header", bg = "white") %>%          # backgrounds
   bg(j = 2:5, i = 1, part = "header", bg = "orange") 
@@ -269,18 +270,18 @@ example %>%
   #flextable::color(i = 1:3, j = 1:5, "white", part = "body")    # white text
 ```
 
-- Estos **nombres de columna pivotarán**
+- Estos **nombres de columna se pivotarán**
 
 ]
 
 ---
 
-# Pivotar más tiempo
+# Pivotar a lo largo
 
-.tirar-izquierda\[
+.pull-left[
 
 ```{r}
-example %>% 
+ejemplo %>% 
   qflextable() %>% 
   bg(j = 1, i = 1, part = "header", bg = "white") %>%          # backgrounds
   bg(j = 2:5, i = 1, part = "header", bg = "orange") %>% 
@@ -297,12 +298,12 @@ example %>%
 
 ---
 
-# Pivotar más tiempo
+# Pivotar a lo largo
 
-.tirar-izquierda\[
+.pull_left[
 
 ```{r}
-example %>% 
+ejemplo %>% 
   qflextable() %>% 
   bg(j = 1, i = 1, part = "header", bg = "white") %>%          # backgrounds
   bg(j = 2:5, i = 1, part = "header", bg = "orange") %>% 
@@ -319,12 +320,12 @@ example %>%
 
 ---
 
-# Pivotar más tiempo
+# Pivotar a lo largo
 
-.tirar-izquierda\[
+.pull-left[
 
 ```{r}
-example %>% 
+ejemplo %>% 
   qflextable() %>% 
   bg(j = 1, i = 1, part = "header", bg = "white") %>%          # backgrounds
   bg(j = 2:5, i = 1, part = "header", bg = "orange") %>% 
@@ -336,10 +337,10 @@ example %>%
 ```
 
 ```{r, eval=TRUE, echo=FALSE, out.width="100%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "pivot_command.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "pivot_command_es.png")))
 ```
 
-- Lista las columnas a pivotar
+- Selecciona las columnas a pivotar
 - Proporciona 2 **nuevos nombres de columna**
 
 ]
@@ -347,8 +348,8 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 .pull-right[
 
 ```{r}
-example %>% 
-  pivot_longer(cols=2:5, names_to="year", values_to = "cases") %>% 
+ejemplo %>% 
+  pivot_longer(cols=2:5, names_to="anio", values_to = "casos") %>% 
   
   qflextable() %>% 
   bg(j = 1, i = 1, part = "header", bg = "white") %>% 
@@ -370,11 +371,11 @@ example %>%
 
 ```{r pivot, eval=F}
 # Create pivot command (switch to include = F)
-example %>% 
+ejemplo %>% 
   pivot_longer(
        cols = `1999`:`2002`,
-       names_to = "year",
-       values_to = "cases")
+       names_to = "anio",
+       values_to = "casos")
 ```
 
 ```{r pivot_flair, echo=F, eval=F}
@@ -382,8 +383,8 @@ example %>%
 # use to create image of pivot command
 decorate("pivot") %>%
   flair("`1999`:`2002`", background = "orange") %>%
-  flair("year", background = "yellow") %>%
-  flair("cases", background = "#CBC3E3") %>%
+  flair("anio", background = "yellow") %>%
+  flair("casos", background = "#CBC3E3") %>%
   knit_print.with_flair()
 ```
 
@@ -394,38 +395,38 @@ decorate("pivot") %>%
 .pull-left[
 
 ```{r, eval=F, echo=T}
-example %>%
+ejemplo %>%
   pivot_longer(
        cols = `1999`:`2002`,
-       names_to = "year",
-       values_to = "cases") %>%
+       names_to = "anio",
+       values_to = "casos") %>%
      
   ggplot(mapping = aes(
-*           x = year,
-*           y = cases,
-*           color = country,
-*           group = country))+
+*           x = anio,
+*           y = casos,
+*           color = pais,
+*           group = pais))+
   geom_line()
 ```
 
-**Nota** este ejemplo se incluye en la carpeta de tu curso como un script de R titulado "ejemplo\_pivot.R" en la subcarpeta "ebola/scripts/ejemplos".
+**Nota** este ejemplo esta incluido en la carpeta del curso como un script de R titulado "demo\_pivot_es.R" en la subcarpeta "ebola/scripts/ejemplos".
 
 ]
 
 .pull-right[
 
 ```{r, eval=T, echo=F}
-example %>%
+ejemplo %>%
   pivot_longer(
        cols = `1999`:`2002`,
-       names_to = "year",
-       values_to = "cases") %>%
+       names_to = "anio",
+       values_to = "casos") %>%
      
   ggplot(mapping = aes(
-           x = year,
-           y = cases,
-           color = country,
-           group = country))+
+           x = anio,
+           y = casos,
+           color = pais,
+           group = pais))+
   geom_line(size = 2)+
   theme_classic(base_size = 16)
 ```
@@ -434,14 +435,14 @@ example %>%
 
 ---
 
-# Giro más amplio
+# Pivotar a lo ancho
 
-En este curso no trataremos el pivotaje más amplio, porque no se utiliza con tanta frecuencia.
+En este curso no trataremos pivotar a lo ancho, porque no se utiliza con tanta frecuencia.
 
 Puedes explorar varios ejemplos en estos capítulos del Manual de Epi R:
 
-- [Pivotar datos](https://epirhandbook.com/en/pivoting-data.html#long-to-wide)
-- [Tablas descriptivas con {dplyr}](https://epirhandbook.com/en/descriptive-tables.html#tbls_pivot_wider)
+- [Pivotar datos](https://epirhandbook.com/es/pivoting-data.html#long-to-wide)
+- [Tablas descriptivas con {dplyr}](https://epirhandbook.com/es/descriptive-tables.html#tbls_pivot_wider)
 
 ```{r, eval=TRUE, echo=FALSE, out.height="100%"}
 # Using here() alone won't work because Rmd folder becomes the rendering root.
@@ -461,7 +462,8 @@ class: inverse, center, middle
 Ir al sitio web del curso  
 Abre el ejercicio del Módulo 7 parte 2, e inicia sesión  
 Sigue las instrucciones para volver a tu proyecto R "ébola" y continúa codificando en tu script RMD
-Avisa a un instructor si no estás seguro de lo que tienes que hacer
+
+Avísale a un instructor si no estás seguro de lo que tienes que hacer
 
 ```{r, eval=TRUE, echo=FALSE, out.width="50%"}
 # Using here() alone won't work because Rmd folder becomes the rendering root.
