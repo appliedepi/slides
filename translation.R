@@ -13,21 +13,23 @@ Sys.setenv(DEEPL_API_KEY = "287d5481-9d96-8500-228c-6f98cfb3c576")
 
 
 # 3. Indicate modules to be translated
-module_list = c(#"intro1",
-                #"intro2",
-                #"intro3",
-                #"intro4",
-                #"intro5-1",
-                #"intro5-2",
-                "intro6"
-                #"intro7",
-                #"intro9",
-                #"intro10"
-                )
+module_list = c(
+  "intro01",
+  "intro02",
+  "intro03",
+  "intro04",
+  "intro05-1",
+  "intro05-2",
+  "intro06",
+  "intro07",
+  # "intro08-1",
+  # "intro08-2",
+  "intro10"
+  )
 
 base_directory <- here::here("intro")
 
-languages <- c("es") # "fr", "pt" Add more languages as needed
+languages <- c("pt") # "fr", "pt" Add more languages as needed
 
 # 4. Write a loop to run the translation for each module
 for (i in 1:length(module_list)) {
