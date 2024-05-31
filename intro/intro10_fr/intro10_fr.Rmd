@@ -1,0 +1,231 @@
+---
+title: Introduction à R pour<br>Épidémiologie appliquée
+subtitle: COVID-19 case study
+author: March 2022
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: en
+---
+
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  sf,         # spatial
+  ggspatial,  # spatial
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation
+  tidyverse  # data management and visualization
+
+)
+
+## load packages from github
+pacman::p_load_gh(
+     "R4IDSR/epichecks"   # bivariate colour maps 
+)
+
+
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+#gen <- googlesheets4::read_sheet(
+#  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#  range = "generic") %>%
+#  clean_names()
+
+#mod10 <- googlesheets4::read_sheet(
+#  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#  range = "mod10", col_types = "c") %>%
+#  clean_names()
+```
+
+```{r xaringan-themer, include=FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+# Introduction à R pour l'épidémiologie appliquée
+
+### Étude de cas COVID-19
+
+contact@appliedepi.org
+---
+
+# Aujourd'hui : objectifs et calendrier
+
+**Dans ce module, nous avons pour objectif de t'aider à :**
+
+- Applique ton apprentissage à un nouvel ensemble de données, sans que des solutions de code soient facilement disponibles.
+
+--
+
+- Vois les résultats et reproduis-les à l'aide de R
+
+--
+
+- Écrire un code R original qui soit compréhensible par quelqu'un d'autre.
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  "15 minutes",   "Main" ,    "Introduce the COVID-19 case study",
+  "2 hours 45 mins",      "Break outs", "COVID-19 case study",
+  "30 minutes",   "Main" ,   "Post course suvey; Recap"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+```
+
+---
+
+# Rapport COVID-19
+
+Comme pour le rapport sur Ebola, nous appliquons maintenant notre apprentissage à un nouvel ensemble de données :
+
+- Fulton County, GA COVID-19 outbreak (épidémie de COVID-19)
+- Le rapport COVID-19 est fourni en format Word Document
+
+Ton travail consiste à essayer de recréer les tableaux, les graphiques et le contenu écrit :
+
+- Le rapport se trouve dans le dossier du cours
+- Tu auras 3 heures pour reproduire le rapport dans un DMR.
+- Utilise le code Ebola que tu as développé comme référence.
+
+---
+
+# Données COVID-19
+
+Brouillés et anonymisés, 2 ensembles de données :
+
+- Linelist, voir le dictionnaire de données fourni dans le dossier de cours.
+- Population des villes du comté de Fulton
+
+Nous démarrons un nouveau projet :
+
+- N'oublie pas de créer un nouveau projet R !
+- Où doit se trouver le **nouveau projet R**?
+
+Jetons un coup d'œil ensemble aux données de COVID-19 !
+
+---
+
+class: inverse, center, middle
+
+# Démo : Examen des données COVID-19
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "window.png")))
+```
+
+---
+
+# Support disponible
+
+- Les instructeurs seront disponibles dans la salle des petits déjeuners
+- N'ayez pas peur de poser des questions, nous sommes là pour vous aider !
+- N'hésite pas à continuer à travailler ou à poser des questions sur le rapport Ebola.
+
+---
+
+# Amuse-toi
+
+Ce n'est pas un test. Fais de ton mieux. Prends plaisir à réviser tout ce que tu as appris.
+
+---
+
+class: inverse, center, middle
+
+# Exercice !
+
+Va sur le site du cours  
+Ouvre l'exercice du module 10 et connecte-toi  
+Suis les instructions pour démarrer un nouveau projet R "covid" et démarrer un nouveau script RMD.
+Informe un instructeur si tu n'es pas sûr de ce que tu dois faire.
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "window.png")))
+```
+
+

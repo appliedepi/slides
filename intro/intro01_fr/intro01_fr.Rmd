@@ -1,0 +1,1438 @@
+---
+title: Introduction à R pour</br>Épidémiologie appliquée
+subtitle: Welcome and course overview
+author: Applied Epi
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css]
+params:
+  lang: en
+---
+
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+
+library(countdown)
+```
+
+```{r xaringan-themer, include=FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png",
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+```{r, echo=F, eval=T}
+surv <- rio::import(xfun::relative_path(here::here("data", "surveillance_linelist_clean_20141201.rds")))
+# 
+# gen <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "generic") %>%
+#   clean_names()
+# 
+# mod1 <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "mod1", col_types = "c") %>%
+#   clean_names()
+```
+
+# Introduction à R pour</br> Épidémiologie appliquée
+
+### Bienvenue et introduction
+
+[contact@appliedepi.org](mailto:contact@appliedepi.org)
+
+---
+
+# Merci de nous avoir rejoints
+
+**Merci pour le service que vous rendez à votre communauté en cette période chargée**  
+Nous sommes heureux que tu apprennes le R avec nous.
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "team.png")))
+```
+
+???
+Fais un bref tour de table pour te présenter
+
+---
+
+## À propos d'Applied Epi
+
+.pull-left[
+
+**"Par les épis, pour les épis"**
+
+Un global **mouvement populaire** L'épidémiologie de première ligne.
+
+A **sans but lucratif** à but non lucratif.
+
+Nous pensons que la transition de la santé publique vers R doit être menée par les utilisateurs au niveau du terrain.
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+#knitr::include_graphics(xfun::relative_path(here::here("images", "AE_R_training_support_pyramid.png")))
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "team_locations.png")))
+```
+
+**170** épidémiologistes avec **expertise R** et **sur le terrain** l'expérience de la santé publique.
+
+]
+
+.footnote[Meet [notre équipe](www.appliedepi.org/people2)]
+
+---
+
+# Cours de formation R
+
+**Synchrones** cours avec **tutorat 1 à 1** et **soutien de suivi**.
+
+**Plus de 1200 épis dans 350 agences** ont suivi notre cours d'introduction, notamment au CDC américain, à l'OMS, à Médecins sans frontières (MSF), dans des agences nationales et locales, et dans des FETP.
+
+**Cours avancés** - Vois nos cours R avancés sur les SIG, l'automatisation avancée, les statistiques, Git/Github, les séries temporelles/la détection des ruptures, les tableaux de bord, et plus encore !
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%", out.height="75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "moz-banner.png")))
+```
+
+---
+
+# Le manuel R de l'épidémiologiste
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "Epi R Handbook Banner Beige 1500x500.png")))
+```
+
+- Disponible gratuitement à l'adresse suivante **[www.epiRhandbook.com](www.epirhandbook.com)**
+- 50 chapitres de **exemples de codes de meilleures pratiques** disponibles en ligne et hors ligne
+- Utilisé **4 000 fois par jour** par **650 000 utilisateurs dans le monde**
+- Traduit en espagnol, français, portugais, vietnamien, turc, et plus encore...
+
+> *"Le plus grand compagnon de l'épidémiologiste"* <br> - Épidémiologiste, CDC du Nigeria
+
+> *"[Il] tisse ensemble tant de choses, de façon si succincte et si incroyablement claire"* <br> - Épidémiologiste, CDC américain
+
+---
+
+# Service d'assistance téléphonique multilingue 24 heures sur 24, 7 jours sur 7
+
+.pull-left[
+
+**Réserve des appels 1 à 1 opportuns avec les techniciens de l'épidémiologiste R.**
+
+> "Une aide rapide et de qualité - **une bouée de sauvetage**!" <br> -*Epi Advisor</br>Médecins sans frontières*
+
+Utilisé par des centaines d'agences, y compris le ministère de la Santé de l'Ouganda pour la réponse à Ebola.
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%", out.height="75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images","welcome", "headphones.jpg")))
+```
+
+]
+
+---
+
+class: inverse, center, middle
+
+# Pourquoi apprendre R ?
+
+---
+
+# Apprendre R...
+
+## ...est vraiment utile
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "stop_epidemic_dominoes2.png")))
+```
+
+???
+Mentionne les compétences commercialisables ainsi que les compétences techniques pour la réponse aux épidémies.
+
+---
+
+# Apprendre R...
+
+## ...est libérateur
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "freedom_bird.png")))
+```
+
+---
+
+# Apprendre R...
+
+## ...peut être un travail difficile
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "missing_puzzle.png")))
+```
+
+---
+
+# Apprendre R...
+
+## ...procure des moments de pure joie
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "joy.png")))
+```
+
+---
+
+# Apprendre R...
+
+## ...est plus facile que jamais
+
+.pull-left[
+
+- Interface utilisateur conviviale (RStudio)
+- Syntaxe plus simple ("tidyverse")
+- Livres et blogs
+- Ressources gratuites d'Applied Epi :
+  - **Manuel de l'épidémiologiste**
+  - **Tutoriels en ligne**
+  - **Études de cas**
+  - **Forum communautaire**  
+    ]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="80%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "tidyverse-icons.png")))
+```
+
+]
+
+???
+
+- Il y a une certaine courbe d'apprentissage - comme pour tout logiciel.
+- Mais nous sommes là pour t'aider à surmonter cette première difficulté afin que tu puisses continuer à te développer.
+
+---
+
+# Apprendre R...
+
+## ...est plus flexible
+
+```{r, eval=TRUE, echo=FALSE, out.width="80%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "interoperability.png")))
+```
+
+???
+
+- R peut lire et écrire dans de nombreux logiciels/bases de données différents.
+- Peut contenir plusieurs ensembles de données à la fois
+- Peut également produire de nombreux résultats différents
+- Flux de travail automatisés et reproductibles (tu gagnes du temps et tu t'épargnes des maux de tête).
+
+---
+
+# Apprendre R...
+
+## ...automatise les tâches routinières
+
+.pull-left[
+
+- Pipelines de nettoyage de données
+
+- Rapports (Word, PDF, HTML...)
+
+- Diaporamas et tableaux de bord
+
+- Cartes (SIG)
+
+> "J'ai vraiment le temps de *être un épidémiologiste* maintenant !" </br> - Diplômé du cours, Haïti
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.height="80%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "automated_reports.png")))
+```
+
+]
+
+.footnote[*317 rapports COVID-19 produits quotidiennement par Public Health England en 2020 (Image : Paula Blomquist)*]
+
+???
+
+- Produire des rapports à grande échelle, un exemple de notre collègue Paula EpiRHandbook
+- Il ne s'agit pas d'un rapport sophistiqué, d'un document Word plat, mais il répond à des besoins spécifiques !
+- **Un exemple clé de l'intelligence locale et aucun moyen de se passer de la puissance de R.**
+
+---
+
+# Apprendre R...
+
+## ...fait de brillantes visualisations de données
+
+```{r, eval=TRUE, echo=FALSE, out.width="90%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "visualization.png")))
+```
+
+???
+
+- La viz des données est essentielle pour comprendre les tendances de la surveillance des maladies et les épidémies
+- **L'une des caractéristiques les plus fortes de R**
+- Diagrammes de réseau, cartes, cartes thermiques, figures intégrées, la liste est longue...
+
+---
+
+# Apprendre R...
+
+## ...fait appel à ton côté créatif
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "artistic.png")))
+```
+
+???
+Pour beaucoup de gens, coder c'est créer des œuvres d'art... par exemple créer des poteries, écrire des poèmes, peindre, etc.
+
+---
+
+# Apprendre R...
+
+## ...avec une communauté de millions de personnes
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "communities.png")))
+```
+
+???
+
+- Quelle est la plus grande communauté d'utilisateurs de R au monde ? R Ladies
+- Les communautés d'entraide existent dans de nombreux endroits - nous avons notre forum communautaire.
+
+???
+Communauté de personnes qui soutiennent les logiciels libres, les outils en libre accès, et la démocratisation et l'égalisation de la science des données.
+
+---
+
+class: inverse, center, middle
+
+# Ce cours
+
+---
+
+# Objectifs du cours
+
+- Atteindre une compétence de base dans l'utilisation de R pour des tâches courantes de santé publique telles que la gestion des données, la visualisation des données, les tableaux récapitulatifs et les rapports automatisés.
+
+- Avoir de l'expérience dans l'application de R à une variété d'ensembles de données.
+
+- Comprendre comment R évolue et être équipé pour un auto-apprentissage soutenu.
+
+---
+
+# Programme du cours
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Module, ~Topic, ~`Support`,
+  "Pre-course", "Installation troubleshooting", "Preparation calls",
+  "1",   "RStudio, basic R syntax", "Unlimited tutoring\non course material\n\n\nAfter-hours booking\nlink provided by email",
+  "2",   "Data cleaning", "",
+  "3",   "More complex data cleaning", "",
+  "4",   "Grouping and summarising data", "",
+  "5",   "Data visualization with ggplot2", "",
+  "6",   "Troubleshooting and getting help", "",
+  "7",   "Automated reports with R Markdown", "",
+  "8",   "Transforming data with joins and pivots", "",
+  "9",   "Public health plots: Heat plots, epi curves,\nage/sex pyramids, & GIS demo", "",
+  "10",   "COVID-19 case study", "",
+  "Post-course", "We help you apply R to your work.\n1 hour coupon valid 12 months.*", "R Support Desk", 
+  )
+
+outline %>% 
+  flextable::qflextable() %>% 
+  
+  flextable::set_header_labels(
+    Support = "1-on-1 Support\n(24/7 availability)"
+  ) %>% 
+  # merge cells
+  #flextable::merge_at(part = "body", i = 1, j = 2:3) %>%   # prep calls
+  #flextable::merge_at(part = "body", i = 12, j = 2:3) %>%   # Desk calls
+  flextable::merge_at(part = "body", i = 2:11, j = 3) %>%  # tutoring
+
+  
+  # background color
+  flextable::bg(part = "header", i = 1, j = 1:3, bg = "green3") %>% 
+  flextable::bg(i = 1, j = 1:3, bg = "#ccdce7") %>% 
+  flextable::bg(i = 12, j = 1:3, bg = "#ccdce7") %>% 
+  flextable::bg(i = 2:11, j = 3, bg = "#ccdce7") %>% 
+  flextable::bg(i = 2:11, j = 1:2, bg = "grey100") %>% 
+  # bold
+  flextable::bold(j = 1, part = "body") %>% 
+  
+  # alignment  
+  #flextable::align(i = 1, align = "center") %>% 
+
+  # column width
+  flextable::set_table_properties(layout = "autofit") %>% 
+  
+  # borders
+  flextable::theme_box() %>% 
+  
+  flextable::add_footer_lines(values = "*Coupon time and duration may vary by cohort. Additional time can be purchased.")
+
+
+```
+
+---
+
+# Données utilisées dans ce cours
+
+- **Module 1 : Contrôle des fournitures pour les tests COVID-19**
+
+- **Modules 2 - 9 : Etude de cas de l'épidémie d'Ebola**
+  
+  - Liste des cas de surveillance (ensemble de données primaires)
+  - Dossiers hospitaliers de 5 hôpitaux
+  - Ensemble de données sur les enquêtes de cas
+  - Jeu de données sur les résultats de laboratoire
+
+- **Module 10 : Fiches d'épidémie et de population COVID-19**
+
+.note de bas de page[Toutes les données du cours sont soit anonymisées/jittées, soit simulées].
+
+---
+
+# Chaque module
+
+- **Diapositives** Les nouveaux concepts et le code : Une brève explication des nouveaux concepts et du code
+
+- **Démo** Démonstration de codage en direct du nouveau matériel
+
+- **Exercices** Exercices en ligne : Les exercices en ligne te guident pour écrire du code R sur ton ordinateur
+  
+  - *Questions du quiz* Vérifie ta compréhension
+  - *Rencontres 1 à 1* avec les instructeurs (à demander à tout moment)
+  - *Partage ton écran* pour que nous attrapions les erreurs plus tôt et que nous t'invitions dans la salle annexe.
+  - *Il n'y a pas de mal àne pas terminer*. Les solutions sont disponibles dans le dossier du cours.
+  - *Fais des pauses* Quand tu en as besoin
+
+- **Débriefing** Un examen de codage en direct et des conseils de la part des instructeurs.
+
+- **Post-module** Les ressources de l'école : des ressources sont à ta disposition
+  
+  - *Enregistrements* sont sur le site du cours
+  - *Tutorat 1 à 1* sur le matériel de cours (lien de réservation fourni par email)
+
+---
+
+# Certificat
+
+Pour recevoir un certificat d'achèvement, tu dois :
+
+1) **assister à 80 % des sessions** (ou les rattraper avec des cours de soutien)
+
+2) **Remplir l'enquête anonyme de satisfaction**
+
+3) **Envoie un courriel à [training@appliedepi.org](mailto:training@appliedepi.org)** avec :
+
+- Le lien vers ton post de pratique dans notre forum communautaire (module 6).
+- Ton script R de l'étude de cas COVID-19 (Module 10)
+
+---
+
+# Accord entre eux
+
+**Notre équipe va :**
+
+- Créer un espace de soutien et d'apprentissage personnalisé
+
+- Apprécier ton expertise
+
+--
+
+**Nous espérons que tu le feras :**
+
+- Sortir de ta zone de confort *(tu découvriras peut-être une nouvelle passion !)*
+
+- Dis-nous si tu ne comprends pas et rattrape-toi si tu manques une session.
+
+???
+Nous sommes dans ce cours pour réussir, ensemble
+
+---
+
+# Ce module
+
+**Les objectifs**
+
+- Dans le cadre d'un projet RStudio, écris du code R de base pour :
+  - effectuer des calculs
+  - Créer et modifier des objets
+  - Utiliser des fonctions
+  - Installer et charger des paquets
+  - Importer et inspecter un ensemble de données
+
+</br>
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Topic,
+  "45 minutes",      "Welcome & course logistics",
+  "30 minutes",      "RStudio tour and basic R syntax",
+  "2 hours",         "Exercise",
+  "15 minutes",      "Debrief"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+```
+
+???
+Note les pauses d'étirement tout au long du texte.
+
+---
+
+class: inverse, center, middle
+
+# Pause étirement !
+
+(et le temps de poser des questions)
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "stretch.png")))
+```
+
+```{r}
+countdown(minutes = 5, seconds = 00)
+```
+
+---
+
+# Projets RStudio
+
+.pull-left[
+
+Ton travail se produit dans **Projets RStudio**.
+
+Un projet est un **un environnement de travail autonome et portable**
+
+Ils te facilitent énormément la vie.
+
+```{r, eval=TRUE, echo=FALSE, out.width="85%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "project_briefcase.png")))
+```
+
+]
+
+--
+
+.pull-right[
+
+Ce cours est organisé en 3 projets.
+
+**Chaque projet est un dossier pour une épidémie ou une analyse distincte** Il contient des données, des scripts, des résultats et un fichier ".Rproj".
+
+`r emo::ji("folder")` intro\_course
+
+- `r emo::ji("folder")` **module1**
+  - module1.Rproj
+  - `r emo::ji("document")` données.csv
+  - `r emo::ji("document")` analyse.R
+- `r emo::ji("folder")` **ebola**
+  - ebola.Rproj
+- `r emo::ji("folder")` **covid**
+  - covid.Rproj
+
+]
+
+???
+Nous t'aiderons
+Tu peux zipper le dossier et le partager avec un collègue, il peut être hébergé sur un disque partagé et peut être synchronisé avec un dépôt Github.
+
+---
+
+class: inverse, center, middle
+
+# Démonstration en direct
+
+## RStudio et la syntaxe de base
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "piano_man.jpg")))
+```
+
+---
+
+class: inverse, center, middle
+
+.pull-left[
+
+## Fonctions :
+
+## Outils permettant d'accomplir une tâche spécifique.
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "function_tools_pliers.png")))
+```
+
+]
+
+---
+
+# Fonctions
+
+### Entrées et sorties
+
+- Une fonction est comme une machine qui :
+  - reçoit des entrées
+  - Effectue une action avec les données
+  - Renvoie une sortie
+
+--
+
+- Les fonctions ont un nom (*en espérant qu'il soit intuitif !*), et ont des parenthèses ( )
+  - `print()` t'aide à imprimer un objet R
+  - `mean()`  calcule la moyenne de certaines valeurs
+  - `filter()` supprime certaines lignes d'un ensemble de données à l'aide de critères logiques
+
+ Les fonctions .footnote[apparaissent également dans Excel sous la forme de *équations*]
+
+---
+
+# Cela te semble-t-il familier ?
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "excel_functions.png")))
+```
+
+R **fonctions** sont similaires à celles d'Excel **équations**
+
+- Ils acceptent les entrées dans les limites de **parenthèses**
+- Les entrées sont séparées par **virgules**
+
+---
+
+# Fonctions R simples
+
+.pull-left[
+
+- `sqrt()`
+  
+  - Accepte une valeur numérique en entrée, renvoie la racine carrée.
+
+]
+
+.pull-right[
+
+```{r, echo=T, out.width="100%"}
+sqrt(49)
+```
+
+]
+
+.footnote[Accepte des valeurs numériques et renvoie le maximum]
+
+???
+Démontre chaque `sqrt(49)`, `sqrt(12)`, `max(1, 15, 2, 9)` (explique les virgules)
+Explique les vecteurs `c(1, 15, 2, 9)` et un vecteur nommé `cities <- c("Wuhan", "Milan", "New York")`
+Note rapidement les vecteurs indexés `cities[[2]]`
+et numériques : `ages <- c(15, 28, 100, 15, 65, 4, 10)` puis `summary(ages)` et `summary(ages)[2]` et `summary(ages)[[2]]`
+
+---
+
+# Fonctions R simples
+
+.pull-left[
+
+- `sqrt()`
+  
+  - Accepte une valeur numérique en entrée, renvoie la racine carrée.
+
+- `max()`
+  
+  - Accepte des valeurs numériques et renvoie le maximum
+
+]
+
+.pull-right[
+
+```{r, echo=T, out.width="100%"}
+sqrt(49)
+```
+
+<br>
+``{r, echo=T, out.width="100%"}
+max(2, 10, 15, 200, 9)
+```
+
+]
+
+.footnote[Ce sont des exemples de fonctions dans "*base R*" - des fonctions qui sont installées avec R.]
+
+???
+Démontre chaque `sqrt(49)`, `sqrt(12)`, `max(1, 15, 2, 9)` (explique les virgules)
+Explique les vecteurs `c(1, 15, 2, 9)` et un vecteur nommé `cities <- c("Wuhan", "Milan", "New York")`
+Note rapidement les vecteurs indexés `cities[[2]]`
+et numériques : `ages <- c(15, 28, 100, 15, 65, 4, 10)` puis `summary(ages)` et `summary(ages)[2]` et `summary(ages)[[2]]`
+
+---
+
+# Fonctions R simples
+
+.pull-left[
+
+- `sqrt()`
+  - Accepte une valeur numérique en entrée, renvoie la racine carrée.
+
+<br>
+
+- `max()`
+  - Accepte des valeurs numériques et renvoie le maximum
+
+<br>
+
+- `c()`
+  - Abréviation de "concaténer".
+  - Combine les entrées en un *vecteur*  
+    ]
+
+.pull-right[
+
+```{r, echo=T, out.width="100%"}
+sqrt(49)
+```
+
+<br>
+
+```{r, echo=T, out.width="100%"}
+max(2, 10, 15, 200, 9)
+```
+
+```{r, echo=T, out.width="100%"}
+c(2, 5, 9, 12, 47)
+```
+
+]
+
+???
+Démontre chaque `sqrt(49)`, `sqrt(12)`, `max(1, 15, 2, 9)` (explique les virgules)
+Explique les vecteurs `c(1, 15, 2, 9)` et un vecteur nommé `cities <- c("Wuhan", "Milan", "New York")`
+Note rapidement les vecteurs indexés `cities[[2]]`
+et numériques : `ages <- c(15, 28, 100, 15, 65, 4, 10)` puis `summary(ages)` et `summary(ages)[2]` et `summary(ages)[[2]]`
+
+---
+
+# Arguments
+
+.pull-left[
+
+Mais la plupart des fonctions ne sont pas aussi simples.
+
+</br>
+
+Il faut leur dire *comment* travailler, et *sur quoi* travailler.
+
+</br>
+
+Tu utilises la fonction **arguments** pour spécifier ces valeurs.
+
+</br>
+
+Les arguments sont comme les entrées et les paramètres, avec *noms*
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "arguments-buttons.png")))
+```
+
+]
+
+---
+
+# Cela peut te sembler familier
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "excel_arguments.png")))
+```
+
+Une fois de plus, Excel n'est pas si différent de R :
+
+- Les arguments ont des noms et sont séparés par des virgules.
+- Les valeurs peuvent être numériques (12), des caractères ("Apple") ou d'autres objets (A1:A5).
+- Certains arguments sont facultatifs ou ont des valeurs par défaut
+
+???
+Qu'est-ce qui est retourné par cette équation Excel ?
+
+---
+
+# Exemple de cuisson
+
+--
+
+Imaginons que **`oven_bake()`** est une fonction utilisée pour cuire le pain.
+
+Ce qu'il y a à faire *arguments* Cette fonction peut-elle être utilisée ?
+
+Indice : Lesquels *paramètres* doivent être ajustés ? Qu'est-ce que c'est ? *objet* doit être mis dans le four ?
+
+--
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+#knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", #"Function_Bread_Example.png")))
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", paste0("Function_Bread_Example_", params$lang, ".png"))))
+
+```
+
+---
+
+# `tbl_cross()` exemple
+
+```{r, include=FALSE}
+surv <- tribble(
+     ~case, ~case_def, ~sex, ~age,
+     1, "Confirmed", "female", 1,
+     2, "Confirmed", "male", 16,
+     3, "Suspect",   "female", 10,
+     4, "Suspect",   "female", 10,
+     5, "Confirmed", "male", 64,
+     6, "Confirmed", "male", 8,
+     7, "Confirmed", "female", 22,
+     8, "Confirmed", "female", 31)
+```
+
+.pull-left[
+
+Cet ensemble de données dans R s'appelle **`surv`**.
+
+Nous voulons un tableau croisé des colonnes `case_def` et `sex`.
+
+```{r, echo=F, eval=T}
+surv %>%
+  flextable::qflextable() %>% 
+  flextable::theme_box() %>% 
+  flextable::bg(part = "header",
+                bg = "yellow",
+                j = 2:3)
+```
+
+]
+
+--
+
+.pull-right[
+
+La fonction `tbl_cross()` a trois arguments :
+
+```{r, echo=T, eval=F}
+tbl_cross(data =, row =, col = )
+```
+
+]
+
+---
+
+# `tbl_cross()` exemple
+
+.pull-left[
+
+Cet ensemble de données dans R porte le nom de **`surv`**.
+
+Nous voulons un tableau croisé des colonnes `case_def` et `sex`.
+
+```{r, echo=F, eval=T}
+surv %>%
+  flextable::qflextable() %>% 
+  flextable::theme_box() %>% 
+  flextable::bg(part = "header",
+                bg = "yellow",
+                j = 2:3)
+```
+
+]
+
+.pull-right[
+
+La commande peut également être écrite plus verticalement, comme ceci :
+
+```{r, echo=T, eval=F}
+tbl_cross(
+  data = 
+  row  =  
+  col  =       )
+```
+
+]
+
+---
+
+# `tbl_cross()` exemple
+
+.pull-left[
+
+Cet ensemble de données dans R s'appelle **`surv`**.
+
+Nous voulons un tableau croisé des colonnes `case_def` et `sex`.
+
+```{r, echo=F, eval=T}
+surv %>%
+  flextable::qflextable() %>% 
+  flextable::theme_box()
+```
+
+]
+
+.pull-right[
+
+L'ensemble de données que nous voulons utiliser s'appelle **surv**
+
+```{r, echo=T, eval=F}
+tbl_cross(
+* data = surv,
+  row  =  
+  col  =    )
+```
+
+*Dans R, tu dois indiquer à R quel jeu de données utiliser, car tu peux stocker plusieurs jeux de données*.
+
+]
+
+---
+
+# `tbl_cross()` exemple
+
+.pull-left[
+
+Cet ensemble de données dans R s'appelle **`surv`**.
+
+Nous voulons un tableau croisé des colonnes `case_def` et `sex`.
+
+```{r, echo=F, eval=T}
+surv %>%
+  flextable::qflextable() %>% 
+  flextable::theme_box() %>% 
+  flextable::bg(part = "header",
+                bg = "yellow",
+                j = 3)
+```
+
+]
+
+.pull-right[
+
+Le *rangées* du tableau croisé doivent provenir de la colonne **`sex`**
+
+```{r, echo=T, eval=F}
+tbl_cross(
+  data = surv,
+* row  = sex,  
+  col  =    )
+```
+
+]
+
+---
+
+# `tbl_cross()` exemple
+
+.pull-left[
+
+Cet ensemble de données dans R s'appelle **`surv`**.
+
+Nous voulons un tableau croisé des colonnes `case_def` et `sex`.
+
+```{r, echo=F, eval=T}
+surv %>%
+  flextable::qflextable() %>% 
+  flextable::theme_box() %>% 
+  flextable::bg(part = "header",
+                bg = "yellow",
+                j = 2)
+```
+
+]
+
+.pull-right[
+
+Le *colonnes* de la table croisée doivent provenir de la colonne **`case_def`**
+
+```{r, echo=T, eval=F}
+tbl_cross(
+  data = surv,
+  row  = sex,  
+* col  = case_def)
+```
+
+]
+
+---
+
+# `tbl_cross()` exemple
+
+.pull-left[
+
+Cet ensemble de données dans R s'appelle **`surv`**.
+
+Nous voulons un tableau croisé des colonnes `case_def` et `sex`.
+
+```{r, echo=F, eval=T}
+surv %>%
+  flextable::qflextable() %>% 
+  flextable::theme_box()
+```
+
+]
+
+.pull-right[
+
+Maintenant, nous exécutons la commande pour créer le tableau croisé.
+
+```{r, echo=T, eval=T}
+tbl_cross(
+  data = surv,
+  row  = sex,  
+  col  = case_def)
+```
+
+]
+
+---
+
+# Paquets
+
+.pull-left[
+
+Les fonctions `sqrt()`, `sum()`, `max()`, `min()` et `c()` sont prêts à l'emploi lorsque tu installes R.
+
+Elles sont appelées **{base} R** fonctions.
+
+]
+
+--
+
+.pull-right[
+
+Cependant, la plupart des fonctions doivent être téléchargées avec leur **paquet R**.
+
+Par exemple, `tbl_cross()` est contenu dans le paquet R nommé {gtsummary}.
+
+Les paquets R sont souvent désignés par {brackets} et ont des logos "hex".
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "gt_summary.png")))
+```
+
+]
+
+---
+
+# Paquets
+
+Un paquetage R est un **ensemble partageable de fonctions apparentées** à télécharger et à utiliser.  
+Les paquets ont généralement un thème, par exemple :
+
+- **{ggplot2}** est le paquet de visualisation de données le plus courant
+- **{lubridate}** facilite le travail avec les dates
+- **{janitor}** aide à nettoyer et à résumer les données
+- **{rmarkdown}** t'aide à créer des rapports automatisés
+
+```{r, eval=TRUE, echo=FALSE, out.width="20%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "ggplot2.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "lubridate.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "janitor.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "rmarkdown.png")))
+
+
+```
+
+---
+
+# Installer ou charger
+
+.pull-left[
+
+**Étape 1 - Installation**
+
+Un paquet est **installé une fois** et stocké dans ta "bibliothèque" R.
+
+*Le paquet est comme un "livre" de fonctions.*
+
+```{r, eval=TRUE, echo=FALSE, out.width="80%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "library.png")))
+```
+
+]
+
+--
+
+.pull-right[
+
+**Étape 2 - Chargement**
+
+Commence **chaque session R** en chargeant les paquets que tu veux utiliser.
+
+*C'est comme emprunter un livre à la bibliothèque*.
+
+```{r, eval=TRUE, echo=FALSE, out.width="80%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "bookshelf1.png")))
+```
+
+]
+
+---
+
+# Le {pacman} paquet
+
+L'utilisation de R est souvent un choix entre plusieurs approches. Nous sommes là pour t'accompagner.
+
+.pull-left[
+
+**L'approche traditionnelle de la "base R**
+
+```{r, echo=T, eval=F}
+install.packages("janitor") 
+library(janitor) # loads            
+```
+
+- Se réinstalle à chaque fois qu'on l'exécute
+- Commandes multiples
+- Syntaxe difficile
+- Rarement nécessaire
+
+]
+
+.pull-right[
+
+**L'approche efficace de "pacman**
+
+```{r, echo=T, eval=F}
+pacman::p_load(janitor)
+
+```
+
+- Installe les paquets *uniquement si cela est nécessaire*, **et** les charge
+- Bon pour les scripts partagés
+- {pacman} = **pac**kage **homme**ager
+- Exige que le {pacman} paquet
+
+]
+
+---
+
+# Quel code est le plus simple ?
+
+Ces commandes installent et chargent les mêmes 5 paquets.
+
+.pull-left[
+
+En utilisant {base} Fonctions R
+
+```{r, eval=F, echo=T}
+# install the packages
+install.packages(
+     c("rio",
+       "janitor",
+       "gtsummary",
+       "here",
+       "tidyverse"))
+
+# load the packages for use
+library(rio)
+library(janitor)
+library(gtsummary)
+library(here)
+library(tidyverse)
+```
+
+]
+
+.pull-right[
+
+En utilisant {pacman}
+
+```{r, eval=F, echo=T}
+# install if necessary, and load
+pacman::p_load(
+  rio,
+  janitor,
+  gtsummary,
+  here,
+  tidyverse)
+```
+
+]
+
+???
+C'est ce que l'on appelle le R commun, où il y a de nombreuses façons d'effectuer une tâche. Notre travail consiste à les réduire et à partager avec toi les approches les plus simples et les plus faciles.
+
+---
+
+class: inverse, center, middle
+
+# Importer des données dans R
+
+---
+
+# Importer des données en douceur
+
+Des progrès récents ont rendu l'importation de données dans R beaucoup plus facile :
+
+- **Projets RStudio**
+- Les **`import()`** de la fonction **{rio}** paquet
+- Le **{here}** paquet
+
+Dans ce module, tu utiliseras **`import()`** pour importer des données de ton **projet RStudio**.
+
+Dans le prochain module, nous aborderons les sujets suivants **{here}**.
+
+---
+
+# Utilisation `import()`
+
+Les **`import()`** utilise l'extension du fichier (.csv, .xlsx) pour comprendre le type de données. Cela permet d'éviter les confusions passées, par exemple `read_csv()`, `read.csv()`, `read_excel()`...
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+import("testing_data.csv")
+```
+
+Pour un fichier dans le dossier "racine" du projet,
+aucune autre information n'est nécessaire... et cela fonctionne sur n'importe quel ordinateur !
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. # It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "import_root.png")))
+```
+
+.note de bas de page[D'autres scénarios d'importation sont abordés dans le module suivant]
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="40%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. # It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "rio.png")))
+```
+
+`import()` est de l'ordre de {rio} paquet,
+abréviation de "**R** **I**ntrées/**O**utputs"
+
+]
+
+---
+
+class: inverse, center, middle
+
+## Exercice !
+
+Sur le site du cours, ouvre l'exercice du module 1 et connecte-toi.  
+Suis les instructions pour créer un projet RStudio et commencer à coder.  
+Informe-nous si tu ne peux pas te connecter ou si tu n'es pas sûr de ce qu'il faut faire.
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "teamwork2.png")))
+```
+
+
