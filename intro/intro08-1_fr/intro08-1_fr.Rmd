@@ -1,6 +1,6 @@
 ---
 title: Introduction à R pour<br>Épidémiologie appliquée
-subtitle: Joining data
+subtitle: Joining donnees
 author: '2022'
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
@@ -44,11 +44,11 @@ options(htmltools.dir.version = FALSE)
 
 ## install and load necessary packages 
 pacman::p_load(
-  rio,        # importing data  
+  rio,        # importing donnees  
   here,       # relative file pathways  
-  janitor,    # data cleaning and tables
+  janitor,    # donnees cleaning and tables
   lubridate,  # working with dates
-  tidyverse,  # data management and visualization
+  tidyverse,  # donnees management and visualization
   gtsummary,  # summary tables
   countdown,  # countdown timer
   flextable,  # tables
@@ -57,9 +57,9 @@ pacman::p_load(
 )
 
 
-# data prep --------------------------------------------------------------------
-# linelist_raw <- rio::import(here::here("data", "linelist_raw.xlsx"))
-linelist_surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+# donnees prep --------------------------------------------------------------------
+# linelist_raw <- rio::import(here::here("donnees", "linelist_raw.xlsx"))
+linelist_surv <- rio::import(here::here("donnees", "linelist_surveillance_nettoyee_20141201.rds"))
 
 # gen <- googlesheets4::read_sheet(
 #   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
@@ -87,11 +87,11 @@ style_mono_accent(
   base_color = "#00538c", 
   link_color = "#48a878", 
   ## add logo to the title page (bit bigger)
-  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_image = "https://brutes.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
   title_slide_background_position = "95% 95%", 
   title_slide_background_size = "25%", 
   ## add logo to all following slides
-  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_image = "https://brutes.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
   background_size = "10%",
   background_position = "100% 0%"
 )
@@ -132,9 +132,9 @@ contact@appliedepi.org
 outline <- dplyr::tribble(
   ~Time, ~Topic,
   "20 minutes", "Demo: Joins",
-  "1h 15 minutes", "Exercise: Joining data", 
-  "15 minutes", "Demo: Pivoting data", 
-  "1 hour",  "Exercise: Pivoting data & Factors", 
+  "1h 15 minutes", "Exercise: Joining donnees", 
+  "15 minutes", "Demo: Pivoting donnees", 
+  "1 hour",  "Exercise: Pivoting donnees & Factors", 
   "10 minutes", "Plenary debrief" 
 
 )
@@ -209,21 +209,21 @@ Explique que la fonction se présente toujours sous cette forme, deux cadres de 
 ```{r, include=FALSE, echo=F}
 # Make smaller linelists for exemple purpose
 # patients <- linelist_surv %>% 
-#      select(case_id, age, age_unit, sex) %>% 
-#      arrange(case_id) %>% 
+#      select(cas_id, age, unite_age, sexe) %>% 
+#      arrange(cas_id) %>% 
 #      head(5)
 
 patients <- tribble(
-     ~case_id, ~age, ~age_unit, ~sex,
-     "5fe599", 2, "years", "m",
-     "8689b7", 3, "years", "f",
-     "11f8ea", 56, "years", "m",
-     "b8812a", 18, "years", "f",
-     "893f25", 3, "years", "m")
+     ~cas_id, ~age, ~unite_age, ~sexe,
+     "5fe599", 2, "ans", "h",
+     "8689b7", 3, "ans", "f",
+     "11f8ea", 56, "ans", "h",
+     "b8812a", 18, "ans", "f",
+     "893f25", 3, "ans", "h")
 
 
 hosp <- tribble(
-     ~id_patient, ~outcome,
+     ~id_patient, ~resultat,
       "5fe599", "Died",
       "8689b7", "Recovered",
       "11f8ea", "Recovered",
@@ -231,7 +231,7 @@ hosp <- tribble(
 
 
 # hosp <- linelist_surv %>% 
-#      select(id_patient = case_id, hospital) %>% 
+#      select(id_patient = cas_id, hopital) %>% 
 #      arrange(id_patient) %>% 
 #      head(3)
 ```
@@ -331,7 +331,7 @@ hosp %>%
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
 left_join(patients, hosp,      
   by = c(
-    "case_id" = "id_patient")) #<<
+    "cas_id" = "id_patient")) #<<
 ```
 
 ]
@@ -341,7 +341,7 @@ left_join(patients, hosp,
 ```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
 left_join(patients, 
           hosp, 
-     by = c("case_id" = "id_patient")) %>% 
+     by = c("cas_id" = "id_patient")) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 1, bg = "yellow")
 
@@ -386,7 +386,7 @@ hosp %>%
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
 left_join(patients, hosp,      
   by = c(
-    "case_id" = "id_patient")) #<<
+    "cas_id" = "id_patient")) #<<
 ```
 
 ]
@@ -396,7 +396,7 @@ left_join(patients, hosp,
 ```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
 left_join(patients, 
           hosp, 
-     by = c("case_id" = "id_patient")) %>% 
+     by = c("cas_id" = "id_patient")) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 1, bg = "yellow") %>% 
      bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
@@ -462,7 +462,7 @@ hosp %>%
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
 right_join(patients, hosp,      
   by = c(
-    "case_id" = "id_patient")) 
+    "cas_id" = "id_patient")) 
 ```
 
 ]
@@ -472,7 +472,7 @@ right_join(patients, hosp,
 ```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
 right_join(patients, 
           hosp, 
-     by = c("case_id" = "id_patient")) %>% 
+     by = c("cas_id" = "id_patient")) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
      bg(part = "body",   i = 1:4, j = 5, bg = "lightgreen") %>% 
@@ -539,7 +539,7 @@ hosp %>%
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
 full_join(patients, hosp,       
   by = c(
-    "case_id" = "id_patient")) 
+    "cas_id" = "id_patient")) 
 ```
 
 ]
@@ -549,7 +549,7 @@ full_join(patients, hosp,
 ```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
 full_join(patients, 
           hosp, 
-     by = c("case_id" = "id_patient")) %>% 
+     by = c("cas_id" = "id_patient")) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
      bg(part = "body",   i = c(1:3, 6), j = 5, bg = "lightgreen") %>% 
@@ -623,7 +623,7 @@ hosp %>%
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
 inner_join(patients, hosp,       
   by = c(
-    "case_id" = "id_patient")) 
+    "cas_id" = "id_patient")) 
 ```
 
 ]
@@ -633,7 +633,7 @@ inner_join(patients, hosp,
 ```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
 inner_join(patients, 
           hosp, 
-     by = c("case_id" = "id_patient")) %>% 
+     by = c("cas_id" = "id_patient")) %>% 
      qflextable() %>% 
      bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
      bg(part = "body",   i = c(1:3), j = 5, bg = "lightgreen") 
@@ -650,7 +650,7 @@ inner_join(patients,
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
 patients %>%               
-     left_join(hosp, by = c("case_id" = "id_patient")) %>%  #<<
+     left_join(hosp, by = c("cas_id" = "id_patient")) %>%  #<<
      filter(age > 25)
 ```
 
@@ -660,7 +660,7 @@ patients %>%
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
 left_join(patients, hosp,       
-           by = "case_id")   #<<
+           by = "cas_id")   #<<
 ```
 
 --
@@ -671,7 +671,7 @@ left_join(patients, hosp,
 left_join(dataframe1, dataframe2,       
            by = c("name" = "first_name",  
                   "age",       #<<
-                  "sex"))   #<<
+                  "sexe"))   #<<
 ```
 
 ---
@@ -755,7 +755,7 @@ hosp %>%
 ```{r, eval=FALSE, echo=TRUE}
 left_join(patients, hosp,
   by = c(
-   "case_id" = "id_patient"))
+   "cas_id" = "id_patient"))
 ```
 
 ]
@@ -765,7 +765,7 @@ left_join(patients, hosp,
 ```{r, eval=TRUE, echo=FALSE}
 left_join(patients,
           hosp %>% mutate(age = c(2, 3, 56, 40)),
-  by = c("case_id" = "id_patient")) %>% 
+  by = c("cas_id" = "id_patient")) %>% 
   qflextable() %>% 
   bg(part = "header", i = 1, j = 2, bg = "orange") %>% 
   bg(part = "header", i = 1, j = 6, bg = "orange") 
@@ -814,7 +814,7 @@ hosp %>%
 ```{r, eval=FALSE, echo=TRUE}
 left_join(patients, hosp,
   by = c(
-   "case_id" = "id_patient",
+   "cas_id" = "id_patient",
    "age"))    #<<
 ```
 
@@ -825,7 +825,7 @@ left_join(patients, hosp,
 ```{r, eval=TRUE, echo=FALSE}
 left_join(patients,
           hosp %>% mutate(age = c(2, 3, 56, 40)),
-  by = c("case_id" = "id_patient", "age")) %>% 
+  by = c("cas_id" = "id_patient", "age")) %>% 
   qflextable() %>% 
   bg(part = "header", i = 1, j = 2, bg = "orange")
 ```
@@ -857,7 +857,7 @@ patients %>%
 ```{r, eval=TRUE, echo=FALSE}
 
 hosp_dup <- tribble(
-     ~id_patient, ~outcome,
+     ~id_patient, ~resultat,
       "5fe599", "Died",
       "5fe599", "Alive",
       "8689b7", "Recovered",
@@ -875,7 +875,7 @@ hosp_dup %>%
 ```{r, eval=FALSE, echo=TRUE}
 left_join(patients, hosp,
   by = c(
-   "case_id" = "id_patient"))
+   "cas_id" = "id_patient"))
 ```
 
 ]
@@ -884,7 +884,7 @@ left_join(patients, hosp,
 ```{r, eval=TRUE, echo=FALSE}
 left_join(patients,
           hosp_dup,
-  by = c("case_id" = "id_patient")) %>% 
+  by = c("cas_id" = "id_patient")) %>% 
   qflextable() %>% 
   bg(part = "body", i = 1:2, j = 1:5, bg = "orange")
 ```
@@ -900,13 +900,13 @@ left_join(patients,
 ```{r, eval=TRUE, echo=FALSE}
 
 patients_dup <- tribble(
-     ~case_id, ~age, ~age_unit, ~sex,
-     "5fe599", 2, "years", "m",
-     "5fe599", 2, "years", "m",
-     "8689b7", 3, "years", "f",
-     "11f8ea", 56, "years", "m",
-     "b8812a", 18, "years", "f",
-     "893f25", 3, "years", "m")
+     ~cas_id, ~age, ~unite_age, ~sexe,
+     "5fe599", 2, "ans", "h",
+     "5fe599", 2, "ans", "h",
+     "8689b7", 3, "ans", "f",
+     "11f8ea", 56, "ans", "h",
+     "b8812a", 18, "ans", "f",
+     "893f25", 3, "ans", "h")
 
 
 patients_dup %>% 
@@ -930,7 +930,7 @@ hosp %>%
 ```{r, eval=FALSE, echo=TRUE}
 left_join(patients, hosp,
   by = c(
-   "case_id" = "id_patient"))
+   "cas_id" = "id_patient"))
 ```
 
 ]
@@ -939,7 +939,7 @@ left_join(patients, hosp,
 ```{r, eval=TRUE, echo=FALSE}
 left_join(patients_dup,
           hosp,
-  by = c("case_id" = "id_patient")) %>% 
+  by = c("cas_id" = "id_patient")) %>% 
   qflextable() %>% 
   bg(part = "body", i = 1:2, j = 1:5, bg = "orange")
 ```
@@ -955,11 +955,11 @@ Utilisation `semi_join()` et `anti_join()` pour **comprendre pourquoi les rangs 
 " Ce qui `hosp` ne seront pas jointes à gauche à `patients`?" Examine pourquoi avec `anti_join()`
 
 ```{r, eval=FALSE, echo=TRUE}
-anti_join(hosp, patients, by = c("id_patient" = "case_id"))
+anti_join(hosp, patients, by = c("id_patient" = "cas_id"))
 ```
 
 ```{r, eval=TRUE, echo=FALSE}
-anti_join(hosp, patients, by = c("id_patient" = "case_id")) %>% 
+anti_join(hosp, patients, by = c("id_patient" = "cas_id")) %>% 
      qflextable()
 ```
 
@@ -978,7 +978,7 @@ nrow(hosp)
 ```
 
 ```{r, eval=TRUE, echo=TRUE}
-left_join(patients, hosp, by = c("case_id" = "id_patient")) %>%
+left_join(patients, hosp, by = c("cas_id" = "id_patient")) %>%
   nrow()
 ```
 
@@ -991,7 +991,7 @@ class: inverse, center, middle
 
 # Exercice !
 
-Va sur le site du cours  
+Va sur le lieu du cours  
 Ouvre l'exercice du module 8, partie 1, et connecte-toi.  
 Suis les instructions pour ouvrir ton projet R "ebola" et continue à coder dans ton script RMD.
 Informe un instructeur si tu n'es pas sûr de ce que tu dois faire.

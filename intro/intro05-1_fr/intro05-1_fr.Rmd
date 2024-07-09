@@ -1,6 +1,6 @@
 ---
 title: Introduction à R pour<br>Épidémiologie appliquée
-subtitle: <br>{ggplot2} for data visualization
+subtitle: <br>{ggplot2} for donnees visualization
 author: ''
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
@@ -44,13 +44,13 @@ options(htmltools.dir.version = FALSE)
 
 ## install and load necessary packages 
 pacman::p_load(
-  rio,        # importing data  
+  rio,        # importing donnees  
   here,       # relative file pathways  
-  janitor,    # data cleaning and tables
+  janitor,    # donnees cleaning and tables
   lubridate,  # dates
   ggExtra,    # extras
   scales,     # formatting of scales
-  tidyverse,  # data management and visualization
+  tidyverse,  # donnees management and visualization
   xaringanthemer  # for styling presentation 
 )
 
@@ -72,11 +72,11 @@ style_mono_accent(
   base_color = "#00538c", 
   link_color = "#48a878", 
   ## add logo to the title page (bit bigger)
-  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_image = "https://brutes.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
   title_slide_background_position = "95% 95%", 
   title_slide_background_size = "25%", 
   ## add logo to all following slides
-  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_image = "https://brutes.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
   background_size = "10%",
   background_position = "100% 0%"
 )
@@ -86,8 +86,8 @@ options(htmltools.dir.version = FALSE)
 ```
 
 ```{r, include=FALSE}
-# data prep --------------------------------------------------------------------
-surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+# donnees prep --------------------------------------------------------------------
+surv <- rio::import(here::here("donnees", "linelist_surveillance_nettoyee_20141201.rds"))
 
 # gen <- googlesheets4::read_sheet(
 #   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
@@ -210,7 +210,7 @@ Voir les [Galerie de graphes R](https://www.r-graph-gallery.com/ggplot2-package.
 knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "clustering.png")))
 ```
 
-.footnote[Images sources [ici](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html) et [ici](https://jcheshire.com/r-spatial-data-hints/great-maps-ggplot2/)]
+.footnote[Images sources [ici](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html) et [ici](https://jcheshire.com/r-spatial-donnees-hints/great-maps-ggplot2/)]
 
 ---
 
@@ -399,7 +399,7 @@ La tuyauterie est utile pour apporter des modifications ponctuelles à un ensemb
 .pull-left[
 
 ```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
-ggplot(data = surv)                   
+ggplot(donnees = surv)                   
 ```
 
 Attribue le cadre de données à utiliser.
@@ -416,7 +416,7 @@ surv %>%
 .pull-right[
 
 ```{r, echo=FALSE, eval=TRUE}
-ggplot(data = surv)
+ggplot(donnees = surv)
 ```
 
 ]
@@ -434,7 +434,7 @@ La tuyauterie est utile pour apporter des modifications ponctuelles à un ensemb
 
 ```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv)                   
+  donnees = surv)                   
 ```
 
 Les nouvelles lignes et les retraits n'auront pas d'impact sur l'exécution du code.
@@ -446,7 +446,7 @@ Ils peuvent rendre les commandes plus longues plus faciles à lire...
 .pull-right[
 
 ```{r, echo=FALSE, eval=TRUE}
-ggplot(data = surv)
+ggplot(donnees = surv)
 ```
 
 ]
@@ -464,7 +464,7 @@ La tuyauterie est utile pour apporter des modifications ponctuelles à un ensemb
 
 ```{r, eval=F, echo=T}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes())        #<<
 ```
 
@@ -478,7 +478,7 @@ L'"esthétique" des parcelles est constituée de caractéristiques telles que la
 
 ```{r, echo=FALSE, eval=TRUE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes())+
 theme_grey(base_size = 16)
 ```
@@ -496,9 +496,9 @@ Les commandes ggplot ont tendance à devenir très verticales (longues)
 
 ```{r, eval=F, echo=T}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(        
-   x = age_years       #<<
+   x = age_ans       #<<
    ))               
 ```
 
@@ -513,9 +513,9 @@ Deux mappings de base sont les axes vers les colonnes, via :
 
 ```{r, echo=FALSE, eval=TRUE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-   x = age_years))+
+   x = age_ans))+
 theme_grey(base_size = 16)
 ```
 
@@ -532,9 +532,9 @@ Les commandes ggplot ont tendance à devenir très verticales (longues)
 
 ```{r, eval=F, echo=T}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(        
-   x = age_years,       #<<
+   x = age_ans,       #<<
    y = ht_cm))          #<<
 ```
 
@@ -549,9 +549,9 @@ Deux mappings de base sont les axes vers les colonnes, via :
 
 ```{r, echo=FALSE, eval=TRUE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-   x = age_years,
+   x = age_ans,
    y = ht_cm))+
 theme_grey(base_size = 16)
 ```
@@ -569,9 +569,9 @@ Les commandes ggplot ont tendance à devenir très verticales (longues)
 
 ```{r, eval=F, echo=T}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-    x = age_years,
+    x = age_ans,
     y = ht_cm)) +
 *geom_point()
 ```
@@ -587,9 +587,9 @@ avec un **`+`** à la `ggplot()` commande.
 
 ```{r, eval=T, echo=F, message=F, warning=F}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-   x = age_years,
+   x = age_ans,
    y = ht_cm)) +
 geom_point() + 
 theme_grey(base_size = 16)
@@ -621,18 +621,18 @@ Voici quelques "géomes" typiques :
 
 # Histogram
 histogram <- ggplot(
-    data = surv,
+    donnees = surv,
     mapping = aes(
-      x = date_onset))+
+      x = date_symptomes))+
   geom_histogram(fill = "darkorange")+
   labs(title = "geom_histogram()")+
   theme_minimal(base_size = 16)
   
 
 points <- ggplot(
-    data = surv,
+    donnees = surv,
     mapping = aes(
-      x = age_years,       
+      x = age_ans,       
       y = ht_cm)
     )+
   geom_point()+
@@ -671,15 +671,15 @@ Voici quelques "géomes" typiques :
 ```{r, message=F, warning=F}
 
 lines <- surv %>% 
-  group_by(hospital,
-           week_report = lubridate::floor_date(date_onset, "week")) %>% 
-  summarise(n_cases = n()) %>% 
+  group_by(hopital,
+           week_report = lubridate::floor_date(date_symptomes, "week")) %>% 
+  summarise(n_cas = n()) %>% 
   drop_na(week_report) %>% 
   ggplot(
     mapping = aes(
       x = week_report,       
-      y = n_cases,
-      color = hospital),
+      y = n_cas,
+      color = hopital),
     size = 4
     )+
   geom_line()+
@@ -688,8 +688,8 @@ lines <- surv %>%
 
 bars <- surv %>% 
   ggplot(mapping = aes(
-      y = sex,
-      fill = sex))+
+      y = sexe,
+      fill = sexe))+
   geom_bar()+
   labs(title = "geom_bar()")+
   theme_minimal(base_size = 16)+
@@ -725,9 +725,9 @@ Voici quelques "géomes" typiques :
 ```{r, message=F, warning=F}
 
 boxplots <- ggplot(
-    data = surv,
+    donnees = surv,
     mapping = aes(
-      x = fever,       
+      x = fievre,       
       y = temp)
     )+
   geom_boxplot()+
@@ -737,11 +737,11 @@ boxplots <- ggplot(
 
 
 violins <- ggplot(
-    data = surv,
+    donnees = surv,
     mapping = aes(
-      x = fever,       
+      x = fievre,       
       y = temp,
-      fill = fever)
+      fill = fievre)
     )+
   geom_violin()+
   labs(title = "geom_violin()")+
@@ -766,9 +766,9 @@ cowplot::plot_grid(boxplots, violins,
 
 ```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-   x = age_years,
+   x = age_ans,
    y = ht_cm)) +
 *geom_point()
 ```
@@ -781,9 +781,9 @@ Avec les axes maintenant mappés, `geom_point()` affiche les données sous forme
 
 ```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-   x = age_years,
+   x = age_ans,
    y = ht_cm)) +
 geom_point() +
 theme_grey(base_size = 16)
@@ -799,9 +799,9 @@ theme_grey(base_size = 16)
 
 ```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-   x = age_years,
+   x = age_ans,
    y = ht_cm)) +
 geom_point() +
 *geom_smooth()
@@ -817,9 +817,9 @@ Nous pouvons ajouter des géomes supplémentaires à l'intrigue en cours avec `+
 
 ```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-    x = age_years,
+    x = age_ans,
     y = ht_cm)) +
 geom_point() +
 geom_smooth() +
@@ -841,7 +841,7 @@ theme_grey(base_size = 16)
 Les alinéas, les espaces et les nouvelles lignes n'ont pas d'impact sur l'exécution du code, et peuvent être variés pour améliorer la lisibilité.
 
 ```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
-ggplot(data = surv, mapping = aes(x = age_years, y = ht_cm)) + geom_point()
+ggplot(donnees = surv, mapping = aes(x = age_ans, y = ht_cm)) + geom_point()
 ```
 
 --
@@ -849,8 +849,8 @@ ggplot(data = surv, mapping = aes(x = age_years, y = ht_cm)) + geom_point()
 est la même chose que :
 
 ```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
-ggplot(data = surv,
-       mapping = aes(x = age_years, y = ht_cm)) +
+ggplot(donnees = surv,
+       mapping = aes(x = age_ans, y = ht_cm)) +
 geom_point()
 ```
 
@@ -860,36 +860,36 @@ est la même chose que :
 
 ```{r, echo=params$lang == "en", eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,        # use case linelist
+  donnees = surv,        # use case linelist
   mapping = aes(      # make aesthetic mappings for all geoms
-    x = age_years,    # assign x-axis to age column
+    x = age_ans,    # assign x-axis to age column
     y = ht_cm)) +     # assign y-axis to height
-geom_point()          # display data as points
+geom_point()          # display donnees as points
 ```
 
 ```{r, echo=params$lang == "fr", eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,        # utiliser le cas linelist
+  donnees = surv,        # utiliser le cas linelist
   mapping = aes(      # faire des mappings esthétiques pour tous les géomètres
-    x = age_years,    # assigner la colonne d'âge à l'axe des x 
+    x = age_ans,    # assigner la colonne d'âge à l'axe des x 
     y = ht_cm)) +     # assigner la colonne d'hauteur à l'axe des y 
 geom_point()          # afficher les données sous forme de points
 ```
 
 ```{r, echo=params$lang == "ru", eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,     # использование линейного списка
+  donnees = surv,     # использование линейного списка
   mapping = aes(   # создаем эстетические отображения для всех геомов
-    x = age_years, # присвоить ось x столбцу возраста
+    x = age_ans, # присвоить ось x столбцу возраста
     y = ht_cm)) +  # присвоить ось y росту
 geom_point()       # отображение данных в виде точек
 ```
 
 ```{r, echo=params$lang == "es", eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,        # caso de uso lista de líneas
+  donnees = surv,        # caso de uso lista de líneas
   mapping = aes(      # hacer mapeos estéticos para todos los geoms
-    x = age_years,    # asignar el eje x a la columna de edad
+    x = age_ans,    # asignar el eje x a la columna de edad
     y = ht_cm)) +     # asignar el eje y a la altura
 geom_point()          # mostrar los datos en forma de puntos
 ```
@@ -952,11 +952,11 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ggplot( -->
 
-<!-- data = surv, -->
+<!-- donnees = surv, -->
 
 <!-- mapping = aes( -->
 
-<!-- x = age_years, -->
+<!-- x = age_ans, -->
 
 <!-- y = ht_cm))+ -->
 
@@ -972,7 +972,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ``{r,eval = params$lang =="en", message=F, warning=F} -->
 
-<!-- color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+ -->
+<!-- color_purple <- ggplot(donnees = surv, aes(x = age_ans, y = ht_cm))+ -->
 
 <!-- geom_point(color = "purple")+ -->
 
@@ -990,7 +990,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ``{r, eval = params$lang =="fr", message=F, warning=F} -->
 
-<!-- color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+ -->
+<!-- color_purple <- ggplot(donnees = surv, aes(x = age_ans, y = ht_cm))+ -->
 
 <!-- geom_point(color = "purple")+ -->
 
@@ -1008,7 +1008,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ``{r, eval = params$lang =="ru", message=F, warning=F} -->
 
-<!-- color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+ -->
+<!-- color_purple <- ggplot(donnees = surv, aes(x = age_ans, y = ht_cm))+ -->
 
 <!-- geom_point(color = "purple")+ -->
 
@@ -1026,7 +1026,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ``{r,eval = params$lang =="es", message=F, warning=F} -->
 
-<!-- color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+ -->
+<!-- color_purple <- ggplot(donnees = surv, aes(x = age_ans, y = ht_cm))+ -->
 
 <!-- geom_point(color = "purple")+ -->
 
@@ -1064,11 +1064,11 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ggplot( -->
 
-<!-- data = surv, -->
+<!-- donnees = surv, -->
 
 <!-- mapping = aes( -->
 
-<!-- x = age_years, -->
+<!-- x = age_ans, -->
 
 <!-- y = ht_cm))+ -->
 
@@ -1086,15 +1086,15 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ggplot( -->
 
-<!-- data = surv, -->
+<!-- donnees = surv, -->
 
 <!-- mapping = aes( -->
 
-<!-- x = age_years, -->
+<!-- x = age_ans, -->
 
 <!-- y = ht_cm, -->
 
-<!-- color = hospital))+ # dynamique #<< -->
+<!-- color = hopital))+ # dynamique #<< -->
 
 <!-- geom_point() -->
 
@@ -1108,7 +1108,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ``{r, eval = params$lang == "en", message=F, warning=F} -->
 
-<!-- color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+ -->
+<!-- color_purple <- ggplot(donnees = surv, aes(x = age_ans, y = ht_cm))+ -->
 
 <!-- geom_point(color = "purple")+ -->
 
@@ -1116,13 +1116,13 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- labs(title = "Using color = 'purple'") -->
 
-<!-- color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+ -->
+<!-- color_hospital <- ggplot(donnees = surv, aes(x = age_ans, y = ht_cm))+ -->
 
-<!-- geom_point(aes(color = hospital))+ -->
+<!-- geom_point(aes(color = hopital))+ -->
 
 <!-- theme_minimal(base_size = 16)+ -->
 
-<!-- labs(title = "Using aes(color = hospital)") -->
+<!-- labs(title = "Using aes(color = hopital)") -->
 
 <!-- cowplot::plot_grid(color_purple, color_hospital, -->
 
@@ -1132,7 +1132,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ``{r, eval = params$lang =="fr", message=F, warning=F} -->
 
-<!-- color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+ -->
+<!-- color_purple <- ggplot(donnees = surv, aes(x = age_ans, y = ht_cm))+ -->
 
 <!-- geom_point(color = "purple")+ -->
 
@@ -1140,13 +1140,13 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- labs(title = "Utilisant color = 'purple' (mauve)") -->
 
-<!-- color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+ -->
+<!-- color_hospital <- ggplot(donnees = surv, aes(x = age_ans, y = ht_cm))+ -->
 
-<!-- geom_point(aes(color = hospital))+ -->
+<!-- geom_point(aes(color = hopital))+ -->
 
 <!-- theme_minimal(base_size = 16)+ -->
 
-<!-- labs(title = "Utilisant aes(color = hospital)") -->
+<!-- labs(title = "Utilisant aes(color = hopital)") -->
 
 <!-- cowplot::plot_grid(color_purple, color_hospital, -->
 
@@ -1156,7 +1156,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ``{r, eval = params$lang =="ru", message=F, warning=F} -->
 
-<!-- color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+ -->
+<!-- color_purple <- ggplot(donnees = surv, aes(x = age_ans, y = ht_cm))+ -->
 
 <!-- geom_point(color = "purple")+ -->
 
@@ -1164,13 +1164,13 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- labs(title = "Использование цвета = 'violet' (сиреневый)") -->
 
-<!-- color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+ -->
+<!-- color_hospital <- ggplot(donnees = surv, aes(x = age_ans, y = ht_cm))+ -->
 
 <!-- geom_point(aes(color = hôpital))+ -->
 
 <!-- theme_minimal(base_size = 16)+ -->
 
-<!-- labs(title = "Использование aes(color = hospital), больница") -->
+<!-- labs(title = "Использование aes(color = hopital), больница") -->
 
 <!-- cowplot::plot_grid(color_purple, color_hospital, -->
 
@@ -1180,7 +1180,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ``{r, eval = params$lang =="es", message=F, warning=F} -->
 
-<!-- color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+ -->
+<!-- color_purple <- ggplot(donnees = surv, aes(x = age_ans, y = ht_cm))+ -->
 
 <!-- geom_point(color = "purple")+ -->
 
@@ -1188,13 +1188,13 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- labs(title = "Utilizar el color = 'purple' (púrpura)") -->
 
-<!-- color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+ -->
+<!-- color_hospital <- ggplot(donnees = surv, aes(x = age_ans, y = ht_cm))+ -->
 
-<!-- geom_point(aes(color = hospital))+ -->
+<!-- geom_point(aes(color = hopital))+ -->
 
 <!-- theme_minimal(base_size = 16)+ -->
 
-<!-- labs(title = "Utilizar aes(color = hospital)") -->
+<!-- labs(title = "Utilizar aes(color = hopital)") -->
 
 <!-- cowplot::plot_grid(color_purple, color_hospital, -->
 
@@ -1222,9 +1222,9 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ggplot( -->
 
-<!-- data = surv, -->
+<!-- donnees = surv, -->
 
-<!-- mapping = aes(x = date_onset)) + -->
+<!-- mapping = aes(x = date_symptomes)) + -->
 
 <!-- geom_histogram(fill = "purple") # static #<< -->
 
@@ -1238,11 +1238,11 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ggplot( -->
 
-<!-- data = surv, -->
+<!-- donnees = surv, -->
 
 <!-- mapping = aes( -->
 
-<!-- x = date_onset, -->
+<!-- x = date_symptomes, -->
 
 <!-- color = district)) + # dynamique #<< -->
 
@@ -1258,7 +1258,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ``{r, eval = params$lang == "en", message=F, warning=F} -->
 
-<!-- fill_purple <- ggplot(data = surv, aes(x = date_onset))+ -->
+<!-- fill_purple <- ggplot(donnees = surv, aes(x = date_symptomes))+ -->
 
 <!-- geom_histogram(fill = "purple")+ -->
 
@@ -1266,13 +1266,13 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- labs(title = "Using fill = 'purple'") -->
 
-<!-- fill_hospital <- ggplot(data = surv, aes(x = date_onset))+ -->
+<!-- fill_hospital <- ggplot(donnees = surv, aes(x = date_symptomes))+ -->
 
 <!-- geom_histogram(aes(fill = hôpital))+ -->
 
 <!-- theme_minimal(base_size = 16)+ -->
 
-<!-- labs(title = "Using aes(fill = hospital)") -->
+<!-- labs(title = "Using aes(fill = hopital)") -->
 
 <!-- cowplot::plot_grid( -->
 
@@ -1284,7 +1284,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ``{r,eval = params$lang =="fr", message=F, warning=F} -->
 
-<!-- fill_purple <- ggplot(data = surv, aes(x = date_onset))+ -->
+<!-- fill_purple <- ggplot(donnees = surv, aes(x = date_symptomes))+ -->
 
 <!-- geom_histogram(fill = "purple")+ -->
 
@@ -1292,13 +1292,13 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- labs(title = "Utilisant fill = 'purple' (mauve)") -->
 
-<!-- fill_hospital <- ggplot(data = surv, aes(x = date_onset))+ -->
+<!-- fill_hospital <- ggplot(donnees = surv, aes(x = date_symptomes))+ -->
 
 <!-- geom_histogram(aes(fill = hôpital))+ -->
 
 <!-- theme_minimal(base_size = 16)+ -->
 
-<!-- labs(title = "Utilisant aes(fill = hospital)") -->
+<!-- labs(title = "Utilisant aes(fill = hopital)") -->
 
 <!-- cowplot::plot_grid( -->
 
@@ -1310,7 +1310,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ``{r, eval = params$lang =="ru", message=F, warning=F} -->
 
-<!-- fill_purple <- ggplot(data = surv, aes(x = date_onset))+ -->
+<!-- fill_purple <- ggplot(donnees = surv, aes(x = date_symptomes))+ -->
 
 <!-- geom_histogram(fill = "purple")+ -->
 
@@ -1318,7 +1318,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- labs(title = "Использование fill = 'purple' (сиреневый)") -->
 
-<!-- fill_hospital <- ggplot(data = surv, aes(x = date_onset))+ -->
+<!-- fill_hospital <- ggplot(donnees = surv, aes(x = date_symptomes))+ -->
 
 <!-- geom_histogram(aes(fill = hôpital))+ -->
 
@@ -1336,7 +1336,7 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- ``{r, eval = params$lang =="es", message=F, warning=F} -->
 
-<!-- fill_purple <- ggplot(data = surv, aes(x = date_onset))+ -->
+<!-- fill_purple <- ggplot(donnees = surv, aes(x = date_symptomes))+ -->
 
 <!-- geom_histogram(fill = "purple")+ -->
 
@@ -1344,13 +1344,13 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 <!-- labs(title = "Utilizar fill = 'purple' (púrpura)") -->
 
-<!-- fill_hospital <- ggplot(data = surv, aes(x = date_onset))+ -->
+<!-- fill_hospital <- ggplot(donnees = surv, aes(x = date_symptomes))+ -->
 
-<!-- geom_histogram(aes(fill = hospital))+ -->
+<!-- geom_histogram(aes(fill = hopital))+ -->
 
 <!-- theme_minimal(base_size = 16)+ -->
 
-<!-- labs(title = "Utilizar aes(fill = hospital)") -->
+<!-- labs(title = "Utilizar aes(fill = hopital)") -->
 
 <!-- cowplot::plot_grid( -->
 
@@ -1370,9 +1370,9 @@ Chaque géom accepte certaines esthétiques, comme `binwidth=` pour `geom_histog
 
 ```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-    x = age_years,
+    x = age_ans,
     y = ht_cm)) + 
 *geom_point(color = "seagreen")
 ```
@@ -1394,9 +1394,9 @@ Autres exemples statiques que tu pourrais utiliser :
 
 ```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-     x = age_years,
+     x = age_ans,
      y = ht_cm)) +
 geom_point(color = "seagreen") +
 theme_grey(base_size = 16)
@@ -1412,11 +1412,11 @@ theme_grey(base_size = 16)
 
 ```{r, echo=TRUE, eval=FALSE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-    x = age_years,
+    x = age_ans,
     y = ht_cm,
-*   color = hospital)) +
+*   color = hopital)) +
 geom_point()
 ```
 
@@ -1432,11 +1432,11 @@ Cela s'écrit **à l'intérieur `aes()`**.
 
 ```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-    x = age_years,
+    x = age_ans,
     y = ht_cm,
-    color = hospital)) +   
+    color = hopital)) +   
 geom_point()+
 theme_grey(base_size = 16)
 ```
@@ -1453,11 +1453,11 @@ theme_grey(base_size = 16)
 
 ```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-    x = age_years,
+    x = age_ans,
     y = ht_cm,
-*   color = hospital)) +  
+*   color = hopital)) +  
 geom_point(
 * size = 7, 
 * alpha = 0.6) 
@@ -1465,7 +1465,7 @@ geom_point(
 
 Ci-dessus , `size = 7` et `alpha = 0.5` sont attribués de façon statique, en dehors de `aes()`.
 
-`color=` est affectée à la colonne `hospital` à l'intérieur de `aes()`.
+`color=` est affectée à la colonne `hopital` à l'intérieur de `aes()`.
 
 ]
 
@@ -1473,11 +1473,11 @@ Ci-dessus , `size = 7` et `alpha = 0.5` sont attribués de façon statique, en d
 
 ```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-    x = age_years,
+    x = age_ans,
     y = ht_cm,
-    color = hospital))+      # color varies by outcome
+    color = hopital))+      # color varies by resultat
 geom_point(size = 7,         # all points 7x size
            alpha = 0.5)+     # transparency 
 theme_grey(base_size = 16)     
@@ -1499,10 +1499,10 @@ Comme il n'y a qu'un seul géom, toutes les esthétiques peuvent être écrites 
 
 ```{r, echo=TRUE, eval=FALSE}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  donnees = surv,
+  mapping = aes(x = date_symptomes)) +
 geom_histogram() +
-*facet_wrap(~hospital)
+*facet_wrap(~hopital)
 ```
 
 Les groupes peuvent également être affichés de cette façon.
@@ -1520,10 +1520,10 @@ par valeur unique dans la colonne.
 
 ```{r}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  donnees = surv,
+  mapping = aes(x = date_symptomes)) +
 geom_histogram() +
-facet_wrap(~ hospital)+
+facet_wrap(~ hopital)+
 theme_grey(base_size = 16)
 ```
 
@@ -1540,10 +1540,10 @@ Appelés aussi "petits multiples"
 
 ```{r, echo=TRUE, eval=FALSE}
 ggplot(
-  data = surv,
-  mapping = aes(x = date_onset)) +
+  donnees = surv,
+  mapping = aes(x = date_symptomes)) +
 geom_histogram() +
-*facet_wrap(~hospital,
+*facet_wrap(~hopital,
             scales = "free_y")
 ```
 
@@ -1564,40 +1564,40 @@ Essaie aussi `ncol=` et `nrow=`
 .pull-right[
 
 ```{r, eval=params$lang == "en", echo=F}
-ggplot(data = surv,
-       mapping = aes(x = date_onset)) +
+ggplot(donnees = surv,
+       mapping = aes(x = date_symptomes)) +
 geom_histogram() +
-facet_wrap(~hospital,
+facet_wrap(~hopital,
            scales = "free_y") +
 labs(caption = "Note the free y-axis")+
 theme_grey(base_size = 16)
 ```
 
 ```{r, eval=params$lang == "fr", echo=F}
-ggplot(data = surv,
-       mapping = aes(x = date_onset)) +
+ggplot(donnees = surv,
+       mapping = aes(x = date_symptomes)) +
 geom_histogram() +
-facet_wrap(~hospital,
+facet_wrap(~hopital,
            scales = "free_y") +
 labs(caption = "Notez l'axe y libre")+
 theme_grey(base_size = 16)
 ```
 
 ```{r, eval=params$lang == "ru", echo=F}
-ggplot(data = surv,
-       mapping = aes(x = date_onset)) +
+ggplot(donnees = surv,
+       mapping = aes(x = date_symptomes)) +
 geom_histogram() +
-facet_wrap(~hospital,
+facet_wrap(~hopital,
            scales = "free_y") +
 labs(caption = "Обратите внимание на свободную ось y")+
 theme_grey(base_size = 16)
 ```
 
 ```{r, eval=params$lang == "es", echo=F}
-ggplot(data = surv,
-       mapping = aes(x = date_onset)) +
+ggplot(donnees = surv,
+       mapping = aes(x = date_symptomes)) +
 geom_histogram() +
-facet_wrap(~hospital,
+facet_wrap(~hopital,
            scales = "free_y") +
 labs(caption = "Obsérvese el eje y libre")+
 theme_grey(base_size = 16)
@@ -1617,12 +1617,12 @@ Les paquets d'extension ggplot comme {gghighlight} sont utiles.
 
 ```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-    x = date_onset,
-*   fill = hospital)) +
+    x = date_symptomes,
+*   fill = hopital)) +
 geom_histogram() +
-facet_wrap(~ hospital) +
+facet_wrap(~ hopital) +
 *gghighlight()
 ```
 
@@ -1632,12 +1632,12 @@ facet_wrap(~ hospital) +
 
 ```{r}
 ggplot(
-  data = surv,
+  donnees = surv,
   mapping = aes(
-    x = date_onset,
-    fill = hospital)) +
+    x = date_symptomes,
+    fill = hopital)) +
 geom_histogram() +
-facet_wrap(~ hospital) +
+facet_wrap(~ hopital) +
 gghighlight::gghighlight() +
 theme_minimal(base_size = 14)
 ```
@@ -1654,10 +1654,10 @@ theme_minimal(base_size = 14)
 
 ```{r, echo=params$lang == "en", eval=F}
 surv %>% 
-  # get weekly counts by hospital
+  # get weekly compte by hopital
   group_by(
-     hospital,
-     week = floor_date(date_onset, "week")
+     hopital,
+     week = floor_date(date_symptomes, "week")
      ) %>%
   count() %>% 
   
@@ -1666,10 +1666,10 @@ surv %>%
     mapping = aes(
       x = week,
       y = n,
-      color = hospital)) +
+      color = hopital)) +
   geom_line() +
 * gghighlight(
-*   hospital == "Port Hospital")+
+*   hopital == "Port Hospital")+
   theme(legend.position = "none")
   
 ```
@@ -1678,8 +1678,8 @@ surv %>%
 surv %>% 
   # obtenir des comptages hebdomadaires par hôpital
   group_by(
-     hospital,
-     week = floor_date(date_onset, "week")) %>%
+     hopital,
+     week = floor_date(date_symptomes, "week")) %>%
   count() %>% 
   
   # graphique
@@ -1687,10 +1687,10 @@ surv %>%
     mapping = aes(
       x = week,
       y = n,
-      color = hospital)) +
+      color = hopital)) +
   geom_line() +
 * gghighlight(
-*   hospital == "Port Hospital")+
+*   hopital == "Port Hospital")+
   theme(legend.position = "none")
   
 ```
@@ -1699,8 +1699,8 @@ surv %>%
 surv %>% 
   # получить еженедельные подсчеты по больницам
   group_by(
-     hospital,
-     week = floor_date(date_onset, "week")) %>%
+     hopital,
+     week = floor_date(date_symptomes, "week")) %>%
   count() %>% 
   
   # сюжет
@@ -1708,20 +1708,20 @@ surv %>%
     mapping = aes(
       x = week,
       y = n,
-      color = hospital)) +
+      color = hopital)) +
   geom_line() +
 * gghighlight(
-*   hospital == "Port Hospital")+
+*   hopital == "Port Hospital")+
   theme(legend.position = "none")
   
 ```
 
 ```{r, echo=params$lang == "es", eval=F}
 surv %>% 
-  # Obtenga los recuentos semanales por hospital
+  # Obtenga los recuentos semanales por hopital
   group_by(
-     hospital,
-     week = floor_date(date_onset, "week")) %>%
+     hopital,
+     week = floor_date(date_symptomes, "week")) %>%
   count() %>% 
   
   # parcela
@@ -1729,10 +1729,10 @@ surv %>%
     mapping = aes(
       x = week,
       y = n,
-      color = hospital)) +
+      color = hopital)) +
   geom_line() +
 * gghighlight(
-*   hospital == "Port Hospital")+
+*   hopital == "Port Hospital")+
   theme(legend.position = "none")
   
 ```
@@ -1743,10 +1743,10 @@ surv %>%
 
 ```{r, echo=F, eval=T}
 surv %>% 
-  # get daily counts by zip code
+  # get daily compte by zip code
   group_by(
-     hospital,
-     week = floor_date(date_onset, "week")) %>%
+     hopital,
+     week = floor_date(date_symptomes, "week")) %>%
   count() %>% 
   
   # plot
@@ -1754,12 +1754,12 @@ surv %>%
     mapping = aes(
       x = week, 
       y = n,
-      color = hospital)) +
+      color = hopital)) +
   geom_line()+
-  gghighlight::gghighlight(hospital == "Port Hospital") +
+  gghighlight::gghighlight(hopital == "Port Hospital") +
   theme(legend.position = "none")+
   theme_light(base_size = 16)+
-  labs(title = "Weekly cases by hospital", subtitle = "Port Hospital highlighted")
+  labs(title = "Weekly cases by hopital", subtitle = "Port Hospital highlighted")
 ```
 
 ]
@@ -1775,7 +1775,7 @@ class: inverse, center, middle
 
 ## Exercice
 
-Va sur le site du cours  
+Va sur le lieu du cours  
 Ouvre le premier exercice du module 5 et connecte-toi.  
 Suis les instructions pour ouvrir ton projet R "ebola" et continuer à coder.  
 Informe un instructeur si tu n'es pas sûr de ce que tu dois faire.
