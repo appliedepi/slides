@@ -1,6 +1,6 @@
 ---
 title: "Introducción a R para<br>Epidemiología Aplicada"
-subtitle: "<br>Grouping and summarizing data"
+subtitle: "<br>Grouping and summarizing datos"
 author: "Applied Epi"
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
@@ -44,11 +44,11 @@ options(htmltools.dir.version = FALSE)
 
 ## install and load necessary packages 
 pacman::p_load(
-  rio,        # importing data  
+  rio,        # importing datos  
   here,       # relative file pathways  
-  janitor,    # data cleaning and tables
+  janitor,    # datos cleaning and tables
   lubridate,  # working with dates
-  tidyverse,  # data management and visualization
+  tidyverse,  # datos management and visualization
   gtsummary,  # summary tables
   flextable,  # pretty tables
   scales,     # percents in tables
@@ -73,19 +73,19 @@ style_mono_accent(
   base_color = "#00538c", 
   link_color = "#48a878", 
   ## add logo to the title page (bit bigger)
-  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_image = "https://brutos.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
   title_slide_background_position = "95% 95%", 
   title_slide_background_size = "25%", 
   ## add logo to all following slides
-  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_image = "https://brutos.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
   background_size = "10%",
   background_position = "100% 0%"
 )
 ```
 
 ```{r, include=FALSE}
-# data prep --------------------------------------------------------------------
-surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+# datos prep --------------------------------------------------------------------
+vig <- rio::import(here::here("data", "listado_vigilancia_limpio_20141201.rds"))
 
 # gen <- googlesheets4::read_sheet(
 #   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
@@ -154,7 +154,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "Gr
 
 ---
 
-# Objetivos y agenda
+# Objetivos y orden del día
 
 - Practicar el uso de {janitor} para crear rápidamente tablas simples
 
@@ -212,8 +212,8 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "si
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv %>% 
-  tabyl(district)            #<<
+vig %>% 
+  tabyl(distrito)            #<<
 ```
 
 ]
@@ -223,8 +223,8 @@ surv %>%
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv %>% 
-  tabyl(district)
+vig %>% 
+  tabyl(distrito)
 ```
 
 ]
@@ -236,8 +236,8 @@ surv %>%
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv %>% 
-  tabyl(district) %>% 
+vig %>% 
+  tabyl(distrito) %>% 
   adorn_totals()            #<<
 ```
 
@@ -246,8 +246,8 @@ surv %>%
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv %>% 
-  tabyl(district) %>% 
+vig %>% 
+  tabyl(distrito) %>% 
   adorn_totals()
 ```
 
@@ -260,8 +260,8 @@ surv %>%
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv %>% 
-  tabyl(district) %>% 
+vig %>% 
+  tabyl(distrito) %>% 
   adorn_totals() %>% 
   adorn_pct_formatting()                            #<<
 ```
@@ -271,8 +271,8 @@ surv %>%
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv %>% 
-  tabyl(district) %>% 
+vig %>% 
+  tabyl(distrito) %>% 
   adorn_totals() %>% 
   adorn_pct_formatting()
 ```
@@ -286,8 +286,8 @@ surv %>%
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv %>% 
-  tabyl(district, sex)              #<<
+vig %>% 
+  tabyl(distrito, sexo)              #<<
 ```
 
 ]
@@ -297,8 +297,8 @@ surv %>%
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv %>% 
-  tabyl(district, sex)
+vig %>% 
+  tabyl(distrito, sexo)
 ```
 
 ]
@@ -310,8 +310,8 @@ surv %>%
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv %>% 
-  tabyl(district, sex, show_na = FALSE)              #<<
+vig %>% 
+  tabyl(distrito, sexo, show_na = FALSE)              #<<
 ```
 
 Elimina los valores que faltan o perdidos de la tabla.
@@ -321,8 +321,8 @@ Elimina los valores que faltan o perdidos de la tabla.
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv %>% 
-  tabyl(district, sex, show_na = FALSE)
+vig %>% 
+  tabyl(distrito, sexo, show_na = FALSE)
 ```
 
 ]
@@ -334,8 +334,8 @@ surv %>%
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv %>% 
-  tabyl(district, sex, show_na = FALSE) %>% 
+vig %>% 
+  tabyl(distrito, sexo, show_na = FALSE) %>% 
   adorn_totals(where = "both")                     #<<
 ```
 
@@ -346,8 +346,8 @@ Añade totales tanto para las filas como para las columnas.
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv %>% 
-  tabyl(district, sex, show_na = FALSE) %>% 
+vig %>% 
+  tabyl(distrito, sexo, show_na = FALSE) %>% 
   adorn_totals(where = "both") 
 ```
 
@@ -360,8 +360,8 @@ surv %>%
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv %>% 
-  tabyl(district, sex, show_na = FALSE) %>% 
+vig %>% 
+  tabyl(distrito, sexo, show_na = FALSE) %>% 
   adorn_totals(where = "both") %>% 
   adorn_percentages() %>%     #<<
   adorn_pct_formatting()      #<<
@@ -374,8 +374,8 @@ Con estos dos comandos, añade porcentajes con formato.
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv %>% 
-  tabyl(district, sex, show_na = FALSE) %>% 
+vig %>% 
+  tabyl(distrito, sexo, show_na = FALSE) %>% 
   adorn_totals(where = "both") %>% 
   adorn_percentages() %>%     
   adorn_pct_formatting()      
@@ -390,8 +390,8 @@ surv %>%
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv %>% 
-  tabyl(district, sex, show_na = FALSE) %>% 
+vig %>% 
+  tabyl(distrito, sexo, show_na = FALSE) %>% 
   adorn_totals(where = "both") %>% 
   adorn_percentages() %>%     
   adorn_pct_formatting(digits = 0)      #<<
@@ -404,8 +404,8 @@ Establece el número de dígitos decimales.
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv %>% 
-  tabyl(district, sex, show_na = FALSE) %>% 
+vig %>% 
+  tabyl(distrito, sexo, show_na = FALSE) %>% 
   adorn_totals(where = "both") %>% 
   adorn_percentages() %>%     
   adorn_pct_formatting(digits = 0)      
@@ -425,8 +425,8 @@ Canaliza fácilmente la tabla a `qflextable()` para convertirla a formato html.
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv %>% 
-  tabyl(district, sex, show_na = FALSE) %>% 
+vig %>% 
+  tabyl(distrito, sexo, show_na = FALSE) %>% 
   adorn_totals(where = "both") %>% 
   adorn_percentages() %>%     
   adorn_pct_formatting(digits = 0) %>% 
@@ -438,8 +438,8 @@ surv %>%
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv %>% 
-  tabyl(district, sex, show_na = FALSE) %>% 
+vig %>% 
+  tabyl(distrito, sexo, show_na = FALSE) %>% 
   adorn_totals(where = "both") %>% 
   adorn_percentages() %>%     
   adorn_pct_formatting(digits = 0) %>% 
@@ -485,7 +485,7 @@ Devuelve el número de filas por valor único (por grupo)
 --
 
 ```{r, echo=T}
-surv %>% 
+vig %>% 
   count(hospital)                            #<<
 ```
 
@@ -501,8 +501,8 @@ Puedes incluir varias columnas de agrupación
 --
 
 ```{r, echo=T}
-surv %>% 
-  count(hospital, sex)                            #<<
+vig %>% 
+  count(hospital, sexo)                            #<<
 ```
 
 ???
@@ -537,7 +537,7 @@ Pero, ¿y si quieres algo más que los recuentos?
 ## group_by() y summarise()
 
 ```{r, echo=T, eval=F}
-surv %>% 
+vig %>% 
   group_by(hospital)
 ```
 
@@ -548,7 +548,7 @@ No se observan cambios perceptibles en la base de datos hasta que se aplique otr
 Si se presenta, La entrada `Groups:` aparece encima de los datos.
 
 ```{r, echo=F, eval=T}
-surv %>% 
+vig %>% 
   group_by(hospital)
 ```
 
@@ -574,7 +574,7 @@ str_glue("summarise(nombre de nueva columna = una función para aplicar a cada g
 --
 
 ```{r summarise, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise()   
 ```
@@ -601,25 +601,25 @@ str_glue("summarise(Nombre de nueva columna = Una función a ser aplicada a cada
 ```
 
 ```{r summarise2_en, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(n_rows = n())                        # n() counts the number of rows per group
 ```
 
 ```{r summarise2_fr, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(n_rows = n())                       # n(): le nombre de lignes par groupe
 ```
 
 ```{r summarise2_ru, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(n_rows = n())                        # n() подсчитывает количество строк в группе
 ```
 
 ```{r summarise2_es, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(n_rows = n())                        # n() cuenta el número de filas del grupo
 ```
@@ -667,35 +667,35 @@ str_glue("summarise(Nombre de nueva columna = Una función a ser aplicada a cada
 ```
 
 ```{r summarise3_en, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() counts the number of rows per group
-    age_avg = mean(age_years, na.rm = T))        # mean age in the group
+    age_avg = mean(edad_anios, na.rm = T))        # mean edad in the group
 ```
 
 ```{r summarise3_fr, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n(): le nombre de lignes par groupe
-    age_avg = mean(age_years, na.rm = T))        # âge moyen dans le groupe
+    age_avg = mean(edad_anios, na.rm = T))        # âge moyen dans le groupe
 ```
 
 ```{r summarise3_ru, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               #n() подсчитывает количество строк для каждой группы
-    age_avg = mean(age_years, na.rm = T))        # средний возраст в группе
+    age_avg = mean(edad_anios, na.rm = T))        # средний возраст в группе
 ```
 
 ```{r summarise3_es, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() cuenta el número de filas por grupo
-    age_avg = mean(age_years, na.rm = T))        # edad media del grupo
+    age_avg = mean(edad_anios, na.rm = T))        # edad media del grupo
 ```
 
 ```{r, echo=F, eval=params$lang == "en"}
@@ -703,7 +703,7 @@ decorate("summarise3_en") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
@@ -712,7 +712,7 @@ decorate("summarise3_fr") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
@@ -721,7 +721,7 @@ decorate("summarise3_ru") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
@@ -730,7 +730,7 @@ decorate("summarise3_es") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
@@ -749,42 +749,42 @@ str_glue("summarise(Nombre de nueva columna = función a ser aplicada a cada fil
 ```
 
 ```{r summarise4_en, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() counts the number of rows per group
-    age_avg = mean(age_years, na.rm = T),        # mean age in the group
-    max_onset = max(date_onset, na.rm=T))        # latest onset date
+    age_avg = mean(edad_anios, na.rm = T),        # mean edad in the group
+    max_onset = max(fecha_sintomas, na.rm=T))        # latest fecha inicio sintomas
 
 ```
 
 ```{r summarise4_fr, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n(): le nombre de lignes par groupe
-    age_avg = mean(age_years, na.rm = T),        # âge moyen dans le groupe
-    max_onset = max(date_onset, na.rm=T))        # date d'apparition la plus récente
+    age_avg = mean(edad_anios, na.rm = T),        # âge moyen dans le groupe
+    max_onset = max(fecha_sintomas, na.rm=T))        # date d'apparition la plus récente
 
 ```
 
 ```{r summarise4_ru, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows = n(),                               # n() подсчитывает количество строк в группе
-    age_avg = mean(age_years, na.rm = T),       # средний возраст в группе
-    max_onset = max(date_onset, na.rm=T))       # последняя дата начала заболевания
+    age_avg = mean(edad_anios, na.rm = T),       # средний возраст в группе
+    max_onset = max(fecha_sintomas, na.rm=T))       # последняя дата начала заболевания
 
 ```
 
 ```{r summarise4_es, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() cuenta el número de filas por grupo
-    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
-    max_onset = max(date_onset, na.rm=T))        # Fecha de inicio más tardía
+    age_avg = mean(edad_anios, na.rm = T),        # edad media del grupo
+    max_onset = max(fecha_sintomas, na.rm=T))        # Fecha de inicio más tardía
 
 ```
 
@@ -794,8 +794,8 @@ decorate("summarise4_en") %>%
   flair("age_avg", color = "deeppink") %>%
   flair("max_onset", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
-  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(fecha_sintomas, na.rm=T)", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
@@ -805,8 +805,8 @@ decorate("summarise4_fr") %>%
   flair("age_avg", color = "deeppink") %>%
   flair("max_onset", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
-  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(fecha_sintomas, na.rm=T)", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
@@ -816,8 +816,8 @@ decorate("summarise4_ru") %>%
   flair("age_avg", color = "deeppink") %>%
   flair("max_onset", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
-  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(fecha_sintomas, na.rm=T)", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
@@ -827,8 +827,8 @@ decorate("summarise4_es") %>%
   flair("age_avg", color = "deeppink") %>%
   flair("max_onset", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
-  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(fecha_sintomas, na.rm=T)", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
@@ -847,46 +847,46 @@ str_glue("summarise(Nombre de nueva columna = función a ser aplicada a cada fil
 ```
 
 ```{r summarise5_en, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() counts the number of rows per group
-    age_avg = mean(age_years, na.rm = T),        # mean age in the group
-    max_onset = max(date_onset, na.rm=T),        # latest onset date
-    n_female = sum(sex == 'female', na.rm=T)) # number female in group
+    age_avg = mean(edad_anios, na.rm = T),        # mean edad in the group
+    max_onset = max(fecha_sintomas, na.rm=T),        # latest fecha inicio sintomas
+    n_female = sum(sexo == 'mujer', na.rm=T)) # number mujer in group
 
 ```
 
 ```{r summarise5_fr, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n(): le nombre de lignes par groupe
-    age_avg = mean(age_years, na.rm = T),        # âge moyen dans le groupe
-    max_onset = max(date_onset, na.rm=T),        # date d'apparition la plus récente
-    n_female = sum(sex == 'female', na.rm=T)) # nombre de femmes dans le groupe
+    age_avg = mean(edad_anios, na.rm = T),        # âge moyen dans le groupe
+    max_onset = max(fecha_sintomas, na.rm=T),        # date d'apparition la plus récente
+    n_female = sum(sexo == 'mujer', na.rm=T)) # nombre de femmes dans le groupe
 
 ```
 
 ```{r summarise5_ru, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() подсчитывает количество строк в группе
-    age_avg = mean(age_years, na.rm = T),        # средний возраст в группе
-    max_onset = max(date_onset, na.rm=T),        # последняя дата начала заболевания
-    n_female = sum(sex == 'female', na.rm=T)) ## количество женщин в группе
+    age_avg = mean(edad_anios, na.rm = T),        # средний возраст в группе
+    max_onset = max(fecha_sintomas, na.rm=T),        # последняя дата начала заболевания
+    n_female = sum(sexo == 'mujer', na.rm=T)) ## количество женщин в группе
 
 ```
 
 ```{r summarise5_es, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() cuenta el número de filas por grupo
-    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
-    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
-    n_female = sum(sex == 'female', na.rm=T)) # número de mujeres en el grupo
+    age_avg = mean(edad_anios, na.rm = T),        # edad media del grupo
+    max_onset = max(fecha_sintomas, na.rm=T),        # Fecha de inicio más tardía
+    n_female = sum(sexo == 'mujer', na.rm=T)) # número de mujeres en el grupo
 
 ```
 
@@ -897,9 +897,9 @@ decorate("summarise5_en") %>%
   flair("max_onset", color = "deeppink") %>%
   flair(" n_female ", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
-  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
-  flair("sum(sex == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(fecha_sintomas, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(sexo == 'mujer', na.rm=T)", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
@@ -910,9 +910,9 @@ decorate("summarise5_fr") %>%
   flair("max_onset", color = "deeppink") %>%
   flair(" n_female ", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
-  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
-  flair("sum(sex == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(fecha_sintomas, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(sexo == 'mujer', na.rm=T)", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
@@ -923,9 +923,9 @@ decorate("summarise5_ru") %>%
   flair("max_onset", color = "deeppink") %>%
   flair(" n_female ", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
-  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
-  flair("sum(sex == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(fecha_sintomas, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(sexo == 'mujer', na.rm=T)", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
@@ -936,9 +936,9 @@ decorate("summarise5_es") %>%
   flair("max_onset", color = "deeppink") %>%
   flair(" n_female ", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
-  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
-  flair("sum(sex == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(fecha_sintomas, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(sexo == 'mujer', na.rm=T)", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
@@ -957,46 +957,46 @@ str_glue("summarise(Nombre de nueva columna = función a ser aplicada a cada fil
 ```
 
 ```{r summarise6_en, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                                # n() counts the number of rows per group
-    age_avg = mean(age_years, na.rm = T),        # mean age in the group
-    max_onset = max(date_onset, na.rm=T),        # latest onset date
-    n_female = sum(sex == 'female', na.rm=T), # number female in group
-    pct_female = percent(n_female / n_rows))     # percent female in group
+    age_avg = mean(edad_anios, na.rm = T),        # mean edad in the group
+    max_onset = max(fecha_sintomas, na.rm=T),        # latest fecha inicio sintomas
+    n_female = sum(sexo == 'mujer', na.rm=T), # number mujer in group
+    pct_female = percent(n_female / n_rows))     # percent mujer in group
 ```
 
 ```{r summarise6_fr, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n(): le nombre de lignes par groupe
-    age_avg = mean(age_years, na.rm = T),        # âge moyen dans le groupe
-    max_onset = max(date_onset, na.rm=T),        # date d'apparition la plus récente
-    n_female = sum(sex == 'female', na.rm=T), # nombre de femmes dans le groupe
+    age_avg = mean(edad_anios, na.rm = T),        # âge moyen dans le groupe
+    max_onset = max(fecha_sintomas, na.rm=T),        # date d'apparition la plus récente
+    n_female = sum(sexo == 'mujer', na.rm=T), # nombre de femmes dans le groupe
     pct_female = percent(n_female / n_rows))     # pourcentage de femmes dans le groupe
 ```
 
 ```{r summarise6_ru, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() подсчитывает количество строк в группе
-    age_avg = mean(age_years, na.rm = T),        # средний возраст в группе
-    max_onset = max(date_onset, na.rm=T),        # последняя дата начала заболевания
-    n_female = sum(sex == 'female', na.rm=T), ## количество женщин в группе
+    age_avg = mean(edad_anios, na.rm = T),        # средний возраст в группе
+    max_onset = max(fecha_sintomas, na.rm=T),        # последняя дата начала заболевания
+    n_female = sum(sexo == 'mujer', na.rm=T), ## количество женщин в группе
     pct_female = percent(n_female / n_rows))     # процент женщин в группе
 ```
 
 ```{r summarise6_es, include=F}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                                # n() cuenta el número de filas por grupo
-    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
-    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
-    n_female = sum(sex == 'female', na.rm=T), # número de mujeres en el grupo
+    age_avg = mean(edad_anios, na.rm = T),        # edad media del grupo
+    max_onset = max(fecha_sintomas, na.rm=T),        # Fecha de inicio más tardía
+    n_female = sum(sexo == 'mujer', na.rm=T), # número de mujeres en el grupo
     pct_female = percent(n_female / n_rows))     # Porcentaje de mujeres en el grupo
 ```
 
@@ -1008,9 +1008,9 @@ decorate("summarise6_en") %>%
   flair("n()", color = "cornflowerblue") %>% 
   flair(" n_female ", color = "deeppink") %>%
   flair("pct_female", color = "deeppink") %>%
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
-  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
-  flair("sum(sex == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(fecha_sintomas, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(sexo == 'mujer', na.rm=T)", color = "cornflowerblue") %>% 
   flair("percent(n_female / n_rows)", color = "cornflowerblue") %>% 
   knit_print()
 ```
@@ -1023,9 +1023,9 @@ decorate("summarise6_fr") %>%
   flair("n()", color = "cornflowerblue") %>% 
   flair(" n_female ", color = "deeppink") %>%
   flair("pct_female", color = "deeppink") %>%
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
-  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
-  flair("sum(sex == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(fecha_sintomas, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(sexo == 'mujer', na.rm=T)", color = "cornflowerblue") %>% 
   flair("percent(n_female / n_rows)", color = "cornflowerblue") %>% 
   knit_print()
 ```
@@ -1038,9 +1038,9 @@ decorate("summarise6_ru") %>%
   flair("n()", color = "cornflowerblue") %>% 
   flair(" n_female ", color = "deeppink") %>%
   flair("pct_female", color = "deeppink") %>%
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
-  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
-  flair("sum(sex == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(fecha_sintomas, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(sexo == 'mujer', na.rm=T)", color = "cornflowerblue") %>% 
   flair("percent(n_female / n_rows)", color = "cornflowerblue") %>% 
   knit_print()
 ```
@@ -1053,9 +1053,9 @@ decorate("summarise6_es") %>%
   flair("n()", color = "cornflowerblue") %>% 
   flair(" n_female ", color = "deeppink") %>%
   flair("pct_female", color = "deeppink") %>%
-  flair("mean(age_years, na.rm = T)", color = "cornflowerblue") %>% 
-  flair("max(date_onset, na.rm=T)", color = "cornflowerblue") %>% 
-  flair("sum(sex == 'female', na.rm=T)", color = "cornflowerblue") %>% 
+  flair("mean(edad_anios, na.rm = T)", color = "cornflowerblue") %>% 
+  flair("max(fecha_sintomas, na.rm=T)", color = "cornflowerblue") %>% 
+  flair("sum(sexo == 'mujer', na.rm=T)", color = "cornflowerblue") %>% 
   flair("percent(n_female / n_rows)", color = "cornflowerblue") %>% 
   knit_print()
 ```
@@ -1067,49 +1067,49 @@ decorate("summarise6_es") %>%
 Ordena la tabla colocando la columna o columnas a ordenar dentro de la función `arrange()`
 
 ```{r, echo=params$lang == "en", eval=params$lang == "en"}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() counts the number of rows per group
-    age_avg = mean(age_years, na.rm = T),        # mean age in the group
-    max_onset = max(date_onset, na.rm=T),        # latest onset date
-    n_female = sum(sex == 'female', na.rm=T), # number female in group
-    pct_female = percent(n_female / n_rows)) %>% # percent female in group
+    age_avg = mean(edad_anios, na.rm = T),        # mean edad in the group
+    max_onset = max(fecha_sintomas, na.rm=T),        # latest fecha inicio sintomas
+    n_female = sum(sexo == 'mujer', na.rm=T), # number mujer in group
+    pct_female = percent(n_female / n_rows)) %>% # percent mujer in group
   arrange(n_rows)                                  #<<
 ```
 
 ```{r, echo=params$lang == "fr", eval=params$lang == "fr"}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n(): le nombre de lignes par groupe
-    age_avg = mean(age_years, na.rm = T),        # âge moyen dans le groupe
-    max_onset = max(date_onset, na.rm=T),        # date d'apparition la plus récente
-    n_female = sum(sex == 'female', na.rm=T), # nombre de femmes dans le groupe
+    age_avg = mean(edad_anios, na.rm = T),        # âge moyen dans le groupe
+    max_onset = max(fecha_sintomas, na.rm=T),        # date d'apparition la plus récente
+    n_female = sum(sexo == 'mujer', na.rm=T), # nombre de femmes dans le groupe
     pct_female = percent(n_female / n_rows)) %>% # pourcentage de femmes dans le groupe
   arrange(n_rows)
 ```
 
 ```{r, echo=params$lang == "ru", eval=params$lang == "ru"}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() подсчитывает количество строк в группе
-    age_avg = mean(age_years, na.rm = T),        # средний возраст в группе
-    max_onset = max(date_onset, na.rm=T),        # последняя дата начала заболевания
-    n_female = sum(sex == 'female', na.rm=T), # количество женщин в группе
+    age_avg = mean(edad_anios, na.rm = T),        # средний возраст в группе
+    max_onset = max(fecha_sintomas, na.rm=T),        # последняя дата начала заболевания
+    n_female = sum(sexo == 'mujer', na.rm=T), # количество женщин в группе
     pct_female = percent(n_female / n_rows)) %>% # процент женщин в группе
   arrange(n_rows)
 ```
 
 ```{r, echo=params$lang == "es", eval=params$lang == "es"}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() cuenta el número de filas por grupo
-    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
-    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más reciente
-    n_female = sum(sex == 'female', na.rm=T),    # número de mujeres en el grupo
+    age_avg = mean(edad_anios, na.rm = T),        # edad media del grupo
+    max_onset = max(fecha_sintomas, na.rm=T),        # Fecha de inicio más reciente
+    n_female = sum(sexo == 'mujer', na.rm=T),    # número de mujeres en el grupo
     pct_female = percent(n_female / n_rows)) %>% # Porcentaje de mujeres en el grupo
   arrange(n_rows)                                  #<<
 ```
@@ -1121,49 +1121,49 @@ surv %>%
 Envuelve la(s) columna(s) en `desc()` para invertir el orden de las filas
 
 ```{r, echo=params$lang == "en", eval=params$lang == "en"}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() counts the number of rows per group
-    age_avg = mean(age_years, na.rm = T),        # mean age in the group
-    max_onset = max(date_onset, na.rm=T),        # latest onset date
-    n_female = sum(sex == 'female', na.rm=T), # number female in group
-    pct_female = percent(n_female / n_rows)) %>% # percent female in group
+    age_avg = mean(edad_anios, na.rm = T),        # mean edad in the group
+    max_onset = max(fecha_sintomas, na.rm=T),        # latest fecha inicio sintomas
+    n_female = sum(sexo == 'mujer', na.rm=T), # number mujer in group
+    pct_female = percent(n_female / n_rows)) %>% # percent mujer in group
   arrange(-n_rows) 
 ```
 
 ```{r, echo=params$lang == "fr", eval=params$lang == "fr"}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n(): le nombre de lignes par groupe
-    age_avg = mean(age_years, na.rm = T),        # âge moyen dans le groupe
-    max_onset = max(date_onset, na.rm=T),        # date d'apparition la plus récente
-    n_female = sum(sex == 'female', na.rm=T), # nombre de femmes dans le groupe
+    age_avg = mean(edad_anios, na.rm = T),        # âge moyen dans le groupe
+    max_onset = max(fecha_sintomas, na.rm=T),        # date d'apparition la plus récente
+    n_female = sum(sexo == 'mujer', na.rm=T), # nombre de femmes dans le groupe
     pct_female = percent(n_female / n_rows)) %>% # pourcentage de femmes dans le groupe
   arrange(-n_rows)                                   
 ```
 
 ```{r, echo=params$lang == "ru", eval=params$lang == "ru"}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() подсчитывает количество строк в группе
-    age_avg = mean(age_years, na.rm = T),        # средний возраст в группе
-    max_onset = max(date_onset, na.rm=T),        # последняя дата начала заболевания
-    n_female = sum(sex == 'female', na.rm=T), # количество женщин в группе
+    age_avg = mean(edad_anios, na.rm = T),        # средний возраст в группе
+    max_onset = max(fecha_sintomas, na.rm=T),        # последняя дата начала заболевания
+    n_female = sum(sexo == 'mujer', na.rm=T), # количество женщин в группе
     pct_female = percent(n_female / n_rows))  %>% # процент женщин в группе
   arrange(-n_rows)                                  
 ```
 
 ```{r, echo=params$lang == "es", eval=params$lang == "es"}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() cuenta el número de filas por grupo
-    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
-    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
-    n_female = sum(sex == 'female', na.rm=T), # número de mujeres en el grupo
+    age_avg = mean(edad_anios, na.rm = T),        # edad media del grupo
+    max_onset = max(fecha_sintomas, na.rm=T),        # Fecha de inicio más tardía
+    n_female = sum(sexo == 'mujer', na.rm=T), # número de mujeres en el grupo
     pct_female = percent(n_female / n_rows)) %>% # Porcentaje de mujeres en el grupo
   arrange(-n_rows) 
 ```
@@ -1175,52 +1175,52 @@ surv %>%
 Con la función `qflextable()`, podemos dar un formato html para impresión de forma rápida.
 
 ```{r dplyr-flex-en, echo=params$lang == "en", eval=params$lang == "en"}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() counts the number of rows per group
-    age_avg = mean(age_years, na.rm = T),        # mean age in the group
-    max_onset = max(date_onset, na.rm=T),        # latest onset date
-    n_female = sum(sex == 'female', na.rm=T), # number female in group
-    pct_female = percent(n_female / n_rows)) %>% # percent female in group
+    age_avg = mean(edad_anios, na.rm = T),        # mean edad in the group
+    max_onset = max(fecha_sintomas, na.rm=T),        # latest fecha inicio sintomas
+    n_female = sum(sexo == 'mujer', na.rm=T), # number mujer in group
+    pct_female = percent(n_female / n_rows)) %>% # percent mujer in group
   arrange(-n_rows) %>% 
   qflextable()                                   #<<
 ```
 
 ```{r dplyr-flex-fr, echo=params$lang == "fr", eval=params$lang == "fr"}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n(): le nombre de lignes par groupe
-    age_avg = mean(age_years, na.rm = T),        # âge moyen dans le groupe
-    max_onset = max(date_onset, na.rm=T),        # date d'apparition la plus récente
-    n_female = sum(sex == 'female', na.rm=T), # nombre de femmes dans le groupe
+    age_avg = mean(edad_anios, na.rm = T),        # âge moyen dans le groupe
+    max_onset = max(fecha_sintomas, na.rm=T),        # date d'apparition la plus récente
+    n_female = sum(sexo == 'mujer', na.rm=T), # nombre de femmes dans le groupe
     pct_female = percent(n_female / n_rows)) %>% # pourcentage de femmes dans le groupe
   arrange(-n_rows) %>% 
   qflextable()                                   #<<
 ```
 
 ```{r dplyr-flex-ru, echo=params$lang == "ru", eval=params$lang == "ru"}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() подсчитывает количество строк в группе
-    age_avg = mean(age_years, na.rm = T),        # средний возраст в группе
-    max_onset = max(date_onset, na.rm=T),        # последняя дата начала заболевания
-    n_female = sum(sex == 'female', na.rm=T), # количество женщин в группе
+    age_avg = mean(edad_anios, na.rm = T),        # средний возраст в группе
+    max_onset = max(fecha_sintomas, na.rm=T),        # последняя дата начала заболевания
+    n_female = sum(sexo == 'mujer', na.rm=T), # количество женщин в группе
     pct_female = percent(n_female / n_rows)) %>% # процент женщин в группе
   arrange(-n_rows) %>% 
   qflextable()                                   #<<
 ```
 
 ```{r dplyr-flex-es, echo=params$lang == "es", eval=params$lang == "es"}
-surv %>% 
+vig %>% 
   group_by(hospital) %>% 
   summarise(
     n_rows  = n(),                               # n() cuenta el número de filas por grupo
-    age_avg = mean(age_years, na.rm = T),        # edad media del grupo
-    max_onset = max(date_onset, na.rm=T),        # Fecha de inicio más tardía
-    n_female = sum(sex == 'female', na.rm=T), # número de mujeres en el grupo
+    age_avg = mean(edad_anios, na.rm = T),        # edad media del grupo
+    max_onset = max(fecha_sintomas, na.rm=T),        # Fecha de inicio más tardía
+    n_female = sum(sexo == 'mujer', na.rm=T), # número de mujeres en el grupo
     pct_female = percent(n_female / n_rows)) %>% # Porcentaje de mujeres en el grupo
   arrange(-n_rows) %>% 
   qflextable()                                   #<<
@@ -1250,15 +1250,15 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "be
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv %>% 
-  select(hospital, age_years)   #<<
+vig %>% 
+  select(hospital, edad_anios)   #<<
 ```
 
 Selecciona las columnas a resumir.  
 Para demostración:
 
 - Columna de un carácter (`hospital`)
-- Una columna numérica (`age_years`)
+- Una columna numérica (`edad_anios`)
 
 ]
 
@@ -1271,8 +1271,8 @@ Para demostración:
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv %>% 
-  select(hospital, age_years) %>% 
+vig %>% 
+  select(hospital, edad_anios) %>% 
   tbl_summary()                 #<<
 ```
 
@@ -1280,7 +1280,7 @@ Selecciona las columnas a resumir.
 Para demostración:
 
 - Columna de un carácter (`hospital`)
-- Una columna numérica (`age_years`)
+- Una columna numérica (`edad_anios`)
 
 ]
 
@@ -1289,8 +1289,8 @@ Para demostración:
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv %>% 
-  select(hospital, age_years) %>%   
+vig %>% 
+  select(hospital, edad_anios) %>%   
   tbl_summary()                    #<<
 ```
 
@@ -1305,9 +1305,9 @@ surv %>%
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv %>% 
-  select(hospital, age_years, sex) %>% 
-  tbl_summary(by = sex)                 #<<
+vig %>% 
+  select(hospital, edad_anios, sexo) %>% 
+  tbl_summary(by = sexo)                 #<<
 ```
 
 Consulta los consejos de personalización en [Manual de Epi R capítulo sobre Tablas descriptivas](https://epirhandbook.com/en/descriptive-tables.html#tbl_gt))
@@ -1318,9 +1318,9 @@ Consulta los consejos de personalización en [Manual de Epi R capítulo sobre Ta
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv %>% 
-  select(age_years, hospital, sex) %>%   
-  tbl_summary(by = sex)   #<<
+vig %>% 
+  select(edad_anios, hospital, sexo) %>%   
+  tbl_summary(by = sexo)   #<<
 ```
 
 ]
@@ -1334,42 +1334,42 @@ surv %>%
 .pull-left[
 
 ```{r, echo=params$lang == "en", eval=F}
-surv %>% 
-  select(hospital, age_years, sex) %>% 
+vig %>% 
+  select(hospital, edad_anios, sexo) %>% 
   tbl_summary(
-       by = sex,
+       by = sexo,
        label = list(
-         age_years = "Age (years)", 
+         edad_anios = "Age (anios)", 
          hospital = "Hospital"))     
 ```
 
 ```{r, echo=params$lang == "fr", eval=F}
-surv %>% 
-  select(hospital, age_years, sex) %>% 
+vig %>% 
+  select(hospital, edad_anios, sexo) %>% 
   tbl_summary(
-       by = sex,
+       by = sexo,
        label = list(
-         age_years = "Âge (années)", 
+         edad_anios = "Âge (années)", 
          hospital = "Hôpital"))     
 ```
 
 ```{r, echo=params$lang == "ru", eval=F}
-surv %>% 
-  select(hospital, age_years, sex) %>% 
+vig %>% 
+  select(hospital, edad_anios, sexo) %>% 
   tbl_summary(
-       by = sex,
+       by = sexo,
        label = list(
-         age_years = "Возраст (годы)", 
+         edad_anios = "Возраст (годы)", 
          hospital = "Больница"))     
 ```
 
 ```{r, echo=params$lang == "es", eval=F}
-surv %>% 
-  select(hospital, age_years, sex) %>% 
+vig %>% 
+  select(hospital, edad_anios, sexo) %>% 
   tbl_summary(
-       by = sex,
+       by = sexo,
        label = list(
-         age_years = "Edad (años)", 
+         edad_anios = "Edad (años)", 
          hospital = "Hospital"))     
 ```
 
@@ -1381,38 +1381,38 @@ Consulta los consejos sobre personalización en [Manual de Epi R capítulo sobre
 .pull-right[
 
 ```{r, echo=F, eval=params$lang == "en"}
-surv %>% 
-  select(hospital, age_years, sex) %>% 
-  tbl_summary(by = sex,
+vig %>% 
+  select(hospital, edad_anios, sexo) %>% 
+  tbl_summary(by = sexo,
               label = list(
-                   age_years = "Age (years)", #<<
+                   edad_anios = "Age (anios)", #<<
                    hospital = "Hospital"))    #<< 
 ```
 
 ```{r, echo=F, eval=params$lang == "fr"}
-surv %>% 
-  select(hospital, age_years, sex) %>% 
-  tbl_summary(by = sex,
+vig %>% 
+  select(hospital, edad_anios, sexo) %>% 
+  tbl_summary(by = sexo,
               label = list(
-                   age_years = "Âge (années)", #<<
+                   edad_anios = "Âge (années)", #<<
                    hospital = "Hôpital"))    #<< 
 ```
 
 ```{r, echo=F, eval=params$lang == "ru"}
-surv %>% 
-  select(hospital, age_years, sex) %>% 
-  tbl_summary(by = sex,
+vig %>% 
+  select(hospital, edad_anios, sexo) %>% 
+  tbl_summary(by = sexo,
               label = list(
-                   age_years = "Возраст (годы)", #<<
+                   edad_anios = "Возраст (годы)", #<<
                    hospital = "Больница"))    #<< 
 ```
 
 ```{r, echo=F, eval=params$lang == "es"}
-surv %>% 
-  select(hospital, age_years, sex) %>% 
-  tbl_summary(by = sex,
+vig %>% 
+  select(hospital, edad_anios, sexo) %>% 
+  tbl_summary(by = sexo,
               label = list(
-                   age_years = "Edad (años)", #<<
+                   edad_anios = "Edad (años)", #<<
                    hospital = "Hospital"))    #<< 
 ```
 

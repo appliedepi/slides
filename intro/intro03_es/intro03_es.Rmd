@@ -1,6 +1,6 @@
 ---
 title: "Introducción a R</br>para la Epidemiología Aplicada"
-subtitle: '<br>Cleaning data with R: Part 2'
+subtitle: '<br>Cleaning datos with R: Part 2'
 author: "Applied Epi"
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
@@ -47,11 +47,11 @@ xaringanExtra::use_panelset()
 
 ## install and load necessary packages 
 pacman::p_load(
-  rio,        # importing data  
+  rio,        # importing datos  
   here,       # relative file pathways  
-  janitor,    # data cleaning and tables
+  janitor,    # datos cleaning and tables
   lubridate,  # working with dates
-  tidyverse,  # data management and visualization
+  tidyverse,  # datos management and visualization
   gtsummary,  # summary tables
   flair,       # for decorating code chunks with colors
   kableExtra, # for output tables
@@ -74,11 +74,11 @@ style_mono_accent(
   base_color = "#00538c", 
   link_color = "#48a878", 
   ## add logo to the title page (bit bigger)
-  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_image = "https://brutos.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
   title_slide_background_position = "95% 95%", 
   title_slide_background_size = "25%", 
   ## add logo to all following slides
-  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_image = "https://brutos.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
   background_size = "10%",
   background_position = "100% 0%"
 )
@@ -122,11 +122,11 @@ style_mono_accent(
 ```
 
 ```{r, echo=F, include=F}
-surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
+vig_bruta <- rio::import(here::here("data", "listado_vigilancia_20141201.csv"))
 
-surv_raw <- surv_raw %>% 
-  filter(row_num %in% c(635, 2, 11, 227, 641)) %>% 
-  select(case_id, age, sex, hospital, lab_confirmed, epilink, fever)
+vig_bruta <- vig_bruta %>% 
+  filter(num_fila %in% c(635, 2, 11, 227, 641)) %>% 
+  select(id_caso, edad, sexo, hospital, lab_conferma, epilink, fiebre)
 
 # gen <- googlesheets4::read_sheet(
 #   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
@@ -203,17 +203,17 @@ En operador **`%>%`** "pipe" significa **"y entonces"** (...realiza la acción e
 ¿Alguien puede explicar verbalmente este código, comando por comando?
 
 ```{r, echo=T, eval=F}
-surv <- surv_raw %>% 
+vig <- vig_bruta %>% 
   clean_names() %>% 
   rename(
-    age_years = age,
-    date_onset = onset_date,
-    date_report = date_of_report) %>% 
-  mutate(date_onset = mdy(date_onset)) %>% 
-  mutate(date_report = mdy(date_report)) %>% 
-  mutate(sex = recode(sex,  
-    "m" = "male",           
-    "f" = "female"))  
+    edad_anios = edad,
+    fecha_sintomas = fecha_inicio_sintomas,
+    fecha_notifica = fecha_de_notifica) %>% 
+  mutate(fecha_sintomas = mdy(fecha_sintomas)) %>% 
+  mutate(fecha_notifica = mdy(fecha_notifica)) %>% 
+  mutate(sexo = recode(sexo,  
+    "m" = "hombre",           
+    "f" = "mujer"))  
 
 ```
 
@@ -228,17 +228,17 @@ En operador pipe (**`%>%`**)  significa **"y entonces"** (...realiza la acción 
 ¿Alguien puede explicar verbalmente este comando?
 
 ```{r, echo=T, eval=F}
-surv <- surv_raw %>%        # crea un nuevo objeto como: el objeto crudo canalizado a.....
+vig <- vig_bruta %>%        # crea un nuevo objeto como: el objeto crudo canalizado a.....
   clean_names() %>%                           # estandarizar los nombres de las columnas 
   rename(                                     # editar el nombre de las columnas manualmente
-    age_years = age,                            # edad a edad en años
-    date_onset = onset_date,                    # usa date_ como prefijo
-    date_report = date_of_report) %>%           # usa date_ como prefijo
-  mutate(date_onset = mdy(date_onset)) %>%    # ayuda R a entender fecha de inicio de sintomas (convertir a objeto de fecha)
-  mutate(date_report = mdy(date_report)) %>%  # ayuda R a entender fecha de reporte
-  mutate(sex = recode(sex,                    # edita los valores de sexo para que:
-    "m" = "male",                               # "m" is now "masculino"
-    "f" = "female"))                            # "f" is now "femenino"
+    edad_anios = edad,                            # edad a edad en años
+    fecha_sintomas = fecha_inicio_sintomas,                    # usa date_ como prefijo
+    fecha_notifica = fecha_de_notifica) %>%           # usa date_ como prefijo
+  mutate(fecha_sintomas = mdy(fecha_sintomas)) %>%    # ayuda R a entender fecha de inicio de sintomas (convertir a objeto de fecha)
+  mutate(fecha_notifica = mdy(fecha_notifica)) %>%  # ayuda R a entender fecha de reporte
+  mutate(sexo = recode(sexo,                    # edita los valores de sexo para que:
+    "m" = "hombre",                               # "m" is now "masculino"
+    "f" = "mujer"))                            # "f" is now "femenino"
 
 ```
 
@@ -250,21 +250,21 @@ surv <- surv_raw %>%        # crea un nuevo objeto como: el objeto crudo canaliz
 
 ```{r, echo=T, eval=F}
 # crea una base de datos limpia
-surv <- surv_raw %>% 
+vig <- vig_bruta %>% 
   clean_names() %>% 
   rename(
-    age_years = age,
-    date_onset = onset_date,
-    date_report = date_of_report) %>% 
-  mutate(date_onset = mdy(date_onset)) %>% 
-  mutate(date_report = mdy(date_report)) 
-  mutate(sex = recode(sex,  
-    "m" = "male",           
-    "f" = "female"))  
+    edad_anios = edad,
+    fecha_sintomas = fecha_inicio_sintomas,
+    fecha_notifica = fecha_de_notifica) %>% 
+  mutate(fecha_sintomas = mdy(fecha_sintomas)) %>% 
+  mutate(fecha_notifica = mdy(fecha_notifica)) 
+  mutate(sexo = recode(sexo,  
+    "m" = "hombre",           
+    "f" = "mujer"))  
 ```
 
 ```{r, echo=T, eval=F}
-Error in recode(sex, m = "male", f = "female") : object 'sex' not found
+Error in recode(sexo, m = "hombre", f = "mujer") : object 'sexo' not found
 ```
 
 ---
@@ -274,27 +274,27 @@ Error in recode(sex, m = "male", f = "female") : object 'sex' not found
 ¿Cuál es la causa de este mensaje de error?
 
 ```{r, echo=T, eval=F}
-# create clean dataset
-surv <- surv_raw %>% 
+# create limpios dataset
+vig <- vig_bruta %>% 
   clean_names() %>% 
   rename(
-    age_years = age,
-    date_onset = onset_date,
-    date_report = date_of_report) %>% 
-  mutate(date_onset = mdy(date_onset)) %>% 
-  mutate(date_report = mdy(date_report))     #<<
-  mutate(sex = recode(sex,  
-    "m" = "male",           
-    "f" = "female"))  
+    edad_anios = edad,
+    fecha_sintomas = fecha_inicio_sintomas,
+    fecha_notifica = fecha_de_notifica) %>% 
+  mutate(fecha_sintomas = mdy(fecha_sintomas)) %>% 
+  mutate(fecha_notifica = mdy(fecha_notifica))     #<<
+  mutate(sexo = recode(sexo,  
+    "m" = "hombre",           
+    "f" = "mujer"))  
 ```
 
 ```{r, echo=T, eval=F}
-Error in recode(sex, m = "male", f = "female") : object 'sex' not found
+Error in recode(sexo, m = "hombre", f = "mujer") : object 'sexo' not found
 ```
 
 Falta un operador pipe, lo que rompe la cadena.
 
-La función `mutate(sex...` no ha recibido la base de datos del paso anterior, y por tanto R no tiene contexto de lo que la columna `sex` es.
+La función `mutate(sexo...` no ha recibido la base de datos del paso anterior, y por tanto R no tiene contexto de lo que la columna `sexo` es.
 
 ---
 
@@ -303,27 +303,27 @@ La función `mutate(sex...` no ha recibido la base de datos del paso anterior, y
 ¿Cuál es la causa de este mensaje de error?
 
 ```{r, echo=T, eval=F}
-# create clean dataset
-surv <- surv_raw %>% 
+# create limpios dataset
+vig <- vig_bruta %>% 
   clean_names() %>% 
   rename(
-    age_years = age,
-    date_onset = onset_date,
-    date_report = date_of_report) %>% 
-  mutate(date_onset = mdy(date_onset)) %>% 
-  mutate(date_report = mdy(date_report)) %>% 
-  mutate(sex = recode(sex,  
-    "m" = "male",           
-    "f" = "female"))  %>% 
+    edad_anios = edad,
+    fecha_sintomas = fecha_inicio_sintomas,
+    fecha_notifica = fecha_de_notifica) %>% 
+  mutate(fecha_sintomas = mdy(fecha_sintomas)) %>% 
+  mutate(fecha_notifica = mdy(fecha_notifica)) %>% 
+  mutate(sexo = recode(sexo,  
+    "m" = "hombre",           
+    "f" = "mujer"))  %>% 
 
-# make a table with the clean data
-tabyl(surv, sex, district)
+# make a table with the limpios datos
+tabyl(vig, sexo, distrito)
 ```
 
 ```{r, echo=T, eval=F}
 Error in `dplyr::select()`:
 ! Can't subset columns that don't exist.
-✖ Column `surv` doesn't exist.
+✖ Column `vig` doesn't exist.
 ```
 
 ---
@@ -333,28 +333,28 @@ Error in `dplyr::select()`:
 ¿Cuál es la causa de este mensaje de error?
 
 ```{r, echo=T, eval=F}
-# create clean dataset
-surv <- surv_raw %>% 
+# create limpios dataset
+vig <- vig_bruta %>% 
   clean_names() %>% 
   rename(
-    age_years = age,
-    date_onset = onset_date,
-    date_report = date_of_report) %>% 
-  mutate(date_onset = mdy(date_onset)) %>% 
-  mutate(date_report = mdy(date_report)) %>%      
-  mutate(sex = recode(sex,  
-    "m" = "male",           
-    "f" = "female"))  %>%       #<<
+    edad_anios = edad,
+    fecha_sintomas = fecha_inicio_sintomas,
+    fecha_notifica = fecha_de_notifica) %>% 
+  mutate(fecha_sintomas = mdy(fecha_sintomas)) %>% 
+  mutate(fecha_notifica = mdy(fecha_notifica)) %>%      
+  mutate(sexo = recode(sexo,  
+    "m" = "hombre",           
+    "f" = "mujer"))  %>%       #<<
 
-# make a table with the clean data
-tabyl(surv, sex, district)
+# make a table with the limpios datos
+tabyl(vig, sexo, distrito)
 
 ```
 
 ```{r, echo=T, eval=F}
 Error in `dplyr::select()`:
 ! Can't subset columns that don't exist.
-✖ Column `surv` doesn't exist.
+✖ Column `vig` doesn't exist.
 ```
 
 Un operador pipe "colgante" o adicional pasó el conjunto de datos limpio a un comando *separado* (`tabyl()`) que no debe de formar parte de los comandos de limpieza.  
@@ -367,28 +367,28 @@ Un operador pipe "colgante" o adicional pasó el conjunto de datos limpio a un c
 **Evita esto**
 
 ```{r, echo=T, eval=F}
-surv <- surv_raw %>%    #<<
+vig <- vig_bruta %>%    #<<
   clean_names()
   
-surv <- surv_raw %>%    #<<
+vig <- vig_bruta %>%    #<<
   clean_names() %>% 
   rename(
-    date_onset = onset_date,
-    date_report = date_of_report)
+    fecha_sintomas = fecha_inicio_sintomas,
+    fecha_notifica = fecha_de_notifica)
 
-tabyl(surv, sex, district)
-class(surv$date_onset)
+tabyl(vig, sexo, distrito)
+class(vig$fecha_sintomas)
 
-surv <- surv_raw %>% #<<
+vig <- vig_bruta %>% #<<
   clean_names() %>% 
   rename(
-    date_onset = onset_date,
-    date_report = report_date) %>% 
-  mutate(date_onset = mdy(date_onset)) %>% 
-  mutate(date_report = mdy(date_report)) %>%     
-  mutate(sex = recode(sex,  
-    "m" = "male",           
-    "f" = "female"))
+    fecha_sintomas = fecha_inicio_sintomas,
+    fecha_notifica = report_date) %>% 
+  mutate(fecha_sintomas = mdy(fecha_sintomas)) %>% 
+  mutate(fecha_notifica = mdy(fecha_notifica)) %>%     
+  mutate(sexo = recode(sexo,  
+    "m" = "hombre",           
+    "f" = "mujer"))
   
 ```
 
@@ -410,17 +410,17 @@ Añade nuevas funciones o comandos conectados con operadores pipe.
 Script limpio
 
 ```{r, echo=T, eval=F}
-# Create clean dataset -------------------------------------
-surv <- surv_raw %>%                       #<<               
+# Create limpios dataset -------------------------------------
+vig <- vig_bruta %>%                       #<<               
   clean_names() %>% 
   rename(
-    date_onset = onset_date,
-    date_report = report_date) %>% 
-  mutate(date_onset = mdy(date_onset))  %>% 
-  mutate(date_report = mdy(date_of_report)) %>%     
-  mutate(sex = recode(sex,  
-    "m" = "male",           
-    "f" = "female"))
+    fecha_sintomas = fecha_inicio_sintomas,
+    fecha_notifica = report_date) %>% 
+  mutate(fecha_sintomas = mdy(fecha_sintomas))  %>% 
+  mutate(fecha_notifica = mdy(fecha_de_notifica)) %>%     
+  mutate(sexo = recode(sexo,  
+    "m" = "hombre",           
+    "f" = "mujer"))
 ```
 
 ]
@@ -441,21 +441,21 @@ Añade nuevas funciones o comandos conectados con operadores pipe.
 Limpiar script
 
 ```{r, echo=T, eval=F}
-# Create clean dataset -------------------------------------
-surv <- surv_raw %>%                                     
+# Create limpios dataset -------------------------------------
+vig <- vig_bruta %>%                                     
   clean_names() %>% 
   rename(
-    date_onset = onset_date,
-    date_report = report_date) %>% 
-  mutate(date_onset = mdy(date_onset))  %>% 
-  mutate(date_report = mdy(date_of_report)) %>%     
-  mutate(sex = recode(sex,  
-    "m" = "male",           
-    "f" = "female"))
+    fecha_sintomas = fecha_inicio_sintomas,
+    fecha_notifica = report_date) %>% 
+  mutate(fecha_sintomas = mdy(fecha_sintomas))  %>% 
+  mutate(fecha_notifica = mdy(fecha_de_notifica)) %>%     
+  mutate(sexo = recode(sexo,  
+    "m" = "hombre",           
+    "f" = "mujer"))
   
-# Testing area ---------------------------------------------
-tabyl(surv, sex, district)    # cross-tabulate        #<<
-class(surv$date_onset)        # check column class    #<<
+# Area de prueba ---------------------------------------------
+tabyl(vig, sexo, distrito)    # cross-tabulate        #<<
+class(vig$fecha_sintomas)        # check column class    #<<
 ```
 
 ]
@@ -472,31 +472,31 @@ class(surv$date_onset)        # check column class    #<<
 
 **Presentar**
 
-Este comando no tiene el operador **`<-`**, por lo que sólo *presenta* lo modificado `surv` en la consola. La base de datos de origen no ha cambiado.
+Este comando no tiene el operador **`<-`**, por lo que sólo *presenta* lo modificado `vig` en la consola. La base de datos de origen no ha cambiado.
 
 ```{r, echo=params$lang == "en", eval=F}
-surv_raw %>%              #  only cases over 10 years  #<<
-  filter(age > 10)
+vig_bruta %>%              #  only cases over 10 anios  #<<
+  filter(edad > 10)
 ```
 
 ```{r, echo=params$lang == "fr", eval=F}
-surv_raw %>%                    # IMPRIMER seulement les cas plus que 10 ans
-  filter(age > 10)
+vig_bruta %>%                    # IMPRIMER seulement les cas plus que 10 ans
+  filter(edad > 10)
 ```
 
 ```{r, echo=params$lang == "ru", eval=F}
-surv_raw %>%                    # ПЕЧАТАТЬ только случаи старше 10 лет
-  filter(age > 10)
+vig_bruta %>%                    # ПЕЧАТАТЬ только случаи старше 10 лет
+  filter(edad > 10)
 ```
 
 ```{r, echo=params$lang == "es", eval=F}
-surv_raw %>%              # presenta solo los casos mayores de 10 años  #<<
-  filter(age > 10)
+vig_bruta %>%              # presenta solo los casos mayores de 10 años  #<<
+  filter(edad > 10)
 ```
 
 ```{r, echo=F, eval=F}
-surv_raw %>%                    # print only cases over 10 years
-  filter(age > 10) %>% 
+vig_bruta %>%                    # print only cases over 10 anios
+  filter(edad > 10) %>% 
   knitr::kable()
 ```
 
@@ -505,14 +505,14 @@ surv_raw %>%                    # print only cases over 10 years
 Añadir el operador de asignación **<-** para crear un nuevo objeto dataframe o base de datos.
 
 ```{r pipe-assign, eval=F, echo=T}
-surv_over10 <- surv_raw %>%     # crea un nuevo objeto dataframe   #<<
-  filter(age > 10)
+vig_mas10 <- vig_bruta %>%     # crea un nuevo objeto dataframe   #<<
+  filter(edad > 10)
 ```
 
 (No hay salida en la consola de R, pero sí un nuevo objeto en el panel Entorno R)
 
 ???
-Observa cómo los nombres de las columnas en `surv` ¡son antiguos! Es porque nuestros cambios aún no se han guardado.
+Observa cómo los nombres de las columnas en `vig` ¡son antiguos! Es porque nuestros cambios aún no se han guardado.
 
 ---
 
@@ -525,7 +525,7 @@ class: inverse, center, middle
 # Ejemplo de base de datos
 
 ```{r, eval=T, echo=T}
-surv_raw
+vig_bruta
 ```
 
 ---
@@ -535,10 +535,10 @@ surv_raw
 Utiliza `recode()` dentro de `mutate()` para *re-codificación* manual o directa
 
 ```{r, echo=params$lang == "es", eval=params$lang == "es"}
-surv_raw %>% 
+vig_bruta %>% 
   mutate(hospital = recode(hospital,
       # for reference: OLD = NEW
-      "Mitilary Hospital"  = "Military Hospital",
+      "Other"  = "Military Hospital",
       "Port"               = "Port Hospital",
       "Port Hopital"       = "Port Hospital",
       "St. Mark's Maternity Hospital (SMMH)" = "SMMH"))
@@ -556,9 +556,9 @@ Crea una nueva columna llamada `age_group`:
 - "menor", si la evaluación es FALSA
 
 ```{r, echo=T, eval=T}
-surv_raw %>% 
+vig_bruta %>% 
   mutate(age_group = ifelse(
-    test = age >= 18, #evaluación
+    test = edad >= 18, #evaluación
     yes = "adulto",    #Si es verdadera
     no = "menor"))    #si es falsa
 ```
@@ -574,18 +574,18 @@ Los argumentos de `ifelse()` son `ifelse(test = , yes = , no = )`
 Este comando:
 
 ```{r, echo=T, eval=F}
-surv_raw %>% 
+vig_bruta %>% 
   mutate(age_group = ifelse(
-    test = age >= 18,
-    yes = "adult",  
-    no = "minor")) 
+    test = edad >= 18,
+    yes = "adulto",  
+    no = "menor")) 
 ```
 
 También puede escribirse como
 
 ```{r, echo=T, eval=F}
-surv_raw %>% 
-  mutate(age_group = ifelse(age >= 18, "adult", "minor")) 
+vig_bruta %>% 
+  mutate(age_group = ifelse(edad >= 18, "adulto", "menor")) 
 ```
 
 .nota[¿Cuáles son sus ventajas e inconvenientes?]
@@ -597,7 +597,7 @@ surv_raw %>%
 Utiliza la función **`case_when()`** en `mutate()` para comprobar una serie de criterios lógicos en cada fila y asignar el nuevo valor correspondiente.
 
 ```{r, results="asis", echo=FALSE}
-str_glue("La sintaxis case_when() es la siguiente: criterios logicos para la file ~ resultado si se satisface") %>%
+str_glue("La sintaxis case_when() es la siguiente: criterios logicos para la fila ~ resultado si se satisface") %>%
   flair("criterios lógicos", color = "orange") %>%
   flair("~", color = "deeppink") %>%
   flair("resultado si estos se cumplen", color = "cornflowerblue") %>%
@@ -606,10 +606,10 @@ str_glue("La sintaxis case_when() es la siguiente: criterios logicos para la fil
 ```
 
 ```{r mutate3, include=F}
-surv_raw %>% 
-  mutate(case_def = case_when(
-    lab_confirmed == TRUE             ~ "Confirmed",       # first check this
-    epilink == 'yes' & fever == 'yes' ~ "Suspect",         # then check this
+vig_bruta %>% 
+  mutate(def_caso = case_when(
+    lab_conferma == TRUE             ~ "Confirmed",       # first check this
+    epilink == 'si' & fiebre == 'si' ~ "Suspect",         # then check this
     TRUE                              ~ "To investigate")) # last resort
 ```
 
@@ -619,8 +619,8 @@ decorate("mutate3") %>%
   flair('"Suspect"', color = "cornflowerblue") %>%
   flair('"To investigate"', color = "cornflowerblue") %>%
   flair("~", color = "deeppink") %>%
-  flair("lab_confirmed == TRUE", color = "orange") %>%
-  flair(" epilink == 'yes' & fever == 'yes'", color = "orange") %>%
+  flair("lab_conferma == TRUE", color = "orange") %>%
+  flair(" epilink == 'si' & fiebre == 'si'", color = "orange") %>%
   flair("TRUE", color = "orange") %>%
   knit_print()
 ```
@@ -665,7 +665,7 @@ Los datos limpios también deben estar "ordenados". A continuación se exponen 3
 
 3. Cada **observación** debe tener su propia **fila**
 
-.footnote[Fuente : [R para la Ciencia de Datos](https://r4ds.had.co.nz/tidy-data.html)  
+.footnote[Fuente : [R para la Ciencia de Datos](https://r4ds.had.co.nz/tidy-datos.html)  
 ]
 
 ???
@@ -677,14 +677,14 @@ Los datos limpios también deben estar "ordenados". A continuación se exponen 3
 ```{r, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
 # CREATE EXAMPLE DATA
 #####################
-clean_data_example_5 <- data.frame(case = c("Case 1", "Case 2", "Case 3", "Case 4"), age = c("31, years", "24, years", "18, months", "33, years")) 
+clean_data_example_5 <- data.frame(case = c("Case 1", "Case 2", "Case 3", "Case 4"), edad = c("31, anios", "24, anios", "18, meses", "33, anios")) 
 
 clean_data_example_6 <- clean_data_example_5 %>%
-    separate(age, 
-           into = c("age", "age_unit"), 
+    separate(edad, 
+           into = c("edad", "unidad_edad"), 
            sep = ", "
            ) %>%
-  mutate(age = as.numeric(age))
+  mutate(edad = as.numeric(edad))
 ```
 
 .pull-left[
@@ -745,7 +745,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 ```
 
-.footnote[Fuente de la imagen: [R para la Ciencia de Datos](https://r4ds.had.co.nz/tidy-data.html)]
+.footnote[Fuente de la imagen: [R para la Ciencia de Datos](https://r4ds.had.co.nz/tidy-datos.html)]
 
 ---
 
