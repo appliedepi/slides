@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to R for Applied Epidemiology</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Introduction to R for<br>Applied Epidemiology
+]
+.subtitle[
+## Routine reports with {rmarkdown}
+]
+.date[
+### <a href="mailto:contact@appliedepi.org">contact@appliedepi.org</a>
+]
+
+---
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+# Введение в R для прикладной эпидемиологии
+
+### Рутинные отчеты с {rmarkdown}
+
+contact@appliedepi.org
+
+---
+
+# Цели и расписание  
+
+**В этом модуле мы постараемся помочь вам:**  
+
+* Понять язык R markdown как инструмента для создания рутинных отчетов  
+
+--
+
+* Изучить разнообразие форматов и интеграций для отчетов R markdown  
+
+--
+
+* Преобразовать ваш код для изучения примера по Эболе в отчет в формате R markdown  
+
+--
+
+* Сделать скрипт R Markdown динамически способствующим обновлению данных  
+
+--
+
+&lt;template id="99eeaa7e-b61f-4713-b487-e5ce50d01ceb"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-9ee9677a{}.cl-9ed2a0b2{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-9ee0b648{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-9ee0d786{width:0.919in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d790{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d79a{width:4.08in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d7a4{width:0.919in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d7ae{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d7b8{width:4.08in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d7c2{width:0.919in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d7cc{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d7cd{width:4.08in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d7e0{width:0.919in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d7e1{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d7ea{width:4.08in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d7f4{width:0.919in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d7fe{width:1.564in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9ee0d808{width:4.08in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-9ee9677a'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9ee0d786"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9ee0d790"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9ee0d79a"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9ee0d7a4"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;15 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9ee0d7ae"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9ee0d7b8"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;Демонстрация R markdown&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9ee0d7a4"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;30 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9ee0d7ae"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9ee0d7b8"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;Синтаксис R markdown&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9ee0d7c2"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;2 часа&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9ee0d7cc"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;Сессионные залы&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9ee0d7cd"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;Создайте свой отчет о ситуации с лихорадкой Эбола&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9ee0d7e0"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;30 минут&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9ee0d7e1"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;Главная&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9ee0d7ea"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;Общее обсуждение&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-9ee0d7f4"&gt;&lt;p class="cl-9ee0b648"&gt;&lt;span class="cl-9ed2a0b2"&gt;Перерывы включены выше, но не показаны как строки&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="2d24a181-c4cf-4752-81fe-08fd2218ae20"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("2d24a181-c4cf-4752-81fe-08fd2218ae20");
+var template = document.getElementById("99eeaa7e-b61f-4713-b487-e5ce50d01ceb");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+
+
+---
+# Общественное здравоохранение и рутинные отчеты  
+
+.pull-left[
+
+В здравоохранении мы любим "автоматизированные отчеты".  
+
+- Отчеты о ситуации со вспышками  
+- Еженедельные презентации 
+- Брифинги для руководителей  
+- Отчеты для общественности  
+- Обследования здоровья населения  
+- Анализ исследований по вакцинации  
+- ...
+
+**Подготовка вручную трудоемкая и подвержена человеческим ошибкам**.
+
+]
+
+.pull-right[
+
+&lt;img src="../../../images/welcome/automated_reports.png" width="100%" /&gt;
+
+]
+
+
+
+---
+# Общественное здравоохранение и рутинные отчеты  
+
+
+
+В здравоохранении мы любим "автоматизированные отчеты".  
+
+.pull-left[  
+
+- Район, почтовый индекс  
+- Округ, район, провинция, штат, страна  
+- Этнические или профессиональные подгруппы  
+- Группы высокого риска  
+- Еженедельно, ежеквартально, ежегодно 
+
+]
+
+.pull-right[
+
+&lt;img src="../../../images/welcome/automated_reports.png" width="100%" /&gt;
+
+**Подготовка вручную трудоемкая и подвержена человеческим ошибкам**.  
+]
+
+
+
+
+
+---
+# "Автоматизация" или человеческий глаз  
+
+.pull-left[  
+
+"Машинное обучение" и "ИИ" - горячие темы в настоящее время. 
+
+В сценариях общественного здравоохранения и эпидемиологии для интерпретации тенденций важно следующее:  
+ - Опыт  
+ - Местные контекстуальные знания  
+ - Понимание потока данных и ограничений 
+ 
+Как вы ощущали ограничения "автоматизации" в своей работе?  
+
+]
+
+.pull-right[
+
+&lt;img src="../../../images/rmarkdown/human_robot.png" width="75%" /&gt;
+
+]
+
+
+
+
+---
+# R markdown  
+
+
+
+
+---
+# Различные форматы
+
+&lt;img src="../../../images/rmarkdown/rmarkdown_overview.png" width="100%" /&gt;
+
+
+
+---
+class: inverse, center, middle  
+
+# Даже эти слайды были сделаны с помощью R Markdown!  
+
+&lt;img src="../../../images/rmarkdown/even_slides.png" width="75%" /&gt;
+
+.footnote[См. пакет {xaringan}]
+
+
+---
+# Информационные панели
+
+Скрипты {rmarkdown} могут легко создавать простые информационные панели, которые вы можете отправить по электронной почте своему руководителю или разместить в Интернете!  
+
+&lt;img src="../../../images/rmarkdown/flexdashboard_output.png" width="75%" /&gt;
+
+
+---
+# Обзор  
+
+Необходимо осознать две важные вещи:  
+
+1) Весь скрипт *теперь является документом* (расширение .rmd или .Rmd).  
+
+--
+
+2) Код R размещается внутри "фрагментов" кода  
+
+--
+
+3) Между фрагментами можно писать, как в обычном текстовом документе  
+
+--
+
+Но вы получаете бонусные функции:  
+
+- Вы можете встраивать код *в обычный текст*.  
+
+
+
+---
+# Глоссарий  
+
+- **Markdown** - "язык", не специфичный для R, который позволяет преобразовывать обычный текст в html и другие форматы (.md).  
+
+--
+
+- **R Markdown** - разновидность разметки, специфичная для R (.Rmd)  
+
+--
+
+- {rmarkdown} пакет R, используемый для преобразования разметки (текста) в файле .Rmd в желаемый результат  
+
+--
+
+- {knitr} - пакет R, который читает фрагменты кода R и "встраивает" их в документ  
+
+--
+
+- **Pandoc** - отдельная программа (но поставляется в комплекте с RStudio), которая конвертирует вывод в word/pdf/powerpoint и т.д.  
+
+&lt;img src="../../../images/rmarkdown/0_rmd.png" width="75%" /&gt;
+
+.footnote[изображение [источник](https://rmarkdown.rstudio.com/authoring_quick_tour.html)]  
+
+???
+This process happens in the background, so you do not need to know all these steps. However you may encounter these names.  
+
+The .Rmd file is fed to knitr, which executes the R code chunks and creates a new .md (markdown) file which includes the R code and its rendered output. The .md file is then processed by pandoc to create the finished product: a Microsoft Word document, HTML file, powerpoint document, pdf, etc.
+
+
+
+---
+# Выберите вывод  
+
+Выберите начальный тип вывода - не беспокойтесь, вы можете изменить его позже  
+
+&lt;img src="../../../images/rmarkdown/1_gettingstarted.png" width="75%" /&gt;
+
+---
+# Компоненты R Markdown  
+
+В файле Rmd есть три основных компонента: YAML, текст в формате Markdown и фрагменты кода R.
+
+&lt;img src="../../../images/rmarkdown/2_defaultRMD_ru.png" width="100%" /&gt;
+
+
+
+---
+# Компоненты R Markdown  
+
+Этот компонент *станет* вашим документом:  
+
+&lt;img src="../../../images/rmarkdown/rmarkdown_translation_ru.png" width="100%" /&gt;
+
+
+
+---
+# Метаданные YAML  
+
+Этот раздел в **верхней части документа** определяет основные настройки для создания.  
+
+Настройки записываются в виде пар `key: value`  
+
+```{results='asis'}
+---
+title: "R is great for public health"
+subtitle: "A personal testimony"
+author: "Me"
+date: "2022-03-15"
+output: 
+  html_document
+---
+```
+
+???
+Note that it starts and ends with three dashes, and that placement of spaces and colons are very important  
+
+
+
+---
+# "Фрагменты" кода R  
+
+- Разделите код на фрагменты по отдельным задачам/целям (например, загрузка пакетов, импорт данных, вычистка данных, построение описательных графиков и т.д.).  
+
+--
+
+- Каждый фрагмент начинается и заканчивается тремя обратными тактами штрихами `.
+
+`````
+```{r}
+# import data
+surv_raw &lt;- import(here("data", "surveillance_linelist_20141201.csv))
+```
+`````  
+--
+
+Здесь я могу писать текст между фрагментами кода!  
+
+--
+
+`````
+```{r}
+# clean data
+surv &lt;- surv %&gt;% 
+  clean_names() %&gt;% 
+  select(case_id, gender, age, hospital) %&gt;% 
+  mutate(child = ifelse(age &lt; 18))
+```
+````` 
+
+
+---
+# Фрагменты кода R  
+
+В реальном скрипте фрагменты легче увидеть:  
+
+&lt;img src="../../../images/rmarkdown/6_Rmdexample_ru.png" width="100%" /&gt;
+
+---
+# Фрагменты кода R  
+
+
+`````
+```{r}  
+# import data
+surv_raw &lt;- import(here("data", "surveillance_linelist_20141201.csv))
+```
+`````  
+
+В верхней части каждого фрагмента, в фигурных скобках { }, находится:  
+
+- буква "r" (обозначающая R-код) и запятая , 
+
+--
+
+- имя фрагмента (необязательно, пробелы не допускаются)  
+
+--
+
+- другие варианты, такие как: 
+     - `eval = TRUE` (запускает код R, или игнорирует его)  
+     - `echo = TRUE` (отображает код R в документе)  
+     - `warning = TRUE` (выводит предупреждения кода R в документ)  
+     - `message = TRUE` (печатает любое сообщение кода R в документ)  
+     - `include = TRUE` (печает выходные данные R, например, графики, в документ)  
+
+Возможны многие другие варианты. Подробности см. в главе [Epi R Handbook](https://epirhandbook.com/en/reports-with-r-markdown.html#code-chunks).
+
+
+???
+Chunk names cannot contain spaces  
+
+
+
+---
+# Встроенный код R
+
+Это написанный встроенный код и текст:  
+
+&lt;img src="../../../images/rmarkdown/verbatim_inline_1_1_ru.png" width="100%" /&gt;
+
+производит это:  
+
+&lt;img src="../../../images/rmarkdown/verbatim_inline_1_2_ru.png" width="100%" /&gt;
+
+
+---
+# Встроенный код R
+
+Это написанный встроенный код и текст:  
+
+&lt;img src="../../../images/rmarkdown/verbatim_inline_2_1_ru.png" width="100%" /&gt;
+
+производит это:  
+
+&lt;img src="../../../images/rmarkdown/verbatim_inline_2_2_ru.png" width="100%" /&gt;
+
+---
+# Функции-помощники 
+
+{epikit}  
+
+
+```r
+epikit::fmt_count(surv, is.na(date_onset))
+```
+
+```
+## [1] "28 (5.2%)"
+```
+
+
+
+
+
+
+
+```r
+str_glue("{fmt_count(surv, is.na(date_onset))} случаев дата начала заболевания отсутствует и не показана.")
+```
+
+```
+## 28 (5.2%) случаев дата начала заболевания отсутствует и не показана.
+```
+
+
+
+--
+
+{scales}
+
+
+
+
+
+
+
+```r
+str_glue("Между началом симптомов и сообщением о них прошло {comma(sum(as.numeric(surv$diff), na.rm=T))} всего дней задержки.")
+```
+
+```
+## Между началом симптомов и сообщением о них прошло 1,582 всего дней задержки.
+```
+
+
+
+---
+# Заголовки и маркированные списки  
+
+- Заголовки контролируются с помощью хэш-символов #, ##, ###, ####...
+
+&lt;img src="../../../images/rmarkdown/2_text_ru.png" width="100%" /&gt;
+
+
+---
+# Таблицы 
+
+Это записано в R markdown:  
+`````
+Column 1 |Column  2 |Column 3
+---------|----------|--------
+Cell A   |Cell B    |Cell C
+Cell D   |Cell E    |Cell F
+`````
+
+производит это:  
+
+
+Column 1 |Column  2 |Column 3
+---------|----------|--------
+Cell A   |Cell B    |Cell C
+Cell D   |Cell E    |Cell F
+
+
+
+---
+# Режим источника
+
+Ваш скрипт может выглядеть следующим образом:  
+
+&lt;img src="../../../images/rmarkdown/source_mode_ru.png" width="80%" /&gt;
+
+---
+# Визуальный режим
+
+RStudio позволяет редактировать в "Визуальном режиме", который выглядит как документ Word
+
+
+&lt;img src="../../../images/rmarkdown/visual_mode_ru.png" width="80%" /&gt;
+
+???
+If writing the document in code is intimidating, RStudio allows you to toggle the script into "Visual Mode", so that your document looks similar to a Word document.  
+
+
+
+---
+# Выполнение документа  
+
+Нажмите кнопку "knit" (связать) в верхней части. Используйте выпадающий список вариантов.  
+
+&lt;img src="../../../images/rmarkdown/4_knitbutton.PNG" width="10%" /&gt;
+
+Прогресс будет отображаться в панели "R Markdown" (рядом с консолью R).  
+
+&lt;img src="../../../images/rmarkdown/4_progress.png" width="100%" /&gt;
+
+Вывод будет сохранен рядом с вашим файлом .Rmd  
+
+???
+Please see the Handbook for options to create a "Report factory" where it becomes easier to catalog outputs from many different reports in date- and time-stamped folders.  
+
+
+---
+# `params`  
+
+В YAML вы можете определить `params`, которые будут доступны отчету:  
+
+```{results='asis'}
+---
+title: "Surveillance report"
+output: html_document
+params:
+ date: "2021-04-10"
+ hospital: "Central Hospital"
+---
+```
+
+Вы можете создать имена для этих параметров  
+
+
+
+---
+# `params`
+
+
+В разметке R вызовите эти значения `params` в своем коде, используя: `params$`.  
+
+
+&lt;img src="../../../images/rmarkdown/5_parameterized_1.png" width="100%" /&gt;
+
+
+
+---
+# `params`
+
+
+В разметке R вызовите эти значения `params` в своем коде, используя: `params$`.  
+
+
+&lt;img src="../../../images/rmarkdown/5_parameterized_2.png" width="100%" /&gt;
+
+
+
+---
+# `params`
+
+
+В разметке R вызовите эти значения `params` в своем коде, используя: `params$`.  
+
+
+&lt;img src="../../../images/rmarkdown/5_parameterized_3.png" width="100%" /&gt;
+
+
+
+---
+# `params`
+
+.pull-left[
+&lt;img src="../../../images/rmarkdown/5_parameterized_menu_1.png" width="100%" /&gt;
+]
+
+.pull-right[
+&lt;img src="../../../images/rmarkdown/5_parameterized_menu_2.png" width="100%" /&gt;
+
+]
+
+---
+# Шаблоны отчетов  
+
+Вы можете предоставить R Markdown шаблоны Word или PPT (например, с логотипами и т.д.).  
+
+После отображения отчета вы можете отредактировать текст, чтобы добавить интерпретации.
+
+
+
+
+---
+# Шаблоны ситуационных отчетов  
+
+Applied Epi сотрудничает с организацией "Врачи без границ" (MSF), предлагая шаблоны R Markdown для ситуационных отчетов:  
+
+- Холера/острая водянистая диарея  
+- Менингит  
+- Корь/краснуха  
+- Синдром острой желтухи (часто с подозрением на гепатит Е)  
+
+и для анализа исследований:  
+
+- Ретроспективная смертность и доступ к медицинской помощи  
+- Охват вакцинацией  
+- Недоедание 
+
+
+
+---
+# Сессионные залы  
+
+
+
+
+
+
+&lt;!-- --- --&gt;
+
+&lt;!-- # inline R code   --&gt;
+
+&lt;!-- As of --&gt;
+&lt;!-- `` `r format(Sys.Date())` ``, there were  --&gt;
+&lt;!-- `` `r nrow(surv)` `` confirmed cases.   --&gt;
+
+
+&lt;!-- As of --&gt;
+&lt;!-- `` `r format(Sys.Date(), '%d %B, %Y')` ``, there were  --&gt;
+&lt;!-- `` `r nrow(surv)` `` confirmed cases.   --&gt;
+
+&lt;!-- Produces this:   --&gt;
+
+&lt;!-- As of 13 November, 2022, there were 539 confirmed cases.   --&gt;
+
+
+
+
+
+&lt;!-- --- --&gt;
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

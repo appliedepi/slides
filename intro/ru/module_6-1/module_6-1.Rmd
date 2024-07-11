@@ -1,0 +1,1748 @@
+---
+title: "Introduction to R for<br>Applied Epidemiology"
+subtitle: "<br>{ggplot2} for data visualization"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "en"
+---
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # dates
+  ggExtra,    # extras
+  scales,     # formatting of scales
+  tidyverse,  # data management and visualization
+  xaringanthemer  # for styling presentation 
+)
+
+
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+
+options(htmltools.dir.version = FALSE)
+
+```
+
+```{r, include=FALSE}
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic") %>%
+  clean_names()
+
+mod6_1 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod6_1", col_types = "c") %>%
+  clean_names()
+```
+
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
+
+### `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_subtitle", params$lang])`
+
+contact@appliedepi.org
+---
+
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_today", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_op_aim", params$lang])`
+* `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_aim_1", params$lang])`
+* `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_aim_2", params$lang])`
+* `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_aim_3", params$lang])`
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_1_1", params$lang])}),     str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_2_1", params$lang])}),      str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_3_1", params$lang])}),
+  str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_1_2", params$lang])}),     str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_2_2", params$lang])}),      str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_3_2", params$lang])}),
+  str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_1_3", params$lang])}),     str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_2_3", params$lang])}), str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_3_3", params$lang])}),
+  str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_1_4", params$lang])}),     str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_2_4", params$lang])}), str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_3_4", params$lang])}),
+  str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_1_5", params$lang])}),     str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_2_5", params$lang])}), str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_3_5", params$lang])}),
+  str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_1_6", params$lang])}),     str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_2_6", params$lang])}),      str_glue({paste0(mod6_1[mod6_1$uid == "mod6_tb_objectives_3_6", params$lang])})
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines(str_glue({paste0(mod6_1[mod6_1$uid == "mod6_fn_objectives", params$lang])}))
+```
+
+
+
+
+
+---
+class: inverse, center, middle
+
+## `r paste0(mod6_1[mod6_1$uid == "mod6_1_h2_dataViz", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "ggplot2_hex.png")))
+```
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_vizR", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_op_ggplot2", params$lang])`
+
+* `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_ggplot2_1", params$lang])`
+* `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_ggplot2_2", params$lang])`
+* `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_ggplot2_3", params$lang])`
+* `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_ggplot2_4", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_gallery", params$lang])`
+
+.footnote[`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_plotting", params$lang])`
+]  
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_ggplot", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "clustering.png")))
+```
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_ggplot", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "dumbbell_chart.png")))
+```
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_ggplot", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "map.png")))
+```
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_ggplot", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "bike_london.png")))
+```
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_ggplot", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "90%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "swiss_map.png")))
+```
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_ggplot", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "60%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "phylo_tree.png")))
+```
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_ggplot", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "uk_geography.jpg")))
+```
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_ggplot", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "art_ggplot.png")))
+```
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_ggplot", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_intro", "van_gogh.jpg")))
+```
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_ggwhat", params$lang])`
+
+--
+
+- `r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_ggwhat_1", params$lang])`
+
+--
+
+- `r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_ggwhat_2", params$lang])`
+
+--
+
+- `r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_ggwhat_3", params$lang])`
+
+--
+
+- `r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_ggwhat_4", params$lang])`
+
+--
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_ggwhat_5", params$lang])`
+
+.footnote[
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_gg", params$lang])`
+]
+
+???
+- "gg" represents the “grammar of graphics” used to construct the figures 
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_grammar", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_plotLayer_1", params$lang])`
+
+
+--
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_op_plotLayer", params$lang])`
+
+1) `r paste0(mod6_1[mod6_1$uid == "mod6_1_nu_plotLayer_1", params$lang])`
+
+--
+
+2) `r paste0(mod6_1[mod6_1$uid == "mod6_1_nu_plotLayer_2", params$lang])`
+
+--
+
+3) `r paste0(mod6_1[mod6_1$uid == "mod6_1_nu_plotLayer_3", params$lang])`
+
+--
+
+4) `r paste0(mod6_1[mod6_1$uid == "mod6_1_nu_plotLayer_4", params$lang])`
+
+--
+
+5) `r paste0(mod6_1[mod6_1$uid == "mod6_1_nu_plotLayer_5", params$lang])`
+
+--
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_plotLayer_2", params$lang])`
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_plotLayer_3", params$lang])`
+
+
+???
+Remember that although the commands may be long, it is infinitely easier to edit and recycle than in Excel  
+
+
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_open", params$lang])`
+
+.pull-left[
+
+```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot()                   
+```
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_canvas", params$lang])`
+
+
+
+]
+
+.pull-right[
+
+```{r , echo = FALSE, eval = TRUE}
+ggplot()
+```
+] 
+
+???
+This is only a blank canvas, we have not defined what should be in the x and y axes. 
+If several data frames are needed, they can be added in their own geoms.
+Piping is useful to make one-time changes to a dataset prior to plotting.  
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_add", params$lang])`
+
+.pull-left[
+
+```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot(data = surv)                   
+```
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_add_1", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_add_2", params$lang])`
+
+```{r , echo = TRUE, eval = FALSE, tidy = FALSE}
+surv %>%
+  ggplot()
+```
+
+]
+
+.pull-right[
+
+```{r , echo = FALSE, eval = TRUE}
+ggplot(data = surv)
+```
+] 
+
+???
+This is only a blank canvas, we have not defined what should be in the x and y axes. 
+If several data frames are needed, they can be added in their own geoms.
+Piping is useful to make one-time changes to a dataset prior to plotting.  
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_add", params$lang])`
+
+.pull-left[
+
+```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv)                   
+```
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_add_3", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_add_4", params$lang])`
+
+
+]
+
+.pull-right[
+
+```{r , echo = FALSE, eval = TRUE}
+ggplot(data = surv)
+```
+] 
+
+???
+This is only a blank canvas, we have not defined what should be in the x and y axes. 
+If several data frames are needed, they can be added in their own geoms.
+Piping is useful to make one-time changes to a dataset prior to plotting.  
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_aes", params$lang])`
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+ggplot(
+  data = surv,
+  mapping = aes())        #<<
+```
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_aes_1", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_aes_2", params$lang])`
+
+]
+
+.pull-right[
+
+```{r , echo = FALSE, eval = TRUE}
+ggplot(
+  data = surv,
+  mapping = aes())+
+theme_grey(base_size = 16)
+```
+] 
+
+???
+ggplot commands tend to get very vertical (long)  
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_aes", params$lang])`
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+ggplot(
+  data = surv,
+  mapping = aes(        
+   x = age_years       #<<
+   ))               
+```
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_aes_3", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_aes_4", params$lang])`
+`x = `   
+
+
+]
+
+.pull-right[
+
+```{r , echo = FALSE, eval = TRUE}
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years))+
+theme_grey(base_size = 16)
+```
+] 
+
+???
+ggplot commands tend to get very vertical (long)  
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_aes", params$lang])`
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+ggplot(
+  data = surv,
+  mapping = aes(        
+   x = age_years,       #<<
+   y = ht_cm))          #<<
+```
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_aes_3", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_aes_4", params$lang])`
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_aes_6", params$lang])`
+
+
+]
+
+.pull-right[
+
+```{r , echo = FALSE, eval = TRUE}
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm))+
+theme_grey(base_size = 16)
+```
+] 
+
+???
+ggplot commands tend to get very vertical (long)  
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_addGeometry", params$lang])`
+
+.pull-left[
+
+```{r eval=F, echo=T}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm)) +
+*geom_point()
+```
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_addGeometry_1", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_addGeometry_2", params$lang])`
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_addGeometry_3", params$lang])`
+
+]
+
+
+.pull-right[
+
+```{r eval=T, echo=F, message=F, warning=F}
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm)) +
+geom_point() + 
+theme_grey(base_size = 16)
+```
+
+]
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_geometry", params$lang])`
+
+.pull-left[
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_geometry", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_1", params$lang])`   |`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_2", params$lang])`
+------------------------------------------------------------------------|--------------------------------------------------------------------
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_3", params$lang])`|`geom_histogram()`  
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_4", params$lang])`|`geom_point()`
+
+.footnote[`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_geometry", params$lang])`
+]  
+
+]
+
+
+
+.pull-right[
+
+```{r, message=F, warning=F}
+
+# Histogram
+histogram <- ggplot(
+    data = surv,
+    mapping = aes(
+      x = date_onset))+
+  geom_histogram(fill = "darkorange")+
+  labs(title = "geom_histogram()")+
+  theme_minimal(base_size = 16)
+  
+
+points <- ggplot(
+    data = surv,
+    mapping = aes(
+      x = age_years,       
+      y = ht_cm)
+    )+
+  geom_point()+
+  labs(title = "geom_point()")+
+  theme_minimal(base_size = 16)
+
+
+cowplot::plot_grid(histogram, points,
+                          nrow = 2, rel_widths = c(2,2))
+
+#cowplot::plot_grid(top, lines, ncol = 1)
+
+```
+
+]
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_geometry", params$lang])`
+
+.pull-left[
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_geometry", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_1", params$lang])`   |`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_2", params$lang])`
+------------------------------------------------------------------------|--------------------------------------------------------------------
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_5", params$lang])`|`geom_lines()`  
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_6", params$lang])`|`geom_bar()` or `geom_col()`  
+
+.footnote[`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_geometry", params$lang])`]
+
+]
+
+
+
+.pull-right[
+
+```{r, message=F, warning=F}
+
+lines <- surv %>% 
+  group_by(hospital,
+           week_report = lubridate::floor_date(date_onset, "week")) %>% 
+  summarise(n_cases = n()) %>% 
+  drop_na(week_report) %>% 
+  ggplot(
+    mapping = aes(
+      x = week_report,       
+      y = n_cases,
+      color = hospital),
+    size = 4
+    )+
+  geom_line()+
+  labs(title = "geom_line()")+
+  theme_minimal(base_size = 16)
+
+bars <- surv %>% 
+  ggplot(mapping = aes(
+      y = gender,
+      fill = gender))+
+  geom_bar()+
+  labs(title = "geom_bar()")+
+  theme_minimal(base_size = 16)+
+  theme(legend.position = "none")
+
+cowplot::plot_grid(lines, bars,
+                   nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+]
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_geometry", params$lang])`
+
+.pull-left[
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_geometry", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_1", params$lang])`   |`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_2", params$lang])`
+------------------------------------------------------------------------|--------------------------------------------------------------------
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_7", params$lang])`|`geom_boxplot()`  
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_geometry_8", params$lang])`|`geom_violin())` 
+
+
+.footnote[`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_geometry", params$lang])`]
+
+]
+
+
+
+.pull-right[
+
+```{r, message=F, warning=F}
+
+boxplots <- ggplot(
+    data = surv,
+    mapping = aes(
+      x = fever,       
+      y = temp)
+    )+
+  geom_boxplot()+
+  labs(title = "geom_boxplot()")+
+  theme_minimal(base_size = 16)
+
+
+
+violins <- ggplot(
+    data = surv,
+    mapping = aes(
+      x = fever,       
+      y = temp,
+      fill = fever)
+    )+
+  geom_violin()+
+  labs(title = "geom_violin()")+
+  theme_minimal(base_size = 16)
+
+
+cowplot::plot_grid(boxplots, violins,
+                          #smooth, density,
+                          
+                          nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+]
+
+
+
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_addGeom", params$lang])`
+
+.pull-left[
+
+```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm)) +
+*geom_point()
+```
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_addGeom_1", params$lang])`
+
+]
+
+.pull-right[
+
+
+```{r , echo = FALSE, eval = TRUE, tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm)) +
+geom_point() +
+theme_grey(base_size = 16)
+```
+
+] 
+
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_addGeom", params$lang])`
+
+.pull-left[
+
+```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm)) +
+geom_point() +
+*geom_smooth()
+```
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_addGeom_2", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_addGeom_3", params$lang])`
+
+]
+
+.pull-right[
+
+```{r , echo = FALSE, eval = TRUE, tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm)) +
+geom_point() +
+geom_smooth() +
+theme_grey(base_size = 16)
+```
+] 
+
+.footnote[`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_addGeom", params$lang])`]
+
+
+???
+- Explain why you might use one or the other
+
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_indent", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_indent_1", params$lang])`
+
+```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot(data = surv, mapping = aes(x = age_years, y = ht_cm))+geom_point()
+```
+
+--
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_indent_2", params$lang])`
+
+```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot(data = surv,
+       mapping = aes(x = age_yers, y = ht_cm)) +
+geom_point()
+```
+
+--
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_indent_2", params$lang])`
+
+```{r, echo = params$lang == "en", eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,        # use case linelist
+  mapping = aes(      # make aesthetic mappings for all geoms
+    x = age_years,    # assign x-axis to age column
+    y = ht_cm)) +     # assign y-axis to height
+geom_point()          # display data as points
+```
+
+```{r, echo = params$lang == "fr", eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,        # utiliser le cas linelist
+  mapping = aes(      # faire des mappings esthétiques pour tous les géomètres
+    x = age_years,    # assigner la colonne d'âge à l'axe des x 
+    y = ht_cm)) +     # assigner la colonne d'hauteur à l'axe des y 
+geom_point()          # afficher les données sous forme de points
+```
+
+```{r, echo = params$lang == "ru", eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,     # использование линейного списка
+  mapping = aes(   # создаем эстетические отображения для всех геомов
+    x = age_years, # присвоить ось x столбцу возраста
+    y = ht_cm)) +  # присвоить ось y росту
+geom_point()       # отображение данных в виде точек
+```
+
+```{r, echo = params$lang == "es", eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,        # caso de uso lista de líneas
+  mapping = aes(      # hacer mapeos estéticos para todos los geoms
+    x = age_years,    # asignar el eje x a la columna de edad
+    y = ht_cm)) +     # asignar el eje y a la altura
+geom_point()          # mostrar los datos en forma de puntos
+```
+
+
+
+???
+- Which of the above is easier to read for you?
+- Explain why you might use one or the other 
+long style can enable informative comments/annotations
+- short style very dense (harder to read for some). Shorter scripts, but so what? The number of lines of your code is not an informative metric.
+- very long lines => needs to scroll horizontally for people with smaller monitors (not nice)
+- long-ish style makes it easier to see which argument belongs to each function
+- spaces around "=" or "+" => make it easier to parse to many people
+- other?
+
+
+
+
+
+
+
+
+---
+
+class: large-table
+
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_aesOther", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_aesOther_1", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_aesOther_1", params$lang])`|`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_aesOther_2", params$lang])`
+-------------------------------------------------------------------|--------------------------------------------------------------------
+`shape`      |`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_aesOther_3", params$lang])`
+`fill`       |`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_aesOther_4", params$lang])`
+`color`      |`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_aesOther_5", params$lang])`
+`size`       |`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_aesOther_6", params$lang])`
+`alpha`      |`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_aesOther_7", params$lang])`
+`width`      |`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_aesOther_8", params$lang])`
+`linetype`   |`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_aesOther_9", params$lang])`
+`binwidth`   |`r paste0(mod6_1[mod6_1$uid == "mod6_1_tb_aesOther_10", params$lang])`
+  
+
+
+???
+
+Note that “aesthetic” in ggplot has a specific meaning that you might associate with the word “aesthetics” in common English. In ggplot those details are called “themes” and are adjusted within a theme() command
+
+Each geom accepts certain aesthetics, like `binwidth=` for `geom_histogram()`
+
+
+
+---
+
+class: medium-text
+
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_aesAssign", params$lang])`
+
+
+.pull-left[
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_op_aesAssign", params$lang])`
+
+* `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_static_1", params$lang])`
+  - `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_static_2", params$lang])`
+  - `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_static_3", params$lang])`
+
+</br>
+</br>
+</br>
+</br>
+
+
+]
+
+
+.pull-right[
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_op_example_1", params$lang])`
+
+```{r,eval = params$lang == "en", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using color = 'purple'")
+
+color_hospital <- ggplot() + theme_void()
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r, eval = params$lang == "fr", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilisant color = 'purple' (mauve)")
+
+color_hospital <- ggplot() + theme_void()
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r, eval = params$lang == "ru", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Использование цвета = 'purple'")
+
+color_hospital <- ggplot() + theme_void()
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r,eval = params$lang == "es", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilizar el color = 'purple' (púrpura)")
+
+color_hospital <- ggplot() + theme_void()
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+]
+
+
+
+---
+
+class: medium-text
+
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_aesAssign", params$lang])`
+
+
+.pull-left[
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_op_aesAssign", params$lang])`
+
+* `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_static_1", params$lang])`
+  - `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_static_2", params$lang])`
+  - `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_static_3", params$lang])`
+
+</br>
+</br>
+</br>
+</br>
+
+* `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_column_1", params$lang])`
+  - `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_column_2", params$lang])`
+  - `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_column_3", params$lang])`
+  
+
+]
+
+
+.pull-right[
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_op_example_1", params$lang])`
+
+```{r, eval = params$lang == "en", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using color = 'purple'")
+
+color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(aes(color = hospital))+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using aes(color = hospital)")
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+
+```{r, eval = params$lang == "fr", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilisant color = 'purple' (mauve)")
+
+color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(aes(color = hospital))+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilisant aes(color = hospital)")
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+
+```{r, eval = params$lang == "ru", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Использование цвета = 'purple' (сиреневый)")
+
+color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(aes(color = hospital))+
+  theme_minimal(base_size = 16)+
+  labs(title = "Использование aes(color = hospital), больница")
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r, eval = params$lang == "es", message=F, warning=F}
+
+color_purple <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(color = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilizar el color = 'purple' (púrpura)")
+
+color_hospital <- ggplot(data = surv, aes(x = age_years, y = ht_cm))+
+  geom_point(aes(color = hospital))+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilizar aes(color = hospital)")
+
+cowplot::plot_grid(color_purple, color_hospital,
+                  nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+]
+
+
+
+
+
+---
+
+class: medium-text
+
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_aesAssign", params$lang])`
+
+
+.pull-left[
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_op_aesAssign", params$lang])`
+
+* `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_static_1", params$lang])`
+  - `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_static_2", params$lang])`
+  - `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_static_3", params$lang])`
+  
+</br>
+</br>
+</br>
+</br>
+
+* `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_column_1", params$lang])`
+  - `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_column_2", params$lang])`
+  - `r paste0(mod6_1[mod6_1$uid == "mod6_1_bu_column_3", params$lang])`
+  
+
+]
+
+
+.pull-right[
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_op_example_2", params$lang])` 
+
+```{r, eval = params$lang == "en", message=F, warning=F}
+
+fill_purple <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(fill = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Using fill = 'purple'")
+
+
+fill_hospital <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(aes(fill = hospital))+
+    theme_minimal(base_size = 16)+
+  labs(title = "Using aes(fill = hospital)")
+
+cowplot::plot_grid(
+                  fill_purple, fill_hospital,
+                   
+                   nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r,eval = params$lang == "fr", message=F, warning=F}
+
+fill_purple <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(fill = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilisant fill = 'purple' (mauve)")
+
+
+fill_hospital <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(aes(fill = hospital))+
+    theme_minimal(base_size = 16)+
+  labs(title = "Utilisant aes(fill = hospital)")
+
+cowplot::plot_grid(
+                  fill_purple, fill_hospital,
+                   
+                   nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r, eval = params$lang == "ru", message=F, warning=F}
+
+fill_purple <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(fill = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Использование fill = 'purple' (сиреневый)")
+
+
+fill_hospital <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(aes(fill = hospital))+
+    theme_minimal(base_size = 16)+
+  labs(title = "Использование aes(fill= hospital), больница")
+
+cowplot::plot_grid(
+                  fill_purple, fill_hospital,
+                   
+                   nrow = 2, rel_widths = c(2,2))
+
+
+```
+
+```{r, eval = params$lang == "es", message=F, warning=F}
+
+fill_purple <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(fill = "purple")+
+  theme_minimal(base_size = 16)+
+  labs(title = "Utilizar fill = 'purple' (púrpura)")
+
+
+fill_hospital <- ggplot(data = surv, aes(x = date_onset))+
+  geom_histogram(aes(fill = hospital))+
+    theme_minimal(base_size = 16)+
+  labs(title = "Utilizar aes(fill = hospital)")
+
+cowplot::plot_grid(
+                  fill_purple, fill_hospital,
+                   
+                   nrow = 2, rel_widths = c(2,2))
+
+
+```
+]
+
+
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_static", params$lang])`
+
+.pull-left[
+
+```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm)) + 
+*geom_point(color = "seagreen")
+```
+
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_static_1", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_op_example_3", params$lang])`
+`size = 3`  
+`alpha = 0.5`  
+`width = 1.2`  
+
+]
+
+.pull-right[
+
+```{r , echo = FALSE, eval = TRUE, tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+     x = age_years,
+     y = ht_cm)) +
+geom_point(color = "seagreen") +
+theme_grey(base_size = 16)
+```
+] 
+
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_dynamic", params$lang])`
+
+.pull-left[
+
+```{r, echo = TRUE, eval = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+*   color = hospital)) +
+geom_point()
+```
+
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_dynamic_1", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_dynamic_2", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_dynamic_3", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_dynamic_4", params$lang])`
+
+]
+
+.pull-right[
+
+```{r , echo = FALSE, eval = TRUE, tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+    color = hospital)) +   
+geom_point()+
+theme_grey(base_size = 16)
+```
+]
+
+???
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_staticDynamic", params$lang])`
+
+.pull-left[
+
+
+```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+*   color = hospital)) +  
+geom_point(
+* size = 7, 
+* alpha = 0.7) 
+```
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_staticDynamic_1", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_staticDynamic_2", params$lang])`
+
+
+]
+
+.pull-right[
+
+```{r , echo = FALSE, eval = TRUE, tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+    color = hospital))+      # color varies by outcome
+geom_point(size = 7,         # all points 7x size
+           alpha = 0.7)+     # transparency 
+theme_grey(base_size = 16)     
+```
+]
+
+.footnote[`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_aes", params$lang])`
+]  
+
+
+???
+As there is only one geom, all aesthetics can be written in `ggplot()`, or in `geom_point()`
+
+
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_facets", params$lang])`
+
+
+
+.pull-left[
+
+```{r , echo = TRUE, eval = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+*facet_wrap(~hospital)
+```
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_facets_1", params$lang])`
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_facets_2", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_facets_3", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_facets_4", params$lang])`
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_facets_5", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_facets_6", params$lang])`
+
+
+] 
+
+
+
+.pull-right[
+
+```{r }
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~ hospital)+
+theme_grey(base_size = 16)
+```
+
+]
+
+???
+Also called "small multiples"  
+
+
+
+
+---
+
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_facets", params$lang])`
+
+.pull-left[
+
+```{r , echo = TRUE, eval = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+*facet_wrap(~hospital,
+            scales = "free_y")
+```
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_op_facets", params$lang])`
+- "free_y"  
+- "free_x"   
+- "free" (both x and y)  
+
+] 
+
+.footnote[
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_freeAxis_1", params$lang])`
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_fn_freeAxis_2", params$lang])`
+
+]
+
+
+.pull-right[
+```{r, eval = params$lang == "en", echo = F }
+ggplot(data = surv,
+       mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~hospital,
+           scales = "free_y") +
+labs(caption = "Note the free y-axis")+
+theme_grey(base_size = 16)
+```
+
+```{r, eval = params$lang == "fr", echo = F}
+ggplot(data = surv,
+       mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~hospital,
+           scales = "free_y") +
+labs(caption = "Notez l'axe y libre")+
+theme_grey(base_size = 16)
+```
+
+```{r, eval = params$lang == "ru", echo = F }
+ggplot(data = surv,
+       mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~hospital,
+           scales = "free_y") +
+labs(caption = "Обратите внимание на свободную ось y")+
+theme_grey(base_size = 16)
+```
+
+```{r, eval = params$lang == "es", echo = F }
+ggplot(data = surv,
+       mapping = aes(x = date_onset)) +
+geom_histogram() +
+facet_wrap(~hospital,
+           scales = "free_y") +
+labs(caption = "Obsérvese el eje y libre")+
+theme_grey(base_size = 16)
+```
+
+]
+
+
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_ggext", params$lang])`
+
+.pull-left[
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_ggext_1", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_ggext_2", params$lang])`
+
+```{r , echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = date_onset,
+*   fill = hospital)) +
+geom_histogram() +
+facet_wrap(~ hospital) +
+*gghighlight()
+```
+
+] 
+
+
+.pull-right[
+```{r }
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = date_onset,
+    fill = hospital)) +
+geom_histogram() +
+facet_wrap(~ hospital) +
+gghighlight::gghighlight() +
+theme_minimal(base_size = 14)
+```
+
+]
+
+
+
+
+
+
+---
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_gghighlight", params$lang])`
+
+.pull-left[
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_tx_gghighlight", params$lang])`
+
+```{r, echo=T, eval=F}
+surv %>% 
+  # get weekly counts by hospital
+  group_by(
+     hospital,
+     week = floor_date(date_onset, "week")) %>%
+  count() %>% 
+  
+  # plot
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+  
+```
+
+
+
+
+] 
+
+
+.pull-right[
+```{r echo=F, eval=T}
+surv %>% 
+  # get daily counts by zip code
+  group_by(
+     hospital,
+     week = floor_date(date_onset, "week")) %>%
+  count() %>% 
+  
+  # plot
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line()+
+  gghighlight::gghighlight(hospital == "Port Hospital") +
+  theme(legend.position = "none")
+```
+
+]
+
+
+
+???
+Here we create data frame of cases per week per hospital, and plot with `geom_line()`. The highlight is applied to Port Hospital.  
+
+
+
+---
+
+# `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_acknowledgment", params$lang])`
+
+`r paste0(mod6_1[mod6_1$uid == "mod6_1_op_images", params$lang])`
+
+* http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html  
+* https://jcheshire.com/r-spatial-data-hints/great-maps-ggplot2/
+
+
+
+
+---
+class: inverse, center, middle
+
+
+
+## `r paste0(mod6_1[mod6_1$uid == "mod6_1_h1_breakout", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "Safety Match - COVID artwork.png")))
+```

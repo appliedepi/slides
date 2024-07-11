@@ -1,0 +1,779 @@
+---
+title: "Introduction to R for<br>Applied Epidemiology"
+subtitle: "Routine reports with {rmarkdown}"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "en"
+---
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  sf,         # spatial
+  scales,     # comma
+  epikit,     # helpers
+  ggspatial,  # spatial
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation
+  tidyverse  # data management and visualization
+
+)
+
+## load packages from github
+pacman::p_load_gh(
+     "R4IDSR/epichecks"   # bivariate colour maps 
+)
+
+
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic", col_types = "c") %>%
+  clean_names()
+
+mod9 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod9", col_types = "c") %>%
+  clean_names()
+```
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colors: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
+
+### `r paste0(mod9[mod9$uid == "mod9_h1_subtitle", params$lang])`
+
+contact@appliedepi.org
+
+---
+
+# `r paste0(mod9[mod9$uid == "mod9_h1_objectives", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_op_objectives", params$lang])`  
+
+* `r paste0(mod9[mod9$uid == "mod9_bu_objectives_1", params$lang])`  
+
+--
+
+* `r paste0(mod9[mod9$uid == "mod9_bu_objectives_2", params$lang])`  
+
+--
+
+* `r paste0(mod9[mod9$uid == "mod9_bu_objectives_3", params$lang])`  
+
+--
+
+* `r paste0(mod9[mod9$uid == "mod9_bu_objectives_4", params$lang])`  
+
+--
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  str_glue({paste0(mod9[mod9$uid == "mod9_tb_objectives_1_1", params$lang])}),     str_glue({paste0(mod9[mod9$uid == "mod9_tb_objectives_2_1", params$lang])}),      str_glue({paste0(mod9[mod9$uid == "mod9_tb_objectives_3_1", params$lang])}),
+  str_glue({paste0(mod9[mod9$uid == "mod9_tb_objectives_1_2", params$lang])}),     str_glue({paste0(mod9[mod9$uid == "mod9_tb_objectives_2_2", params$lang])}),      str_glue({paste0(mod9[mod9$uid == "mod9_tb_objectives_3_2", params$lang])}),
+  str_glue({paste0(mod9[mod9$uid == "mod9_tb_objectives_1_3", params$lang])}),        str_glue({paste0(mod9[mod9$uid == "mod9_tb_objectives_2_3", params$lang])}), str_glue({paste0(mod9[mod9$uid == "mod9_tb_objectives_3_3", params$lang])}),
+  str_glue({paste0(mod9[mod9$uid == "mod9_tb_objectives_1_4", params$lang])}),     str_glue({paste0(mod9[mod9$uid == "mod9_tb_objectives_2_4", params$lang])}),      str_glue({paste0(mod9[mod9$uid == "mod9_tb_objectives_3_4", params$lang])})
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines(str_glue({paste0(mod9[mod9$uid == "mod9_fn_objectives", params$lang])}))
+```
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_routinerp", params$lang])`  
+
+.pull-left[
+
+`r paste0(mod9[mod9$uid == "mod9_op_routinerp_1", params$lang])`  
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_routinerp_1", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_routinerp_2", params$lang])` 
+- `r paste0(mod9[mod9$uid == "mod9_bu_routinerp_3", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_routinerp_4", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_routinerp_5", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_routinerp_6", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_routinerp_7", params$lang])`
+
+`r paste0(mod9[mod9$uid == "mod9_tx_routinerp_1", params$lang])`
+
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "automated_reports.png")))
+```
+
+]
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_routinerp", params$lang])`  
+
+
+
+`r paste0(mod9[mod9$uid == "mod9_op_routinerp_1", params$lang])`  
+
+.pull-left[  
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_routinerp_8", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_routinerp_9", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_routinerp_10", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_routinerp_11", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_routinerp_12", params$lang])` 
+
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "automated_reports.png")))
+```
+
+`r paste0(mod9[mod9$uid == "mod9_tx_routinerp_1", params$lang])`  
+]
+
+
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_automation", params$lang])`  
+
+.pull-left[  
+
+`r paste0(mod9[mod9$uid == "mod9_tx_automation_1", params$lang])` 
+
+`r paste0(mod9[mod9$uid == "mod9_op_automation_1", params$lang])`  
+ - `r paste0(mod9[mod9$uid == "mod9_bu_automation_1", params$lang])`  
+ - `r paste0(mod9[mod9$uid == "mod9_bu_automation_2", params$lang])`  
+ - `r paste0(mod9[mod9$uid == "mod9_bu_automation_3", params$lang])` 
+ 
+`r paste0(mod9[mod9$uid == "mod9_tx_automation_2", params$lang])`  
+
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "human_robot.png")))
+```
+
+]
+
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_rmarkdown", params$lang])`  
+
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_format", params$lang])`
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "rmarkdown_overview.png")))
+```
+
+
+
+---
+class: inverse, center, middle  
+
+# `r paste0(mod9[mod9$uid == "mod9_h1_slides", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "even_slides.png")))
+```
+
+.footnote[`r paste0(mod9[mod9$uid == "mod9_fn_slides", params$lang])`]
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_dashboards", params$lang])`
+
+`r paste0(mod9[mod9$uid == "mod9_tx_dashboards", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "flexdashboard_output.png")))
+```
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_overview", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_op_overview_1", params$lang])`  
+
+1) `r paste0(mod9[mod9$uid == "mod9_nu_overview_1", params$lang])`  
+
+--
+
+2) `r paste0(mod9[mod9$uid == "mod9_nu_overview_2", params$lang])`  
+
+--
+
+3) `r paste0(mod9[mod9$uid == "mod9_nu_overview_3", params$lang])`  
+
+--
+
+`r paste0(mod9[mod9$uid == "mod9_op_overview_2", params$lang])`  
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_overview_1", params$lang])`  
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_vocab", params$lang])`  
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_vocab_1", params$lang])`  
+
+--
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_vocab_2", params$lang])`  
+
+--
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_vocab_3", params$lang])`  
+
+--
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_vocab_4", params$lang])`  
+
+--
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_vocab_5", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "0_rmd.png")))
+```
+
+.footnote[`r paste0(mod9[mod9$uid == "mod9_fn_vocab", params$lang])`]  
+
+???
+This process happens in the background, so you do not need to know all these steps. However you may encounter these names.  
+
+The .Rmd file is fed to knitr, which executes the R code chunks and creates a new .md (markdown) file which includes the R code and its rendered output. The .md file is then processed by pandoc to create the finished product: a Microsoft Word document, HTML file, powerpoint document, pdf, etc.
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_output", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_tx_output", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "1_gettingstarted.png")))
+```
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_component", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_tx_component_1", params$lang])`
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("2_defaultRMD_", params$lang, ".png"))))
+
+```
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_component", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_tx_component_2", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("rmarkdown_translation_", params$lang, ".png"))))
+```
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_yaml", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_tx_yaml_1", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_tx_yaml_2", params$lang])`  
+
+```{results='asis'}
+---
+title: "R is great for public health"
+subtitle: "A personal testimony"
+author: "Me"
+date: "2022-03-15"
+output: 
+  html_document
+---
+```
+
+???
+Note that it starts and ends with three dashes, and that placement of spaces and colons are very important  
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_chunk1", params$lang])`  
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_chunk_1", params$lang])`  
+
+--
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_chunk_2", params$lang])`
+
+`````
+```{r}`r ''`
+# import data
+surv_raw <- import(here("data", "surveillance_linelist_20141201.csv))
+```
+`````  
+--
+
+`r paste0(mod9[mod9$uid == "mod9_bu_chunk_3", params$lang])`  
+
+--
+
+`````
+```{r}`r ''`
+# clean data
+surv <- surv %>% 
+  clean_names() %>% 
+  select(case_id, gender, age, hospital) %>% 
+  mutate(child = ifelse(age < 18))
+```
+````` 
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_chunk", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_tx_chunk_1", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("6_Rmdexample_", params$lang, ".png"))))
+```
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_chunk", params$lang])`  
+
+
+`````
+```{r}`r ''`  
+# import data
+surv_raw <- import(here("data", "surveillance_linelist_20141201.csv))
+```
+`````  
+
+`r paste0(mod9[mod9$uid == "mod9_op_chunk_1", params$lang])`  
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_chunk_4", params$lang])` 
+
+--
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_chunk_5", params$lang])`  
+
+--
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_chunk_6", params$lang])` 
+     - `r paste0(mod9[mod9$uid == "mod9_sb_chunk_1", params$lang])`  
+     - `r paste0(mod9[mod9$uid == "mod9_sb_chunk_2", params$lang])`  
+     - `r paste0(mod9[mod9$uid == "mod9_sb_chunk_3", params$lang])`  
+     - `r paste0(mod9[mod9$uid == "mod9_sb_chunk_4", params$lang])`  
+     - `r paste0(mod9[mod9$uid == "mod9_sb_chunk_5", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_tx_chunk_2", params$lang])`
+
+
+???
+Chunk names cannot contain spaces  
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_inline", params$lang])`
+
+`r paste0(mod9[mod9$uid == "mod9_tx_inline_1", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("verbatim_inline_1_1_", params$lang, ".png"))))
+```
+
+`r paste0(mod9[mod9$uid == "mod9_tx_inline_2", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("verbatim_inline_1_2_", params$lang, ".png"))))
+```
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_inline", params$lang])`
+
+`r paste0(mod9[mod9$uid == "mod9_tx_inline_1", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("verbatim_inline_2_1_", params$lang, ".png"))))
+```
+
+`r paste0(mod9[mod9$uid == "mod9_tx_inline_2", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("verbatim_inline_2_2_", params$lang, ".png"))))
+```
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_tx_helpers", params$lang])` 
+
+{epikit}  
+
+```{r, eval=TRUE, echo=TRUE}
+epikit::fmt_count(surv, is.na(date_onset))
+```
+
+
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
+str_glue("{fmt_count(surv, is.na(date_onset))} are missing date of onset and not shown.")
+```
+
+```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
+str_glue("{fmt_count(surv, is.na(date_onset))} cas n'ont pas de date d'apparition et ne sont pas présentés ici.")
+```
+
+```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
+str_glue("{fmt_count(surv, is.na(date_onset))} случаев дата начала заболевания отсутствует и не показана.")
+```
+
+```{r, eval=params$lang == "es", echo=params$lang == "es"}
+str_glue("{fmt_count(surv, is.na(date_onset))} falta la fecha de inicio y no se muestra.")
+```
+
+--
+
+{scales}
+
+
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
+str_glue("There were {comma(sum(as.numeric(surv$diff), na.rm=T))} total delay days between symptom onset and report.")
+
+```
+
+```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
+str_glue("Il y avait {comma(sum(as.numeric(surv$diff), na.rm=T))} jours de retard total entre l'apparition des symptômes et la déclaration.")
+
+```
+
+```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
+str_glue("Между началом симптомов и сообщением о них прошло {comma(sum(as.numeric(surv$diff), na.rm=T))} всего дней задержки.")
+
+```
+
+```{r, eval=params$lang == "es", echo=params$lang == "es"}
+str_glue("Hubo {comma(sum(as.numeric(surv$diff), na.rm=T))} días totales de retraso entre el inicio de los síntomas y el informe".)
+
+```
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_heading", params$lang])`  
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_heading", params$lang])`
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("2_text_", params$lang, ".png"))))
+```
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_tables", params$lang])` 
+
+`r paste0(mod9[mod9$uid == "mod9_tx_tables_1", params$lang])`  
+`````
+Column 1 |Column  2 |Column 3
+---------|----------|--------
+Cell A   |Cell B    |Cell C
+Cell D   |Cell E    |Cell F
+`````
+
+`r paste0(mod9[mod9$uid == "mod9_tx_tables_2", params$lang])`  
+
+
+Column 1 |Column  2 |Column 3
+---------|----------|--------
+Cell A   |Cell B    |Cell C
+Cell D   |Cell E    |Cell F
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_source", params$lang])`
+
+`r paste0(mod9[mod9$uid == "mod9_tx_source", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("source_mode_", params$lang, ".png"))))
+```
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_visual", params$lang])`
+
+`r paste0(mod9[mod9$uid == "mod9_tx_visual", params$lang])`
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "80%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", paste0("visual_mode_", params$lang, ".png"))))
+```
+
+???
+If writing the document in code is intimidating, RStudio allows you to toggle the script into "Visual Mode", so that your document looks similar to a Word document.  
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_running", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_tx_running_1", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "10%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "4_knitbutton.png")))
+```
+
+`r paste0(mod9[mod9$uid == "mod9_tx_running_2", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "4_progress.png")))
+```
+
+`r paste0(mod9[mod9$uid == "mod9_tx_running_3", params$lang])`  
+
+???
+Please see the Handbook for options to create a "Report factory" where it becomes easier to catalog outputs from many different reports in date- and time-stamped folders.  
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_params", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_tx_params_1", params$lang])`  
+
+```{results='asis'}
+---
+title: "Surveillance report"
+output: html_document
+params:
+ date: "2021-04-10"
+ hospital: "Central Hospital"
+---
+```
+
+`r paste0(mod9[mod9$uid == "mod9_tx_params_2", params$lang])`  
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_params", params$lang])`
+
+
+`r paste0(mod9[mod9$uid == "mod9_tx_params_3", params$lang])`  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_1.png")))
+```
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_params", params$lang])`
+
+
+`r paste0(mod9[mod9$uid == "mod9_tx_params_3", params$lang])`  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_2.png")))
+```
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_params", params$lang])`
+
+
+`r paste0(mod9[mod9$uid == "mod9_tx_params_3", params$lang])`  
+
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_3.png")))
+```
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_params", params$lang])`
+
+.pull-left[
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_menu_1.png")))
+```
+]
+
+.pull-right[
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "5_parameterized_menu_2.png")))
+```
+
+]
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_template", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_tx_template_1", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_tx_template_2", params$lang])`
+
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_situation", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_op_situation_1", params$lang])`  
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_situation_1", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_situation_2", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_situation_3", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_situation_4", params$lang])`  
+
+`r paste0(mod9[mod9$uid == "mod9_op_situation_2", params$lang])`  
+
+- `r paste0(mod9[mod9$uid == "mod9_bu_situation_5", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_situation_6", params$lang])`  
+- `r paste0(mod9[mod9$uid == "mod9_bu_situation_7", params$lang])` 
+
+
+
+---
+# `r paste0(mod9[mod9$uid == "mod9_h1_breakout", params$lang])`  
+
+
+
+
+
+
+<!-- --- -->
+
+<!-- # inline R code   -->
+
+<!-- As of -->
+<!-- `` `r knitr::inline_expr("format(Sys.Date())")` ``, there were  -->
+<!-- `` `r knitr::inline_expr("nrow(surv)")` `` confirmed cases.   -->
+
+
+<!-- As of -->
+<!-- `` `r knitr::inline_expr("format(Sys.Date(), '%d %B, %Y')")` ``, there were  -->
+<!-- `` `r knitr::inline_expr("nrow(surv)")` `` confirmed cases.   -->
+
+<!-- Produces this:   -->
+
+<!-- As of `r format(Sys.Date(), '%d %B, %Y')`, there were `r nrow(surv)` confirmed cases.   -->
+
+
+
+
+
+<!-- --- -->
+
+

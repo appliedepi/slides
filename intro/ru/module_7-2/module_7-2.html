@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to R for Applied Epidemiology</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="2022" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle, inverse, title-slide
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+# Введение в R для прикладной эпидемиологии
+
+### Преобразование данных
+
+contact@appliedepi.org
+---
+
+
+# Реструктуризация данных
+
+*поворот, изменение формы, плавление, литье, преобразование...* датафреймов
+
+&lt;img src="../../../images/joins_pivots/Pivoting_500x500.png" width="222" height="100%" /&gt;
+
+---
+
+# Что такое преобразование?
+
+* *Сводные таблицы *Excel - это способ обобщения и агрегирования данных.
+
+--
+
+* В R **преобразование** датафрейма имеет **другое значение**.
+
+--
+
+* Думайте об этом как о *реструктуризации* или *обновлении* датафрейма.
+
+--
+
+* Мы будем использовать функции `pivot_wider()` и `pivot_longer()` из пакета {tidyr}.
+
+--
+
+* Часто можно встретить примеры с использованием альтернативных функций из других пакетов: 
+     * `melt()` и `cast()` из {reshape2}
+     * `gather()` и `spread()` предшественники функции {tidyr} `pivot_()`  
+     * `melt()` и `dcast()` из {data.table}
+     
+     
+     
+     
+
+
+
+---
+# Упорядоченные данные
+
+Помните ли вы 3 принципа "упорядоченных данных"?  
+
+--
+
+1. Каждое **значение** должно иметь свою **ячейку**.
+
+--
+
+2. Каждая **переменная** должна иметь свой **столбец**.
+
+--
+
+3. Каждое **наблюдение** должно иметь свою собственную **строку**.  
+
+
+
+
+
+
+
+
+---
+
+# Терминология  
+
+Структурно "датафреймы" в R состоят из **столбцов** и **строк**.  
+
+--
+
+**"Переменные "** и **"наблюдения "** являются более абстрактными понятиями:  
+
+* **Переменные** измеряют один *основной атрибут* (возраст, исход или дату появления симптомов).  
+* **Наблюдения** относятся к *единице анализа*.  
+
+--
+
+В идеале они выравниваются: **столбцы = переменные** и **строки = наблюдения**.  
+
+&lt;img src="../../../images/data_cleaning/tidy_image_ru.png" width="754" height="65%" /&gt;
+
+.footnote[Источник изображения: [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)]
+
+
+
+
+
+---
+# Поворот в длину  
+.pull-left[
+Ввод данных часто осуществляется в "широком" формате  
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 1999 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2000 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2001 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2002 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9250 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10200 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25650 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26800 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27255 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5120 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5860 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+* Характеристики субъекта хранятся в одной строке  
+* Полезно для презентации  
+* **Не** идеален для некоторых видов анализа.
+]
+
+--
+.pull-right[
+**Легче анализировать в "длинном" формате**  
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; cases &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9250 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10200 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25650 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26800 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27255 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5120 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5860 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+]
+
+
+
+
+
+
+
+
+
+
+
+---
+# Пример {ggplot2}
+
+Как построить график случаев во времени для трех стран?  
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 1999 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2000 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2001 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2002 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nigeria &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9250 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10200 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; India &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25650 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26800 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27255 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5120 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5860 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+  
+
+```r
+ggplot(data = example,
+       mapping = aes(x = ???, y = ???))+
+     geom_line()
+```
+
+
+
+
+
+
+---
+# Поворот в длину
+
+.pull-left[
+&lt;template id="0e51aa27-b583-46e3-8d96-e0e07f7a1bd5"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-9af4397e{}.cl-9ae8d3c2{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-9aed974a{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-9aed9754{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-9aedac76{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9aedac80{width:0.752in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9aedac8a{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9aedac94{width:0.752in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9aedac95{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9aedaca8{width:0.752in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9aedaca9{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9aedacb2{width:0.752in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-9af4397e'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9aedac76"&gt;&lt;p class="cl-9aed974a"&gt;&lt;span class="cl-9ae8d3c2"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedac80"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedac80"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedac80"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedac80"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9aedac8a"&gt;&lt;p class="cl-9aed974a"&gt;&lt;span class="cl-9ae8d3c2"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedac94"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedac94"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedac94"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedac94"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9aedac95"&gt;&lt;p class="cl-9aed974a"&gt;&lt;span class="cl-9ae8d3c2"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedaca8"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedaca8"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedaca8"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedaca8"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9aedaca9"&gt;&lt;p class="cl-9aed974a"&gt;&lt;span class="cl-9ae8d3c2"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedacb2"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedacb2"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedacb2"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9aedacb2"&gt;&lt;p class="cl-9aed9754"&gt;&lt;span class="cl-9ae8d3c2"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="0d25c9ed-96b6-434c-9de3-737f3c6979f7"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("0d25c9ed-96b6-434c-9de3-737f3c6979f7");
+var template = document.getElementById("0e51aa27-b583-46e3-8d96-e0e07f7a1bd5");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+* Эти **имена столбцов будут повернуты**.  
+
+]
+
+
+
+---
+# Поворот в длину
+
+.pull-left[
+&lt;template id="a449ee7e-c543-4c01-8f23-1651e88a8424"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-9b1bd326{}.cl-9b10c404{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-9b1533cc{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-9b1533e0{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-9b1549fc{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b1549fd{width:0.752in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b154a06{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b154a10{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b154a1a{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b154a24{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b154a25{width:0.786in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b154a2e{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-9b1bd326'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b1549fc"&gt;&lt;p class="cl-9b1533cc"&gt;&lt;span class="cl-9b10c404"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b1549fd"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b1549fd"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b1549fd"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b1549fd"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b154a06"&gt;&lt;p class="cl-9b1533cc"&gt;&lt;span class="cl-9b10c404"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b154a10"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b154a10"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b154a10"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b154a10"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b154a1a"&gt;&lt;p class="cl-9b1533cc"&gt;&lt;span class="cl-9b10c404"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b154a24"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b154a24"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b154a24"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b154a24"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b154a25"&gt;&lt;p class="cl-9b1533cc"&gt;&lt;span class="cl-9b10c404"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b154a2e"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b154a2e"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b154a2e"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b154a2e"&gt;&lt;p class="cl-9b1533e0"&gt;&lt;span class="cl-9b10c404"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="3b298f82-ed06-466a-aa68-543715733922"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("3b298f82-ed06-466a-aa68-543715733922");
+var template = document.getElementById("a449ee7e-c543-4c01-8f23-1651e88a8424");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+* Эти **значения будут переупорядочены**.    
+
+]
+
+
+
+---
+# Поворот в длину
+
+.pull-left[
+&lt;template id="cb3e3b31-bdaf-49ea-a667-c8783d2ae860"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-9b45a340{}.cl-9b3a1db8{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-9b3ec3ea{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-9b3ec3fe{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-9b3edad8{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b3edae2{width:0.752in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b3edaec{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b3edaf6{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b3edb00{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b3edb01{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b3edb0a{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b3edb0b{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-9b45a340'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b3edad8"&gt;&lt;p class="cl-9b3ec3ea"&gt;&lt;span class="cl-9b3a1db8"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edae2"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edae2"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edae2"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edae2"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b3edaec"&gt;&lt;p class="cl-9b3ec3ea"&gt;&lt;span class="cl-9b3a1db8"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edaf6"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edaf6"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edaf6"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edaf6"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b3edb00"&gt;&lt;p class="cl-9b3ec3ea"&gt;&lt;span class="cl-9b3a1db8"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edb01"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edb01"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edb01"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edb01"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b3edb0a"&gt;&lt;p class="cl-9b3ec3ea"&gt;&lt;span class="cl-9b3a1db8"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edb0b"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edb0b"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edb0b"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b3edb0b"&gt;&lt;p class="cl-9b3ec3fe"&gt;&lt;span class="cl-9b3a1db8"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="cb1053c9-1de3-4036-a78a-dce3f64fb60e"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("cb1053c9-1de3-4036-a78a-dce3f64fb60e");
+var template = document.getElementById("cb3e3b31-bdaf-49ea-a667-c8783d2ae860");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+* Эти **идентификаторы будут реплицированы**.  
+
+]
+
+
+
+---
+# Поворот в длину  
+
+.pull-left[
+&lt;template id="242aa0f6-c053-414e-9e00-857c262783d5"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-9b6c6336{}.cl-9b610cac{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-9b65c90e{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-9b65c922{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-9b65de8a{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b65de94{width:0.752in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b65de95{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b65de9e{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b65de9f{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b65dea8{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b65deb2{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b65deb3{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-9b6c6336'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b65de8a"&gt;&lt;p class="cl-9b65c90e"&gt;&lt;span class="cl-9b610cac"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65de94"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65de94"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65de94"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65de94"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b65de95"&gt;&lt;p class="cl-9b65c90e"&gt;&lt;span class="cl-9b610cac"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65de9e"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65de9e"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65de9e"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65de9e"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b65de9f"&gt;&lt;p class="cl-9b65c90e"&gt;&lt;span class="cl-9b610cac"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65dea8"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65dea8"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65dea8"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65dea8"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b65deb2"&gt;&lt;p class="cl-9b65c90e"&gt;&lt;span class="cl-9b610cac"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65deb3"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65deb3"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65deb3"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b65deb3"&gt;&lt;p class="cl-9b65c922"&gt;&lt;span class="cl-9b610cac"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="8b512b16-9fa8-442c-9b23-33f087256e84"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("8b512b16-9fa8-442c-9b23-33f087256e84");
+var template = document.getElementById("242aa0f6-c053-414e-9e00-857c262783d5");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+&lt;img src="../../../images/joins_pivots/pivot_command.png" width="100%" /&gt;
+
+* Перечислите столбцы для преобразования  
+* Предоставьте 2 **новых названия столбцов**.  
+
+]
+
+
+.pull-right[
+
+&lt;template id="8a5140d4-5930-4327-bec7-664f3b2e377d"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-9b9a4bca{}.cl-9b8eeb7c{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-9b9391fe{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-9b939208{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-9b93a8e2{width:0.786in;background-color:rgba(255, 255, 255, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b93a8e3{width:0.625in;background-color:rgba(255, 255, 0, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b93a8ec{width:0.752in;background-color:rgba(203, 195, 227, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b93a8f6{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b93a8f7{width:0.625in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b93a90a{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b93a90b{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b93a914{width:0.625in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b93a915{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b93a91e{width:0.786in;background-color:rgba(173, 216, 230, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b93a928{width:0.625in;background-color:rgba(255, 165, 0, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9b93a929{width:0.752in;background-color:rgba(49, 163, 84, 1.00);vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-9b9a4bca'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a8e2"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;country&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a8e3"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;year&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a8ec"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;cases&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a8f6"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a8f7"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a90a"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;8,000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a8f6"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a8f7"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a90a"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;7,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a8f6"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a8f7"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a90a"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;9,250&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a8f6"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;Nigeria&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a8f7"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a90a"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;10,200&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a90b"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a914"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a915"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;20,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a90b"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a914"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a915"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;25,650&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a90b"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a914"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a915"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;26,800&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a90b"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;India&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a914"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a915"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;27,255&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a90b"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a914"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;1999&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a915"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;4,500&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a90b"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a914"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;2000&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a915"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;5,120&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a90b"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a914"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;2001&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a915"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;5,100&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9b93a91e"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;Brazil&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a928"&gt;&lt;p class="cl-9b9391fe"&gt;&lt;span class="cl-9b8eeb7c"&gt;2002&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9b93a929"&gt;&lt;p class="cl-9b939208"&gt;&lt;span class="cl-9b8eeb7c"&gt;5,860&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="7ee32a8e-2414-4ba3-afde-5de6307aa585"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("7ee32a8e-2414-4ba3-afde-5de6307aa585");
+var template = document.getElementById("8a5140d4-5930-4327-bec7-664f3b2e377d");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+# команда ggplot
+
+.pull-left[
+
+```r
+example %&gt;%
+  pivot_longer(
+       cols = `1999`:`2002`,
+       names_to = "year",
+       values_to = "cases") %&gt;%
+     
+  ggplot(mapping = aes(
+*           x = year,
+*           y = cases,
+*           color = country,
+*           group = country))+
+  geom_line()
+```
+]
+
+.pull-right[
+
+&lt;img src="module_7-2_files/figure-html/unnamed-chunk-16-1.png" width="504" /&gt;
+
+]
+
+
+---
+# Преобразование в ширину  
+
+Поворот шире используется не так часто, поэтому сегодня мы не будем его учить. 
+
+Вы можете изучить несколько примеров в руководстве Epi R Handbook:  
+
+* [Преобразование данных](https://epirhandbook.com/en/pivoting-data.html#long-to-wide)  
+* [Описательные таблицы с помощью {dplyr}](https://epirhandbook.com/en/descriptive-tables.html#tbls_pivot_wider)  
+
+&lt;img src="../../../images/joins_pivots/pivot_wider_new_ru.png" width="818" height="100%" /&gt;
+
+
+
+
+---
+# Упражнение  
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
