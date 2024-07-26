@@ -15,13 +15,13 @@ Sys.setenv(DEEPL_API_KEY = "287d5481-9d96-8500-228c-6f98cfb3c576")
 # 3. Indicate modules to be translated
 module_list = c(
   "intro01",
-  # "intro02",
+  "intro02",
   "intro03",
   "intro04",
-  # "intro05-1",
+  "intro05-1",
   "intro05-2",
-  # "intro06",
-  # "intro07",
+  "intro06",
+  "intro07",
   "intro08-1",
   "intro08-2",
   "intro10"
