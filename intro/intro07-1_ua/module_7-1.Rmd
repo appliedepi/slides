@@ -1,0 +1,1070 @@
+---
+title: "Introduction to R for<br>Applied Epidemiology"
+subtitle: "Joining data"
+author: "2022"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "en"
+---
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  countdown,  # countdown timer
+  flextable,  # tables
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+
+
+# data prep --------------------------------------------------------------------
+# linelist_raw <- rio::import(here::here("data", "linelist_raw.xlsx"))
+linelist_surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic") %>%
+  clean_names()
+
+mod7_1 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod7_1", col_types = "c") %>%
+  clean_names()
+```
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
+
+### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_subtitle", params$lang])`
+
+contact@appliedepi.org
+---
+
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_objectives", params$lang])`  
+
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_op_objectives", params$lang])`  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_objectives_1", params$lang])`  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_objectives_2", params$lang])` 
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_objectives_3", params$lang])`  
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_objectives_4", params$lang])`  
+
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Location, ~Topic,
+  str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_1_1", params$lang])}),    str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_2_1", params$lang])}),      str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_3_1", params$lang])}),
+  str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_1_2", params$lang])}), str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_2_2", params$lang])}),  str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_3_2", params$lang])}),
+  str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_1_3", params$lang])}),    str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_2_3", params$lang])}),      str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_3_3", params$lang])}),
+  str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_1_4", params$lang])}),        str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_2_4", params$lang])}),      str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_3_4", params$lang])}),
+  str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_1_5", params$lang])}),    str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_2_5", params$lang])}),      str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_tb_objectives_3_5", params$lang])})
+
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines(str_glue({paste0(mod7_1[mod7_1$uid == "mod7_1_fn_objectives", params$lang])}))
+```
+
+
+
+---
+class: inverse, center, middle
+
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_joinintro", params$lang])`
+
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_joinintro", params$lang])`
+
+.footnote[`r paste0(mod7_1[mod7_1$uid == "mod7_1_fn_joinintro", params$lang])`]
+
+???
+
+Explain that:
+- people coming from different background might have different words for this type of operation: joining, union, merging, combining, assembling...
+- In this module, we will use the word "join" to stick to the `join_` function family from tidyverse as well as well known functions from SQL. The base R equivalent is `merge`.
+
+
+  
+
+---
+
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_situation", params$lang])`
+
+
+???
+
+Provide examples of situations they might encounter to highlight how common it is: 
+- connect laboratory data to patient clinical outcomes
+- connect patient data with GIS data,
+- connect Google mobility data to infectious disease trends
+- other relevant example for their work hinted by participant survey
+
+
+
+
+
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_jointype", params$lang])`
+
+#### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h4_jointype", params$lang])`
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_jointype_1", params$lang])`
+     * `r paste0(mod7_1[mod7_1$uid == "mod7_1_sb_jointype_1", params$lang])`
+     * `r paste0(mod7_1[mod7_1$uid == "mod7_1_sb_jointype_2", params$lang])`
+     * `r paste0(mod7_1[mod7_1$uid == "mod7_1_sb_jointype_3", params$lang])`
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_jointype_2", params$lang])`
+     * `r paste0(mod7_1[mod7_1$uid == "mod7_1_sb_jointype_4", params$lang])`
+
+#### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h4_syntax", params$lang])`
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_jointype_3", params$lang])`
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_jointype_4", params$lang])`
+
+```{r include=TRUE, echo=TRUE, eval=FALSE}
+xxx_join(dataframe_1, dataframe_2, 
+         by = "key_id")
+```
+
+
+???
+Insist that there are globally two types of joins, the mutating joins, who will add new columns, and potentially affect the number of lines, and the filtering joins, wich will not add any new columns, just change the rows in one dataset.
+
+Explain that the function are always in this form, two dataframes, the first one is nicknamed _left_ dataframe, the second is nicknamed the _right_ dataframe. The *by* argument: provide columns used for identifying matches between observations
+
+
+
+
+
+---
+
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_example", params$lang])`  
+
+
+```{r include=FALSE, echo=F}
+# Make smaller linelists for exemple purpose
+# patients <- linelist_surv %>% 
+#      select(case_id, age, age_unit, gender) %>% 
+#      arrange(case_id) %>% 
+#      head(5)
+
+patients <- tribble(
+     ~case_id, ~age, ~age_unit, ~gender,
+     "5fe599", 2, "years", "m",
+     "8689b7", 3, "years", "f",
+     "11f8ea", 56, "years", "m",
+     "b8812a", 18, "years", "f",
+     "893f25", 3, "years", "m")
+
+
+hosp <- tribble(
+     ~id_patient, ~outcome,
+      "5fe599", "Died",
+      "8689b7", "Recovered",
+      "11f8ea", "Recovered",
+      "ebd24z", "Died")
+
+
+# hosp <- linelist_surv %>% 
+#      select(id_patient = case_id, hospital) %>% 
+#      arrange(id_patient) %>% 
+#      head(3)
+```
+
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_example_1", params$lang])`  
+
+
+.pull-left[
+
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_example_2", params$lang])`  
+
+```{r include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+
+]
+
+.pull-right[
+
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_example_3", params$lang])`  
+
+```{r include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+]
+
+<br>
+
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_example_4", params$lang])`
+
+
+???
+For the purpose of the slides, we created two _mini_ dataframes to see what's happening, one with patient characteristics (age and gender), the other hospital the patient has been hospitalised in.
+**Note that both datasets have the ID of the patient in common, but a slightly different name (a very common situation)**. We call this column the KEY, or the identifier column. It allows to *match* observations in both dataframes.
+
+
+
+
+
+
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_leftjoin", params$lang])`
+
+
+.pull-left[
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_leftjoin_1", params$lang])`
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_leftjoin_2", params$lang])`
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_leftjoin_3", params$lang])` 
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_leftjoin_4", params$lang])`
+
+]
+
+
+.pull-right[
+
+```{r eval = TRUE, echo=FALSE, out.width = '100%'}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "left-join.gif")))
+```
+
+]
+
+
+
+???
+Sometimes called Left *outer* join  
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_leftjoin", params$lang])`
+
+.pull-left[
+
+```{r include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+
+]
+
+
+
+.pull-right[
+
+```{r include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+
+```
+
+]
+
+
+
+.pull-left[
+
+
+```{r echo = TRUE, eval=FALSE, include=TRUE}
+left_join(patients, hosp,      
+  by = c(
+    "case_id" = "id_patient")) #<<
+```
+
+]
+
+
+
+.pull-right[
+
+```{r include=TRUE, echo=FALSE, eval=TRUE, out.width = '80%'}
+left_join(patients, 
+          hosp, 
+     by = c("case_id" = "id_patient")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+
+
+
+```
+
+]
+
+
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_leftjoin", params$lang])`
+
+.pull-left[
+
+```{r include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+
+]
+
+
+
+.pull-right[
+
+```{r include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow") %>% 
+     bg(part = "body",   i = 4, j = 1:2, bg = "red") %>% 
+     bg(part = "body",   i = 1:3, j = 2, bg = "lightgreen")
+
+
+```
+
+]
+
+
+
+.pull-left[
+
+
+```{r echo = TRUE, eval=FALSE, include=TRUE}
+left_join(patients, hosp,      
+  by = c(
+    "case_id" = "id_patient")) #<<
+```
+
+]
+
+
+
+.pull-right[
+
+```{r include=TRUE, echo=FALSE, eval=TRUE, out.width = '80%'}
+left_join(patients, 
+          hosp, 
+     by = c("case_id" = "id_patient")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow") %>% 
+     bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = 1:3, j = 5, bg = "lightgreen")
+
+
+```
+
+]
+
+
+
+
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_rightjoin", params$lang])`  
+
+.pull-left[
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_rightjoin_1", params$lang])`  
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_rightjoin_2", params$lang])`  
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_rightjoin_3", params$lang])`  
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_rightjoin_4", params$lang])`  
+
+]
+
+
+.pull-right[
+
+```{r eval = TRUE, echo=FALSE, out.width = '100%'}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "right-join.gif")))
+```
+
+
+]
+
+
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_rightjoin", params$lang])`
+
+.pull-left[
+
+```{r include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "body",   i = 4:5, j = 1:4, bg = "red")
+
+```
+
+
+]
+
+
+
+.pull-right[
+
+```{r include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable()
+```
+
+]
+
+
+
+.pull-left[
+
+
+```{r echo = TRUE, eval=FALSE, include=TRUE}
+right_join(patients, hosp,      
+  by = c(
+    "case_id" = "id_patient")) 
+```
+
+]
+
+
+
+.pull-right[
+
+```{r include=TRUE, echo=FALSE, eval=TRUE, out.width = '80%'}
+right_join(patients, 
+          hosp, 
+     by = c("case_id" = "id_patient")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = 1:4, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = 4, j = 1, bg = "lightgreen")
+
+
+```
+
+]
+
+
+
+???
+Not used very often. 
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_fulljoin", params$lang])`
+
+.pull-left[
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_fulljoin_1", params$lang])`  
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_fulljoin_2", params$lang])`  
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_fulljoin_3", params$lang])`  
+
+]
+
+.pull-right[
+
+```{r eval = TRUE, echo=FALSE, out.width = '100%'}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "full-join.gif")))
+```
+
+]
+
+
+.footnote[`r paste0(mod7_1[mod7_1$uid == "mod7_1_fn_fulljoin", params$lang])`]
+
+
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_fulljoin", params$lang])`
+
+.pull-left[
+
+```{r include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable()
+```
+
+
+]
+
+
+
+.pull-right[
+
+```{r include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable()
+```
+
+]
+
+
+
+.pull-left[
+
+
+```{r echo = TRUE, eval=FALSE, include=TRUE}
+full_join(patients, hosp,       
+  by = c(
+    "case_id" = "id_patient")) 
+```
+
+]
+
+
+
+.pull-right[
+
+```{r include=TRUE, echo=FALSE, eval=TRUE, out.width = '80%'}
+full_join(patients, 
+          hosp, 
+     by = c("case_id" = "id_patient")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = c(1:3, 6), j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = 6, j = 1, bg = "lightgreen")
+
+
+```
+
+]
+
+
+
+???
+Now is a good time to insist on how consistent the arguments of the join function family are: you always write them the same way
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_innerjoin", params$lang])` 
+
+.pull-left[
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_innerjoin_1", params$lang])`  
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_innerjoin_2", params$lang])`  
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_innerjoin_3", params$lang])`
+
+]
+
+.pull-right[
+
+```{r eval = TRUE, echo=FALSE, out.width = '100%'}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "inner-join.gif")))
+```
+
+]
+
+.footnote[`r paste0(mod7_1[mod7_1$uid == "mod7_1_fn_innerjoin", params$lang])`]
+
+???
+Well, the bullet points all sort of say the same thing, but I think it is good to make sure that everyone uderstand what it means to take the _intersection_.
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_innerjoin", params$lang])` 
+
+
+.pull-left[
+
+```{r include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "body",   i = 4:5, j = 1:4, bg = "red")
+
+```
+
+
+]
+
+
+
+.pull-right[
+
+```{r include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "body",   i = 4, j = 1:2, bg = "red")
+
+```
+
+]
+
+
+
+.pull-left[
+
+
+```{r echo = TRUE, eval=FALSE, include=TRUE}
+inner_join(patients, hosp,       
+  by = c(
+    "case_id" = "id_patient")) 
+```
+
+]
+
+
+
+.pull-right[
+
+```{r include=TRUE, echo=FALSE, eval=TRUE, out.width = '80%'}
+inner_join(patients, 
+          hosp, 
+     by = c("case_id" = "id_patient")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = c(1:3), j = 5, bg = "lightgreen") 
+
+```
+
+]
+
+
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_tips", params$lang])`
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_tips_1", params$lang])`  
+```{r echo = TRUE, eval=FALSE, include=TRUE}
+patients %>%               
+     left_join(hosp, by = c("case_id" = "id_patient")) %>%  #<<
+     filter(age > 25)
+```
+
+--
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_tips_2", params$lang])`  
+```{r echo = TRUE, eval=FALSE, include=TRUE}
+left_join(patients, hosp,       
+           by = "case_id")   #<<
+```
+
+--
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_tips_3", params$lang])`
+```{r echo = TRUE, eval=FALSE, include=TRUE}
+left_join(dataframe1, dataframe2,       
+           by = c("name" = "first_name",  
+                  "age",       #<<
+                  "gender"))   #<<
+```
+
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_filterjoin", params$lang])`
+
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_filterjoin_1", params$lang])` 
+* `r paste0(mod7_1[mod7_1$uid == "mod7_1_bu_filterjoin_2", params$lang])`  
+
+.pull-left[
+
+#### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h4_antijoin", params$lang])`
+
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_antijoin_1", params$lang])`  
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_antijoin_2", params$lang])`
+
+```{r eval = TRUE, echo=FALSE, out.width = '50%'}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "anti-join.gif")))
+```
+
+]
+
+.pull-right[
+
+#### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h4_semioin", params$lang])`
+
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_semioin_1", params$lang])`   
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_semioin_2", params$lang])`
+
+```{r eval = TRUE, echo=FALSE, out.width = '50%'}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "semi-join.gif")))
+```
+]
+
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_filterjoin", params$lang])`
+
+???
+Anti joins are very useful for seeing which rows in a dataset do *not* match
+
+
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_challenges", params$lang])`  
+
+
+
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_overlap", params$lang])`
+
+```{r eval = TRUE, echo=FALSE}
+df1 <- tibble(ID = c("id_1", "id_2", "id_3", "id_4"), sexe = c("F", "M", "M", "F"))
+df2 <- tibble(ID = c("id_1", "id_2", "id_5"), age = c(5, 5, 7), sexe = c("F", "F", "F"))
+```
+
+.pull-left[
+```{r eval = TRUE, echo=FALSE}
+patients %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1:5, j = 2, bg = "orange") %>% 
+     bg(part = "header", i = 1, j = 2, bg = "orange")
+
+```
+]
+
+.pull-right[
+```{r eval = TRUE, echo=FALSE}
+hosp %>%
+     mutate(age = c(2, 3, 56, 40)) %>% 
+     qflextable() %>% 
+     bg(part = "body", i = c(1:4), j = 3, bg = "orange") %>% 
+     bg(part = "header", i = 1, j = 3, bg = "orange") 
+
+```
+]
+
+.pull-left[
+
+```{r eval=FALSE, echo=TRUE}
+left_join(patients, hosp,
+  by = c(
+   "case_id" = "id_patient"))
+```
+
+]
+
+.pull-right[
+
+```{r eval=TRUE, echo=FALSE}
+left_join(patients,
+          hosp %>% mutate(age = c(2, 3, 56, 40)),
+  by = c("case_id" = "id_patient")) %>% 
+  qflextable() %>% 
+  bg(part = "header", i = 1, j = 2, bg = "orange") %>% 
+  bg(part = "header", i = 1, j = 6, bg = "orange") 
+```
+
+]
+
+???
+If columns are in common, R will change their name to disambiguate them.
+- If you are sure both columns contain the same information, remove them from one of the dataframe before the join
+- If you are unsure, you can compare them easily after the join.
+Mention orally that there is a "suffix" argument and you can give it a vector to rename instead of .x and .y
+
+
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_overlap", params$lang])`
+
+.pull-left[
+```{r eval = TRUE, echo=FALSE}
+patients %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1:5, j = 2, bg = "orange") %>% 
+     bg(part = "header", i = 1, j = 2, bg = "orange")
+
+```
+]
+
+.pull-right[
+```{r eval = TRUE, echo=FALSE}
+hosp %>%
+     mutate(age = c(2, 3, 56, 40)) %>% 
+     qflextable() %>% 
+     bg(part = "body", i = c(1:4), j = 3, bg = "orange") %>% 
+     bg(part = "header", i = 1, j = 3, bg = "orange") 
+
+```
+]
+
+.pull-left[
+
+```{r eval=FALSE, echo=TRUE}
+left_join(patients, hosp,
+  by = c(
+   "case_id" = "id_patient",
+   "age"))    #<<
+```
+
+]
+
+.pull-right[
+
+```{r eval=TRUE, echo=FALSE}
+left_join(patients,
+          hosp %>% mutate(age = c(2, 3, 56, 40)),
+  by = c("case_id" = "id_patient", "age")) %>% 
+  qflextable() %>% 
+  bg(part = "header", i = 1, j = 2, bg = "orange")
+```
+
+]
+
+???
+If columns are in common, R will change their name to disambiguate them.
+- If you are sure both columns contain the same information, remove them from one of the dataframe before the join
+- If you are unsure, you can compare them easily after the join.
+Mention orally that there is a "suffix" argument and you can give it a vector to rename instead of .x and .y
+
+
+
+---
+
+### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h3_one", params$lang])`
+.pull-left[
+```{r eval = TRUE, echo=FALSE}
+patients %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1, j = 1:4, bg = "orange")
+```
+]
+.pull-right[
+```{r eval = TRUE, echo=FALSE}
+
+hosp_dup <- tribble(
+     ~id_patient, ~outcome,
+      "5fe599", "Died",
+      "5fe599", "Alive",
+      "8689b7", "Recovered",
+      "11f8ea", "Recovered",
+      "ebd24z", "Died")
+
+hosp_dup %>%
+    qflextable() %>% 
+     bg(part = "body", i = 1:2, j = 1:2, bg = "orange")
+```
+]
+.pull-left[
+```{r eval=FALSE, echo=TRUE}
+left_join(patients, hosp,
+  by = c(
+   "case_id" = "id_patient"))
+```
+
+]
+.pull-right[
+```{r eval=TRUE, echo=FALSE}
+left_join(patients,
+          hosp_dup,
+  by = c("case_id" = "id_patient")) %>% 
+  qflextable() %>% 
+  bg(part = "body", i = 1:2, j = 1:5, bg = "orange")
+```
+]
+
+
+
+
+
+
+
+
+
+---
+
+### `r paste0(mod7_1[mod7_1$uid == "mod7_1_h3_many", params$lang])`  
+.pull-left[
+```{r eval = TRUE, echo=FALSE}
+
+patients_dup <- tribble(
+     ~case_id, ~age, ~age_unit, ~gender,
+     "5fe599", 2, "years", "m",
+     "5fe599", 2, "years", "m",
+     "8689b7", 3, "years", "f",
+     "11f8ea", 56, "years", "m",
+     "b8812a", 18, "years", "f",
+     "893f25", 3, "years", "m")
+
+
+patients_dup %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1:2, j = 1:4, bg = "orange")
+```
+]
+.pull-right[
+```{r eval = TRUE, echo=FALSE}
+
+hosp %>%
+    qflextable() %>% 
+     bg(part = "body", i = 1, j = 1:2, bg = "orange")
+```
+]
+.pull-left[
+
+```{r eval=FALSE, echo=TRUE}
+left_join(patients, hosp,
+  by = c(
+   "case_id" = "id_patient"))
+```
+
+]
+.pull-right[
+```{r eval=TRUE, echo=FALSE}
+left_join(patients_dup,
+          hosp,
+  by = c("case_id" = "id_patient")) %>% 
+  qflextable() %>% 
+  bg(part = "body", i = 1:2, j = 1:5, bg = "orange")
+```
+
+]
+
+
+
+
+
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_practices", params$lang])`
+
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_practices_1", params$lang])`  
+
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_practices_2", params$lang])`
+```{r eval = FALSE, echo=TRUE}
+anti_join(hosp, patients, by = c("id_patient" = "case_id"))
+```
+
+```{r eval = TRUE, echo=FALSE}
+anti_join(hosp, patients, by = c("id_patient" = "case_id")) %>% 
+     qflextable()
+```
+
+---
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_practices", params$lang])`  
+
+`r paste0(mod7_1[mod7_1$uid == "mod7_1_tx_practices_3", params$lang])`
+
+```{r eval = TRUE, echo=TRUE}
+nrow(patients)
+```
+
+```{r eval = TRUE, echo=TRUE}
+nrow(hosp)
+```
+
+
+```{r eval = TRUE, echo=TRUE}
+left_join(patients, hosp, by = c("case_id" = "id_patient")) %>%
+  nrow()
+```
+
+
+???
+Another good check is to use the `count()` function to count the number of rows for each of your identifier.
+
+
+
+
+---
+class: inverse, center, middle  
+
+# `r paste0(mod7_1[mod7_1$uid == "mod7_1_h1_exercise", params$lang])`
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "window.png")))
+```
+
+
+
+
+

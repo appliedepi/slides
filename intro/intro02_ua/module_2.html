@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to R for Applied Epidemiology</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="2022" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle, inverse, title-slide
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+
+# Вступ до R для прикладної епідеміології
+
+### Імпорт даних, управління проектами та впорядковані дані
+
+contact@appliedepi.org
+
+---
+# Повтор попередньої сесії   
+
+???
+If 5-day course, pause here and give demo of the initial setup and tutorials.  
+
+
+---
+# Цілі та розклад  
+
+**У цьому модулі ми прагнемо допомогти вам:**  
+* Дізнатися про простий спосіб організації файлів у проекті RStudio   
+* Дізнатися як легко імпортувати дані за допомогою {rio} і {here}  
+* Імпорт і перегляд даних у R  
+* Принципи впорядкованих даних та поради щодо правильного формату даних  
+
+
+
+
+
+&lt;template id="37be1042-16e9-49b2-a0fd-71d9f0ccbc91"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-5381473c{}.cl-53761d58{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-537aa2b0{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-537ab7d2{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab7dc{width:0.877in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab7dd{width:4.797in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab7e6{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab7f0{width:0.877in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab7f1{width:4.797in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab7fa{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab7fb{width:0.877in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab804{width:4.797in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab805{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab80e{width:0.877in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab80f{width:4.797in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab818{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab819{width:0.877in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab822{width:4.797in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab823{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab82c{width:0.877in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab836{width:4.797in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab840{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab841{width:0.877in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-537ab84a{width:4.797in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-5381473c'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-537ab7d2"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-537ab7dc"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-537ab7dd"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-537ab7e6"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;15 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-537ab7f0"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Головна&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-537ab7f1"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Повторення попередньої сесії&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-537ab7fa"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;15 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-537ab7fb"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Головна&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-537ab804"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Огляд проектів RStudio, імпорту даних та впорядкованих даних&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-537ab805"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;15 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-537ab80e"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Головна&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-537ab80f"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Демо&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-537ab818"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;2 години&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-537ab819"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Вправа&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-537ab822"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Файли, проекти, імпорт, перегляд і формати даних&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-537ab823"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;20 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-537ab82c"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Головна&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-537ab836"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Загальне обговорення&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-537ab840"&gt;&lt;p class="cl-537aa2b0"&gt;&lt;span class="cl-53761d58"&gt;Робіть перерви на власний розсуд під час виконання вправи&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="9a57ceff-8014-4c62-85cd-0800ff0eb26d"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("9a57ceff-8014-4c62-85cd-0800ff0eb26d");
+var template = document.getElementById("37be1042-16e9-49b2-a0fd-71d9f0ccbc91");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+
+???
+Note stretch breaks throughout.
+
+
+
+---
+# Управління файлами  
+
+R - це не тільки кодування, ви також повинні знати, як організувати свої файли.  
+
+У минулому користувачі R часто засмучувалися через неможливість імпортувати свої дані в R.  
+--
+
+За останні 3-5 років кілька вдосконалень полегшили цей процес:  
+
+* **Пакет {rio}** для імпорту даних  
+* **"Проекти RStudio "** для зберігання файлів  
+* **Пакет {here}** для шляхів до файлів  
+
+Знання деталей того, як вони працюють, не так важливо.  
+Але знайте, що спільне використання цих трьох інструментів дозволяє уникнути великого головного болю.  
+
+
+
+
+---
+# Імпорт даних за допомогою {rio}  
+
+Імпорт даних в R **раньше був** складним  
+
+потрібно було запам'ятовувати по одній функції для кожного типу файлів: `read.csv()`, `read_excel()`, `read_xlsx()`...  
+
+--
+
+Пакет {rio} спрощує це завдання за допомогою всього однієї функції: **`import()`**.  
+
+```{eval=F}
+import("surveillance_linelist_20141201.csv")
+```
+
+.pull-left[
+rio - це скорочення від  
+R inputs/outputs  
+]
+
+.pull-right[
+
+&lt;img src="../../../images/functions_packages/rio.png" width="50%" /&gt;
+]
+
+
+
+---
+# Шляхи до файлів  
+
+.pull-left[
+
+Шляхи до файлів вказують R, де шукати файл.  
+
+]
+
+.pull-right[
+
+* 📁 C:Users  
+  * 📂 Laura  
+      * 📂 Documents  
+          * 📂 intro_course  
+               * 📄 **linelist.csv**
+               * 📃 **analysis.R**
+
+
+]
+
+Цей шлях говорить, що потрібно почати з C: і перейти до папок "Users", "Laura", "Documents"...  
+
+
+```r
+import("C:\Users\Laura\Documents\intro_course\data\clean\linelist.csv")
+```
+
+--
+Але чи буде цей "абсолютний" шлях до файлу працювати на *вашому* комп'ютері? Швидше за все, ні, тому що у вас немає папки "Laura".  
+
+--
+
+Проекти RStudio дозволяють переносити аналізи з одного комп'ютера на інший.  
+
+
+
+---
+# Проекти RStudio  
+
+
+
+.pull-left[
+
+Проект RStudio - це автономне і портативне робоче середовище R.  
+
+Це папка з усіма файлами, пов'язаними з конкретним проєктом:  
+* Файли даних  
+* R скрипти  
+* Вихідні дані  
+* тощо.
+
+Це значно полегшує ваше життя.  
+
+Проєкт представлений файлом .Rproj у папці.  
+
+]
+
+.pull-right[
+&lt;img src="../../../images/functions_packages/project_briefcase.png" width="85%" /&gt;
+
+]
+
+???
+We will help 
+You can zip the folder and share it with a colleague, it can be hosted on a shared drive, and can be synced with a Github repository.  
+
+
+
+---
+# Проекти RStudio  
+
+.pull-left[
+
+При використанні проектів R шлях до файлів *до* папки проекту R є гнучким.  
+
+]
+
+.pull-right[
+
+* 📂 intro_course (R project folder)  
+     * intro_course.Rproj  
+     * 📜 **linelist.csv**
+     * 📄 **my_analysis.R**
+]
+
+--
+
+Команда **`import("linelist.csv")`**, яка використовується в проєкті R...  
+
+...створює цей шлях до файлу на комп'ютері Лаури:  
+
+`"C:\Users\Laura\Documents\`**intro_course\linelist.csv"**  
+
+--
+
+...і робить *це* на комп'ютері Mac Раджіва:  
+
+`"home/Rajiv/docs/`**intro_course/linelist.csv"**  
+
+
+
+
+
+
+---
+# {here}  
+
+.pull-left[
+
+Якщо ваш скрипт і дані знаходяться в різних підпапках, це може спричинити проблеми.  
+
+Наприклад, якщо ви перемістите свій скрипт, шлях до файлів із даними може порушитися.  
+
+
+]
+
+.pull-right[
+
+* 📁 intro_course (R project folder)  
+     * intro_course.Rproj  
+     * .here  
+     * 📁 scripts
+          * 📝 **my_analysis.R**
+     * 📁 data  
+          * 📂 clean  
+               * 📃 **linelist.csv**
+
+
+]
+
+--
+
+При використанні {here} шляхи до файлів завжди починаються від **кореневої (верхньої) папки проекту** ("відносний").  
+**При запуску з будь-якого** місця в проєкті R, за цим шляхом буде знайдено linelist.csv  
+
+**`here("data", "clean", "linelist.csv")`**.  
+`"C:\Users\Laura\Documents\`**intro_course\data\clean\linelist.csv"** 
+`"home/Rajiv/docs/`**intro_course/data/clean/linelist.csv"**  
+
+
+
+---
+# Проекти, {here}, і {rio} разом  
+
+
+```r
+import(here("data", "clean", "linelist.csv"))
+```
+
+.pull-left[
+
+Нарешті, комбінуючи `import()` та `here()` у проєкті RStudio, ми створюємо команду, яка справді універсальна.  
+
+]
+
+
+.pull-right[
+
+* 📂 intro_course (R project folder)  
+     * intro_course.Rproj  
+     * .here  
+     * 📂 scripts
+          * 📃 **my_analysis.R**
+     * 📂 data  
+          * 📂 clean  
+               * 📜 **linelist.csv**
+
+
+]
+
+
+.footnote[
+Див. розділ [EpiRHandbook про цей пакет](https://epirhandbook.com/import-and-export.html?q=here#here) і розділ [EpiRHandbook про імпорт даних](https://epirhandbook.com/en/import-and-export.html).  
+]
+
+---
+# Огляд вашого набору даних  
+
+Після імпорту в R, на що ви звертаєте увагу під час початкового перегляду даних?  
+
+
+---
+
+# Імпортування демо-версії  
+
+
+---
+class: inverse, center, middle
+
+## Упорядковані дані  
+
+&lt;img src="../../../images/data_cleaning/tidy_shelves.png" width="85%" /&gt;
+
+
+
+---
+# Упорядковані дані  
+
+Чисті дані також мають бути "впорядкованими". Нижче наведено 3 основні принципи "впорядкованих даних":  
+
+--
+
+1. Кожне **значення** повинно мати свою **комірку**.  
+
+--
+
+2. Кожна **змінна** повинна мати свій **стовпчик**.  
+
+--
+
+3. Кожне **спостереження** повинно мати свій власний **рядок**.  
+
+
+
+
+.footnote[Джерело : [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)  
+]
+
+???
+
+
+
+
+---
+# Значення у власній комірці  
+
+
+
+.pull-left[
+
+**Хаотичні:** Які зміни зробили б цей набір даних більш упорядкованим?  
+
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; case &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; age &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Case 1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 31, years &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Case 2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 24, years &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Case 3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 18, months &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Case 4 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 33, years &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+--
+
+.pull-right[
+
+**Упорядковані:** Вік та одиниця віку розділені на окремі комірки  
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; case &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; age_unit &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Case 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 31 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; years &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Case 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; years &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Case 3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; months &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Case 4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 33 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; years &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+
+???
+Let's start with an easy one...  
+
+
+
+
+---
+
+# Термінологія  
+
+Структурно "датафрейми" в R складаються з **стовпців** і **рядків**.  
+
+--
+
+**"Змінні "** і **"спостереження "** є більш *абстрактними* поняттями:  
+
+* **Змінні** вимірюють один *основний атрибут* (вік, результат або дату появи симптомів).  
+* **Спостереження** належать до *одиниці аналізу*.  
+
+--
+
+В ідеалі вони зіставлені: **стовпці = змінні** і **рядки = спостереження**.  
+
+&lt;img src="../../../images/data_cleaning/tidy_image_ua.png" width="731" height="65%" /&gt;
+
+.footnote[Джерело зображення: [R for Data Science](https://r4ds.had.co.nz/tidy-data.html)]
+
+
+
+
+
+---
+# Але це не завжди зрозуміло...  
+
+.pull-left[
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; January &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; February &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; March &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Mozambique &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3200 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3300 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Lesotho &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 750 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 900 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; South Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6200 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8100 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+* Чи є "January" змінною?  
+* Де знаходиться змінна "month"?  
+* Чи є в неї свій стовпець?  
+* Чи є кожне спостереження рядком?  
+
+
+]
+
+--
+
+.pull-right[
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; month &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; cases &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Mozambique &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; January &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3200 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Mozambique &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; February &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3300 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Mozambique &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; March &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Lesotho &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; January &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Lesotho &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; February &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 750 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Lesotho &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; March &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 900 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; South Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; January &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; South Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; February &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6200 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; South Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; March &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8100 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+
+
+
+---
+class: inverse, center, middle
+
+
+## Вправа  
+
+
+&lt;img src="../../../images/breakout/teamwork2.png" width="50%" /&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

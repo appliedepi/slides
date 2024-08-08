@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to R for Applied Epidemiology</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle, inverse, title-slide
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+
+
+&lt;style type="text/css"&gt;
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+&lt;/style&gt;
+
+# Вступ до R для прикладної епідеміології
+
+### Вступ до візуалізації даних за допомогою {ggplot2}
+
+contact@appliedepi.org
+---
+
+# Цілі та розклад
+
+**У цьому модулі ми постараємося допомогти вам:**
+* Зрозуміти {ggplot2} "Граматику графіки"
+* Навчитися будувати прості коробкові/стовпчикові діаграми, діаграми розсіювання й гістограми
+* Налаштувати шкали, теми й підписи графіків
+
+&lt;template id="e7dfb5d2-cb7e-42bb-a495-1bbad5342eb7"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-64763d26{}.cl-646aa394{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-646f7e3c{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-646f9494{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f949e{width:1.166in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94a8{width:3in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94b2{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94b3{width:1.166in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94bc{width:3in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94bd{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94c6{width:1.166in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94d0{width:3in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94da{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94db{width:1.166in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94e4{width:3in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94e5{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94ee{width:1.166in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94ef{width:3in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94f0{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94f8{width:1.166in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f94f9{width:3in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f9502{width:0.999in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f950c{width:1.166in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-646f950d{width:3in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-64763d26'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-646f9494"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Time&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f949e"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Location&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94a8"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Topic&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-646f94b2"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;15 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94b3"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Головна&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94bc"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;ggplot2 Синтаксис 'Граматики графіки'&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-646f94bd"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;20 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94c6"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Головна&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94d0"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Демонстрація&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-646f94bd"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;45 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94c6"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Сесійні зали&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94d0"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Вправа: прості графіки&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-646f94da"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;45 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94db"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Головна&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94e4"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Масштаб, теми й підписи&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-646f94e5"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;45 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94ee"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Сесійні зали&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94ef"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Детальне налаштування графіків&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-646f94f0"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;20 хвилин&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94f8"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Головна&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-646f94f9"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Загальне обговорення&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-646f9502"&gt;&lt;p class="cl-646f7e3c"&gt;&lt;span class="cl-646aa394"&gt;Перерви включені вище, але не показані як рядки&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="bb9c2ed2-f9e9-4126-9586-f759909e7c6d"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("bb9c2ed2-f9e9-4126-9586-f759909e7c6d");
+var template = document.getElementById("e7dfb5d2-cb7e-42bb-a495-1bbad5342eb7");
+var caption = template.content.querySelector("caption");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+
+
+
+
+---
+class: inverse, center, middle
+
+## Візуалізація даних за допомогою {ggplot2}
+
+
+&lt;img src="../../../images/ggplot_intro/ggplot2_hex.png" width="50%" /&gt;
+
+
+
+
+---
+# Варіанти візуалізації в R
+
+Сьогодні ми зосередимося на {ggplot2}, бо він:
+
+* добре підходить для швидкого дослідження багатовимірних даних
+* дає дуже **високу якість** кінцевих результатів
+* має добре структуровану граматику =&gt; **висока узгодженість**
+* має багато пакетів, що розширюють функціональність
+
+Для натхнення подивіться [R graph gallery](https://www.r-graph-gallery.com/ggplot2-package.html).
+
+.footnote[Інші варіанти побудови графіків охоплюють [**base** R](https://towardsdatascience.com/base-plotting-in-r-eb365da06b22), [**lattice**](https://www.statmethods.net/advgraphs/trellis.html) і [**plotly**](https://plotly.com/r/).
+]  
+
+
+
+
+
+---
+# Чи це було зроблено за допомогою ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/clustering.png" width="100%" /&gt;
+
+
+
+---
+# Чи це було зроблено за допомогою ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/dumbbell_chart.png" width="50%" /&gt;
+
+
+
+---
+# Чи це було зроблено за допомогою ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/map.png" width="50%" /&gt;
+
+
+
+---
+# Чи це було зроблено за допомогою ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/bike_london.png" width="100%" /&gt;
+
+
+
+---
+# Чи це було зроблено за допомогою ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/swiss_map.png" width="90%" /&gt;
+
+
+
+---
+# Чи це було зроблено за допомогою ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/phylo_tree.png" width="60%" /&gt;
+
+
+
+---
+# Чи це було зроблено за допомогою ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/uk_geography.jpg" width="100%" /&gt;
+
+
+---
+# Чи це було зроблено за допомогою ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/art_ggplot.png" width="50%" /&gt;
+
+
+
+---
+# Чи це було зроблено за допомогою ggplot?
+
+
+&lt;img src="../../../images/ggplot_intro/van_gogh.jpg" width="80%" /&gt;
+
+
+
+
+---
+# gg-що???
+
+--
+
+- *пакет* {ggplot2} є найпопулярнішим інструментом візуалізації даних в R
+
+--
+
+- Його *функція* `ggplot()` лежить в основі пакета
+
+--
+
+- Весь цей підхід відомий як "ggplotting".
+
+--
+
+- Отримані в підсумку рисунки іноді лагідно називають "ggplots".
+
+--
+
+**ggplot2** використовує широкий спектр додаткових пакетів R, що розширюють його функціональність: {gganimate}, {ggthemr}, {ggdendro}, {gghighlight}, {ggforce}...
+
+.footnote[
+*Бонусне питання:* Що означає "gg" в цих іменах?
+]
+
+???
+- "gg" represents the “grammar of graphics” used to construct the figures 
+
+
+
+
+
+---
+# Граматика графіки
+
+Побудова об’єкта графіка шляхом "додавання" одна на одну команд, що задають шари графіка й елементи дизайну
+
+
+--
+
+Порядок шарів зазвичай такий:
+
+1) **"Відкрийте" графік** за допомогою команди `ggplot()` і вкажіть дані
+
+--
+
+2) **"Призначте" стовпці даних** за "естетичними" характеристиками графіка, такими як осі, колір, розмір, форма, заповнення, прозорість
+
+--
+
+3) **Додайте (`+`) шари "geom"**, які візуалізують дані геометрично у вигляді фігур
+
+--
+
+4) **Модифікуйте "шкали"**, наприклад колірну шкалу або розриви осі y.
+
+--
+
+5) **Додайте до графіка "тематичні" елементи дизайну**: підписи до осей, заголовок, шрифти, розміри тексту, теми фону або поворот осей.
+
+--
+
+Ці шари послідовно "додаються" за допомогою символів **`+`**.
+Команди {ggplot2} можуть бути дуже довгими!
+
+
+???
+Remember that although the commands may be long, it is infinitely easier to edit and recycle than in Excel  
+
+
+
+
+
+
+
+---
+# Відкрийте графік
+
+.pull-left[
+
+
+```r
+ggplot()                   
+```
+
+Функція `ggplot()` створює порожній робочий простір.
+
+
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-17-1.png" width="504" /&gt;
+] 
+
+???
+This is only a blank canvas, we have not defined what should be in the x and y axes. 
+If several data frames are needed, they can be added in their own geoms.
+Piping is useful to make one-time changes to a dataset prior to plotting.  
+
+
+
+---
+# Додайте дані
+
+.pull-left[
+
+
+```r
+ggplot(data = surv)                   
+```
+
+Визначте таблицю для використання.
+
+Як альтернативу використовуйте оператор каналу `%&gt;%` для "передавання" таблиці *в `ggplot()`.
+
+
+```r
+surv %&gt;%
+  ggplot()
+```
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-20-1.png" width="504" /&gt;
+] 
+
+???
+This is only a blank canvas, we have not defined what should be in the x and y axes. 
+If several data frames are needed, they can be added in their own geoms.
+Piping is useful to make one-time changes to a dataset prior to plotting.  
+
+
+
+
+---
+# Додайте дані
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv)                   
+```
+
+Нові рядки й відступи не впливають на виконання коду.
+
+Вони можуть полегшити читання довгих команд...
+
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-22-1.png" width="504" /&gt;
+] 
+
+???
+This is only a blank canvas, we have not defined what should be in the x and y axes. 
+If several data frames are needed, they can be added in their own geoms.
+Piping is useful to make one-time changes to a dataset prior to plotting.  
+
+
+
+---
+# Призначення за допомогою `aes()`.
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+* mapping = aes())
+```
+
+"Естетика" графіка — це такі характеристики, як положення, колір, форма...
+
+`mapping = aes()` призначає "естетику" для стовпців даних.
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-24-1.png" width="504" /&gt;
+] 
+
+???
+ggplot commands tend to get very vertical (long)  
+
+
+
+
+
+---
+# Призначення за допомогою `aes()`.
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(        
+*  x = age_years
+   ))               
+```
+
+Естетичні призначення поміщають в `aes()`.
+
+Два основні призначення — осі до стовпців через:
+`x = `   
+
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-26-1.png" width="504" /&gt;
+] 
+
+???
+ggplot commands tend to get very vertical (long)  
+
+
+
+
+---
+# Призначення за допомогою `aes()`.
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(        
+*  x = age_years,
+*  y = ht_cm))
+```
+
+Естетичні призначення поміщають в `aes()`.
+
+Два основні призначення — осі до стовпців через:
+`x = ` и `y = `
+
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-28-1.png" width="504" /&gt;
+] 
+
+???
+ggplot commands tend to get very vertical (long)  
+
+
+
+
+
+---
+# Додайте геометрію
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm)) +
+*geom_point()
+```
+
+Дані візуалізуються за допомогою команд "geom", таких як `geom_point()`.
+
+Ці команди "додаються"
+за допомогою **`+`** до команди `ggplot()`.
+
+]
+
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-30-1.png" width="504" /&gt;
+
+]
+
+
+
+
+---
+# Геометрії
+
+.pull-left[
+
+Класичні "геоми" включають:
+
+Геометрію   |Геом
+------------------------------------------------------------------------|--------------------------------------------------------------------
+Гістограми|`geom_histogram()`  
+Крапки|`geom_point()`
+
+.footnote[Повний список [тут] (https://ggplot2.tidyverse.org/reference/)
+]  
+
+]
+
+
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-31-1.png" width="504" /&gt;
+
+]
+
+
+
+
+
+---
+# Геометрії
+
+.pull-left[
+
+Класичні "геоми" включають:
+
+Геометрію   |Геом
+------------------------------------------------------------------------|--------------------------------------------------------------------
+Лінії|`geom_lines()`  
+Стовпчикові діаграми|`geom_bar()` or `geom_col()`  
+
+.footnote[Повний список [тут] (https://ggplot2.tidyverse.org/reference/)]
+
+]
+
+
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-32-1.png" width="504" /&gt;
+
+]
+
+
+
+---
+# Геометрії
+
+.pull-left[
+
+Класичні "геоми" включають:
+
+Геометрію   |Геом
+------------------------------------------------------------------------|--------------------------------------------------------------------
+Коробчасті діаграми|`geom_boxplot()`  
+Скрипкові діаграми|`geom_violin())` 
+
+
+.footnote[Повний список [тут] (https://ggplot2.tidyverse.org/reference/)]
+
+]
+
+
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-33-1.png" width="504" /&gt;
+
+]
+
+
+
+
+
+
+
+
+---
+# Додавання геомів
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm)) +
+*geom_point()
+```
+
+Тепер, коли осі призначено, `geom_point()` відображає дані як крапки.
+
+]
+
+.pull-right[
+
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-35-1.png" width="504" /&gt;
+
+] 
+
+
+
+
+
+
+---
+# Додавання геомів
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+   x = age_years,
+   y = ht_cm)) +
+geom_point() +
+*geom_smooth()
+```
+
+Ми можемо додати ще геомів до поточного графіка за допомогою `+`.
+
+*Геоми з’являються в порядку їх написання: згладжена лінія з’являється над крапками.
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-37-1.png" width="504" /&gt;
+] 
+
+.footnote[`geom_smooth()` видає згладжені умовні середні, допомагаючи показати тренди при накладанні "графіків" (див. [документацію] (https://ggplot2.tidyverse.org/reference/geom_smooth.html)).]
+
+
+???
+- Explain why you might use one or the other
+
+
+
+
+
+
+---
+# Зауваження щодо відступів
+
+Відступи, пробіли та нові рядки не впливають на виконання коду й можуть бути змінені для поліпшення читабельності.
+
+
+```r
+ggplot(data = surv, mapping = aes(x = age_years, y = ht_cm))+geom_point()
+```
+
+--
+
+це те саме, що:
+
+
+```r
+ggplot(data = surv,
+       mapping = aes(x = age_yers, y = ht_cm)) +
+geom_point()
+```
+
+--
+
+це те саме, що:
+
+
+
+
+
+
+
+
+
+
+
+```r
+ggplot(
+  data = surv,        # use case linelist
+  mapping = aes(      # make aesthetic mappings for all geoms
+    x = age_years,    # assign x-axis to age column
+    y = ht_cm)) +     # assign y-axis to height
+geom_point()          # display data as points
+```
+
+
+???
+- Which of the above is easier to read for you?
+- Explain why you might use one or the other 
+long style can enable informative comments/annotations
+- short style very dense (harder to read for some). Shorter scripts, but so what? The number of lines of your code is not an informative metric.
+- very long lines =&gt; needs to scroll horizontally for people with smaller monitors (not nice)
+- long-ish style makes it easier to see which argument belongs to each function
+- spaces around "=" or "+" =&gt; make it easier to parse to many people
+- other?
+
+
+
+
+
+
+
+
+---
+
+class: large-table
+
+# Інша естетика
+
+Крім осей, до інших поширених "естетичних" елементів належать:
+
+Аргумент|Контролі
+-------------------------------------------------------------------|--------------------------------------------------------------------
+`shape`      |Відображення точки у вигляді крапки, зірки, трикутника, квадрата...
+`fill`       |*Внутрішній* колір (наприклад, стовпчика або коробкового графіка)
+`color`      |*Зовнішній* колір стовпчика, коробкового графіка АБО колір точки
+`size`       |Товщина лінії, розмір точки...
+`alpha`      |Прозорість: від 0 (невидимий) до 1 (непрозорий)
+`width`      |Ширина стовпців "стовпчастої діаграми"
+`linetype`   |Суцільні, пунктирні, точкові тощо
+`binwidth`   |Ширина кошиків гістограми
+  
+
+
+???
+
+Note that “aesthetic” in ggplot has a specific meaning that you might associate with the word “aesthetics” in common English. In ggplot those details are called “themes” and are adjusted within a theme() command
+
+Each geom accepts certain aesthetics, like `binwidth=` for `geom_histogram()`
+
+
+
+---
+
+class: medium-text
+
+# Призначення естетики
+
+
+.pull-left[
+
+Естетика може бути присвоєна до будь-чого:
+
+* **Статичні значення**: `color = "purple"`.
+  - Присвоюється *поза* `aes()`.
+  - Однакове відображення для всіх даних
+
+&lt;/br&gt;
+&lt;/br&gt;
+&lt;/br&gt;
+&lt;/br&gt;
+
+
+]
+
+
+.pull-right[
+
+Деякі приклади:
+
+
+
+
+
+
+
+
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-49-1.png" width="504" /&gt;
+]
+
+
+
+---
+
+class: medium-text
+
+# Призначення естетики
+
+
+.pull-left[
+
+Естетика може бути присвоєна до будь-чого:
+
+* **Статичні значення**: `color = "purple"`.
+  - Присвоюється *поза* `aes()`.
+  - Однакове відображення для всіх даних
+
+&lt;/br&gt;
+&lt;/br&gt;
+&lt;/br&gt;
+&lt;/br&gt;
+
+* **Стовпець даних**: `aes(color = hospital)`
+  - Присвоюється *всередині* `aes()`.
+  - Відображає дані як "групи"
+  
+
+]
+
+
+.pull-right[
+
+Деякі приклади:
+
+
+
+
+
+
+
+
+
+
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-54-1.png" width="504" /&gt;
+
+]
+
+
+
+
+
+---
+
+class: medium-text
+
+# Призначення естетики
+
+
+.pull-left[
+
+Естетика може бути присвоєна до будь-чого:
+
+* **Статичні значення**: `color = "purple"`.
+  - Присвоюється *поза* `aes()`.
+  - Однакове відображення для всіх даних
+  
+&lt;/br&gt;
+&lt;/br&gt;
+&lt;/br&gt;
+&lt;/br&gt;
+
+* **Стовпець даних**: `aes(color = hospital)`
+  - Присвоюється *всередині* `aes()`.
+  - Відображає дані як "групи"
+  
+
+]
+
+
+.pull-right[
+
+Більше прикладів: 
+
+
+
+
+
+
+
+
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-59-1.png" width="504" /&gt;
+]
+
+
+
+
+
+
+
+---
+# Статична естетика
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm)) + 
+*geom_point(color = "seagreen")
+```
+
+
+Естетика є *статичною*, якщо застосовує те саме відображення до всіх точок даних у геомі або графіку. Статичну естетику визначають *поза* `aes()` для *числового або символьного значення*.
+
+Інші приклади:
+`size = 3`  
+`alpha = 0.5`  
+`width = 1.2`  
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-61-1.png" width="504" /&gt;
+] 
+
+
+
+
+
+
+---
+# Динамічна естетика
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+*   color = hospital)) +
+geom_point()
+```
+
+
+*Динамічна* естетика призначається за назвою стовпця.
+
+Це створює "групи" й генерує легенду.
+
+Це присвоєння відбувається *всередині* `aes()`.
+
+Вище `color=` призначений стовпцю `hospital`.
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-63-1.png" width="504" /&gt;
+]
+
+???
+
+
+
+
+
+---
+# Статичні й динамічні
+
+.pull-left[
+
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+*   color = hospital)) +  
+geom_point(
+* size = 7, 
+* alpha = 0.7) 
+```
+
+Вище `size = 7` та `alpha = 0.7` присвоєні статично, поза `aes()`.
+
+`color=` присвоюється стовпцю `hospital`, у межах `aes()`.
+
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-65-1.png" width="504" /&gt;
+]
+
+.footnote[Докладніше про естетику ggplot [тут](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html)
+]  
+
+
+???
+As there is only one geom, all aesthetics can be written in `ggplot()`, or in `geom_point()`
+
+
+
+
+
+
+
+---
+# Фасети
+
+
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+*facet_wrap(~hospital)
+```
+
+Фасети — це "малі блоки":
+графіки для одного унікального значення
+
+Їх можна використовувати для відображення груп даних.
+
+`facet_wrap()` створює один фасет
+на одне унікальне значення стовпця.
+
+Поставте знак "~" перед назвою стовпця.
+
+
+] 
+
+
+
+.pull-right[
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-67-1.png" width="504" /&gt;
+
+]
+
+???
+Also called "small multiples"  
+
+
+
+
+---
+
+# Фасети
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+*facet_wrap(~hospital,
+            scales = "free_y")
+```
+
+"Вільні" автомасштабовані осі зі `scales=`
+- "free_y"  
+- "free_x"   
+- "free" (both x and y)  
+
+] 
+
+.footnote[
+Попередьте аудиторію, якщо використовуєте вільні осі!
+Також спробуйте `ncol=` та `nrow=`.
+
+]
+
+
+.pull-right[
+
+
+
+
+
+
+
+
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-73-1.png" width="504" /&gt;
+]
+
+
+
+
+
+
+
+---
+# Фасети + `gghighlight()`
+
+.pull-left[
+
+Корисні пакети розширення ggplot, такі як {gghighlight}.
+
+`gghighlight()` може показати "тінь" за кожним фасетом.
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = date_onset,
+*   fill = hospital)) +
+geom_histogram() +
+facet_wrap(~ hospital) +
+*gghighlight()
+```
+
+] 
+
+
+.pull-right[
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-75-1.png" width="504" /&gt;
+
+]
+
+
+
+
+
+
+---
+# gghighlight
+
+.pull-left[
+
+Додайте `gghighlight()` до інших графіків і зазначте конкретні значення для виділення
+
+
+
+
+
+
+
+
+
+
+```r
+surv %&gt;% 
+  # get weekly counts by hospital
+  count(
+     hospital,
+     week = floor_date(date_onset, "week")) %&gt;%
+
+  # plot
+  ggplot(
+    mapping = aes(
+      x = week,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+```
+
+
+
+] 
+
+
+.pull-right[
+&lt;img src="module_6-1_files/figure-html/unnamed-chunk-81-1.png" width="504" /&gt;
+
+]
+
+
+
+???
+Here we create data frame of cases per week per hospital, and plot with `geom_line()`. The highlight is applied to Port Hospital.  
+
+
+
+---
+
+# Подяки
+
+ggplot-зображення з:
+
+* http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html  
+* https://jcheshire.com/r-spatial-data-hints/great-maps-ggplot2/
+
+
+
+
+---
+class: inverse, center, middle
+
+
+
+## Сесійні зали
+
+
+&lt;img src="../../../images/breakout/Safety Match - COVID artwork.png" width="50%" /&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

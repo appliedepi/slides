@@ -1,0 +1,490 @@
+---
+title: "Introduction to R for<br>Applied Epidemiology"
+subtitle: "Pivoting data"
+author: "2022"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "en"
+---
+class: center, middle, inverse, title-slide
+
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flextable,  # make pivot images 
+  flair,      # slides color text
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+
+
+# data prep --------------------------------------------------------------------
+# linelist_raw <- rio::import(here::here("data", "linelist_raw.xlsx"))
+surv <- rio::import(here::here("data", "linelist_combined_20141201.rds"))
+
+gen <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "generic") %>%
+  clean_names()
+
+mod7_2 <- googlesheets4::read_sheet(
+  "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+  range = "mod7_2", col_types = "c") %>%
+  clean_names()
+```
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://github.com/appliedepi/intro_course/raw/main/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+# `r paste0(gen[gen$uid == "gen_h1_courseTitle", params$lang])`
+
+### `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_subtitle", params$lang])`
+
+contact@appliedepi.org
+---
+
+
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_intro", params$lang])`
+
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_intro", params$lang])`
+
+```{r, eval = TRUE, echo = FALSE, out.height = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "Pivoting_500x500.png")))
+```
+
+---
+
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivot", params$lang])`
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivot_1", params$lang])`
+
+--
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivot_2", params$lang])`
+
+--
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivot_3", params$lang])`
+
+--
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivot_4", params$lang])`
+
+--
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivot_5", params$lang])` 
+     * `r paste0(mod7_2[mod7_2$uid == "mod7_2_sb_pivot_1", params$lang])`
+     * `r paste0(mod7_2[mod7_2$uid == "mod7_2_sb_pivot_2", params$lang])`  
+     * `r paste0(mod7_2[mod7_2$uid == "mod7_2_sb_pivot_3", params$lang])`
+     
+     
+     
+     
+
+
+
+---
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_tidydata", params$lang])`
+
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_op_tidydata", params$lang])`  
+
+--
+
+1. `r paste0(mod7_2[mod7_2$uid == "mod7_2_nu_tidydata_1", params$lang])`
+
+--
+
+2. `r paste0(mod7_2[mod7_2$uid == "mod7_2_nu_tidydata_2", params$lang])`
+
+--
+
+3. `r paste0(mod7_2[mod7_2$uid == "mod7_2_nu_tidydata_3", params$lang])`  
+
+
+
+
+
+
+
+
+---
+
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_terminology", params$lang])`  
+
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_terminology_1", params$lang])`  
+
+--
+
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_terminology_2", params$lang])`  
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_terminology_1", params$lang])`  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_terminology_2", params$lang])`  
+
+--
+
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_terminology_3", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.height = "65%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", paste0("tidy_image_", params$lang, ".png"))))
+```
+
+.footnote[`r paste0(mod7_2[mod7_2$uid == "mod7_2_fn_terminology", params$lang])`]
+
+
+
+
+
+---
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivotlong", params$lang])`  
+.pull-left[
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_pivotlong_1", params$lang])`  
+```{r}
+example <- tribble(
+     ~country, ~`1999`, ~`2000`,     ~`2001`,  ~`2002`, 
+     "Nigeria",   8000,    7500,        9250,      10200,    
+     "India",    20100,  25650,      26800,    27255,
+     "Brazil",   4500,    5120,        5100,   5860)
+          
+example %>%
+  knitr::kable()
+```
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_1", params$lang])`  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_2", params$lang])`  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_3", params$lang])`
+]
+
+--
+.pull-right[
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_pivotlong_2", params$lang])`  
+```{r}
+example %>%
+  pivot_longer(cols=2:5, names_to="year", values_to = "cases") %>% 
+     knitr::kable()
+```
+
+
+]
+
+
+
+
+
+
+
+
+
+
+
+---
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_ggplot2", params$lang])`
+
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_ggplot2", params$lang])`  
+
+```{r}
+example %>%
+  knitr::kable()
+```
+  
+```{r, eval=F, echo = T}
+ggplot(data = example,
+       mapping = aes(x = ???, y = ???))+
+     geom_line()
+```
+
+
+
+
+
+
+---
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivotlong", params$lang])`
+
+.pull-left[
+```{r}
+example %>% 
+  qflextable() %>% 
+  bg(j = 1, i = 1, part = "header", bg = "white") %>%          # backgrounds
+  bg(j = 2:5, i = 1, part = "header", bg = "orange") 
+  
+ # bg(j = 1, i = 1:3, part = "body", bg = "#ADD8E6") %>% 
+ # bg(j = 2:5, i = 1:3, part = "body", bg = "#31a354") 
+     
+  #flextable::color(i = 1:3, j = 1:5, "white", part = "body")    # white text
+```
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_4", params$lang])`  
+
+]
+
+
+
+---
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivotlong", params$lang])`
+
+.pull-left[
+```{r}
+example %>% 
+  qflextable() %>% 
+  bg(j = 1, i = 1, part = "header", bg = "white") %>%          # backgrounds
+  bg(j = 2:5, i = 1, part = "header", bg = "orange") %>% 
+  
+  #bg(j = 1, i = 1:3, part = "body", bg = "#ADD8E6") %>% 
+  bg(j = 2:5, i = 1:3, part = "body", bg = "#31a354") 
+     
+  #flextable::color(i = 1:3, j = 1:5, "white", part = "body")    # white text
+```
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_5", params$lang])`    
+
+]
+
+
+
+---
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivotlong", params$lang])`
+
+.pull-left[
+```{r}
+example %>% 
+  qflextable() %>% 
+  bg(j = 1, i = 1, part = "header", bg = "white") %>%          # backgrounds
+  bg(j = 2:5, i = 1, part = "header", bg = "orange") %>% 
+  
+  bg(j = 1, i = 1:3, part = "body", bg = "#ADD8E6") %>% 
+  bg(j = 2:5, i = 1:3, part = "body", bg = "#31a354") 
+     
+  #flextable::color(i = 1:3, j = 1:5, "white", part = "body")    # white text
+```
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_6", params$lang])`  
+
+]
+
+
+
+---
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivotlong", params$lang])`  
+
+.pull-left[
+```{r}
+example %>% 
+  qflextable() %>% 
+  bg(j = 1, i = 1, part = "header", bg = "white") %>%          # backgrounds
+  bg(j = 2:5, i = 1, part = "header", bg = "orange") %>% 
+  
+  bg(j = 1, i = 1:3, part = "body", bg = "#ADD8E6") %>% 
+  bg(j = 2:5, i = 1:3, part = "body", bg = "#31a354") 
+     
+  #flextable::color(i = 1:3, j = 1:5, "white", part = "body")    # white text
+```
+
+```{r eval = TRUE, echo=FALSE, out.width = '100%'}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "pivot_command.png")))
+```
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_7", params$lang])`  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotlong_8", params$lang])`  
+
+]
+
+
+.pull-right[
+
+```{r}
+example %>% 
+  pivot_longer(cols=2:5, names_to="year", values_to = "cases") %>% 
+  
+  qflextable() %>% 
+  bg(j = 1, i = 1, part = "header", bg = "white") %>% 
+  bg(j = 2, i = 1, part = "header", bg = "yellow") %>% 
+  bg(j = 3, i = 1, part = "header", bg = "#CBC3E3") %>% 
+
+  #bg(j = 2:3, i = 1, part = "header", bg = "yellow") %>% 
+  
+  bg(j = 1, i = 1:12, part = "body", bg = "#ADD8E6") %>% 
+  bg(j = 2, i = 1:12, part = "body", bg = "orange") %>% 
+  bg(j = 3, i = 1:12, part = "body", bg = "#31a354") 
+
+  #flextable::color(j = 1, i = 1:12, "white", part = "body") %>% 
+  #flextable::color(j = 3, i = 1:12, "white", part = "body")
+
+```
+]
+
+
+```{r pivot, eval=F}
+# Create pivot command (switch to include = F)
+example %>% 
+  pivot_longer(
+       cols = `1999`:`2002`,
+       names_to = "year",
+       values_to = "cases")
+```
+
+```{r pivot_flair, echo=F, eval=F}
+# remove eval = F
+# use to create image of pivot command
+decorate("pivot") %>%
+  flair("`1999`:`2002`", background = "orange") %>%
+  flair("year", background = "yellow") %>%
+  flair("cases", background = "#CBC3E3") %>%
+  knit_print.with_flair()
+```
+
+
+
+
+
+
+
+
+---
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_ggcommand", params$lang])`
+
+.pull-left[
+```{r, eval=F, echo=T}
+example %>%
+  pivot_longer(
+       cols = `1999`:`2002`,
+       names_to = "year",
+       values_to = "cases") %>%
+     
+  ggplot(mapping = aes(
+*           x = year,
+*           y = cases,
+*           color = country,
+*           group = country))+
+  geom_line()
+```
+]
+
+.pull-right[
+
+```{r, eval=T, echo=F}
+example %>%
+  pivot_longer(
+       cols = `1999`:`2002`,
+       names_to = "year",
+       values_to = "cases") %>%
+     
+  ggplot(mapping = aes(
+           x = year,
+           y = cases,
+           color = country,
+           group = country))+
+  geom_line(size = 2)+
+  theme_classic(base_size = 16)
+```
+
+]
+
+
+---
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_pivotwide", params$lang])`  
+
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_pivotwide_1", params$lang])` 
+
+`r paste0(mod7_2[mod7_2$uid == "mod7_2_tx_pivotwide_2", params$lang])`  
+
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotwide_1", params$lang])`  
+* `r paste0(mod7_2[mod7_2$uid == "mod7_2_bu_pivotwide_2", params$lang])`  
+
+```{r, eval = TRUE, echo = FALSE, out.height = "100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", paste0("pivot_wider_new_", params$lang, ".png"))))
+
+```
+
+
+
+
+---
+# `r paste0(mod7_2[mod7_2$uid == "mod7_2_h1_exercise", params$lang])`  
+

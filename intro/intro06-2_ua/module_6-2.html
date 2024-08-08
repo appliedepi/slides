@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to R for Applied Epidemiology</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle, inverse, title-slide
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+
+
+&lt;style type="text/css"&gt;
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+&lt;/style&gt;
+
+# Вступ до R для прикладної епідеміології
+
+### {ggplot2} — Шкали, теми й підписи
+
+contact@appliedepi.org
+
+---
+# Граматика графіки  
+
+Повернімося до тієї послідовності, яка будує ggplot:
+--
+
+Порядок шарів зазвичай такий:
+
+1) ✅ **"Відкрийте" графік**
+
+--
+
+2) ✅ **"Призначте" стовпці даних**.
+
+--
+
+3) ✅ **Додайте (`+`) шари "geom"**.
+
+--
+
+4) ✅ **Модифікуйте "шкали"**, наприклад колірну шкалу або розриви осі y.
+
+--
+
+5) ✅ **Додайте "тематичні" елементи оформлення графіка**: підписи осей, заголовок, напис, шрифти, розміри тексту, теми фону або поворот осей.
+
+
+???
+Remember that although the commands may be long, it is infinitely easier to edit and recycle than in Excel  
+
+
+
+
+
+
+
+---
+class: inverse, center, middle
+
+## Шкали в {ggplot2}
+
+
+&lt;img src="../../../images/ggplot_scales_themes/scales.png" width="50%" /&gt;
+
+
+
+
+
+---
+# Шкали — огляд
+
+Команди шкал замінюють стандартні налаштування відображення естетики, як-от:
+* *Які* кольори або форми показувати
+* *Як* дата або пропорції записуються в підписах осей
+* Мінімальне/максимальне значення й частота розривів осей
+
+--
+
+
+
+
+
+
+
+
+
+
+&lt;h4&gt;Загальна формула: &lt;span style='color:darkgreen'&gt;scale&lt;/span&gt;_&lt;span style='color:cornflowerblue'&gt;aesthetic&lt;/span&gt;_&lt;span style='color:deeppink'&gt;method&lt;/span&gt;()&lt;/h4&gt;
+
+--
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;h4&gt;1) &lt;span style='color:darkgreen'&gt;scale&lt;/span&gt;_ : this prefix never changes.&lt;/h4&gt;
+
+--
+
+
+
+
+
+
+
+
+
+
+
+&lt;h4&gt;2) &lt;span style='color:cornflowerblue'&gt;aesthetic&lt;/span&gt;: _fill_ or _color_ or _x_ or _y_ etc.&lt;/h4&gt;
+
+--
+
+
+
+
+
+
+
+
+
+
+&lt;h4&gt;3) &lt;span style='color:deeppink'&gt;method&lt;/span&gt;: _continuous() or _discrete() or _manual() or _date() etc.&lt;/h4&gt;
+
+--
+
+&lt;h4&gt;&lt;span style='color:darkgreen'&gt;scale&lt;/span&gt;_&lt;span style='color:cornflowerblue'&gt;color&lt;/span&gt;_&lt;span style='color:deeppink'&gt;continuous&lt;/span&gt;()&lt;/h4&gt;
+
+&lt;h4&gt;&lt;span style='color:darkgreen'&gt;scale&lt;/span&gt;_&lt;span style='color:cornflowerblue'&gt;x&lt;/span&gt;_&lt;span style='color:deeppink'&gt;date&lt;/span&gt;()&lt;/h4&gt;
+
+&lt;h4&gt;&lt;span style='color:darkgreen'&gt;scale&lt;/span&gt;_&lt;span style='color:cornflowerblue'&gt;x&lt;/span&gt;_&lt;span style='color:deeppink'&gt;manual&lt;/span&gt;()&lt;/h4&gt;
+
+
+
+---
+# Приклади шкал  
+
+Деякі приклади команд шкал:
+
+Ви хочете налаштувати|Команда шкали
+--------------------|-------------------
+безперервна вісь y |`scale_y_continuous()`
+вісь x дата |`scale_x_date()`  
+категоріальна вісь x |`scale_x_discrete()`  
+заповнення, безперервне |`scale_fill_continuous()`
+заповнення, безперервне |`scale_fill_gradient()`  
+колір, ручне призначення |`scale_color_manual()`  
+
+
+
+
+---
+# Шкали — за замовчуванням
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = district,
+    fill = gender)) +
+geom_bar()
+```
+
+
+Вище для заповнення стовпчастої діаграми використано **кольори й розриви осей за замовчуванням**: 
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-30-1.png" width="504" /&gt;
+
+]
+
+???
+Ignore the overlapping x-axis labels, for code simplicity we are not adjusting these in this slide.  
+
+---
+# Шкали — модифікований  
+
+.pull-left[
+
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = district,
+    fill = gender)) +
+geom_bar() +
+*scale_fill_manual(        
+*  values = c(
+*    "male"     = "violetred", 
+*    "female"   = "aquamarine"))
+```
+
+У `scale_fill_manual()` ми надаємо призначення **вручну** 
+в межах вектора `c()`.  
+
+
+.footnote[Використовуйте *na.value = "grey"* для значень, яких немає 
+]  
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-32-1.png" width="504" /&gt;
+]
+
+???
+Discuss the na.value= arguments in most scale commands, and the difference between having NA values in the data and having an explicit missing value such as "Unknown".
+
+
+
+
+---
+# Ваги — colorbrewer 
+
+.pull-left[
+
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = district,
+    fill = gender)) +
+geom_bar() +
+*scale_fill_brewer(
+*   type = "qual",
+*   na.value = "grey50")
+```
+
+Використовуйте `scale_fill_brewer()` для приємних палітр  
+
+
+.footnote[Використовуйте *na.value = "grey"* для значень, яких немає 
+]  
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-34-1.png" width="504" /&gt;
+]
+
+???
+Briefly mention the `na.value=` arguments in most scale commands, and the difference between having NA values in the data and having an explicit missing value such as "Unknown".
+
+
+
+---
+# Шкали — скоригована вісь y 
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = district,
+    fill = gender)) +
+geom_bar() +
+scale_fill_manual(        
+  values = c(
+     "male" = "violetred", 
+     "female" = "aquamarine")) +
+*scale_y_continuous(
+*  breaks = seq(from = 0,
+*               to = 250,
+*               by = 10))
+```
+
+У `scale_y_continuous()` ми коригуємо розриви осі y, використовуючи `seq()` для визначення числової послідовності. 
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-36-1.png" width="504" /&gt;
+
+]
+
+
+
+
+
+---
+# Шкали — початок осей з 0  
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = district,
+    fill = gender)) +
+geom_bar() +
+scale_fill_manual(        
+  values = c(
+     "male" = "violetred", 
+     "female" = "aquamarine")) +
+scale_y_continuous(
+  breaks = seq(from = 0,
+               to = 250,
+               by = 10),
+* expand = c(0, 0)) +
+*scale_x_discrete(
+*  expand = c(0, 0))
+```
+
+У командах `scale_x_` або `scale_y_` використовуйте `expand = c(0,0)` для видалення зайвого простору навколо графіка. 
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-38-1.png" width="504" /&gt;
+
+]
+
+
+
+
+---
+# Шкали — підписи осей дат  
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram()
+```
+
+Масштаб за замовчуванням для осей дат залежить від діапазону даних.  
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-40-1.png" width="504" /&gt;
+
+]
+
+
+
+
+
+
+
+
+
+---
+# Шкали — підписи розривів дат 
+
+.pull-left[  
+
+
+
+
+
+
+
+
+
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+*scale_x_date(
+*  date_breaks = "2 months") # 2 місяці
+```
+
+Налаштуйте підписи осей за допомогою `scale_x_date()`. 
+
+Використовуйте значення `date_breaks=`, наприклад "1 тиждень", "2 тижні" або "3 місяці". 
+
+Вони регулюють *підписи* розривів осей, а не кошики гістограми!
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-46-1.png" width="504" /&gt;
+
+]
+
+???
+For tips on geom_histogram() bins, see Epi R Handbook epicurves page
+
+
+
+
+
+
+
+
+---
+# Шкали — підписи осей дат 
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+scale_x_date(
+  date_breaks = "2 months",
+* date_labels = "%d %b\n%Y")
+```
+
+Зазначте формат підпису дати в `date_labels=`, використовуючи  
+["strptime" syntax](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime)  
+
+`"%d %b %Y"` для ДД-ММ-РРРР.  
+
+
+.footnote[Див. глави Epi R Handbook [Epicurves](https://epirhandbook.com/epidemic-curves.html) та [Strings](https://epirhandbook.com/characters-and-strings.html). 
+]  
+
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-48-1.png" width="504" /&gt;
+
+]
+
+
+???
+/n is a newline
+
+
+
+
+
+---
+# Шкали — автоматичні ефективні підписи 
+
+.pull-left[
+
+
+
+
+
+
+
+
+
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(x = date_onset)) +
+geom_histogram() +
+scale_x_date(
+* date_breaks = "2 weeks", # 2 тижні
+* labels = label_date_short() )
+```
+
+Або просто присвойте `labels=` значенню `label_date_short()` зі [{scales}](https://scales.r-lib.org/)  
+
+Рік не повторюється на кожному підписі. 
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-54-1.png" width="504" /&gt;
+
+]
+
+
+
+
+
+
+---
+class: inverse, center, middle
+
+## Підписи в {ggplot2}  
+
+
+&lt;img src="../../../images/ggplot_scales_themes/labels.png" width="50%" /&gt;
+
+
+
+
+
+---
+# Підписи графіків  
+
+.pull-left[
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = date_onset,
+    fill = hospital)) +
+geom_histogram() +
+scale_x_date(
+  date_breaks = "2 weeks",
+  labels = label_date_short() )+
+scale_fill_brewer(type = "qual",
+                  na.value = "grey50")
+```
+
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-57-1.png" width="504" /&gt;
+]
+
+
+
+---
+# Підписи графіків 
+
+.pull-left[
+
+
+
+
+
+
+
+
+
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = date_onset,
+    fill = hospital)) +
+geom_histogram() +
+scale_x_date(
+  date_breaks = "2 weeks",
+  labels = label_date_short() )+
+scale_fill_brewer(type = "qual",
+                  na.value = "grey50")+
+*labs(
+*  title = "Епідемічна крива спалаху лихоманки Ебола",
+*  subtitle = "Підтверджені випадки, 2014 рік",
+*  x = "Дата",
+*  y = "Кількість випадків",
+*  caption = "Вигадані дані про лихоманку Ебола",
+*  fill = "Лікарня"
+) +
+  theme_grey(base_size = 18)
+```
+
+Використовуйте `labs()`,редагуйте заголовок легенди через естетику, яка створила легенду (наприклад, `fill=`).  
+
+]
+
+.pull-right[
+
+
+
+
+
+
+
+
+
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-67-1.png" width="504" /&gt;
+
+]
+
+
+
+
+
+---
+# Динамічні підписи  
+
+Вбудуйте код у `str_glue("тут текст {ТУТ КОД} тут текст")`. 
+Код оновиться з отриманням даних. 
+
+
+
+
+
+
+
+
+
+
+
+```r
+str_glue("Дані про стан на {Sys.Date()}")
+```
+
+```
+## Дані про стан на 2023-02-23
+```
+
+--
+
+
+
+
+
+
+
+
+
+
+
+```r
+str_glue("{fmt_count(surv, is.na(date_onset))}} випадки без початку й не показані")
+```
+
+```
+## 28 (5.2%)} випадки без початку й не показані
+```
+
+
+.footnote[Див. главу [Epi R Handbook Strings](https://epirhandbook.com/characters-and-strings.html#dynamic-strings) і пакет {stringr}.  
+ 
+]
+
+
+???
+Explain that in str_glue, anything within curly brackets it will run as R code.  
+
+
+
+
+
+
+---
+class: inverse, center, middle
+
+## Теми в {ggplot2}  
+
+
+&lt;img src="../../../images/ggplot_scales_themes/themes.png" width="50%" /&gt;
+
+
+---
+
+# Теми  
+
+Теми — це **не пов’язані з даними** особливості дизайну, наприклад: 
+
+* Фон робочої ділянки графіків 
+* Розмір, колір та орієнтація тексту  
+* Положення легенди 
+
+--
+
+Плюси {ggplot2} — ви можете вносити навіть незначні коригування  
+
+...якщо забажаєте.  
+
+
+
+---
+# Теми 
+
+.pull-left[
+
+
+["Повні теми"](https://ggplot2.tidyverse.org/reference/ggtheme.html) легко додати.  
+
+
+
+
+
+
+
+
+
+
+
+```r
+# Try one of these...
+theme_minimal()
+theme_light()
+theme_bw()
+theme_gray()
+theme_dark()
+theme_void()
+theme_classic()
+```
+
+Спробуйте використати аргумент `base_size = 16` для швидкого збільшення розміру тексту.  
+
+]
+
+.pull-right[
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-84-1.png" width="504" /&gt;
+
+
+
+]
+
+
+
+---
+# Мікрокоригування 
+
+Вносьте мікрокоригування в `theme()`.  
+
+Наведіть аргументи для кожної невеликої зміни, яку ви хочете внести, наприклад:  
+
+Компонент графіка        | Аргумент теми 
+-----------------------------------------------------------------------------------------------|---------------  
+положення легенди       |`legend.position = `  
+напрямок легенди (горизонтальний чи вертикальний)       | `legend.direction = `  
+
+--
+
+Вони можуть бути *дуже* специфічними:   
+
+Компонент графіка        | Аргумент теми 
+-----------------------------------------------------------------------------------------------|---------------  
+Довжина відміток по осі X        |`axis.ticks.length.x = `  
+
+Є сотні варіантів.  
+
+???
+Think of all the minute adjustments that you make when creating a plot in Excel. How many times do you have to re-do all those steps? All of those steps can be coded, which makes the plot adjustable. 
+
+
+---
+# Теми 
+
+.pull-left[
+
+Вносьте мікрокоригування в `theme()`. 
+
+
+
+
+
+
+
+
+
+
+
+```r
+ggplot(
+  data = surv,
+  mapping = aes(
+    x = age_years,
+    y = ht_cm,
+    color = gender),    
+    alpha = 0.3) +
+geom_point() +
+labs(
+  title = "Height by age",
+  x = "Age (years)",
+  y = "Height (cm)",
+  color = "Gender")+
+theme_minimal(base_size = 16) +
+*theme(
+* legend.position = "bottom",
+* plot.title = element_text(
+*   color = "red",
+*   face = "bold"),
+* axis.title.y = element_text(angle = 90))
+```
+
+
+]
+
+.pull-right[
+
+Синтаксис вимагає практики — див. [цей список](https://ggplot2.tidyverse.org/reference/theme.html) специфічних аргументів. 
+
+
+
+
+
+
+
+
+
+
+&lt;img src="module_6-2_files/figure-html/unnamed-chunk-94-1.png" width="504" /&gt;
+]
+
+???
+Talk about these theme() arguments and how they consist of two parts, just like `mapping = aes()`. 
+Explain that nobody has these all memorized, but the common ones are easy to remember once you use them enough.  
+Remember to add them AFTER any complete themes.
+
+
+
+
+---
+# Теми — `element_text()` 
+
+Під час зміни *тексту* мікрокоригування часто мають бути зроблені *всередині* `element_text()`. 
+
+
+```r
+theme(
+ legend.position = "bottom",
+* plot.title = element_text(
+*   color = "red",
+*   face = "bold"),
+* axis.title.y = element_text(angle = 90))
+```
+
+Цей синтаксис аналогічний синтаксису `mapping = aes()`. 
+
+
+???
+Talk about these theme() arguments and how they consist of two parts, just like `mapping = aes()`. 
+Explain that nobody has these all memorized, but the common ones are easy to remember once you use them enough.  
+
+
+
+
+---
+class: inverse, center, middle
+
+
+
+## Вправа 
+
+
+&lt;img src="../../../images/breakout/teamwork3.png" width="50%" /&gt;
+
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
