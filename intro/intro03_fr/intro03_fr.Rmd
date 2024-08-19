@@ -13,7 +13,7 @@ output:
       countIncrementalSlides: false
     css: xaringan-themer.css
 params:
-  lang: en
+  lang: fr
 ---
 
 class: inverse, center, middle, title-slide
@@ -122,10 +122,10 @@ style_mono_accent(
 ```
 
 ```{r, echo=F, include=F}
-surv_brutes <- rio::import(here::here("donnees", "linelist_surveillance_20141201.csv"))
+surv_brutes <- rio::import(here::here("data", "linelist_surveillance_20141201.csv"))
 
-surv_brutes <- surv_brutes %>% 
-  filter(num_ligne %in% c(635, 2, 11, 227, 641)) %>% 
+surv_ex <- surv_brutes %>%
+  filter(num_ligne %in% c(635, 2, 11, 227, 641)) %>%
   select(cas_id, age, sexe, hopital, lab_confirme, epilink, fievre)
 
 # gen <- googlesheets4::read_sheet(
@@ -147,68 +147,68 @@ contact@appliedepi.org
 
 ---
 
-# Aujourd'hui : objectifs et calendrier
+# Aujourd'hui : objectifs et planning
 
-**Dans ce module, nous avons pour objectif de t'aider à :**
+**Dans ce module, nous avons pour objectif de vous aider à :**
 
-- Te familiariser avec plus de fonctions utilisées pour nettoyer les données de santé publique.
-- Ajoute des étapes de recodage logique complexes à ta "chaîne de tuyaux" de nettoyage de données.
-- S'initier aux concepts de structure de "données bien rangées".
+- Vous familiariser à plus de fonctions utilisées pour nettoyer les données de santé publique.
+- Ajouter des étapes de recodage logique plus complexes à votre "chaîne de pipes" pour le nettoyage des données.
+- Vous initier aux concepts de structure de "données bien organisées".
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
-  ~Time, ~Topic,
-  "20 minutes",  "Review of previous module", 
-  "20 minutes", "Demo - logical coding",
-  "2.5 hours",  "Exercise",
-  "20 minutes", "Debrief"
+  ~Temps, ~Sujet,
+  "20 minutes",  "Revue du module précédent", 
+  "20 minutes", "Demonstration - le code logique",
+  "2.5 heures",  "Exercice",
+  "20 minutes", "Débrief"
 )
 
 outline %>% 
   flextable::qflextable() %>% 
-  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+  flextable::add_footer_lines("Prenez des pauses quand vous en avez besoin pendant l'exercice")
 ```
 
 ???
-Notez les pauses d'étirement tout au long du texte.
+Notez les pauses d'étirement tout au long.
 
 ---
 
-# Plus de fonctions de nettoyage des données
+# D'autres fonctions pour le nettoyage des données
 
 Dans ce module, nous aborderons :
 
-| La fonction | Utilité                                  | 
+| Fonction | Utilité                                  | 
 | ----------- | ---------------------------------------- |
 | `mutate()`            | créer et transformer des colonnes        | 
-| `ifelse()`            | recodage logique simple des valeurs      | 
-| `case_when()`            | recodage logique complexe des valeurs    | 
+| `ifelse()`            | recodage logique simple de valeurs      | 
+| `case_when()`            | recodage logique complexe de valeurs    | 
 | `age_categories()`            | créer une colonne de catégorie d'âge     | 
 | `coalesce()`            | hiérarchisation des valeurs              | 
-| `select()`            | Sous-ensemble et classement des colonnes | 
+| `select()`            | sélection et organisation des colonnes | 
 
 ---
 
 class: inverse, center, middle
 
-# Révision du module précédent
+# Revue du module précédent
 
 ---
 
 # Raconter une histoire avec la pipe
 
-A **commande de nettoyage** est une histoire, un **une série d'actions** effectuées sur des données brutes.
+Une **commande de nettoyage** est une histoire, **une série d'actions** effectuées sur des données brutes.
 
-Les **`%>%`** L'opérateur de tuyauterie signifie **"et ensuite"** (...fais l'action à la ligne suivante).
+La **`%>%`** (opérateur pipe) signifie **"et ensuite"** (...fais l'action à la ligne suivante).
 
-Quelqu'un peut-il expliquer cette commande verbalement ?
+Pouvez-vous expliquer cette commande verbalement ?
 
 ```{r, echo=T, eval=F}
 surv <- surv_brutes %>% 
-  clean_names() %>% 
+  clean_names() %>%
   rename(
     age_ans = age,
-    date_symptomes = date_symptomes,
+    date_symptomes = date_debut_symptomes,
     date_notification = date_de_notification) %>% 
   mutate(date_symptomes = mdy(date_symptomes)) %>% 
   mutate(date_notification = mdy(date_notification)) %>% 
@@ -220,26 +220,27 @@ surv <- surv_brutes %>%
 
 ---
 
-# Raconte une histoire avec la pipe
+# Raconter une histoire avec la pipe
 
-A **commande de nettoyage** est une histoire, un **une série d'actions** effectuées sur des données brutes.
+Une **commande de nettoyage** est une histoire, **une série d'actions** effectuées sur des données brutes.
 
-Les **`%>%`** L'opérateur de tuyauterie signifie **"et puis"** (...fais l'action à la ligne suivante).
+Le **`%>%`** (opérateur pipe) signifie **"et ensuite"** (...fais l'action à la ligne suivante).
 
-Quelqu'un peut-il expliquer cette commande verbalement ?
+Pouvez-vous expliquer cette commande verbalement ?
 
 ```{r, echo=T, eval=F}
-surv <- surv_brutes %>%        # create new nettoyees donnees as: the brutes donnees piped to...
-  clean_names() %>%                           # standardize column names 
-  rename(                                     # manual column names edits:
-    age_ans = age,                            # age to age_ans
-    date_symptomes = date_symptomes,                    # use date_ as prefix
-    date_notification = date_de_notification) %>%           # use date_ as prefix
-  mutate(date_symptomes = mdy(date_symptomes)) %>%    # help R understand dates of onset
-  mutate(date_notification = mdy(date_notification)) %>%  # help R understand dates of report
-  mutate(sexe = recode(sexe,                    # edit sexe values so that:
-    "h" = "homme",                               # "h" is now "homme"
-    "f" = "femme"))                            # "f" is now "femme"
+surv <- surv_brutes %>% # création d'un nouveau jeu de données néttoyé
+                        # à partir du jeu de données brutes, suivi par...
+  clean_names() %>%    # standardisation du nom des colonnes 
+  rename(              # rectification manuelle du nom des colonnes :
+    age_ans = age,     # age à age_ans
+    date_symptomes = date_debut_symptomes, # utilisation de date_ comme préfixe
+    date_notification = date_de_notification) %>% # utilisation de date_ comme préfixe
+  mutate(date_symptomes = mdy(date_symptomes)) %>%  # aide R à comprendre les dates de début de symptômes
+  mutate(date_notification = mdy(date_notification)) %>%  #  aide R à comprendre les dates de notification
+  mutate(sexe = recode(sexe,  # change les valeurs de sexe values pour que:
+    "h" = "homme",            # "h" devienne "homme"
+    "f" = "femme"))           # "f" devienne "femme"
 
 ```
 
@@ -250,12 +251,12 @@ surv <- surv_brutes %>%        # create new nettoyees donnees as: the brutes don
 Quelle est la cause de ce message d'erreur ?
 
 ```{r, echo=T, eval=F}
-# create nettoyees dataset
+# création du jeu de données néttoyé
 surv <- surv_brutes %>% 
   clean_names() %>% 
   rename(
     age_ans = age,
-    date_symptomes = date_symptomes,
+    date_symptomes = date_debut_symptomes,
     date_notification = date_de_notification) %>% 
   mutate(date_symptomes = mdy(date_symptomes)) %>% 
   mutate(date_notification = mdy(date_notification)) 
@@ -275,12 +276,12 @@ Error in recode(sexe, h = "homme", f = "femme") : object 'sexe' not found
 Quelle est la cause de ce message d'erreur ?
 
 ```{r, echo=T, eval=F}
-# create nettoyees dataset
+# création du jeu de données néttoyé
 surv <- surv_brutes %>% 
   clean_names() %>% 
   rename(
     age_ans = age,
-    date_symptomes = date_symptomes,
+    date_symptomes = date_debut_symptomes,
     date_notification = date_de_notification) %>% 
   mutate(date_symptomes = mdy(date_symptomes)) %>% 
   mutate(date_notification = mdy(date_notification))     #<<
@@ -293,9 +294,9 @@ surv <- surv_brutes %>%
 Error in recode(sexe, h = "homme", f = "femme") : object 'sexe' not found
 ```
 
-Il manque un opérateur de tuyauterie, ce qui rompt la chaîne.
+Il manque un opérateur pipe, ce qui rompt la chaîne.
 
-Les `mutate(sexe...` n'a pas reçu l'ensemble de données de l'étape précédente, et par conséquent R n'a aucun contexte de ce que la colonne `sexe` est.
+La fonction `mutate(sexe...` n'a pas reçu le jeu de données de l'étape précédente, et par conséquent R n'a aucun contexte sur ce que la colonne `sexe` est.
 
 ---
 
@@ -304,12 +305,12 @@ Les `mutate(sexe...` n'a pas reçu l'ensemble de données de l'étape précéden
 Quelle est la cause de ce message d'erreur ?
 
 ```{r, echo=T, eval=F}
-# create nettoyees dataset
+# création du jeu de données néttoyé
 surv <- surv_brutes %>% 
   clean_names() %>% 
   rename(
     age_ans = age,
-    date_symptomes = date_symptomes,
+    date_symptomes = date_debut_symptomes,
     date_notification = date_de_notification) %>% 
   mutate(date_symptomes = mdy(date_symptomes)) %>% 
   mutate(date_notification = mdy(date_notification)) %>% 
@@ -317,7 +318,7 @@ surv <- surv_brutes %>%
     "h" = "homme",           
     "f" = "femme"))  %>% 
 
-# make a table with the nettoyees donnees
+# faire un tableau avec le jeu de données nettoyé
 tabyl(surv, sexe, district)
 ```
 
@@ -334,12 +335,12 @@ Error in `dplyr::select()`:
 Quelle est la cause de ce message d'erreur ?
 
 ```{r, echo=T, eval=F}
-# create nettoyees dataset
+# création du jeu de données néttoyé
 surv <- surv_brutes %>% 
   clean_names() %>% 
   rename(
     age_ans = age,
-    date_symptomes = date_symptomes,
+    date_symptomes = date_debut_symptomes,
     date_notification = date_de_notification) %>% 
   mutate(date_symptomes = mdy(date_symptomes)) %>% 
   mutate(date_notification = mdy(date_notification)) %>%      
@@ -347,7 +348,7 @@ surv <- surv_brutes %>%
     "h" = "homme",           
     "f" = "femme"))  %>%       #<<
 
-# make a table with the nettoyees donnees
+# faire un tableau avec le jeu de données nettoyé
 tabyl(surv, sexe, district)
 
 ```
@@ -358,16 +359,16 @@ Error in `dplyr::select()`:
 ✖ Column `surv` doesn't exist.
 ```
 
-Un tuyau "suspendu" supplémentaire a transmis l'ensemble de données propres à un fichier de données. *séparé* `tabyl()` commande.  
-Pour une fonction, fournis un ensemble de données **soit** par un tuyau, *OU* comme premier argument.
+Une pipe supplémentaire "suspendue" a transmis le jeu de données propres à une autre commande `tabyl()` *séparée*.  
+Pour une fonction, il est impératif de fournir le jeu de données **soit** par une pipe, *OU* comme premier argument.
 
 ---
 
-# Un script compliqué
+# Un script désorganisé
 
 .pull-left[
 
-**Évite ceci**
+**Évitez ceci**
 
 ```{r, echo=T, eval=F}
 surv <- surv_brutes %>%    #<<
@@ -376,7 +377,7 @@ surv <- surv_brutes %>%    #<<
 surv <- surv_brutes %>%    #<<
   clean_names() %>% 
   rename(
-    date_symptomes = date_symptomes,
+    date_symptomes = date_debut_symptomes,
     date_notification = date_de_notification)
 
 tabyl(surv, sexe, district)
@@ -385,7 +386,7 @@ class(surv$date_symptomes)
 surv <- surv_brutes %>% #<<
   clean_names() %>% 
   rename(
-    date_symptomes = date_symptomes,
+    date_symptomes = date_debut_symptomes,
     date_notification = report_date) %>% 
   mutate(date_symptomes = mdy(date_symptomes)) %>% 
   mutate(date_notification = mdy(date_notification)) %>%     
@@ -399,7 +400,7 @@ surv <- surv_brutes %>% #<<
 
 .pull-right[
 
-- Garde **une commande de nettoyage** seulement. Ajoute de nouvelles fonctions avec des tuyaux à son extrémité.
+- Gardez **une commande de nettoyage** seulement. Ajoutez de nouvelles fonctions avec des pipes à la fin de la ligne.
 
 ]
 
@@ -412,11 +413,11 @@ surv <- surv_brutes %>% #<<
 Script propre
 
 ```{r, echo=T, eval=F}
-# Create nettoyees dataset -------------------------------------
+# Création du jeu de données néttoyé -------------------------------------
 surv <- surv_brutes %>%                       #<<               
   clean_names() %>% 
   rename(
-    date_symptomes = date_symptomes,
+    date_symptomes = date_debut_symptomes,
     date_notification = report_date) %>% 
   mutate(date_symptomes = mdy(date_symptomes))  %>% 
   mutate(date_notification = mdy(date_de_notification)) %>%     
@@ -429,24 +430,24 @@ surv <- surv_brutes %>%                       #<<
 
 .pull-right[
 
-- Garde **une commande de nettoyage** seulement. Ajoute de nouvelles fonctions avec des tuyaux à son extrémité.
+- Gardez **une commande de nettoyage** seulement. Ajoutez de nouvelles fonctions avec des pipes à la fin de la ligne.
 
 ]
 
 ---
 
-# Nettoyer le script
+# Script propre
 
 .pull-left[
 
 Script propre
 
 ```{r, echo=T, eval=F}
-# Create nettoyees dataset -------------------------------------
+# Création du jeu de données néttoyé -------------------------------------
 surv <- surv_brutes %>%                                     
   clean_names() %>% 
   rename(
-    date_symptomes = date_symptomes,
+    date_symptomes = date_debut_symptomes,
     date_notification = report_date) %>% 
   mutate(date_symptomes = mdy(date_symptomes))  %>% 
   mutate(date_notification = mdy(date_de_notification)) %>%     
@@ -454,34 +455,34 @@ surv <- surv_brutes %>%
     "h" = "homme",           
     "f" = "femme"))
   
-# Zone d'essai ---------------------------------------------
-tabyl(surv, sexe, district)    # cross-tabulate        #<<
-class(surv$date_symptomes)        # check column class    #<<
+# Zone de test ---------------------------------------------
+tabyl(surv, sexe, district)    # tabulation        #<<
+class(surv$date_symptomes)        # vérification de la classe de la colonne    #<<
 ```
 
 ]
 
 .pull-right[
 
-- Regroupe d'autres petites commandes dans un **zone de test**
+- Regroupez d'autres petites commandes dans une **zone de test**
 
 ]
 
 ---
 
-# Impression ou sauvegarde
+# Impression vs. sauvegarde
 
-**Imprimer**
+**Impression**
 
-Cette commande n'a pas de **`<-`**, donc il n'y a que des *imprime* la modification `surv` sur la console. Le cadre de données actuel n'a pas changé.
+La commande ci-dessous n'a pas de **`<-`**, donc toute modification apportée au jeu de donnée `surv` ne sera qu'*imprimée* dans la console. Le jeu de données de base n'aura donc pas changé.
 
 ```{r, echo=params$lang == "en", eval=F}
-surv_brutes %>%              # PRINT only cases over 10 ans  #<<
+surv_brutes %>%              # IMPRIME seulement les cas plus que 10 ans  #<<
   filter(age > 10)
 ```
 
 ```{r, echo=params$lang == "fr", eval=F}
-surv_brutes %>%                    # IMPRIMER seulement les cas plus que 10 ans
+surv_brutes %>%                    # IMPRIME seulement les cas plus que 10 ans
   filter(age > 10)
 ```
 
@@ -496,49 +497,49 @@ surv_brutes %>%                    # IMPRIMIR sólo los casos de más de 10 año
 ```
 
 ```{r, echo=F, eval=F}
-surv_brutes %>%                    # print only cases over 10 ans
+surv_brutes %>%                    # IMPRIME seulement les cas plus que 10 ans
   filter(age > 10) %>% 
   knitr::kable()
 ```
 
-**Économiser**
+**Sauvegarde**
 
-Ajoute l'opérateur d'affectation **\<-** pour créer un nouveau cadre de données.
+Ajoutez l'opérateur d'affectation **<-** pour créer un nouveau jeu de données.
 
 ```{r pipe-assign, eval=F, echo=T}
-surv_over10 <- surv_brutes %>%     # create new donnees frame   #<<
+surv_over10 <- surv_brutes %>%     # créer un nouveau jeu de données   #<<
   filter(age > 10)
 ```
 
-(Pas de sortie dans la console R, mais un nouvel objet dans le volet Environnement).
+(Pas de sortie dans la console R, mais un nouvel objet apparaît dans l'onglet Environnement).
 
 ???
-Note que les noms de colonnes dans `surv` sont anciens ! C'est parce que nos modifications n'ont pas encore été enregistrées.
+Notez que les noms de colonnes dans `surv` sont toujours ceux d'avant ! C'est parce que nos modifications n'ont pas encore été enregistrées.
 
 ---
 
 class: inverse, center, middle
 
-# Valeurs de recodage
+# Recoder des valeurs
 
 ---
 
 # Exemple de données
 
 ```{r, eval=T, echo=T}
-surv_brutes
+surv_ex
 ```
 
 ---
 
-# `recode()` pour les éditions manuelles
+# `recode()` pour le recodage manuel
 
-Utilise `recode()` dans `mutate()` pour un manuel complet *recodage*
+Utilisez `recode()` dans la fonction `mutate()` pour un *recodage* manuel complet.
 
-```{r, echo=params$lang == "en", eval=params$lang == "en"}
-surv_brutes %>% 
+```{r, echo=params$lang == "fr", eval=params$lang == "fr"}
+surv_ex %>% 
   mutate(hopital = recode(hopital,
-      # for reference: OLD = NEW
+      # pour référence: ANCIEN = NOUVEAU
       "Other"  = "Military Hospital",
       "Port"               = "Port Hospital",
       "Port Hopital"       = "Port Hospital",
@@ -549,19 +550,19 @@ surv_brutes %>%
 
 # `ifelse()` pour une logique simple
 
-`ifelse()` dans `mutate()` teste logiquement chaque ligne.
+`ifelse()` dans la fonction `mutate()` teste logiquement chaque ligne.
 
-Il écrit dans le nouveau `age_group` colonne :
+Cettre fonction permet de créer une nouvelle colonne `age_group` dans laquelle la valeur :
 
-- "adulte", si le test donne VRAI.
-- "mineur", si le test donne FAUX
+- "adulte" sera imprimée si le test donne VRAI.
+- "mineur" sera imprimée si le test donne FAUX
 
 ```{r, echo=T, eval=T}
-surv_brutes %>% 
+surv_ex %>% 
   mutate(age_group = ifelse(
     test = age >= 18,
-    oui = "adult",  
-    non = "minor")) 
+    yes = "adult", # Valeur pour "oui" ou VRAI au test
+    no = "minor")) # Valeur pour "non" ou FAUX au test
 ```
 
 ---
@@ -570,22 +571,22 @@ surv_brutes %>%
 
 Si les arguments sont écrits dans l'ordre par défaut, conformément à la documentation de la fonction, il est inutile d'écrire explicitement leur nom.
 
-Les arguments de `ifelse()` sont `ifelse(test = , oui = , non = )`
+Les arguments de `ifelse()` sont `ifelse(test = , yes = , no = )`
 
 Cette commande :
 
 ```{r, echo=T, eval=F}
-surv_brutes %>% 
+surv_ex %>% 
   mutate(age_group = ifelse(
     test = age >= 18,
-    oui = "adult",  
-    non = "minor")) 
+    yes = "adult",  
+    no = "minor")) 
 ```
 
-Peut aussi s'écrire comme suit :
+Peut aussi s'écrire comme ceci :
 
 ```{r, echo=T, eval=F}
-surv_brutes %>% 
+surv_ex %>% 
   mutate(age_group = ifelse(age >= 18, "adult", "minor")) 
 ```
 
@@ -595,30 +596,30 @@ surv_brutes %>%
 
 # Logique complexe
 
-Utilise **`case_when()`** dans `mutate()` pour tester une série de critères logiques sur chaque ligne et attribuer une nouvelle valeur correspondante.
+Utilisez **`case_when()`** dans `mutate()` pour tester une série de critères logiques sur chaque ligne et attribuer une nouvelle valeur correspondante.
 
 ```{r, results="asis", echo=FALSE}
-str_glue("The case_when() syntax is: logical criteria for row ~ resultat if met") %>%
-  flair("logical criteria for row", color = "orange") %>%
+str_glue("La synthaxe de la fonction case_when() est: critère logique pour la ligne ~ résultat si correct") %>%
+  flair("critère logique pour la ligne", color = "orange") %>%
   flair("~", color = "deeppink") %>%
-  flair("resultat if met", color = "cornflowerblue") %>%
+  flair("résultat si correct", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
 
 ```{r mutate3, include=F}
-surv_brutes %>% 
+surv_ex %>% 
   mutate(def_cas = case_when(
-    lab_confirme == TRUE             ~ "Confirmé",       # first check this
-    epilink == 'oui' & fievre == 'oui' ~ "Suspect",         # then check this
-    TRUE                              ~ "To investigate")) # last resort
+    lab_confirme == TRUE             ~ "Confirmé",       # vérifiez ceci d'abord
+    epilink == 'oui' & fievre == 'oui' ~ "Suspect",         # puis vérifiez cela
+    TRUE                              ~ "To investigate")) # dernier recours
 ```
 
 ```{r mutate3_flair, echo=F}
 decorate("mutate3") %>%
   flair('"Confirmé"', color = "cornflowerblue") %>%
   flair('"Suspect"', color = "cornflowerblue") %>%
-  flair('"To investigate"', color = "cornflowerblue") %>%
+  flair('"A investiguer"', color = "cornflowerblue") %>%
   flair("~", color = "deeppink") %>%
   flair("lab_confirme == TRUE", color = "orange") %>%
   flair(" epilink == 'oui' & fievre == 'oui'", color = "orange") %>%
@@ -626,19 +627,19 @@ decorate("mutate3") %>%
   knit_print()
 ```
 
-Le **l'ordre a de l'importance**. Écris les critères les plus spécifiques en haut de la commande (à déclencher en premier) et les critères les plus généraux en bas (comme "attrape-tout").
+L'**ordre a de l'importance** pour cette fonction. Écrivez les critères les plus spécifiques en haut de la commande (à déclencher en premier) et les critères les plus généraux en bas (comme "attrape-tout").
 
 ---
 
 class: inverse, center, middle
 
-# Ranger les données
+# Données organisées
 
 ## Réflexions pour la fin de cet exercice
 
 ---
 
-# Des données en pagaille
+# Données désorganisées
 
 Souvent, les données brutes de santé publique ressemblent à ceci :
 
@@ -650,23 +651,23 @@ Quels sont les défis à relever pour traiter ces données dans R ?
 
 ---
 
-# Ranger les données
+# Données organisées
 
-Les données propres doivent également être "bien rangées". Tu trouveras ci-dessous 3 principes fondamentaux des "données bien rangées" :
-
---
-
-1. Chacun **valeur** doit avoir son propre **cellule**
+Les données propres doivent également être "bien rangées". Vous trouverez ci-dessous 3 principes fondamentaux des "données organisées" :
 
 --
 
-2. Chacun **variable** doit avoir sa propre **colonne**
+1. Chaque **valeur** doit avoir sa propre **cellule**
 
 --
 
-3. Chacun **observation** doit avoir son propre **rangée**
+2. Chaque **variable** doit avoir sa propre **colonne**
 
-.footnote[Source : [R pour la science des données](https://r4ds.had.co.nz/tidy-donnees.html)  
+--
+
+3. Chaque **observation** doit avoir sa propre **rangée**
+
+.footnote[Source : [R for Data Science](https://r4ds.had.co.nz/tidy-donnees.html)  
 ]
 
 ???
@@ -676,9 +677,9 @@ Les données propres doivent également être "bien rangées". Tu trouveras ci-d
 # Valeurs dans leur propre cellule
 
 ```{r, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
-# CREATE EXAMPLE DATA
+# CREER UN JEU DE DONNEES D'EXEMPLE
 #####################
-clean_data_example_5 <- donnees.frame(case = c("Case 1", "Case 2", "Case 3", "Case 4"), age = c("31, ans", "24, ans", "18, mois", "33, ans")) 
+clean_data_example_5 <- data.frame(case = c("Case 1", "Case 2", "Case 3", "Case 4"), age = c("31, ans", "24, ans", "18, mois", "33, ans")) 
 
 clean_data_example_6 <- clean_data_example_5 %>%
     separate(age, 
@@ -690,7 +691,7 @@ clean_data_example_6 <- clean_data_example_5 %>%
 
 .pull-left[
 
-**En désordre :** Quels changements permettraient de rendre cet ensemble de données plus ordonné ?
+**Désorganisé :** Quels changements permettraient de rendre ce jeu de données plus ordonné ?
 
 ```{r, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -705,7 +706,7 @@ clean_data_example_5  %>%
 
 .pull-right[
 
-**Bien rangé** L'âge et l'unité d'âge sont séparés dans des cellules distinctes.
+**Organisé :** L'âge et l'unité d'âge sont séparés dans des cellules distinctes.
 
 ```{r, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -723,18 +724,18 @@ Commençons par un exemple facile...
 
 # La terminologie
 
-Structurellement, les "cadres de données" en R sont constitués de **des colonnes** et **rangées**.
+Structurellement, les "jeux de données" dans R sont constitués de **colonnes** et **rangées**.
 
 --
 
-Cependant , **"variables"** et **"observations"** sont plus *abstraites* concepts :
+Cependant , les **"variables"** et **"observations"** sont des concepts plus *abstraits* :
 
-- **Variables** première mesure *attribut sous-jacent* (âge, résultat ou date d'apparition)
-- **Observations** se rapportent à un *unité d'analyse*
+- Les **variables** mesurent un *attribut sous-jacent* (par exemple l'âge, résultat ou date d'apparition)
+- Les **observations** sont une *unité d'analyse*
 
 --
 
-Idéalement, ils s'alignent : **colonnes = variables** et **lignes = observations**
+Idéalement, ceux-ci peuvent s'aligner : **colonnes = variables** et **lignes = observations**
 
 ```{r, eval=TRUE, echo=FALSE, out.height="65%"}
 # Using here() alone won't work because Rmd folder becomes the rendering root.
@@ -746,15 +747,15 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 ```
 
-.footnote[Source de l'image : [R pour la science des données](https://r4ds.had.co.nz/tidy-donnees.html)]
+.footnote[Source de l'image : [R for Data Science](https://r4ds.had.co.nz/tidy-donnees.html)]
 
 ---
 
-# Mais il n'est pas toujours évident...
+# Mais ce n'est pas toujours clair...
 
 .pull-left[
 
-**Données non ordonnées**
+**Données désorganisées**
 
 ```{r}
 long_example <- tribble(
@@ -778,7 +779,7 @@ long_example %>%
 
 .pull-right[
 
-**Ranger les données**
+**Données organisées**
 
 ```{r}
 long_example %>%
@@ -794,10 +795,10 @@ class: inverse, center, middle
 
 ## Exercice !
 
-Va sur le lieu du cours  
-Ouvre l'exercice du module 3 et connecte-toi  
-Suis les instructions pour ouvrir ton projet R "ebola" et continuer à coder.  
-Informe un instructeur si tu n'es pas sûr de ce que tu dois faire.
+Allez sur le site du cours
+Ouvrez l'exercice du module 3 et connectez-vous  
+Suivez les instructions pour ouvrir votre projet R "ebola" et continuer à coder.  
+Informez un instructeur si vous n'êtes pas sûr.e.s de ce que vous devez faire.
 
 ```{r, eval=TRUE, echo=FALSE, out.width="100%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
