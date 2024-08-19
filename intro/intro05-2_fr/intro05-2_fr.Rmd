@@ -13,7 +13,7 @@ output:
       countIncrementalSlides: false
     css: xaringan-themer.css
 params:
-  lang: en
+  lang: fr
 ---
 
 class: center, middle, inverse, title-slide
@@ -96,7 +96,7 @@ options(htmltools.dir.version = FALSE)
 
 ```{r, include=FALSE}
 # donnees prep --------------------------------------------------------------------
-surv <- rio::import(here::here("donnees", "linelist_surveillance_nettoyee_20141201.rds"))
+surv <- rio::import(here::here("data", "linelist_surveillance_nettoyee_20141201.rds"))
 
 # gen <- googlesheets4::read_sheet(
 #   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
@@ -154,38 +154,38 @@ surv <- rio::import(here::here("donnees", "linelist_surveillance_nettoyee_201412
 
 ---
 
-# Grammaire graphique
+# Grammaire des Graphiques
 
-## Revenons à cette séquence qui construit un ggplot.
+## Revenons à la séquence qui construit un ggplot.
 
 L'ordre des couches se présente généralement comme suit :
 
-1) **"Ouvrir" la parcelle**
+1) **"Ouverture" du graphique**
 
 --
 
-2) **"Mapper" les colonnes de données**
+2) **"Cartographier" les colonnes de données**
 
 --
 
-3) **Ajoute (`+`) "Couches "geom**
+3) **Ajout (`+`) des couches "geom"**
 
 --
 
-4) **Modifier les "échelles"** comme l'échelle des couleurs ou les ruptures de l'axe des ordonnées
+4) **Modification des "échelles"**, telle que l'échelle des couleurs ou des ruptures de l'axe y
 
 --
 
-5) **Ajoute des éléments de conception d'intrigue "à thème"** tels que les étiquettes d'axe, le titre, la légende, les polices, les tailles de texte, les thèmes d'arrière-plan ou la rotation des axes.
+5) **Ajout d'éléments visuels "à thème"**, tels que le nom des axes, le titre, la légende, les polices, les tailles de texte, les thèmes d'arrière-plan ou la rotation des axes.
 
 ???
-N'oublie pas que même si les commandes sont longues, il est infiniment plus facile de les modifier et de les recycler que dans Excel
+N'oubliez pas que même si les commandes sont longues, il est infiniment plus facile de les modifier et de les recycler que dans Excel
 
 ---
 
 class: inverse, center, middle
 
-## Échelles en {ggplot2}
+## Échelles dans {ggplot2}
 
 ```{r, eval=TRUE, echo=FALSE, out.width="50%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
@@ -196,11 +196,11 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_scales_
 
 ---
 
-# Balances - vue d'ensemble
+# Échelles - vue d'ensemble
 
 Les commandes d'échelle remplacent les valeurs par défaut pour l'affichage de l'esthétique, comme par exemple :
 
-- *Quel* Les couleurs ou les formes à afficher
+- *Quelles* couleurs ou formes à afficher
 - *Comment* les dates ou les proportions sont écrites dans les étiquettes des axes
 - Le min/max et la fréquence des ruptures d'axes
 
@@ -254,7 +254,7 @@ Les commandes d'échelle remplacent les valeurs par défaut pour l'affichage de 
 ```
 
 ```{r, eval=params$lang == "fr", results="asis", echo=FALSE}
-"1) scale_ : ce préfixe ne change jamais." %>%
+"1) scale_ (échelle) : ce préfixe ne change jamais." %>%
   flair("scale", color = "darkgreen") %>%
   flair("aesthetic", color = "cornflowerblue") %>%  
   flair("method", color = "deeppink") %>%
@@ -292,7 +292,7 @@ Les commandes d'échelle remplacent les valeurs par défaut pour l'affichage de 
 ```
 
 ```{r, eval=params$lang == "fr", results="asis", echo=FALSE}
-"2) aesthetic: _fill_ ou _color_ ou _x_ ou _y_ etc." %>%
+"2) aesthetic (esthétique) : _fill_ ou _color_ ou _x_ ou _y_ etc." %>%
   flair("scale", color = "darkgreen") %>%
   flair("aesthetic", color = "cornflowerblue") %>%  
   flair("method", color = "deeppink") %>%
@@ -330,7 +330,7 @@ Les commandes d'échelle remplacent les valeurs par défaut pour l'affichage de 
 ```
 
 ```{r, eval=params$lang == "fr", results="asis", echo=FALSE}
-"3) method: _continuous() ou _discrete() ou _manual() ou _date() etc." %>%
+"3) method (méthode) : _continuous() ou _discrete() ou _manual() ou _date() etc." %>%
   flair("scale", color = "darkgreen") %>%
   flair("aesthetic", color = "cornflowerblue") %>%  
   flair("method", color = "deeppink") %>%
@@ -391,31 +391,31 @@ Les commandes d'échelle remplacent les valeurs par défaut pour l'affichage de 
 
 Quelques exemples de commandes d'échelles :
 
-| Tu veux ajuster                                    | Commande de mise à l'échelle | 
+| Vous voulez ajuster                                    | Commande d'échelle | 
 | -------------------------------------------------- | ---------------------------- |
-| axe des y continu                                  | `scale_y_continuous()`                             | 
-| date axe des x                                     | `scale_x_date()`                             | 
-| axe des x catégorique                              | `scale_x_discrete()`                             | 
-| remplissage, continu                               | `scale_fill_continuous()`                             | 
-| remplissage, continu                               | `scale_fill_gradient()`                             | 
-| couleur, affectation manuelle                      | `scale_color_manual()`                             | 
+| axe y continu                                  | `scale_y_continuous()`                             | 
+| axe x de dates                                    | `scale_x_date()`                             | 
+| axe x, données catégoriques                              | `scale_x_discrete()`                             | 
+| couleur de remplissage, données continues               | `scale_fill_continuous()`                             | 
+| couleur de remplissage, données continues                               | `scale_fill_gradient()`                             | 
+| couleur, modification manuelle                      | `scale_color_manual()`                             | 
 
 ---
 
-# Balances - par défaut
+# Échelles - valeurs par défaut
 
 .pull-left[
 
 ```{r, eval=F, echo=T}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = district,
     fill = sexe)) +
 geom_bar()
 ```
 
-Ci-dessus, le remplissage d'un diagramme à barres utilise la fonction **les couleurs par défaut et les ruptures d'axe**:
+Ci-dessus, le graphique à barres utilise **les valeurs par défaut de couleurs et de ruptures d'axe**:
 
 ]
 
@@ -423,7 +423,7 @@ Ci-dessus, le remplissage d'un diagramme à barres utilise la fonction **les cou
 
 ```{r, eval=T, echo=F}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = district,
     fill = sexe)) +
@@ -434,17 +434,17 @@ theme_gray(base_size = 18)
 ]
 
 ???
-Ignore les étiquettes de l'axe des x qui se chevauchent, pour la simplicité du code, nous ne les ajustons pas dans cette diapositive.
+Ignorez les étiquettes de l'axe x qui se chevauchent, pour garder ce code simple, nous ne les ajustons pas dans cette diapositive.
 
 ---
 
-# Balances - remplissage ajusté
+# Échelles - remplissage ajusté
 
 .pull-left[
 
 ```{r, eval=F, echo=T}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = district,
     fill = sexe)) +
@@ -457,10 +457,10 @@ geom_bar() +
 
 ```
 
-À l'intérieur `scale_fill_manual()` nous fournissons **manuel** missions  
+À l'intérieur de la fonction `scale_fill_manual()` nous fournissons des mofications **manuelles** 
 dans un vecteur `c()`.
 
-.note de bas de page[Utilisation *na.value = "grey"* pour les valeurs manquantes
+.footnote[Utiliser *na.value = "grey"* pour les valeurs manquantes
 ]
 
 ]
@@ -469,7 +469,7 @@ dans un vecteur `c()`.
 
 ```{r, eval=T, echo=F}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = district,
     fill = sexe)) +
@@ -484,7 +484,7 @@ theme_gray(base_size = 16)
 ]
 
 ???
-Discute des arguments na.value= dans la plupart des commandes d'échelle, et de la différence entre avoir des valeurs NA dans les données et avoir une valeur manquante explicite telle que "Inconnu".
+Mentionnez brièvement les `na.value=` dans la plupart des commandes d'échelle, et la différence entre avoir des valeurs NA dans les données et avoir une valeur manquante explicite telle que "Inconnu".
 
 ---
 
@@ -494,7 +494,7 @@ Discute des arguments na.value= dans la plupart des commandes d'échelle, et de 
 
 ```{r, eval=F, echo=T}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = district,
     fill = sexe)) +
@@ -507,7 +507,7 @@ geom_bar() +
 
 Échelles - colorbrewer
 
-.footnote [Utilisation *na.value = "gris"* pour les valeurs manquantes
+.footnote[Utiliser *na.value = "grey"* pour les valeurs manquantes
 ]
 
 ]
@@ -516,7 +516,7 @@ geom_bar() +
 
 ```{r, eval=T, echo=F}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = district,
     fill = sexe)) +
@@ -528,17 +528,17 @@ theme_gray(base_size = 16)
 ]
 
 ???
-Mentionne brièvement les `na.value=` dans la plupart des commandes d'échelle, et la différence entre avoir des valeurs NA dans les données et avoir une valeur manquante explicite telle que "Inconnu".
+Mentionnez brièvement les `na.value=` dans la plupart des commandes d'échelle, et la différence entre avoir des valeurs NA dans les données et avoir une valeur manquante explicite telle que "Inconnu".
 
 ---
 
-# Échelles - axe des ordonnées ajusté
+# Échelles - axe y ajusté
 
 .pull-left[
 
 ```{r, eval=F, echo=T}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = district,
     fill = sexe)) +
@@ -553,7 +553,7 @@ scale_fill_manual(
 *               by = 10))
 ```
 
-En `scale_y_continuous()` nous ajustons les ruptures de l'axe des ordonnées à l'aide de `seq()` pour définir une séquence numérique.
+Dans `scale_y_continuous()` nous ajustons les ruptures de l'axe y à l'aide de `seq()` pour définir une séquence numérique.
 
 ]
 
@@ -561,7 +561,7 @@ En `scale_y_continuous()` nous ajustons les ruptures de l'axe des ordonnées à 
 
 ```{r}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = district,
     fill = sexe)) +
@@ -581,13 +581,13 @@ theme_gray(base_size = 18)
 
 ---
 
-# Échelles - commence les axes à 0
+# Échelles - commencer les axes à 0
 
 .pull-left[
 
 ```{r, eval=F, echo=T}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = district,
     fill = sexe)) +
@@ -605,7 +605,7 @@ scale_y_continuous(
 *  expand = c(0, 0))
 ```
 
-En `scale_x_` ou `scale_y_` utilise `expand = c(0,0)` pour supprimer l'espace excédentaire autour de l'intrigue.
+Dans `scale_x_` ou `scale_y_` utilisez `expand = c(0,0)` pour supprimer l'espace supplémentaire autour du graphique.
 
 ]
 
@@ -613,7 +613,7 @@ En `scale_x_` ou `scale_y_` utilise `expand = c(0,0)` pour supprimer l'espace ex
 
 ```{r}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = district,
     fill = sexe)) +
@@ -642,12 +642,12 @@ theme_grey(base_size = 18)
 
 ```{r, eval=F, echo=T}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram()
 ```
 
-L'échelle par défaut des axes de date varie en fonction de l'étendue de tes données.
+L'échelle par défaut des axes de date varie en fonction de l'étendue de vos données.
 
 ]
 
@@ -655,7 +655,7 @@ L'échelle par défaut des axes de date varie en fonction de l'étendue de tes d
 
 ```{r}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram()+
 theme_grey(base_size = 18)
@@ -666,13 +666,13 @@ theme_grey(base_size = 18)
 
 ---
 
-# Balances - ruptures de l'étiquette de la date
+# Échelles - ruptures de l'étiquette de la date
 
 .pull-left[
 
 ```{r, eval=F, echo=params$lang == "en"}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram() +
 *scale_x_date(
@@ -682,7 +682,7 @@ geom_histogram() +
 
 ```{r, eval=F, echo=params$lang == "fr"}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram() +
 *scale_x_date(
@@ -692,7 +692,7 @@ geom_histogram() +
 
 ```{r, eval=F, echo=params$lang == "ru"}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram() +
 *scale_x_date(
@@ -702,7 +702,7 @@ geom_histogram() +
 
 ```{r, eval=F, echo=params$lang == "es"}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram() +
 *scale_x_date(
@@ -710,11 +710,11 @@ geom_histogram() +
 
 ```
 
-Ajuste les étiquettes des axes avec `scale_x_date()`.
+Ajustez les étiquettes des axes avec `scale_x_date()`.
 
-Utilise `date_breaks=` des valeurs comme "1 semaine", "2 semaines" ou "3 mois".
+Utilisez des valeurs pour `date_breaks=` telles que "1 semaine", "2 semaines" ou "3 mois".
 
-Ces valeurs permettent d'ajuster la rupture d'axe *étiquettes* et non les cases de l'histogramme !
+Ces valeurs permettent d'ajuster les *étiquettes* pour chaque rupture d'axe et non les barres de l'histogramme !
 
 ]
 
@@ -722,11 +722,11 @@ Ces valeurs permettent d'ajuster la rupture d'axe *étiquettes* et non les cases
 
 ```{r}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram() +
 scale_x_date(
-  date_breaks = "2 mois") +
+  date_breaks = "2 months") +
 theme_grey(base_size = 18)
 
 ```
@@ -734,7 +734,7 @@ theme_grey(base_size = 18)
 ]
 
 ???
-Pour des conseils sur les bins de geom\_histogram(), voir la page Epi R Handbook epicurves.
+Pour des conseils sur les barres de geom\_histogram(), voir la page du Epi R Handbook epicurves.
 
 ---
 
@@ -744,21 +744,21 @@ Pour des conseils sur les bins de geom\_histogram(), voir la page Epi R Handbook
 
 ```{r, eval=F, echo=T}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram() +
 scale_x_date(
-  date_breaks = "2 mois",
+  date_breaks = "2 months",
 * date_labels = "%d %b\n%Y")
 
 ```
 
-Spécifie le format de l'étiquette de date à `date_labels=` à l'aide  
-["syntaxe "strptime](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime)
+Spécifiez le format de l'étiquette de date à l'aide de `date_labels=` en utilisant la  
+[syntaxe "strptime"](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime)
 
 `"%d %b %Y"` pour JJ MM AAAA.
 
-.note de bas de page [Voir le manuel Epi R [Epicurves](https://epirhandbook.com/epidemic-curves.html) et [Cordes](https://epirhandbook.com/characters-and-strings.html) chapitres
+.footnote[Voir les chapites [Epicurves](https://epirhandbook.com/epidemic-curves.html) et [Strings](https://epirhandbook.com/characters-and-strings.html) du Manuel Epi R
 ]
 
 ]
@@ -767,11 +767,11 @@ Spécifie le format de l'étiquette de date à `date_labels=` à l'aide
 
 ```{r}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram() +
 scale_x_date(
-  date_breaks = "2 mois",
+  date_breaks = "2 months",
   date_labels = "%d %b\n%Y"
 ) +
 theme_grey(base_size = 18)
@@ -785,13 +785,13 @@ theme_grey(base_size = 18)
 
 ---
 
-# Échelles - étiquettes auto-efficaces
+# Échelles - étiquettes efficaces automatiques
 
 .pull-left[
 
 ```{r, eval=F, echo=params$lang == "en"}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram() +
 scale_x_date(
@@ -802,7 +802,7 @@ scale_x_date(
 
 ```{r, eval=F, echo=params$lang == "fr"}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram() +
 scale_x_date(
@@ -813,7 +813,7 @@ scale_x_date(
 
 ```{r, eval=F, echo=params$lang == "ru"}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram() +
 scale_x_date(
@@ -824,7 +824,7 @@ scale_x_date(
 
 ```{r, eval=F, echo=params$lang == "es"}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram() +
 scale_x_date(
@@ -833,9 +833,9 @@ scale_x_date(
 
 ```
 
-Ou bien, assigne simplement `labels=` à `label_date_short()` de [{scales}](https://scales.r-lib.org/)
+Ou bien, assignez simplement `labels=` à la fonction `label_date_short()` du paquet [{scales}](https://scales.r-lib.org/)
 
-L'année n'est pas répétée sur chaque étiquette.
+L'année ne sera pas répétée sur chaque étiquette.
 
 ]
 
@@ -843,7 +843,7 @@ L'année n'est pas répétée sur chaque étiquette.
 
 ```{r}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes)) +
 geom_histogram() +
 scale_x_date(
@@ -859,7 +859,7 @@ theme_grey(base_size = 18)
 
 class: inverse, center, middle
 
-## Étiquettes en {ggplot2}
+## Étiquettes dans {ggplot2}
 
 ```{r, eval=TRUE, echo=FALSE, out.width="50%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
@@ -870,13 +870,13 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_scales_
 
 ---
 
-# Étiquettes de tracé
+# Étiquettes de graphique
 
 .pull-left[
 
 ```{r, echo=TRUE, eval=FALSE, tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = date_symptomes,
     fill = hopital)) +
@@ -894,7 +894,7 @@ scale_fill_brewer(type = "qual",
 
 ```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(x = date_symptomes, fill = hopital)) +
 geom_histogram() +
 scale_x_date(
@@ -909,13 +909,13 @@ theme_grey(base_size = 18)
 
 ---
 
-# Étiquettes de tracé
+# Étiquettes de graphique
 
 .pull-left[
 
 ```{r, echo=params$lang == "en", eval=FALSE, tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = date_symptomes,
     fill = hopital)) +
@@ -937,7 +937,7 @@ scale_fill_brewer(type = "qual",
 
 ```{r, echo=params$lang == "fr", eval=FALSE, tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = date_symptomes,
     fill = hopital)) +
@@ -959,7 +959,7 @@ scale_fill_brewer(type = "qual",
 
 ```{r, echo=params$lang == "ru", eval=FALSE, tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = date_symptomes,
     fill = hopital)) +
@@ -981,7 +981,7 @@ scale_fill_brewer(type = "qual",
 
 ```{r, echo=params$lang == "es", eval=FALSE, tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = date_symptomes,
     fill = hopital)) +
@@ -1001,7 +1001,7 @@ scale_fill_brewer(type = "qual",
 ) +
 ```
 
-Utilise `labs()` comme ci-dessus. Remarque : modifie le titre de la légende via l'esthétique qui a créé la légende (par ex. `fill=`).
+Utilisez `labs()` comme ci-dessus. Remarque : modifiez le titre de la légende via l'esthétique qui a créé la légende (par ex. `fill=`).
 
 ]
 
@@ -1009,7 +1009,7 @@ Utilise `labs()` comme ci-dessus. Remarque : modifie le titre de la légende via
 
 ```{r, echo=FALSE, eval=params$lang == "en", tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = date_symptomes,
     fill = hopital)) +
@@ -1032,7 +1032,7 @@ theme_grey(base_size = 18)
 
 ```{r, echo=FALSE, eval=params$lang == "fr", tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = date_symptomes,
     fill = hopital)) +
@@ -1055,7 +1055,7 @@ theme_grey(base_size = 18)
 
 ```{r, echo=FALSE, eval=params$lang == "ru", tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = date_symptomes,
     fill = hopital)) +
@@ -1078,7 +1078,7 @@ theme_grey(base_size = 18)
 
 ```{r, echo=FALSE, eval=params$lang == "es", tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = date_symptomes,
     fill = hopital)) +
@@ -1105,7 +1105,7 @@ theme_grey(base_size = 18)
 
 # Étiquettes dynamiques
 
-Incorporer un code à l'intérieur `str_glue("text here {CODE HERE} text here")`  
+Incorporez un code à l'intérieur `str_glue("texte ici {CODE ICI} texte ici")`  
 Le code sera mis à jour avec les données.
 
 ```{r, eval=params$lang == "en", echo=params$lang == "en"}
@@ -1142,12 +1142,12 @@ str_glue("{fmt_count(surv, is.na(date_symptomes))} случаи с отсутс�
 str_glue("{fmt_count(surv, is.na(date_symptomes))} casos que faltan para el inicio y non se muestran")
 ```
 
-.footnote[Voir la [Manuel de l'Epi R Chapitre sur les cordes](https://epirhandbook.com/characters-and-strings.html#dynamic-strings) et le chapitre {stringr} paquet.
-
+.footnote[Voir le chapitre du Manuel de l'Epi R sur les [Strings](https://epirhandbook.com/characters-and-strings.html#dynamic-strings) et le chapitre sur le paquet {stringr}.
 ]
 
+
 ???
-Explique que dans str\_glue, tout ce qui est entre crochets sera exécuté comme du code R.
+Expliquez brièvement que dans str\_glue, tout ce qui est entre crochets sera exécuté comme du code R.
 
 ---
 
@@ -1166,17 +1166,17 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "ggplot_scales_
 
 # Thèmes
 
-Les thèmes sont **sans données** des caractéristiques de conception, par exemple :
+Les thèmes sont des ajustements visuels **sans données**, par exemple :
 
-- Arrière-plan du canevas de tracé
+- Arrière-plan du graphique
 - Taille, couleur et orientation du texte
 - Position de la légende
 
 --
 
-Le pouvoir de la {ggplot2} - tu peux faire des ajustements extrêmement petits
+Le pouvoir du paquet {ggplot2} - vous pouvez faire des ajustements extrêmement petits
 
-... si tu le souhaites.
+... si vous le souhaitez.
 
 ---
 
@@ -1184,7 +1184,7 @@ Le pouvoir de la {ggplot2} - tu peux faire des ajustements extrêmement petits
 
 .pull-left[
 
-["Thèmes complets"](https://ggplot2.tidyverse.org/reference/ggtheme.html) sont faciles à ajouter.
+[Des "thèmes complets"](https://ggplot2.tidyverse.org/reference/ggtheme.html) sont faciles à ajouter.
 
 ```{r, eval=F, echo=params$lang == "en"}
 # Try one of these...
@@ -1230,7 +1230,7 @@ theme_void()
 theme_classic()
 ```
 
-Essaie l'argument `base_size = 16` pour augmenter rapidement la taille du texte.
+Essayez l'argument `base_size = 16` pour augmenter rapidement la taille du texte.
 
 ]
 
@@ -1238,7 +1238,7 @@ Essaie l'argument `base_size = 16` pour augmenter rapidement la taille du texte.
 
 ```{r, echo=FALSE, eval=TRUE, tidy=FALSE}
 
-minimal <- ggplot(donnees = surv,
+minimal <- ggplot(data = surv,
        mapping = aes(
          x = age_ans,
          y = ht_cm),    
@@ -1252,7 +1252,7 @@ minimal <- ggplot(donnees = surv,
 
 
 
-bw <- ggplot(donnees = surv,
+bw <- ggplot(data = surv,
        mapping = aes(
          x = age_ans,
          y = ht_cm),    
@@ -1266,7 +1266,7 @@ bw <- ggplot(donnees = surv,
 
 
 
-grey <- ggplot(donnees = surv,
+grey <- ggplot(data = surv,
        mapping = aes(
          x = age_ans,
          y = ht_cm),    
@@ -1279,7 +1279,7 @@ grey <- ggplot(donnees = surv,
   theme_grey(base_size = 18)
 
 
-dark <- ggplot(donnees = surv,
+dark <- ggplot(data = surv,
        mapping = aes(
          x = age_ans,
          y = ht_cm),    
@@ -1293,7 +1293,7 @@ dark <- ggplot(donnees = surv,
 
 
 
-void <- ggplot(donnees = surv,
+void <- ggplot(data = surv,
        mapping = aes(
          x = age_ans,
          y = ht_cm),    
@@ -1307,7 +1307,7 @@ void <- ggplot(donnees = surv,
 
 
 
-light <- ggplot(donnees = surv,
+light <- ggplot(data = surv,
        mapping = aes(
          x = age_ans,
          y = ht_cm),    
@@ -1336,11 +1336,11 @@ themes_plots
 
 # Micro-ajustements
 
-Effectue des micro-ajustements au sein de `theme()`.
+Effectuez des micro-ajustements au sein de la fonction `theme()`.
 
-Fournis des arguments pour chaque petit changement que tu veux faire, par exemple :
+Fournissez des arguments pour chaque petit changement que vous voulez faire, par exemple :
 
-| Composant de tracé                                 | Argument thématique          | 
+| Composant du graphique                                | Argument de theme          | 
 | -------------------------------------------------- | ---------------------------- |
 | position de la légende                             | `legend.position = `                             | 
 | direction de la légende (horizontale ou verticale) | `legend.direction = `                             | 
@@ -1349,14 +1349,14 @@ Fournis des arguments pour chaque petit changement que tu veux faire, par exempl
 
 Ceux-ci peuvent être *très très* spécifiques :
 
-| Composante de l'intrigue                           | Argument thématique          | 
+| Composante du graphique                       | Argument de theme          | 
 | -------------------------------------------------- | ---------------------------- |
-| Longueur des ticks de l'axe X                      | `axis.ticks.length.x = `                             | 
+| Longueur des lignes de l'axe X                      | `axis.ticks.length.x = `                             | 
 
 Il existe littéralement des centaines d'options.
 
 ???
-Pense à tous les ajustements minutieux que tu fais lorsque tu crées un graphique dans Excel. Combien de fois dois-tu refaire toutes ces étapes ? Toutes ces étapes peuvent être codées, ce qui rend le tracé ajustable.
+Pensez à tous les ajustements minutieux que vous faites lorsque vous créez un graphique dans Excel. Combien de fois devez-vous refaire toutes ces étapes ? Toutes ces étapes peuvent être codées, ce qui rend le graphique facilement modifiable
 
 ---
 
@@ -1364,11 +1364,11 @@ Pense à tous les ajustements minutieux que tu fais lorsque tu crées un graphiq
 
 .pull-left[
 
-Effectue des micro-ajustements au sein de `theme()`.
+Effectuez des micro-ajustements au sein de `theme()`.
 
 ```{r, echo=params$lang == "en", eval=FALSE, tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = age_ans,
     y = ht_cm,
@@ -1391,7 +1391,7 @@ theme_minimal(base_size = 16) +
 
 ```{r, echo=params$lang == "fr", eval=FALSE, tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = age_ans,
     y = ht_cm,
@@ -1414,7 +1414,7 @@ theme_minimal(base_size = 16) +
 
 ```{r, echo=params$lang == "ru", eval=FALSE, tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = age_ans,
     y = ht_cm,
@@ -1437,7 +1437,7 @@ theme_minimal(base_size = 16) +
 
 ```{r, echo=params$lang == "es", eval=FALSE, tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = age_ans,
     y = ht_cm,
@@ -1462,11 +1462,11 @@ theme_minimal(base_size = 16) +
 
 .pull-right[
 
-La syntaxe demande de l'entraînement - voir [cette liste](https://ggplot2.tidyverse.org/reference/theme.html) des arguments spécifiques aux fonctionnalités.
+La syntaxe demande de l'entraînement - voir [cette liste](https://ggplot2.tidyverse.org/reference/theme.html) des arguments spécifiques pour chaque fonctionnalité.
 
 ```{r, echo=FALSE, eval=params$lang == "en", tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = age_ans,
     y = ht_cm,
@@ -1489,7 +1489,7 @@ labs(
 
 ```{r, echo=FALSE, eval=params$lang == "fr", tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = age_ans,
     y = ht_cm,
@@ -1512,7 +1512,7 @@ labs(
 
 ```{r, echo=FALSE, eval=params$lang == "ru", tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = age_ans,
     y = ht_cm,
@@ -1535,7 +1535,7 @@ labs(
 
 ```{r, echo=FALSE, eval=params$lang == "es", tidy=FALSE}
 ggplot(
-  donnees = surv,
+  data = surv,
   mapping = aes(
     x = age_ans,
     y = ht_cm,
@@ -1559,15 +1559,15 @@ labs(
 ]
 
 ???
-Parle de ces arguments de theme() et explique comment ils se composent de deux parties, tout comme `mapping = aes()`.
-Explique que personne ne les a tous mémorisés, mais que les plus courants sont faciles à retenir une fois que tu les utilises suffisamment.  
-N'oublie pas de les ajouter APRÈS chaque thème complet.
+Discutez brièvement ces arguments de theme() et expliquez comment ils se composent de deux parties, tout comme `mapping = aes()`.
+Expliquez que personne ne les a tous mémorisés, mais que les plus courants sont faciles à retenir une fois que vous les utilisez suffisamment.  
+N'oubliez pas de les ajouter APRÈS chaque thème complet.
 
 ---
 
 # Thèmes - `element_text()`
 
-Si tu changes *texte* les micro-ajustements doivent souvent être effectués *dans* `element_text()`
+Si vous changez le *texte*, les micro-ajustements doivent être effectués *dans* `element_text()`
 
 ```{r, eval=F, echo=T}
 theme(
@@ -1581,19 +1581,19 @@ theme(
 Il s'agit d'une syntaxe similaire à `mapping = aes()`
 
 ???
-Parle de ces arguments theme() et explique comment ils se composent de deux parties, tout comme `mapping = aes()`.
-Explique que personne ne les a tous mémorisés, mais que les plus courants sont faciles à retenir une fois que tu les utilises suffisamment.
+Discutez brièvement ces arguments de theme() et expliquez comment ils se composent de deux parties, tout comme `mapping = aes()`.
+Expliquez que personne ne les a tous mémorisés, mais que les plus courants sont faciles à retenir une fois que vous les utilisez suffisamment.
 
 ---
 
 class: inverse, center, middle
 
-## Fais de l'exercice !
+## Exercice !
 
-Va sur le lieu du cours  
-Ouvre l'exercice du module 5, partie 2, et connecte-toi.  
-Suis les instructions pour continuer à coder dans ton projet R "ebola".
-Informe un instructeur si tu n'es pas sûr de ce que tu dois faire.
+Allez sur le site du cours
+Ouvrez l'exercice du module 5, partie 2, et connectez-vous  
+Suivez les instructions pour continuer à coder votre projet R "ebola".
+Informez un instructeur si vous n'êtes pas sûr.e.s de ce que vous devez faire.
 
 ```{r, eval=TRUE, echo=FALSE, out.width="50%"}
 # adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
