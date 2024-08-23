@@ -13,7 +13,7 @@ output:
       countIncrementalSlides: false
     css: xaringan-themer.css
 params:
-  lang: en
+  lang: fr
 ---
 
 class: center, middle, inverse, title-slide
@@ -59,7 +59,7 @@ pacman::p_load(
 
 # donnees prep --------------------------------------------------------------------
 # linelist_raw <- rio::import(here::here("donnees", "linelist_raw.xlsx"))
-linelist_surv <- rio::import(here::here("donnees", "linelist_surveillance_nettoyee_20141201.rds"))
+linelist_surv <- rio::import(here::here("data", "linelist_surveillance_nettoyee_20141201.rds"))
 
 # gen <- googlesheets4::read_sheet(
 #   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
@@ -114,82 +114,82 @@ style_mono_accent(
 
 # Introduction à R pour l'épidémiologie appliquée
 
-### Joindre des cadres de données
+### Joindre des jeux de données
 
 contact@appliedepi.org
 ---
 
-# Aujourd'hui : objectifs et calendrier
+# Aujourd'hui : objectifs et planning
 
-**Dans ce module, nous avons pour objectif de t'aider à :**
+**Dans ce module, nous avons pour objectif de vous aider à :**
 
-- Apprends à joindre deux ou plusieurs cadres de données ensemble.
-- Apprends les différentes jointures et l'utilisation de la clé d'identification/des colonnes d'identification.
-- S'entraîner à faire pivoter les données d'un format large à un format long pour créer des "chronologies" de patients.
-- Convertir les variables en classe "facteur" à l'aide de la fonction {forcats} paquet
+* Apprendre à joindre deux ou plusieurs jeux de données
+* Apprendre les différentes jointures et l'utilisation d'un identifiant/des colonnes d'identification
+* S'entraîner à faire pivoter les données d'un format large à un format long pour créer des "chronologies" des symptômes chez les patients
+* Convertir les variables en classe "facteur" à l'aide du paquet {forcats}
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
   ~Time, ~Topic,
-  "20 minutes", "Demo: Joins",
-  "1h 15 minutes", "Exercise: Joining donnees", 
-  "15 minutes", "Demo: Pivoting donnees", 
-  "1 hour",  "Exercise: Pivoting donnees & Factors", 
-  "10 minutes", "Plenary debrief" 
+  "20 minutes", "Démonstration: Jointures",
+  "1h 15 minutes", "Exercice: Joindre des données", 
+  "15 minutes", "Démonstration: Pivoter des données", 
+  "1 heure",  "Exercice: Pivoter des données & les facteurs", 
+  "10 minutes", "Débrief" 
 
 )
 
 outline %>% 
   flextable::qflextable() %>% 
-  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+  flextable::add_footer_lines("Prenez des pauses quand vous en avez besoin pendant l'exercice")
 ```
 
 ---
 
 class: inverse, center, middle
 
-# Joindre des cadres de données
+# Joindre des jeux de données
 
-*Joindre, fusionner, unir, combiner, assembler, lier, faire correspondre, unir* cadres de données
+*Joindre, fusionner, unir, combiner, assembler, lier, correspondre, ...* des jeux de données
 
-.footnote[Merci à Garrick Aden-Buie pour avoir fourni les gifs utilisés dans ces diapositives].
+.footnote[Merci à Garrick Aden-Buie pour les gifs utilisés dans ces diapositives].
 
 ???
 
-Explique cela :
+Expliquez ceci :
 
-- les personnes venant d'horizons différents peuvent avoir des mots différents pour ce type d'opération : joindre, union, fusionner, combiner, assembler...
-- Dans ce module, nous utiliserons le mot "joindre" pour nous en tenir à l'expression "joindre". `join_` de Tidyverse ainsi qu'aux fonctions bien connues de SQL. L'équivalent de base en R est `merge`.
+- En fonction de votre milieu, il se peut que différents types de mots soient utilisés pour décrire ce type d'opération : joindre, unir, fusionner, combiner, assembler...
+- Dans ce module, nous utiliserons le mot "joindre" pour faire référence aux fonctions de la famille `join_` du paquet tidyverse et aussi aux fonctions populaires de SQL. L'équivalent dans le language R de base est `merge`.
 
 ---
 
-# Situation : les données sont dispersées entre les cadres de données.
+# Situation : les données sont dispersées entre les jeux de données
 
 ???
 
-Donne des exemples de situations qu'ils pourraient rencontrer pour souligner à quel point c'est courant :
+Donnez des exemples de situations qui pourraient se produirent pour souligner à quel point cette situation est courante :
 
 - relier les données de laboratoire aux résultats cliniques des patients
-- relier les données des patients aux données du SIG,
+- relier les données des patients aux données SIG,
 - relier les données de mobilité de Google aux tendances des maladies infectieuses
-- autre exemple pertinent pour leur travail suggéré par l'enquête auprès des participants
+- autre exemples pertinent dans leur domaine, peut-être suggéré par le formulaire d'avant-cours rempli par les participants
 
 ---
 
-# Types de jonctions
+# Types de jointures
 
 #### Types de jointures
 
-- **Jonction par mutation** Ajouter une nouvelle variable à un cadre de données
-  - **Jointure gauche** / **Jointure droite**: ajouter des données à un cadre de données
-  - **Jointure complète**: combine deux cadres de données complets
-  - **Jointure interne**: prend l'intersection de deux cadres de données
-- **Filtrer les jointures**: filtrer un cadre de données en fonction d'un autre cadre de données
-  - **Anti jointure** / **semi-joint**
+- **Jointure par mutation** : ajouter une nouvelle variable à un jeu de données
+  - **Jointure gauche** / **Jointure droite** : ajouter des données à un jeu de données
+  - **Jointure complète** : combiner deux jeux de données complets
+  - **Jointure interne** : prendre l'intersection de deux jeux de données
+- **Filtrer les jointures** : filtrer un jeu de données en fonction d'un autre jeu de données
+  - **Anti join** / **jointure partielle (semi join)**
 
 #### Syntaxe générale
 
-- Nous utilisons le `join` de {dplyr} paquet
+- Nous utilisons les fonctions `join` du paquet {dplyr}
 - Syntaxe homogène :
 
 ```{r, include=TRUE, echo=TRUE, eval=FALSE}
@@ -198,9 +198,9 @@ xxx_join(dataframe_1, dataframe_2,
 ```
 
 ???
-Insiste sur le fait qu'il existe globalement deux types de jointures, les jointures mutantes, qui ajouteront de nouvelles colonnes et affecteront potentiellement le nombre de lignes, et les jointures filtrantes, qui n'ajouteront pas de nouvelles colonnes, mais modifieront simplement les lignes d'un ensemble de données.
+Insistez sur le fait qu'il existe globalement deux types de jointures, les jointures mutantes, qui ajouteront de nouvelles colonnes et affecteront potentiellement le nombre de rangées, et les jointures filtrantes, qui n'ajouteront pas de nouvelles colonnes, mais modifieront simplement les rangées d'un jeu de données.
 
-Explique que la fonction se présente toujours sous cette forme, deux cadres de données, le premier étant surnommé *gauche* le second est surnommé l'image de gauche. *droite* dataframe. Les *par* fournit les colonnes utilisées pour identifier les correspondances entre les observations.
+Expliquez que la fonction se présente toujours sous cette forme, avec deux jeux de données, le premier étant nommé le jeu de données de _gauche_ et le second étant celui de _droite_. L'argument *by* (càd "par") : fournit les colonnes utilisées pour identifier les correspondances entre les observations.
 
 ---
 
@@ -224,10 +224,10 @@ patients <- tribble(
 
 hosp <- tribble(
      ~id_patient, ~resultat,
-      "5fe599", "Died",
-      "8689b7", "Recovered",
-      "11f8ea", "Recovered",
-      "ebd24z", "Died")
+      "5fe599", "Mort.e",
+      "8689b7", "Rétabli.e",
+      "11f8ea", "Rétabli.e",
+      "ebd24z", "Mort.e")
 
 
 # hosp <- linelist_surv %>% 
@@ -236,11 +236,11 @@ hosp <- tribble(
 #      head(3)
 ```
 
-Faisons une démonstration avec ces petits ensembles de données : nous voulons *joindre* les deux cadres de données :
+Faisons une démonstration avec ces petits jeux de données : nous voulons *joindre* les deux jeux de données :
 
 .pull-left[
 
-`patients` *(Informations sur les patients)*
+`patients` *(informations sur les patients)*
 
 ```{r, include=TRUE, echo=FALSE}
 patients %>% 
@@ -253,7 +253,7 @@ patients %>%
 
 .pull-right[
 
-`hosp` *(Info sur les hospitalisations)*
+`hosp` *(informations sur les hospitalisations)*
 
 ```{r, include=TRUE, echo=FALSE}
 hosp %>% 
@@ -266,25 +266,25 @@ hosp %>%
 
 <br>
 
-Les **CLÉ** reliant les deux cadres de données sont **numéro de dossier** et **id\_patient**
+Les colonnes **CLÉS** reliant les deux jeux de données sont **cas_id** et **id_patient**
 
 ???
-Pour les besoins des diapositives, nous avons créé deux *mini* dataframes pour voir ce qui se passe, l'un avec les caractéristiques du patient (âge et sexe), l'autre avec l'hôpital dans lequel le patient a été hospitalisé.
-**Note que les deux ensembles de données ont en commun l'identifiant du patient, mais un nom légèrement différent (une situation très courante)**. Nous appelons cette colonne la colonne KEY, ou colonne des identifiants. Elle permet de *correspondre* observations dans les deux cadres de données.
+Pour cet example, nous avons créé deux _petits_ jeux de données pour voir ce qui se passe, l'un avec les caractéristiques du patient (âge et sexe), l'autre avec l'hôpital dans lequel le patient a été hospitalisé.
+**Notez que les deux jeux de données ont l'identifiant du patient en commun, mais un nom légèrement différent (une situation très courante)**. Nous appelerons cette colonne la colonne CLÉ, ou colonne des identifiants. Elle permet de faire *correspondre* les observations entre les deux jeux de données.
 
 ---
 
-# Joint à gauche
+# Jointure gauche
 
 .pull-left[
 
-- Les jonctions à gauche sont souvent utilisées pour **ajouter des colonnes** à une base de données.
+* Les jointures gauche sont souvent utilisées pour **ajouter des colonnes** à un jeu de données
 
-- Toutes les lignes du cadre de données de base (gauche) sont conservées
+* Toutes les rangées du jeu de données de base (gauche) sont conservées
 
-- Les lignes de la deuxième base de données (droite) qui correspondent sont jointes.
+* Les lignes du deuxième jeu de données (droite) qui correspondent sont jointes.
 
-- Les colonnes du deuxième cadre de données sont ajoutées (avec `NA` en comblant les lacunes éventuelles)
+* Les colonnes du deuxième jeu de données sont ajoutées (avec `NA` comblant les données manquantes éventuelles)
 
 ]
 
@@ -297,7 +297,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 ]
 
 ???
-Parfois appelé gauche *extérieur* joindre
+Parfois appelées jointures gauches *extérieures*
 
 ---
 
@@ -353,7 +353,7 @@ left_join(patients,
 
 ---
 
-# Jonction à gauche
+# Jointure gauche
 
 .pull-left[
 
@@ -409,17 +409,17 @@ left_join(patients,
 
 ---
 
-# Joint à droite
+# Jointure droite
 
 .pull-left[
 
-- Peu utilisé
+- Peu utilisée
 
-- Conserve les lignes appariées de la base de données de référence.
+- Conserve les lignes correspondantes du jeu de données de référence.
 
-- Ajoute *non appariées* lignes du deuxième cadre de données
+- Ajoute les rangées *non correspondantes* du deuxième jeu de données
 
-- Ajoute les colonnes du deuxième cadre de données
+- Ajoute les colonnes du deuxième jeu de données
 
 ]
 
@@ -433,7 +433,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 ---
 
-# Joint à droite
+# Jointure droite
 
 .pull-left[
 
@@ -488,13 +488,13 @@ N'est pas utilisé très souvent.
 
 ---
 
-# Joints complets
+# Jointure complète
 
 .pull-left[
 
 - La plus inclusive des jointures
 
-- Garde **toutes les lignes des deux bases de données**
+- Garde **toutes les lignes des deux jeux de données**
 
 - Remplit les espaces avec `NA` si nécessaire
 
@@ -508,11 +508,11 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 ]
 
-.note de bas de page [Parfois appelée *Jointure externe complète* ou *Jointure externe*]
+.footnote[Parfois appelée *jointure externe complète* ou *jointure externe*]
 
 ---
 
-# Parfois appelée *Jointure externe complète* ou *Jointure externe*
+# Parfois appelée *jointure externe complète* ou *jointure externe*
 
 .pull-left[
 
@@ -561,7 +561,7 @@ full_join(patients,
 ]
 
 ???
-C'est le moment d'insister sur la cohérence des arguments de la famille de fonctions join : tu les écris toujours de la même façon
+C'est le moment d'insister sur la cohérence des arguments de la famille de fonctions join : ils sont toujours écris de la même façon
 
 ---
 
@@ -569,11 +569,11 @@ C'est le moment d'insister sur la cohérence des arguments de la famille de fonc
 
 .pull-left[
 
-- Le plus **restrictif** des jointures
+- La plus **restrictive** des jointures
 
-- Prend le **intersection** entre deux cadres de données : ne garde que les lignes qui correspondent
+- Prend l'**intersection** entre deux jeux de données : ne garde que les lignes qui correspondent
 
-- **Écarter** lignes sans correspondance
+- **Enlève** lignes sans correspondance
 
 ]
 
@@ -585,14 +585,14 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 ]
 
-.footnote[Également appelé *jointure naturelle*]
+.footnote[Également appelée *jointure naturelle*]
 
 ???
-Les puces disent toutes un peu la même chose, mais je pense qu'il est bon de s'assurer que tout le monde comprend ce que cela signifie de prendre l'initiative. *intersection*.
+Bien qu'elles paraîssent similaires, il est important de s'assurer que tout le monde comprennent ce qu'est la signification de prendre l'_intersection_.
 
 ---
 
-# Jointure intérieure
+# Jointure interne
 
 .pull-left[
 
@@ -646,7 +646,7 @@ inner_join(patients,
 
 # Conseils de syntaxe
 
-- Les jointures peuvent être utilisées dans **pipelines** (le dataframe pipé est le dataframe *gauche* gauche) :
+- Les jointures peuvent être utilisées dans des **pipelines** (le jeu de donnée pipé est celui de *gauche*) :
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
 patients %>%               
@@ -656,7 +656,7 @@ patients %>%
 
 --
 
-- Syntaxe simple si **la colonne de l'identificateur a le même nom** dans les deux cadres de données :
+- La syntaxe est simple si **la colonne de l'identificateur a le même nom** dans les deux jeux de données :
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
 left_join(patients, hosp,       
@@ -665,7 +665,7 @@ left_join(patients, hosp,
 
 --
 
-- Passe **plusieurs colonnes** à utiliser comme identifiants :
+- Pour passer **plusieurs colonnes** à utiliser comme identifiants :
 
 ```{r, echo=TRUE, eval=FALSE, include=TRUE}
 left_join(dataframe1, dataframe2,       
@@ -676,17 +676,17 @@ left_join(dataframe1, dataframe2,
 
 ---
 
-# Filtrer les jointures
+# Jointure filtrante
 
-- Les jointures filtrantes sont utilisées pour **filtrer les lignes** de la *ligne de base* sur la base des correspondances dans la deuxième base de données.
-- Filtrage des jointures *n'ajoute pas de colonnes ou de lignes*
+- Les jointures filtrantes sont utilisées pour **filtrer les lignes** du jeu de donnée *de base* sur la base des correspondances dans le deuxième jeu de données.
+- Les jointures filtrantes *n'ajoutent pas de colonnes ou de lignes*
 
 .pull-left[
 
-#### Anti joint
+#### Anti join
 
-Conserve les lignes de base  
-**sans correspondance dans d'autres cadres de données**
+Conserve les lignes du jeu de donnée de base qui n'ont
+**pas de correspondance dans d'autres jeux de données**
 
 ```{r, eval=TRUE, echo=FALSE, out.width="50%"}
 knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "anti-join.gif")))
@@ -696,10 +696,10 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 
 .pull-right[
 
-#### Semi joint
+#### Semi join (jointure partielle)
 
-Conserve les lignes de base  
-**avec une correspondance dans un autre cadre de données**
+Conserve les lignes du jeu de donnée de base qui
+**ont une correspondance dans un autre jeu de données**
 
 ```{r, eval=TRUE, echo=FALSE, out.width="50%"}
 knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "semi-join.gif")))
@@ -710,7 +710,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots",
 **Les jointures filtrantes ne dupliquent jamais les lignes, elles peuvent seulement les supprimer.**
 
 ???
-Les anti jointures sont très utiles pour voir quelles lignes d'un ensemble de données ne sont pas dupliquées. *pas* correspondent pas
+Les anti join sont très utiles pour voir quelles lignes d'un jeu de données n'ont *pas* de correspondance.
 
 ---
 
@@ -718,7 +718,7 @@ Les anti jointures sont très utiles pour voir quelles lignes d'un ensemble de d
 
 ---
 
-# Chevauchement des noms de colonnes
+# Noms de colonnes identiques
 
 ```{r, eval=TRUE, echo=FALSE}
 df1 <- tibble(ID = c("id_1", "id_2", "id_3", "id_4"), sexe = c("F", "M", "M", "F"))
@@ -774,15 +774,15 @@ left_join(patients,
 ]
 
 ???
-Si des colonnes sont communes, R changera leur nom pour les désambiguïser.
+Si il y a des noms de colonnes identiques entre les deux jeux de données, R changera leur nom pour les distinguer.
 
-- Si tu es sûr que les deux colonnes contiennent les mêmes informations, supprime-les de l'un des tableaux de données avant la jointure.
-- Si tu n'es pas sûr, tu peux les comparer facilement après la jointure.
-  Mentionne oralement qu'il existe un argument "suffixe" et que tu peux lui donner un vecteur à renommer au lieu de .x et .y.
+- Si vous êtes sûr.e.s que les deux colonnes contiennent les mêmes informations, supprimez-les de l'un des jeux de données avant la jointure.
+- Si vous n'êtes pas sûr.e.s , vous pouvez les comparer facilement après la jointure.
+  Mentionnez oralement qu'il existe un argument "suffixe" et que vous pouvez donner un vecteur pour renommer les colonnes au lieu de .x et .y.
 
 ---
 
-# Chevauchement des noms de colonnes
+# Nom de colonnes identiques
 
 .pull-left[
 
@@ -833,15 +833,15 @@ left_join(patients,
 ]
 
 ???
-Si des colonnes sont communes, R changera leur nom pour les désambiguïser.
+Si il y a des noms de colonnes identiques entre les deux jeux de données, R changera leur nom pour les distinguer.
 
-- Si tu es sûr que les deux colonnes contiennent les mêmes informations, supprime-les de l'un des cadres de données avant la jointure.
-- Si tu n'es pas sûr, tu peux les comparer facilement après la jointure.
-  Mentionne oralement qu'il existe un argument "suffixe" et que tu peux lui donner un vecteur à renommer au lieu de .x et .y.
+- Si vous êtes sûr.e.s que les deux colonnes contiennent les mêmes informations, supprimez-les de l'un des jeux de données avant la jointure.
+- Si vous n'êtes pas sûr.e.s , vous pouvez les comparer facilement après la jointure.
+  Mentionnez oralement qu'il existe un argument "suffixe" et que vous pouvez donner un vecteur pour renommer les colonnes au lieu de .x et .y.
 
 ---
 
-### Un à plusieurs
+### De un à plusieurs
 
 .pull-left[
 
@@ -858,11 +858,11 @@ patients %>%
 
 hosp_dup <- tribble(
      ~id_patient, ~resultat,
-      "5fe599", "Died",
-      "5fe599", "Alive",
-      "8689b7", "Recovered",
-      "11f8ea", "Recovered",
-      "ebd24z", "Died")
+      "5fe599", "Mort.e",
+      "5fe599", "En vie",
+      "8689b7", "Rétabli.e",
+      "11f8ea", "Rétabli.e",
+      "ebd24z", "Mort.e")
 
 hosp_dup %>%
     qflextable() %>% 
@@ -893,7 +893,7 @@ left_join(patients,
 
 ---
 
-### Plusieurs à plusieurs
+### De plusieurs à un
 
 .pull-left[
 
@@ -950,9 +950,9 @@ left_join(patients_dup,
 
 # Bonnes pratiques
 
-Utilisation `semi_join()` et `anti_join()` pour **comprendre pourquoi les rangs sont abandonnés**
+Utilisez les fonctions `semi_join()` et `anti_join()` pour **comprendre pourquoi certaines rangées sont supprimées**
 
-" Ce qui `hosp` ne seront pas jointes à gauche à `patients`?" Examine pourquoi avec `anti_join()`
+"Quelles rangées de `hosp` ne seront pas jointes à gauche à `patients` ?" Examinez pourquoi avec `anti_join()`
 
 ```{r, eval=FALSE, echo=TRUE}
 anti_join(hosp, patients, by = c("id_patient" = "cas_id"))
@@ -967,7 +967,7 @@ anti_join(hosp, patients, by = c("id_patient" = "cas_id")) %>%
 
 # Bonnes pratiques
 
-**Vérifier les dimensions** des cadres de données avant et après la fusion!\`
+**Vérifiez les dimensions** des jeux de données avant et après la fusion !
 
 ```{r, eval=TRUE, echo=TRUE}
 nrow(patients)
@@ -983,7 +983,7 @@ left_join(patients, hosp, by = c("cas_id" = "id_patient")) %>%
 ```
 
 ???
-Une autre bonne vérification consiste à utiliser le `count()` pour compter le nombre de lignes pour chacun de tes identificateurs.
+Une autre vérification à faire consiste à utiliser la fonction `count()` pour compter le nombre de rangées pour chacun de vos identificateurs.
 
 ---
 
@@ -991,10 +991,10 @@ class: inverse, center, middle
 
 # Exercice !
 
-Va sur le lieu du cours  
-Ouvre l'exercice du module 8, partie 1, et connecte-toi.  
-Suis les instructions pour ouvrir ton projet R "ebola" et continue à coder dans ton script RMD.
-Informe un instructeur si tu n'es pas sûr de ce que tu dois faire.
+Allez sur le site du cours
+Ouvrez l'exercice du module 8, partie 1, et connectez-vous  
+Suivez les instructions pour ouvrir votre projet R "ebola" et continuer à coder dans votre script RMD.  
+Informez un instructeur si vous n'êtes pas sûr.e.s de ce que vous devez faire.
 
 ```{r, eval=TRUE, echo=FALSE, out.width="50%"}
 # Using here() alone won't work because Rmd folder becomes the rendering root.
