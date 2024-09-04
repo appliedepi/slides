@@ -132,8 +132,8 @@ style_mono_accent(
 ```
 
 ```{r, echo=F, include=F}
-surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv"))
-
+# vig_bruto <- rio::import(here::here("data", "vigilancia_lista_de_casos_20141201"))
+vig_bruto <- rio::import(here::here("data", "vigilancia_lista_de_casos_20141201.csv"))
 # gen <- googlesheets4::read_sheet(
 #   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
 #   range = "generic", col_types = "c") %>%
@@ -156,25 +156,25 @@ surv_raw <- rio::import(here::here("data", "surveillance_linelist_20141201.csv")
 # Objetivos e cronograma
 
 - Criar um novo projeto do RStudio para o estudo de caso do Ebola
-- Importe dados de uma subpasta do projeto usando `import()` e `here()`
+- Importar dados de uma subpasta do projeto usando `import()` e `here()`
 - Ganhar familiaridade com {dplyr} funções de limpeza de dados
-- Comece a escrever um comando de limpeza usando a função `%>%` operador de pipe
+- Começar a escrever um comando de limpeza usando o  `%>%` operador pipe
 
 </br>
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
-  ~Time,  ~Topic,
-  "10 minutes",      "Set up of the Ebola case study",
-  "20 minutes",      "Functions for data cleaning",
-  "10 minutes",      "Demo of data cleaning",
-  "2 hours",         "Exercise",
-  "20 minutes",      "Debrief"
+  ~Tempo,  ~Tópico,
+  "10 minutos",      "Configuração do estudo de caso do Ebola",
+  "20 minutos",      "Funções para limpeza de dados",
+  "10 minutos",      "Demonstração de limpeza de dados",
+  "2 horas",         "Exercício",
+  "20 minutos",      "Resumo"
 )
 
 outline %>% 
   flextable::qflextable() %>% 
-  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+  flextable::add_footer_lines("Faça pausas como desejar durante o exercício")
 ```
 
 ???
@@ -184,7 +184,7 @@ Observe as pausas para alongamento ao longo do texto.
 
 # Revisão
 
-- **Projetos do RStudio** - um local para dados e scripts para uma análise específica
+- **Projetos do RStudio** - um local para dados e scripts de uma análise específica
 
 --
 
@@ -216,7 +216,7 @@ class: inverse, center, middle
 
 # O estudo de caso do Ebola
 
-Os módulos 2 a 8 usarão dados de um surto simulado de Ebola em Serra Leoa.
+Os módulos 2-8 usarão dados de um surto simulado de Ebola em Serra Leoa.
 
 ---
 
@@ -237,14 +237,14 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "functions_pack
 
 .pull-right[
 
-`r emo::ji("folder")` curso\_de\_introdução
+`r emo::ji("folder")` intro\_course
 
 - `r emo::ji("folder")` módulo1
-- `r emo::ji("folder")` cobiçado
+- `r emo::ji("folder")` covid
 - **`r emo::ji("folder")` ebola**
   - **ebola.Rproj**
   - `r emo::ji("folder")` dados
-  - `r emo::ji("folder")` saídas
+  - `r emo::ji("folder")` resultados
   - `r emo::ji("folder")` scripts
 
 ]
@@ -255,7 +255,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "functions_pack
 
 .pull-left[
 
-Você escreverá um novo script R chamado "ebola\_analysis.R" para conter seus comandos.
+Você escreverá um novo script R chamado "analise\_ebola.R" para conter seus comandos.
 
 O script será salvo na subpasta "ebola/**scripts**/"
 
@@ -270,16 +270,16 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 .pull-right[
 
-`r emo::ji("folder")` curso\_de\_introdução
+`r emo::ji("folder")` intro\_course
 
 - `r emo::ji("folder")` módulo1
-- `r emo::ji("folder")` cobiçado
+- `r emo::ji("folder")` covid
 - `r emo::ji("folder")` **ebola**
   - **ebola.Rproj**
   - `r emo::ji("folder")` dados
-  - `r emo::ji("folder")` saídas
-  - `r emo::ji("folder")` **roteiros**
-    - **ebola\_analysis.R**
+  - `r emo::ji("folder")` resultados
+  - `r emo::ji("folder")` **scripts**
+    - **analise\_ebola.R**
 
 ]
 
@@ -287,7 +287,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 # Carregar pacotes
 
-Qual será seu primeiro comando no novo script do R? Que função você usará?
+Qual será seu primeiro comando no novo script do R? Qual função você usará?
 
 --
 
@@ -295,12 +295,12 @@ Use **`pacman::p_load()`** para **carregar os pacotes** necessários para a aná
 
 ```{r, echo=T, eval=F}
 pacman::p_load(
-     rio,          # for importing data
-     here,         # for relative file paths
-     skimr,        # for reviewing the data
-     janitor,      # for cleaning data
-     epikit,       # for creating age categories
-     tidyverse     # for data management and visualization
+     rio,          # para importar dados
+     here,         # para caminhos relativos de arquivos
+     skimr,        # para revisar os dados
+     janitor,      # para limpar os dados
+     epikit,       # para criar categorias de idade
+     tidyverse     # para gerenciamento e visualização de dados
 )
 ```
 
@@ -315,31 +315,31 @@ A lista de linhas do ebola é salva no novo projeto "**dados**/**brutos**/":
 - ebola.Rproj
 - `r emo::ji("folder")` **dados**
   - `r emo::ji("folder")` limpos
-  - `r emo::ji("folder")` **bruto**
-    - **surveillance\_linelist\_20141201.csv**
+  - `r emo::ji("folder")` **brutos**
+    - **vigilância\_lista\_\_de\_casos\_20141201.csv**
 - `r emo::ji("folder")` scripts
-- `r emo::ji("folder")` saídas
+- `r emo::ji("folder")` resultados
 
 `import()` espera um *caminho de arquivo* - o local ou "endereço" dos dados em seu computador.
 
-Esse comando funcionará para importar a lista de linhas do Ebola?
+Esse comando funcionará para importar a lista de casos do Ebola?
 
 ```{r, echo=T, eval=F}
-import("surveillance_linelist_20141201.csv")
+import("vigilancia_lista_de_casos_20141201")
 ```
 
 --
 
-**Não** você precisa especificar qual *subpasta* do projeto em que os dados são salvos.
+**Não**, você precisa especificar em qual *subpasta* do projeto  os dados estão salvos.
 
 ---
 
 # Caminhos de arquivo
 
-**Evitar** o frágil caminho "absoluto" do arquivo *(só funciona em um computador)*
+**Evitar** o frágil caminho "absoluto" do arquivo *(só funcionará em um computador)*
 
 ```{r, echo=T, eval=F}
-import("C:/Users/Me/Docs/intro_course/ebola/data/raw/surveillance_linelist_20141201.csv")
+import("C:/Users/Me/Docs/intro_course/ebola/dados/brutos/vigilancia_lista_de_casos_20141201")
 ```
 
 --
@@ -347,29 +347,29 @@ import("C:/Users/Me/Docs/intro_course/ebola/data/raw/surveillance_linelist_20141
 **Em um projeto do RStudio** o caminho pode começar na pasta raiz do projeto
 
 ```{r, echo=T, eval=F}
-import("data/raw/surveillance_linelist_20141201.csv") # works on almost any computer
+import("dados/brutos/vigilancia_lista_de_casos_20141201") # funcionará em quase todos os computadores
 ```
 
 --
 
 **Use `here()` para criar o caminho do arquivo** sem barras
 
-`here("data", "raw", "surveillance_linelist_raw.csv")`
+`here("dados", "brutos", "vigilancia_lista_de_casos_20141201.csv")`
 
 --
 
-**A etapa final** é colocar o `here()` comando de caminho de arquivo *dentro de* `import()`
+**A etapa final** é colocar o comando de caminho de arquivo `here()` *dentro de* `import()`
 
 ```{r, echo=T, eval=F}
-surv_raw <- import(here("data", "raw", "surveillance_linelist_20141201.csv"))
+vig_bruto <- import(here("dados", "brutos", "vigilancia_lista_de_casos_20141201"))
 ```
 
 --
 
-*O `<-` salva o conjunto de dados como um objeto com o nome `surv_raw`.*
+*O operador `<-` salva o conjunto de dados como um objeto de nome `vig_bruto`.*
 
 ???
-Nós os ensinamos aqui() porque isso elimina a necessidade de lidar com barras, e isso realmente ajuda quando você chega a relatórios automatizados.
+Nós os ensinamos here() porque isso elimina a necessidade de lidar com barras, e isso realmente ajuda quando você chega a relatórios automatizados.
 
 ---
 
@@ -378,7 +378,7 @@ class: medium-large-table
 # Os dados
 
 ```{r}
-head(surv_raw, 25) %>% 
+head(vig_bruto, 25) %>% 
   tibble() %>% 
   DT::datatable(
     options = list(
@@ -395,7 +395,7 @@ head(surv_raw, 25) %>%
   )
 ```
 
-.footnote [Apenas 25 linhas são mostradas aqui]
+.footnote[Apenas 25 linhas são mostradas aqui]
 
 ???
 A tabela mostra apenas as primeiras 25 linhas, para carregar mais rápido.
@@ -460,7 +460,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 - Criar variáveis categóricas e calculadas
 
-- Unir-se a outros dados
+- Unir com outros dados
 
 - Remover duplicatas...
 
@@ -473,7 +473,7 @@ Pergunte aos participantes que medidas eles tomam para limpar conjuntos de dados
 
 ---
 
-# O que você {dplyr} pacote
+# O pacote {dplyr} 
 
 .pull-left[
 
@@ -491,13 +491,13 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 - O pacote mais fácil e versátil para limpeza de dados
 
-- Esse pacote é instalado em um universo de {tidyverse} pacotes R
+- Esse pacote é instalado no universo do {tidyverse}
 
 - O pacote {tidyverse} transformou o R nos últimos 10 anos
 
 ]
 
-.footnote ["dplyr" é uma abreviação de "data plier" (alicate de dados) - um alicate é a ferramenta portátil da foto acima]
+.footnote["dplyr" é uma abreviação de "data plier" (alicate de dados)]
 
 ???
 O Tidyverse tornou a codificação em R muito mais fácil de usar, intuitiva e acessível para programadores iniciantes
@@ -506,25 +506,25 @@ O Tidyverse tornou a codificação em R muito mais fácil de usar, intuitiva e a
 
 # Conjunto de dados de prática
 
-Vamos usar um mini **`surv_raw`** conjunto de dados para você praticar algumas funções essenciais do R.
+Vamos usar um mini **`vig_bruto`** conjunto de dados para você praticar algumas funções essenciais do R.
 
 ```{r, echo=F}
-surv_raw <- data.frame(
+vig_bruto <- data.frame(
   stringsAsFactors = FALSE,
        check.names = FALSE,
-         case_id = c("694928","86340d","92d002","544bd1","544bd1"),
-         age = c(23L, 0L, 16L, 10L, 10L),
-         sex = c("m", "f", "m", "f", "f"), 
-         lab_confirmed = c(FALSE, TRUE, TRUE, TRUE, FALSE),
-         `onset date` = c("11/9/2014", "10/30/2014","8/16/2014","8/29/2014","8/29/2014"),
-         `wt (kg)` = c(70L, 18L, 59L, 39L, 39L)
+         caso_id = c("694928","86340d","92d002","544bd1","544bd1"),
+         idade = c(23L, 0L, 16L, 10L, 10L),
+         sexo = c("m", "f", "m", "f", "f"), 
+         lab_confirmado = c(FALSE, TRUE, TRUE, TRUE, FALSE),
+         `sintomas data` = c("11/9/2014", "10/30/2014","8/16/2014","8/29/2014","8/29/2014"),
+         `peso (kg)` = c(70L, 18L, 59L, 39L, 39L)
                        )
-surv_raw <- surv_raw %>% 
-  add_row(surv_raw[4,], .before = 5)
+vig_bruto <- vig_bruto %>% 
+  add_row(vig_bruto[4,], .before = 5)
 ```
 
 ```{r, eval=T}
-surv_raw %>% 
+vig_bruto %>% 
   knitr::kable()
      
 ```
@@ -551,17 +551,17 @@ class: medium-large-table2
 .pull-left[
 
 ```{r, eval=F, echo=T}
-filter(surv_raw)
+filter(vig_bruto)
 ```
 
-1º argumento: um quadro de dados
+1º argumento: um conjunto de dados
 
 ]
 
 .pull-right[
 
 ```{r, eval=T, echo=F}
-filter(surv_raw) %>% knitr::kable()
+filter(vig_bruto) %>% knitr::kable()
 ```
 
 ]
@@ -575,7 +575,7 @@ class: medium-large-table2
 .pull-left[
 
 ```{r, eval=F, echo=T}
-filter(surv_raw, age < 18)
+filter(vig_bruto, idade < 18)
 ```
 
 2º+ argumentos: testes lógicos para que as linhas sejam *mantidas*
@@ -585,7 +585,7 @@ filter(surv_raw, age < 18)
 .pull-right[
 
 ```{r, eval=T, echo=F}
-filter(surv_raw, age < 18) %>% knitr::kable()
+filter(vig_bruto, idade < 18) %>% knitr::kable()
 ```
 
 ]
@@ -599,7 +599,7 @@ class: medium-large-table2
 .pull-left[
 
 ```{r, eval=F, echo=T}
-filter(surv_raw, age < 18, sex == "f")
+filter(vig_bruto, idade < 18, sexo == "f")
 ```
 
 2º+ argumentos: testes lógicos para que as linhas sejam *mantidas*
@@ -609,9 +609,9 @@ filter(surv_raw, age < 18, sex == "f")
 .pull-right[
 
 ```{r, eval=T, echo=F}
-filter(surv_raw,
-  age < 18,
-  sex == "f") %>%
+filter(vig_bruto,
+  idade < 18,
+  sexo == "f") %>%
   knitr::kable()
 ```
 
@@ -628,15 +628,15 @@ class: medium-large-table2
 .pull-left[
 
 ```{r, eval=F, echo=T}
-filter(surv_raw, 
-  age < 18 & 
-  (sex == "f" | lab_confirmed == TRUE)
+filter(vig_bruto, 
+  idade < 18 & 
+  (sexo == "f" | lab_confirmado == TRUE)
 )
 ```
 
 *As linhas novas e os recuos não afetam o código*
 
-A lógica pode se tornar complexa quando você a utiliza:
+A lógica pode se tornar complexa quando você  utiliza:
 
 - `&` (E)
 - `|` (OU)
@@ -647,7 +647,7 @@ A lógica pode se tornar complexa quando você a utiliza:
 .pull-right[
 
 ```{r, eval=T, echo=F}
-filter(surv_raw, age < 18 & (sex == "f" | lab_confirmed == TRUE)) %>%
+filter(vig_bruto, idade < 18 & (sexo == "f" | lab_confirmado == TRUE)) %>%
   knitr::kable()
 ```
 
@@ -662,17 +662,17 @@ class: medium-large-table2
 .pull-left[
 
 ```{r, eval=F, echo=T}
-select(surv_raw, ___) 
+select(vig_bruto, ___) 
 ```
 
-`select()` também espera um quadro de dados como primeiro argumento
+`select()` também espera um conjunto de dados como primeiro argumento
 
 ]
 
 .pull-right[
 
 ```{r, eval=T, echo=F}
-surv_raw %>%
+vig_bruto %>%
   knitr::kable()
 ```
 
@@ -687,17 +687,17 @@ class: medium-large-table2
 .pull-left[
 
 ```{r, eval=F, echo=T}
-select(surv_raw, case_id, age)
+select(vig_bruto, caso_id, idade)
 ```
 
-Você pode fornecer `select()` com nomes de colunas para *manter*
+Você fornece ao `select()` os nomes das colunas para *manter*
 
 ]
 
 .pull-right[
 
 ```{r, eval=T, echo=F}
-select(surv_raw, case_id, age) %>%
+select(vig_bruto, caso_id, idade) %>%
   knitr::kable()
 ```
 
@@ -712,17 +712,17 @@ class: medium-large-table2
 .pull-left[
 
 ```{r, eval=F, echo=T}
-select(surv_raw, case_id, age, sex)
+select(vig_bruto, caso_id, idade, sexo)
 ```
 
-Você pode fornecer `select()` com nomes de colunas para *manter*
+Você fornece ao `select()` os nomes das colunas para *manter*
 
 ]
 
 .pull-right[
 
 ```{r, eval=T, echo=F}
-select(surv_raw, case_id, age, sex) %>%
+select(vig_bruto, caso_id, idade, sexo) %>%
   knitr::kable()
 ```
 
@@ -737,17 +737,17 @@ class: medium-large-table2
 .pull-left[
 
 ```{r, eval=F, echo=T}
-select(surv_raw, -case_id, -lab_confirmed)
+select(vig_bruto, -caso_id, -lab_confirmado)
 ```
 
-Ou você pode designar quais colunas serão *remover* com -
+Ou você pode designar quais colunas serão *removidas* com -
 
 ]
 
 .pull-right[
 
 ```{r, eval=T, echo=F}
-select(surv_raw, -case_id, -lab_confirmed) %>%
+select(vig_bruto, -caso_id, -lab_confirmado) %>%
   knitr::kable()
 ```
 
@@ -757,7 +757,7 @@ select(surv_raw, -case_id, -lab_confirmed) %>%
 
 # `filter()` *e* `select()`?
 
-Sim! Use o botão **%>%** "para "passar" dados de uma função para outra.
+Sim! Use o pipe **%>%** "para "passar" dados de uma função para outra.
 
 .pull-left[
 
@@ -789,25 +789,25 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 class: medium-large-table2
 
-# Dados da tubulação
+# "Piping" dados
 
-Anteriormente, o primeiro argumento era o quadro de dados
+Anteriormente, o primeiro argumento era o conjunto de dados
 
-`filter(`**surv\_raw**`, age < 18)`
+`filter(`**vig\_bruto**`, idade < 18)`
 
 --
 
 Usando pipes, isso agora é escrito como:
 
-**surv\_raw** `%>% filter(age < 18)`
+**vig\_bruto** `%>% filter(idade < 18)`
 
 --
 
-Você pode canalizar os dados por meio de *múltiplos* funções  
-`surv_raw`
+Você pode passar os dados por  *múltiplas* funções com o pipe
+`vig_bruto`
 
 ```{r, eval=T, echo=F}
-surv_raw %>% knitr::kable()
+vig_bruto %>% knitr::kable()
 ```
 
 ---
@@ -818,17 +818,17 @@ class: medium-large-table2
 
 Anteriormente, o primeiro argumento era o quadro de dados
 
-`filter(`**surv\_raw**`, age < 18)`
+`filter(`**vig\_bruto**`, idade < 18)`
 
 Usando pipes, isso agora é escrito como:
 
-**surv\_raw** `%>% filter(age < 18)`
+**vig\_bruto** `%>% filter(idade < 18)`
 
-Você pode canalizar os dados por meio de *múltiplos* funções  
-`surv_raw` **%>%** `filter(age < 18)`
+Você pode passar os dados por  *múltiplas* funções com o pipe
+`vig_bruto` **%>%** `filter(idade < 18)`
 
 ```{r, eval=T, echo=F}
-surv_raw %>% filter(age < 18) %>% knitr::kable()
+vig_bruto %>% filter(idade < 18) %>% knitr::kable()
 ```
 
 ---
@@ -837,34 +837,34 @@ class: medium-large-table2
 
 # Dados da tubulação
 
-Anteriormente, o primeiro argumento era o quadro de dados
+Anteriormente, o primeiro argumento era o conjunto de dados
 
-`filter(`**surv\_raw**`, age < 18)`
+`filter(`**vig\_bruto**`, idade < 18)`
 
 Usando pipes, isso agora é escrito como:
 
-**surv\_raw** `%>% filter(age < 18)`
+**surv\_raw** `%>% filter(idade < 18)`
 
-Você pode canalizar os dados por meio de *múltiplos* funções  
-`surv_raw` **%>%** `filter(age < 18)` **%>%** `select(case_id, age, sex)`
+Você pode passar os dados por  *múltiplas* funções com o pipe
+`vig_bruto` **%>%** `filter(idade < 18)` **%>%** `select(caso_id, idade, sexo)`
 
 ```{r, eval=T, echo=F}
-surv_raw %>% filter(age < 18) %>% select(case_id, age, sex) %>% knitr::kable()
+vig_bruto %>% filter(idade < 18) %>% select(caso_id, idade, sexo) %>% knitr::kable()
 ```
 
 ---
 
 # Estilo de codificação vertical
 
-A *vertical* com recuos não afeta o código, mas o torna mais legível!
+Um estilo *vertical* com recuos não afeta o código, mas o torna mais legível!
 
 ```{r, eval=F, echo=T}
-surv_raw
+vig_bruto
 ```
 
 ```{r, eval=T, echo=F}
-surv_raw %>%  
-  #add_row(surv_raw[5,]) %>% 
+vig_bruto %>%  
+  #add_row(vig_bruto[5,]) %>% 
   knitr::kable() 
 ```
 
@@ -872,55 +872,62 @@ surv_raw %>%
 
 # Estilo de codificação vertical
 
-A *vertical* com recuos não afeta o código, mas o torna mais legível!
+Um estilo *vertical* com recuos não afeta o código, mas o torna mais legível!
 
 ```{r, eval=F, echo=params$lang == "en"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed)                  # select columns
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado)                  # selecionar colunas
 ```
 
 ```{r, eval=F, echo=params$lang == "fr"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed)        # sélectionner les colonnes
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado)        # sélectionner les colonnes
 ```
 
 ```{r, eval=F, echo=params$lang == "ru"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed)        # выбрать столбцы
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado)        # выбрать столбцы
 ```
 
 ```{r, eval=F, echo=params$lang == "es"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed)        # seleccionar columnas
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado)        # seleccionar columnas
+```
+
+
+```{r, eval=F, echo=params$lang == "pt"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado)        # selecionar colunas
 ```
 
 ```{r, eval=params$lang == "en", echo=F}
-surv_raw %>% 
-  #add_row(surv_raw[5,]) %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # select columns
+vig_bruto %>% 
+  #add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # selecionar colunas
   knitr::kable() 
 ```
 
 ```{r, eval=params$lang == "fr", echo=F}
-surv_raw %>% 
-  add_row(surv_raw[5,]) %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # sélectionner les colonnes
+vig_bruto %>% 
+  add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # sélectionner les colonnes
   knitr::kable() 
 ```
 
 ```{r, eval=params$lang == "ru", echo=F}
-surv_raw %>% 
-  add_row(surv_raw[5,]) %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # выбрать столбцы
+vig_bruto %>% 
+  add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # выбрать столбцы
   knitr::kable() 
 ```
 
 ```{r, eval=params$lang == "es", echo=F}
-surv_raw %>% 
-  #add_row(surv_raw[5,]) %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # de-duplicar
+vig_bruto %>% 
+  #add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # de-duplicar
   knitr::kable() 
 ```
+
 
 ---
 
@@ -929,34 +936,34 @@ surv_raw %>%
 O estilo de codificação **`%>%`** passa o conjunto de dados para a próxima etapa
 
 ```{r, eval=F, echo=params$lang == "en"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%              # select columns
-  distinct()                                                # de-duplicate
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%              # selecionar colunas
+  distinct()                                                # de-duplicar
 ```
 
 ```{r, eval=F, echo=params$lang == "fr"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # sélectionner les colonnes
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # sélectionner les colonnes
   distinct()                                         # dédupliquer 
 ```
 
 ```{r, eval=F, echo=params$lang == "ru"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # выбрать столбцы
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # выбрать столбцы
   distinct()                                         # де-дублировать
 ```
 
 ```{r, eval=F, echo=params$lang == "es"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # seleccionar columnas
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # seleccionar columnas
   distinct()                                         # de-duplicar
 ```
 
 ```{r, eval=T, echo=F}
-surv_raw %>% 
-  #add_row(surv_raw[5,]) %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # select columns
-  distinct() %>%                                     # de-duplicate
+vig_bruto %>% 
+  #add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # selecionar colunas
+  distinct() %>%                                     # de-duplicar
   knitr::kable() 
 ```
 
@@ -964,42 +971,42 @@ surv_raw %>%
 
 # Estilo de codificação vertical
 
-O estilo de codificação **`%>%`** passa o conjunto de dados para a próxima etapa
+O **`%>%`** pipe passa o conjunto de dados para a próxima etapa
 
 ```{r, eval=F, echo=params$lang == "en"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%              # select columns
-  distinct() %>%                                            # de-duplicate
-  filter(age < 18, lab_confirmed == TRUE)                   # only children cases
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%              # selecionar colunas
+  distinct() %>%                                            # de-duplicar
+  filter(idade < 18, lab_confirmado == TRUE)                   # só casos de crianças
 ```
 
 ```{r, eval=F, echo=params$lang == "fr"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # Sélectionner les colonnes
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # Sélectionner les colonnes
   distinct() %>%                                     # dédupliquer 
-  filter(age < 18, lab_confirmed == TRUE)            # uniquement les cas confirmés d'enfants 
+  filter(idade < 18, lab_confirmado == TRUE)            # uniquement les cas confirmés d'enfants 
 ```
 
 ```{r, eval=F, echo=params$lang == "ru"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # выбрать столбцы
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # выбрать столбцы
   distinct()  %>%                                    # де-дублировать
-  filter(age < 18, lab_confirmed == TRUE)            #подтвержденные случаи заболевания только у маленьких детей
+  filter(idade < 18, lab_confirmado == TRUE)            #подтвержденные случаи заболевания только у маленьких детей
 ```
 
 ```{r, eval=F, echo=params$lang == "es"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # seleccionar columnas
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # seleccionar columnas
   distinct() %>%                                     # de-duplicar
-  filter(age < 18, lab_confirmed == TRUE)            # sólo los casos confirmados de niños pequeños
+  filter(idade < 18, lab_confirmado == TRUE)            # sólo los casos confirmados de niños pequeños
 ```
 
 ```{r, eval=T, echo=F}
-surv_raw %>% 
-  #add_row(surv_raw[5,]) %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # select columns
-  distinct() %>%                                     # de-duplicate
-  filter(age < 18, lab_confirmed == TRUE) %>%        # only children confirmed cases
+vig_bruto %>% 
+  #add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # selecionar colunas
+  distinct() %>%                                     # de-duplicar
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # only children confirmed cases
   knitr::kable() 
 ```
 
@@ -1010,48 +1017,48 @@ surv_raw %>%
 Os **`%>%`** passa o conjunto de dados para a próxima etapa
 
 ```{r, eval=F, echo=params$lang == "en"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%              # select columns
-  distinct() %>%                                            # de-duplicate
-  filter(age < 18, lab_confirmed == TRUE) %>%               # only children cases      
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # create a column      
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%              # selecionar colunas
+  distinct() %>%                                            # de-duplicar
+  filter(idade < 18, lab_confirmado == TRUE) %>%               # só casos de crianças      
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))  # criar uma coluna      
  
 ```
 
 ```{r, eval=F, echo=params$lang == "fr"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # Sélectionner les colonnes
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # Sélectionner les colonnes
   distinct() %>%                                     # dédupliquer 
-  filter(age < 18, lab_confirmed == TRUE) %>%        # uniquement les cas confirmés d'enfants
-  mutate(infant = ifelse(age < 1, "infant", "not infant")) # créer une colonne       
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # uniquement les cas confirmés d'enfants
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))  # créer une colonne       
  
 ```
 
 ```{r, eval=F, echo=params$lang == "ru"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # выбрать столбцы
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # выбрать столбцы
   distinct()  %>%                                    # де-дублировать
-  filter(age < 18, lab_confirmed == TRUE) %>%        # подтвержденные случаи заболевания только у детей младшего возраста                   
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # создать столбец
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # подтвержденные случаи заболевания только у детей младшего возраста                   
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))   # создать столбец
  
 ```
 
 ```{r, eval=F, echo=params$lang == "es"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # seleccionar columnas
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # seleccionar columnas
   distinct() %>%                                     # de-duplicar
-  filter(age < 18, lab_confirmed == TRUE) %>%        # casos confirmados sólo en niños pequeños      
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # crear una columna      
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # casos confirmados sólo en niños pequeños      
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))   # crear una columna      
  
 ```
 
 ```{r, eval=T, echo=F}
-surv_raw %>% 
-  #add_row(surv_raw[5,]) %>% 
-  select(case_id, age, sex, lab_confirmed) %>%          
+vig_bruto %>% 
+  #add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%          
   distinct() %>%                                           
-  filter(age < 18, lab_confirmed == TRUE) %>%              
-  mutate(infant = ifelse(age < 1, "infant", "not infant")) %>% 
+  filter(idade < 18, lab_confirmado == TRUE) %>%              
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))  %>% 
   knitr::kable()
 ```
 
@@ -1062,54 +1069,54 @@ surv_raw %>%
 Você tem um operador de pipe no final desse fluxo de trabalho?
 
 ```{r, eval=F, echo=params$lang == "en"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%              # select columns
-  distinct() %>%                                            # de-duplicate
-  filter(age < 18, lab_confirmed == TRUE) %>%               # only children cases      
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))  #<<      
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%              # selecionar colunas
+  distinct() %>%                                            # de-duplicar
+  filter(idade < 18, lab_confirmado == TRUE) %>%               # só casos de crianças      
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))   #<<      
  
 ```
 
 ```{r, eval=F, echo=params$lang == "fr"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # Sélectionner les colonnes
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # Sélectionner les colonnes
   distinct() %>%                                     # dédupliquer 
-  filter(age < 18, lab_confirmed == TRUE) %>%        # uniquement les cas confirmés d'enfants
-  mutate(infant = ifelse(age < 1, "infant", "not infant")) # créer une colonne       
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # uniquement les cas confirmés d'enfants
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))  # créer une colonne       
  
 ```
 
 ```{r, eval=F, echo=params$lang == "ru"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # выбрать столбцы
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # выбрать столбцы
   distinct()  %>%                                    # де-дублировать
-  filter(age < 18, lab_confirmed == TRUE) %>%        # подтвержденные случаи заболевания только у детей младшего возраста                   
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # создать столбец
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # подтвержденные случаи заболевания только у детей младшего возраста                   
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))   # создать столбец
  
 ```
 
 ```{r, eval=F, echo=params$lang == "es"}
-surv_raw %>% 
-  select(case_id, age, sex, lab_confirmed) %>%    # seleccionar columnas
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # seleccionar columnas
   distinct() %>%                                     # de-duplicar
-  filter(age < 18, lab_confirmed == TRUE) %>%        # casos confirmados sólo en niños pequeños      
-  mutate(infant = ifelse(age < 1, "infant", "not infant"))  # crear una columna      
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # casos confirmados sólo en niños pequeños      
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))   # crear una columna      
  
 ```
 
 ```{r, eval=T, echo=F}
-surv_raw %>% 
-  #add_row(surv_raw[5,]) %>% 
-  select(case_id, age, sex, lab_confirmed) %>%          
+vig_bruto %>% 
+  #add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%          
   distinct() %>%                                           
-  filter(age < 18, lab_confirmed == TRUE) %>%              
-  mutate(infant = ifelse(age < 1, "infant", "not infant")) %>% 
+  filter(idade < 18, lab_confirmado == TRUE) %>%              
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))  %>% 
   knitr::kable()
 ```
 
 --
 
-Os pipes conectam todas essas funções em um único comando vinculado.  
+Os pipes conectam todas essas funções em um único comando.  
 Como você executaria esse comando no RStudio?
 
 ---
@@ -1119,35 +1126,35 @@ Como você executaria esse comando no RStudio?
 Podemos observar as alterações nos nomes das colunas imprimindo-as com `names()`
 
 ```{r, echo=T, eval=T}
-# print current column names
-names(surv_raw)  
+# imprime o nome das colunas
+names(vig_bruto)  
 ```
 
 ---
 
 # Limpar os nomes das colunas
 
-Equivalente, `surv_raw` pode ser passado para `names()` usando um **tubo**:
+Da mesma maneira, `vig_bruto` pode ser passado para `names()` usando um **pipe**:
 
 ```{r, echo=T, eval=F}
-surv_raw %>%  # begin with raw data
-  names()     # print current column names                           
+vig_bruto %>%  # comece com dados brutos
+  names()     # imprime o nome das colunas                           
 ```
 
 ```{r, eval=T, echo=F}
-surv_raw %>%           # begin with raw data
-  names()              # print current column names                           
+vig_bruto %>%           # comece com dados brutos
+  names()              # imprime o nome das colunas                           
 ```
 
 --
 
-Aplicar `clean_names()` para `surv_raw` inserindo-o na sequência do pipe.  
+Aplicar `clean_names()` para `vig_bruto` inserindo-o na sequência do pipe.  
 Isso padroniza os nomes das colunas (em letras minúsculas, sem espaços ou caracteres especiais).
 
 ```{r, echo=T, eval=T}
-surv_raw %>%            # begin with raw data
-  clean_names() %>%     # standardize column names #<<
-  names()               # print current column names
+vig_bruto %>%            # comece com dados brutos
+  clean_names() %>%     # padroniza o nome das colunas #<<
+  names()               # imprime o nome das colunas
 ```
 
 *Veja as alterações nas duas últimas colunas*
@@ -1156,28 +1163,28 @@ surv_raw %>%            # begin with raw data
 
 # Limpar os nomes das colunas
 
-Equivalente, `surv_raw` pode ser passado para `names()` usando um **tubo**:
+Da mesma maneira, `vig_bruto` pode ser passado para `names()` usando um **pipe**:
 
 ```{r, echo=T, eval=F}
-surv_raw %>%  # begin with raw data
-  names()     # print current column names                           
+vig_bruto %>%  # comece com dados brutos
+  names()     # imprime o nome das colunas                           
 ```
 
 ```{r, eval=T, echo=F}
-surv_raw %>%           # begin with raw data
-  names()              # print current column names                           
+vig_bruto %>%           # comece com dados brutos
+  names()              # imprime o nome das colunas                           
 ```
 
-Em seguida, canalize o **limpo** limpos para `rename()` para edições manuais.  
-Observe que `rename()` faz referência a **limpo** limpos (`onset_date`).
+Em seguida, use o pipe para `rename()` para edições manuais.  
+Observe que `rename()` faz referência as colunas já padronizadas (`data_sintomas`).
 
 ```{r, eval=params$lang == "en", echo=params$lang == "en"}
-surv_raw %>%                        # begin with raw data
-  clean_names() %>%                 # standardize column names 
-  rename(                           # manual edits #<<
-      age_years  = age,             # NEW = OLD    #<<
-      date_onset = onset_date) %>%                 #<<       
-  names()                           # print current column names
+vig_bruto %>%                        # comece com dados brutos
+  clean_names() %>%                 # padroniza o nome das colunas 
+  rename(                           # edição manual #<<
+      idade_anos  = idade,             # NOVO = ANTIGO    #<<
+      data_sintomas = `sintomas_data`) %>%                 #<<       
+  names()                           # imprime o nome das colunas
 ```
 
 ---
@@ -1189,47 +1196,47 @@ Clique nas abas para ver a diferença.
 .panelset[
 .panel[.panel-name[Printing]
 
-As alterações anteriores em `surv_raw` **não** foram salvas.
+As alterações anteriores em `vig_bruto` **não** foram salvas.
 
 Nós apenas *imprimimos com modificações*. 
 
 ```{r, eval=F, echo=params$lang == "en"}
 # modify, then print column names
-surv_raw %>%                        # start with raw data        #<<
-  clean_names() %>%                 # standardize column names 
-  rename(                           # manual edits 
-      age_years  = age,             # NEW = OLD    
-      date_onset = onset_date) %>%                        
-  names()                           # print current column names #<<
+vig_bruto %>%                        # comece com dados brutos        #<<
+  clean_names() %>%                 # padroniza o nome das colunas 
+  rename(                           # edição manual
+      idade_anos  = idade,             # NOVO = ANTIGO    
+      `sintomas_data` = `sintomas_data`) %>%                        
+  names()                           # imprime o nome das colunas #<<
 ```
 
-**`surv_raw`** ainda tem os *nomes das colunas originais*!
+**`vig_bruto`** ainda tem os *nomes das colunas originais*!
 
 ```{r, eval=params$lang == "en", echo=params$lang == "en"}
-names(surv_raw) 
+names(vig_bruto) 
 ```
 
 ]
 
 .panel[.panel-name[Saving]
 
-Use **`<-`** para salvar as alterações em um novo quadro de dados **`surv_clean`**.
+Use **`<-`** para salvar as alterações em um novo conjunto de dados **`vig_limpo`**.
 
 Nenhuma saída é impressa, mas o novo objeto aparecerá no RStudio Environment. 
 
 ```{r, eval=T, echo=T}
 # create new data frame
-surv_clean <- surv_raw %>%  #<<
+vig_limpo <- vig_bruto %>%  #<<
   clean_names() %>%          
-  rename(                           
-      age_years  = age,                 
-      date_onset = onset_date)
+  rename(                           # edição manual
+      idade_anos  = idade,             # NOVO = ANTIGO    
+      `data_sintomas` = `sintomas_data`)
 ```
 
-**`surv_clean`** tem os *nomes de colunas limpos*!
+**`vig_limpo`** tem os *nomes de colunas novos*!
 
 ```{r, eval=params$lang == "en", echo=params$lang == "en"}
-names(surv_clean) 
+names(vig_limpo) 
 ```
 
 ]
@@ -1248,21 +1255,21 @@ class: medium-large-table2
 A sintaxe é a seguinte:
 
 ```{r, echo=T, eval=F}
-DATASET %>% 
-  mutate(NEW_COLUMN_NAME = A_FUNCTION(arguments))
+DADOS %>% 
+  mutate(NOME_NOVA_COLUNA = UMA_FUNCAO(argumentos))
 ```
 
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv_raw %>% 
-  mutate(age_group = ifelse(
-    test = age >= 18,
-    yes = "adult",  
-    no = "minor")) 
+vig_bruto %>% 
+  mutate(idade_grupo = ifelse(
+    test = idade >= 18,
+    yes = "adulto",  
+    no = "menor")) 
 ```
 
-`ifelse()` testa logicamente cada linha e grava no novo `age_group` coluna:
+`ifelse()` testa logicamente cada linha e grava na nova coluna `idade_grupo` :
 
 - "adulto" se o teste for VERDADEIRO
 - "menor" se o teste for FALSO
@@ -1272,11 +1279,11 @@ surv_raw %>%
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv_raw %>% 
-  mutate(age_group = ifelse(
-    test = age >= 18,
-    yes = 'adult',
-    no = 'minor')) %>% 
+vig_bruto %>% 
+  mutate(idade_grupo = ifelse(
+    test = idade >= 18,
+    yes = "adulto",  
+    no = "menor"))  %>% 
   knitr::kable()
 ```
 
@@ -1292,34 +1299,34 @@ A sintaxe é semelhante:
 
 ```{r, echo=T, eval=F}
 DATASET %>% 
-  mutate(SAME_COLUMN_NAME = A_FUNCTION(arguments))
+  mutate(MESMO_NOME_COLUNA = UMA_FUNCAO(argumentos))
 ```
 
 .pull-left[
 
 ```{r, echo=T, eval=F}
-surv_raw %>% 
-  mutate(sex = recode(sex,  
-    "m" = "male",           
-    "f" = "female"))        
+vig_bruto %>% 
+  mutate(sexo = recode(sexo,  
+    "m" = "Masculino",           
+    "f" = "Feminino"))        
 ```
 
-Coluna `sex` é sobrescrito.
+A coluna `sexo` é sobrescrita.
 
-`recode()` começa com o original `sex` original e aplica as alterações:
+`recode()` começa com a coluna `sexo` original e aplica as alterações:
 
-- "m" para "male"
-- "f" para "female" (mulher)
+- "m" para "Masculino"
+- "f" para "Feminino"
 
 ]
 
 .pull-right[
 
 ```{r, echo=F, eval=T}
-surv_raw %>% 
-  mutate(sex = recode(sex,  
-    'm' = 'male',           
-    'f' = 'female'))  %>% 
+vig_bruto %>% 
+  mutate(sexo = recode(sexo,  
+    'm' = 'Masculino',           
+    'f' = 'Feminino'))  %>% 
   knitr::kable()
 ```
 
@@ -1329,7 +1336,7 @@ surv_raw %>%
 
 # `mutate()` com datas
 
-O `class()` das colunas de data deve ser "date", não "character".
+A `class()` das colunas de data deve ser "date", não "character".
 
 Para alterar a classe, você deve *dizer* R como entender as datas brutas.
 
@@ -1353,7 +1360,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning"
 
 ]
 
-.footnote[Mais detalhes neste [Capítulo do Manual do Epi R](https://epirhandbook.com/en/working-with-dates.html)]
+.footnote[Mais detalhes neste [Capítulo do Manual do Epi R](https://epirhandbook.com/pt/new_pages/dates.pt.html)]
 
 ---
 
@@ -1370,8 +1377,8 @@ Dentro de `mutate()` use a opção {lubridate} que se alinha com a função *for
 .pull-left[
 
 ```{r, eval=T, echo=T}
-surv_clean %>% 
-  select(case_id, date_onset) %>% 
+vig_limpo %>% 
+  select(caso_id, data_sintomas) %>% 
   tibble()
 ```
 
@@ -1382,15 +1389,13 @@ surv_clean %>%
 .pull-right[
 
 ```{r, eval=T, echo=T}
-surv_clean %>% 
-  mutate(date_onset = mdy(date_onset)) %>%  #<<
-  select(case_id, date_onset) %>% 
+vig_limpo %>% 
+  mutate(data_sintomas = mdy(data_sintomas)) %>%  #<<
+  select(caso_id, data_sintomas) %>% 
   tibble()
 ```
 
 ]
-
-.footnote[O `tibble()` mostra a classe de cada coluna acima de seus valores].
 
 ---
 
