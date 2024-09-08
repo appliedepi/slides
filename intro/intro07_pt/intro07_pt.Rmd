@@ -1,6 +1,6 @@
 ---
 title: Introdução ao R para<br>Epidemiologia aplicada
-subtitle: Routine reports with {rmarkdown}
+subtitle: Relatórios e boletins com {rmarkdown}
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
   xaringan::moon_reader:
@@ -68,7 +68,7 @@ pacman::p_load_gh(
 
 
 # data prep --------------------------------------------------------------------
-surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+vig <- rio::import(here::here("data", "vigilancia_lista_de_casos_20141201.rds"))
 
 # gen <- googlesheets4::read_sheet(
 #   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
@@ -130,36 +130,36 @@ style_mono_accent(
 
 - Explorar a variedade de formatos e integrações para relatórios do R markdown
 
-- Converta seu código de estudo de caso do Ebola em um relatório R markdown
+- Converter seu código de estudo de caso do Ebola em um relatório R markdown
 
-- Faça com que o script R Markdown conduza dinamicamente às atualizações de dados
+- Fazer com que o script R Markdown altere de forma dinâmica com a atualizações de dados
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
-  ~Time, ~Topic,
-  "30 minutes", "R markdown slides & demonstration",
-  "2.5 hours", "Create your Ebola situation report",
-  "30 minutes", "Debrief"
+  ~Tempo, ~Tópico,
+  "30 minutos", "Apresentação de slides do R markdown e demonstração",
+  "2.5 horas", "Criar seu relatório de situação do Ebola",
+  "30 minutos", "Recapitulação"
 )
 
 outline %>% 
   flextable::qflextable() %>% 
-  flextable::add_footer_lines("Take breaks as you wish during the exercise")
+  flextable::add_footer_lines("Faça pausas quando desejar durante o exercício")
 ```
 
 ---
 
-# Saúde pública e relatórios de rotina: uma história de amor
+# Saúde pública e relatórios de rotina
 
 .pull-left[
 
-Na saúde pública, adoramos nossos relatórios.
+Os boletins ou relatórios fazem parte da rotina da vigilância
 
 - Relatórios de situação de surtos
 - Apresentações de slides semanais
 - Briefings executivos
 - Relatórios voltados para o público
-- Pesquisas de saúde comunitária
+- Pesquisas de saúde 
 - Análises de pesquisas de vacinação
 - ...
 
@@ -181,7 +181,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "welcome", "aut
 
 ---
 
-# Saúde pública e relatórios de rotina: uma história de amor
+# Saúde pública e relatórios de rotina
 
 .pull-left[
 
@@ -245,11 +245,11 @@ class: inverse, center, middle
 
 # R markdown
 
-## Um lugar para escrever com base em dados</br> Você pode usar o markdown para escrever em um único lugar.Código, texto e resultados juntos
+##Um lugar para código baseada em dados, texto, tabelas e gráficos juntos"
 
 ---
 
-# Vários resultados
+# Vários formatos
 
 ```{r, eval=TRUE, echo=FALSE, out.width="100%"}
 knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "rmarkdown_overview.png")))
@@ -257,7 +257,7 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "r
 
 ---
 
-# Painéis de controle
+# Dashboards
 
 {rmarkdown} pode produzir painéis simples para serem enviados por e-mail ou hospedados on-line.
 
@@ -265,25 +265,25 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "r
 knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "flexdashboard_output.png")))
 ```
 
-.footnote[Inscreva-se em nosso curso Advanced R Markdown ou consulte a seção [capítulo do Epi R Handbook](https://epirhandbook.com/en/dashboards-with-r-markdown.html)!]
+.footnote[Inscreva-se em nosso curso Advanced R Markdown ou consulte a seção [capítulo do Epi R Handbook](https://epirhandbook.com/pt/new_pages/flexdashboard.pt.html)!]
 
 ---
 
 class: inverse, center, middle
 
-# Até mesmo esses slides foram criados com o R Markdown!
+# Até mesmo os slides das aulas foram criados com o R Markdown!
 
 ```{r, eval=TRUE, echo=FALSE, out.width="75%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "even_slides.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown","pt", "even_slides.png")))
 ```
 
-.footnote[Veja o {xaringan} e inscreva-se em nosso curso avançado de R Markdown!]
+.footnote[Veja o pacote {xaringan} e inscreva-se em nosso curso avançado de R Markdown!]
 
 ---
 
 # Visão geral
 
-**O script inteiro agora é um documento** que integra o **frases de texto** com frases relacionadas **Código R** e seu **saídas**. Tudo é atualizado quando o script é executado.
+**O script inteiro agora é um documento** que integra o **frases de texto** com  **Códigos R** e suas **saídas**. Tudo é atualizado quando o script é executado.
 
 ```{r, eval=TRUE, echo=FALSE, out.width="100%"}
 
@@ -295,7 +295,7 @@ knitr::include_graphics(here::here("images", "rmd_1", "rmarkdown_translation.png
 
 # Vocabulário
 
-- **Markdown (.md)** - uma "linguagem" não específica do R, que permite que seu texto simples seja convertido em html e outros formatos
+- **Markdown (.md)** - é uma "linguagem" não específica do R, que permite que seu texto simples seja convertido em html e outros formatos
 
 --
 
@@ -303,11 +303,11 @@ knitr::include_graphics(here::here("images", "rmd_1", "rmarkdown_translation.png
 
 --
 
-- {rmarkdown} um pacote R usado para renderizar o markdown (texto) no arquivo de markdown do R na saída desejada
+- {rmarkdown} um pacote R usado para renderizar o markdown (texto) no arquivo de R markdown e produzir o resultado desejado
 
 --
 
-- {knitr} - um pacote R que lê trechos de código R e os integra ao documento
+- {knitr} - um pacote R que lê trechos de código R (code chunks) e os integra ao documento final
 
 --
 
@@ -317,7 +317,7 @@ knitr::include_graphics(here::here("images", "rmd_1", "rmarkdown_translation.png
 knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "0_rmd.png")))
 ```
 
-.footnote[imagem [fonte](https://rmarkdown.rstudio.com/authoring_quick_tour.html)]
+.footnote[[fonte da imagem](https://rmarkdown.rstudio.com/authoring_quick_tour.html)]
 
 ???
 Esse processo ocorre em segundo plano, portanto você não precisa conhecer todas essas etapas. No entanto, você pode encontrar esses nomes.
@@ -328,23 +328,23 @@ O arquivo .Rmd é enviado ao knitr, que executa os blocos de código R e cria um
 
 class: center, middle
 
-# Partes do código R
+# Code chunks (trechos de código)
 
 ---
 
-# Partes de código
+# Code chunks (trechos de código)
 
-No R Markdown, seu código fica em "partes" - pequenos pedaços de script R dentro do documento. Crie partes para tarefas distintas (por exemplo, carregar pacotes, importar dados, limpar dados)
+No R Markdown, seu código ficará em "chunks" - pequenos pedaços de script R dentro do documento. Crie partes para tarefas distintas (por exemplo, carregar pacotes, importar dados, limpar dados)
 
 .pull-left[
-Partes de um bloco de código:
+Partes de um code chunk ou trecho de código:
 
 - 3 "backticks" e `{r}` iniciam o trecho
 - **Código R no meio**
-- 3 pontos finais fecham o bloco
+- 3 "backticks" fecham o trecho
 
 *Atalho de teclado: Ctrl + Alt + i*  
-*Atalho de menu: Código -> Inserir parte*
+*Atalho do menu: Código -> Inserir trecho/Insert chunk*
 
 ]
 
@@ -353,7 +353,7 @@ Partes de um bloco de código:
 ````r
 ```{r}`r ''`
 
-R code will be here
+Seu código ficará aqui
 
 ```
 ````
@@ -363,7 +363,7 @@ R code will be here
 ````r
 ```{r}`r ''`
 
-More R code will be here.
+Mais código aqui
 
 ```
 ````
@@ -375,20 +375,20 @@ More R code will be here.
 # Script R normal (.R)
 
 ```{r, eval=TRUE, echo=FALSE, out.width="100%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "r_script.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown","pt","r_script.png")))
 ```
 
 ---
 
-# Partes de código do R Markdown (.Rmd)
+# Trechos de código do R Markdown (.Rmd)
 
 ```{r, eval=TRUE, echo=FALSE, out.width="100%"}
-knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "rmd_script.png")))
+knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown","pt","rmd_script.png")))
 ```
 
 ---
 
-# A saída do relatório
+# O relatório final em formato Word
 
 ```{r, eval=TRUE, echo=FALSE, out.width="100%"}
 knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "word_simple.png")))
@@ -413,27 +413,27 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", "r
 # Texto
 
 .panelset[
-.panel[.panel-name[To get this]
+.panel[.panel-name[Para criar isso]
 Uma frase de texto normal.
 *Aqui está um texto para ser colocado em itálico*
 **Aqui está um texto para ser escrito em negrito**
 
-* Marcador 1
-* Marcador 2
+* Item 1
+* Item 2
 
 ]
-.panel[.panel-name[Type this]
+.panel[.panel-name[Escreva isso]
 Uma frase de texto normal.
 `*Aqui está um texto para ser colocado em itálico*`
 `**Aqui está um texto para ser escrito em negrito**`
 
-`* Marcador 1`
-`* Marcador 2`
+`* Item 1`
+`* Item 2`
 
 ]
 ]
 
-.footnote[Veja mais formatação RMarkdown [aqui](https://rmarkdown.rstudio.com/authoring_basics.html)]
+.footnote[Veja mais sobre formatação RMarkdown [aqui](https://rmarkdown.rstudio.com/authoring_basics.html)]
 
 
 
@@ -638,23 +638,23 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "rmarkdown", pa
 {epikit}
 
 ```{r, eval=TRUE, echo=TRUE}
-epikit::fmt_count(surv, is.na(date_onset))
+epikit::fmt_count(vig, is.na(data_inicio_sintomas))
 ```
 
 ```{r, eval=params$lang == "en", echo=params$lang == "en"}
-str_glue("{fmt_count(surv, is.na(date_onset))} are missing date of onset and not shown.")
+str_glue("{fmt_count(vig, is.na(data_inicio_sintomas))} are missing date of onset and not shown.")
 ```
 
 ```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
-str_glue("{fmt_count(surv, is.na(date_onset))} cas n'ont pas de date d'apparition et ne sont pas présentés ici.")
+str_glue("{fmt_count(vig, is.na(data_inicio_sintomas))} cas n'ont pas de date d'apparition et ne sont pas présentés ici.")
 ```
 
 ```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
-str_glue("{fmt_count(surv, is.na(date_onset))} случаев дата начала заболевания отсутствует и не показана.")
+str_glue("{fmt_count(vig, is.na(data_inicio_sintomas))} случаев дата начала заболевания отсутствует и не показана.")
 ```
 
 ```{r, eval=params$lang == "es", echo=params$lang == "es"}
-str_glue("{fmt_count(surv, is.na(date_onset))} falta la fecha de inicio y no se muestra.")
+str_glue("{fmt_count(vig, is.na(data_inicio_sintomas))} falta la fecha de inicio y no se muestra.")
 ```
 
 --
@@ -662,22 +662,22 @@ str_glue("{fmt_count(surv, is.na(date_onset))} falta la fecha de inicio y no se 
 {scales}
 
 ```{r, eval=params$lang == "en", echo=params$lang == "en"}
-str_glue("There were {comma(sum(as.numeric(surv$diff), na.rm=T))} total delay days between symptom onset and report.")
+str_glue("There were {comma(sum(as.numeric(vig$diff), na.rm=T))} total delay days between symptom onset and report.")
 
 ```
 
 ```{r, eval=params$lang == "fr", echo=params$lang == "fr"}
-str_glue("Il y avait {comma(sum(as.numeric(surv$diff), na.rm=T))} jours de retard total entre l'apparition des symptômes et la déclaration.")
+str_glue("Il y avait {comma(sum(as.numeric(vig$diff), na.rm=T))} jours de retard total entre l'apparition des symptômes et la déclaration.")
 
 ```
 
 ```{r, eval=params$lang == "ru", echo=params$lang == "ru"}
-str_glue("Между началом симптомов и сообщением о них прошло {comma(sum(as.numeric(surv$diff), na.rm=T))} всего дней задержки.")
+str_glue("Между началом симптомов и сообщением о них прошло {comma(sum(as.numeric(vig$diff), na.rm=T))} всего дней задержки.")
 
 ```
 
 ```{r, eval=params$lang == "es", echo=params$lang == "es"}
-str_glue("Hubo {comma(sum(as.numeric(surv$diff), na.rm=T))} días totales de retraso entre el inicio de los síntomas y el informe")
+str_glue("Hubo {comma(sum(as.numeric(vig$diff), na.rm=T))} días totales de retraso entre el inicio de los síntomas y el informe")
 
 ```
 
@@ -734,7 +734,7 @@ No YAML, você pode definir `params` para que você tenha acesso ao relatório:
 
 ```{asis}
 ---
-title: "Surveillance report"
+title: "vigeillance report"
 output: html_document
 params:
  date: "2021-04-10"
@@ -827,17 +827,17 @@ e para análise de pesquisas:
 
 <!-- `` `r knitr::inline_expr("format(Sys.Date())")` ``, havia -->
 
-<!-- `` `r knitr::inline_expr("nrow(surv)")` `` casos confirmados.   -->
+<!-- `` `r knitr::inline_expr("nrow(vig)")` `` casos confirmados.   -->
 
 <!-- A partir de -->
 
 <!-- `` `r knitr::inline_expr("format(Sys.Date(), '%d %B, %Y')")` ``, havia -->
 
-<!-- `` `r knitr::inline_expr("nrow(surv)")` `` casos confirmados.   -->
+<!-- `` `r knitr::inline_expr("nrow(vig)")` `` casos confirmados.   -->
 
 <!-- Produz o seguinte:   -->
 
-<!-- A partir de `r format(Sys.Date(), '%d %B, %Y')`, havia `r nrow(surv)` casos confirmados.   -->
+<!-- A partir de `r format(Sys.Date(), '%d %B, %Y')`, havia `r nrow(vig)` casos confirmados.   -->
 
 <!-- --- -->
 
