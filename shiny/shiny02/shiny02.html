@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to Shiny in R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Introduction to Shiny in R
+]
+.subtitle[
+## <br>Module 2: Going further with customization in Shiny
+]
+.author[
+### 
+]
+.date[
+### <a href="mailto:contact@appliedepi.org">contact@appliedepi.org</a>
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+&lt;/style&gt;
+
+
+
+&lt;style type="text/css"&gt;
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+&lt;/style&gt;
+
+
+
+# Our goal! 
+
+&lt;img src="images/final_dashboard.png" width="95%" /&gt;
+
+??? 
+Get them excited about the final dashboard we will build together! 
+
+---
+# Module 2 goals and overview 
+**Objective:** To deepen your understanding of Shiny by exploring advanced features and techniques for creating interactive and dynamic dashboards
+
+
+**Today we will cover: **
+
+**Part 1**
+- Advanced user interface (UI) components and widgets
+  - Value boxes, multiple filters, pop-ups, download button
+- Reactive filtering
+- Interactive maps 
+
+**Part 2**
+- Advanced customization of your dashboard
+  - Logos, colors, themes
+  - CSS
+  
+
+???
+
+---
+class: inverse, center, middle
+# Part 1: Advanced UI
+
+---
+# Advanced UI components
+
+There are many options available for Shiny widgets and components.
+
+&lt;iframe src="https://gallery.shinyapps.io/081-widgets-gallery/" width="100%" height="300px"&gt;&lt;/iframe&gt;
+
+.footnote[
+Take a look at the [Widget gallery](https://shiny.posit.co/r/gallery/widgets/widget-gallery/)
+]
+
+???
+Briefly scroll through the options, click on the link and take them through one example.
+
+---
+# Advanced UI components
+Many of the `{shinydashboard}` UI components have a `status` or `color` argument where you can modify its appearance.
+
+--
+### Statuses
+&lt;img src="images/status_cols.png" width="70%" /&gt;
+
+--
+### Colors
+
+&lt;img src="images/cols.png" width="65%" /&gt;
+
+---
+# Advanced UI components
+
+Some UI components can be static or dynamic
+
+### Static 
+- include them in the UI 
+
+### Dynamic
+- include them in the UI **and** render them in the server 
+
+---
+# Value boxes
+
+Value boxes can display important information and summary statistics such as: 
+
+- Total number of cases
+- Percentage of positive cases
+- Important dates
+
+--
+
+You can add different icons from the [Font Awesome](https://fontawesome.com/v5/search?o=r&amp;m=free) to the background of your box. 
+
+--
+
+&lt;img src="images/value_boxes.png" width="100%" /&gt;
+
+.footnote[
+More info on valueBoxes can be found [here](https://rstudio.github.io/shinydashboard/structure.html#valuebox)
+]
+
+???
+After going through the brief list, ask them if they can think of any other examples of key data they may want to display in their dashboard? Briefly mention the icon options from the Font Awesome library
+
+---
+# Static Value boxes
+
+### In the UI:
+
+``` r
+valueBox(value = 100, # a static value to be displayed
+         subtitle = "Total reported cases", # the text to be displayed
+         icon = icon("chart-line"), # the icon from Font Awesome
+         color = "orange", # the color of the box
+         width = 6) # the width of the box in 
+```
+
+--
+
+&lt;img src="images/static_valuebox.png" width="50%" /&gt;
+
+**<svg aria-hidden="true" role="img" viewBox="0 0 384 512" style="height:1em;width:0.75em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M297.2 248.9C311.6 228.3 320 203.2 320 176c0-70.7-57.3-128-128-128S64 105.3 64 176c0 27.2 8.4 52.3 22.8 72.9c3.7 5.3 8.1 11.3 12.8 17.7l0 0c12.9 17.7 28.3 38.9 39.8 59.8c10.4 19 15.7 38.8 18.3 57.5H109c-2.2-12-5.9-23.7-11.8-34.5c-9.9-18-22.2-34.9-34.5-51.8l0 0 0 0c-5.2-7.1-10.4-14.2-15.4-21.4C27.6 247.9 16 213.3 16 176C16 78.8 94.8 0 192 0s176 78.8 176 176c0 37.3-11.6 71.9-31.4 100.3c-5 7.2-10.2 14.3-15.4 21.4l0 0 0 0c-12.3 16.8-24.6 33.7-34.5 51.8c-5.9 10.8-9.6 22.5-11.8 34.5H226.4c2.6-18.7 7.9-38.6 18.3-57.5c11.5-20.9 26.9-42.1 39.8-59.8l0 0 0 0 0 0c4.7-6.4 9-12.4 12.7-17.7zM192 128c-26.5 0-48 21.5-48 48c0 8.8-7.2 16-16 16s-16-7.2-16-16c0-44.2 35.8-80 80-80c8.8 0 16 7.2 16 16s-7.2 16-16 16zm0 384c-44.2 0-80-35.8-80-80V416H272v16c0 44.2-35.8 80-80 80z"/></svg> Tip: ** the valid colors you can use for the boxes are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
+
+???
+Briefly mention that they can choose different colors
+---
+# Dynamic Value boxes
+
+### In the UI:
+
+``` r
+valueBoxOutput(outputId = "dynamic_box") 
+```
+
+--
+
+### In the server: 
+
+``` r
+output$dynamic_box &lt;- renderValueBox{(
+  total_cases &lt;- nrow(surv) # get the number of cases in our line list 
+  
+  valueBox(value = total_cases, # our dynamic value
+           subtitle = "Total reported cases", # the text to be displayed
+           icon = icon("chart-line"), # the icon from Font Awesome
+           color = "orange", # the color of the box
+           width = 6) # the width of the box in 
+)}
+```
+
+???
+Introduce the new functions valueBoxOutput(), renderValueBox() and the importance of the box name "dynamic_box" as well as the reactive box value "total_cases".
+
+---
+# Pop-ups
+You might want to include useful pop-up messages, or even error messages in your app. These can be reactive to certain 'trigger events'. 
+
+.panelset.sideways[
+  .panel[.panel-name[Notifications]
+  Notifications appear at the bottom right corner, appear for 5 seconds and fade away
+  
+&lt;img src="images/notification-types.png" width="50%" /&gt;
+         
+**<svg aria-hidden="true" role="img" viewBox="0 0 384 512" style="height:1em;width:0.75em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M297.2 248.9C311.6 228.3 320 203.2 320 176c0-70.7-57.3-128-128-128S64 105.3 64 176c0 27.2 8.4 52.3 22.8 72.9c3.7 5.3 8.1 11.3 12.8 17.7l0 0c12.9 17.7 28.3 38.9 39.8 59.8c10.4 19 15.7 38.8 18.3 57.5H109c-2.2-12-5.9-23.7-11.8-34.5c-9.9-18-22.2-34.9-34.5-51.8l0 0 0 0c-5.2-7.1-10.4-14.2-15.4-21.4C27.6 247.9 16 213.3 16 176C16 78.8 94.8 0 192 0s176 78.8 176 176c0 37.3-11.6 71.9-31.4 100.3c-5 7.2-10.2 14.3-15.4 21.4l0 0 0 0c-12.3 16.8-24.6 33.7-34.5 51.8c-5.9 10.8-9.6 22.5-11.8 34.5H226.4c2.6-18.7 7.9-38.6 18.3-57.5c11.5-20.9 26.9-42.1 39.8-59.8l0 0 0 0 0 0c4.7-6.4 9-12.4 12.7-17.7zM192 128c-26.5 0-48 21.5-48 48c0 8.8-7.2 16-16 16s-16-7.2-16-16c0-44.2 35.8-80 80-80c8.8 0 16 7.2 16 16s-7.2 16-16 16zm0 384c-44.2 0-80-35.8-80-80V416H272v16c0 44.2-35.8 80-80 80z"/></svg> Tip: ** The default notification color is grey, but use other colors by changing the `type` argument
+         
+More information [here](https://shiny.posit.co/r/articles/build/notifications/)
+]
+
+.panel[.panel-name[Modal dialogs]
+Modal dialogs appear as a pop-up box and the user must click to dismiss.
+
+&lt;iframe src="https://gallery.shinyapps.io/114-modal-dialog/" top="-250px" width="70%" height="200px"&gt;&lt;/iframe&gt;
+
+More information [here](https://shiny.posit.co/r/articles/build/modal-dialogs/)
+]
+
+- the HTML for the modal dialog
+- a call to `showModal()`
+- an observer, so the modal dialog appears in response to a trigger event
+]
+
+---
+# Download button
+
+The download button is a special Shiny widget that allows content from the Shiny app to be downloaded by the user.
+
+### In the UI:
+
+``` r
+downloadButton(outputId = "download_data", # the outputID
+               label = "Download data", # label to be displayed
+               icon = icon("download")) # icon from Font Awesome
+```
+
+--
+### In the server: 
+
+``` r
+output$download_data &lt;- downloadHandler(
+  filename = function(){
+    "ebola_linelist.csv"
+  }, # the filename string
+  content = function(file){
+    write_csv(surv, path = file) # the function to write the content to file
+  }
+)
+```
+
+???
+Make sure they note the function calls inside downloadHandler()
+
+---
+# Reactive filtering
+
+As we increase the complexity of our dashboard, we want to make use of multiple filters. An elegant way is by using **reactive filtering** to increase app performance if our dataset is large. 
+
+
+``` r
+get_surv_data &lt;- function() {
+    surv_filtered &lt;- surv # Create a copy of the all 'surv' data
+    
+    # If a district is selected, then filter it.
+    if (input$select_district != "All") {
+      surv_filtered &lt;- surv_filtered %&gt;% 
+        filter(district == input$select_district)
+    }
+    
+    # If a gender is selected, then filter it.
+    if (input$select_gender != "both") {
+      surv_filtered &lt;- surv_filtered %&gt;% 
+        filter(gender == input$select_gender)
+    }
+    
+    return(surv_filtered)
+  }
+```
+
+
+---
+# Interactive maps with leaflet
+
+The `{leaflet}` package can be used within your Shiny app to create interactive and customizable maps. The syntax is different because it is an R wrapper for the leaflet JavaScript library. 
+
+&lt;!-- &lt;iframe src="https://vac-lshtm.shinyapps.io/ncov_tracker/" top="-250px" width="100%" height="350px"&gt;&lt;/iframe&gt; --&gt;
+
+&lt;iframe src="https://gallery.shinyapps.io/063-superzip-example/" top="-250px" width="100%" height="300px"&gt;&lt;/iframe&gt;
+
+.footnote[
+More info on leaflet can be found [here](https://rstudio.github.io/leaflet/articles/shiny.html)
+]
+
+???
+VERY briefly introduce leaflet but mention that we will not get into maps in too much detail, rather we will focus on how to incorporate its reactivity within a Shiny app. With the example map show the ability to zoom in/out and to click on yellow points to show the text. 
+
+---
+# Interactive maps with leaflet
+
+### In the UI:
+
+``` r
+leafletOutput("map") 
+```
+
+--
+
+### In the server: 
+
+``` r
+output$map &lt;- renderLeaflet{(
+  leaflet(data = surv_map_data) %&gt;% # data for plotting
+    addProviderTiles() %&gt;% # add the base map
+    addPolygons() %&gt;% # add shape files
+    addLegend() # add a legend 
+)}
+```
+
+???
+Make sure to note that you "build" on the leaflet map using the pipe %&gt;% 
+Mention that this is a VERY brief intro to leaflet, and they will explore the customization more in the exercise. although remind them that the point of this course is not to teach maps
+
+---
+class: inverse, center, middle
+# Demo Part I
+
+---
+class: inverse, center, middle
+# Exercises Part I 
+
+---
+class: inverse, center, middle
+# Part 2: Advanced customization
+
+---
+# Using HTML and CSS
+
+'Under the hood' your Shiny app is generating HTML, but the `{shiny}` R package is designed so that you don't need to know HTML, or CSS for that matter. 
+
+--
+- **HTML** (HyperText Markup Language): standard language to **create** web pages using specific elements (headings, paragraphs, images, etc)  
+- **CSS** (Cascading Style Sheets): code that **styles** web content by controlling specific design elements (fonts, colors, spacing, etc)
+
+--
+
+HTML and CSS are beyond the scope of this course, but we will show you some tips and tricks! 
+
+.footnote[
+More details on how to use custom [CSS](https://shiny.posit.co/r/articles/build/css/) and [HTML](https://shiny.posit.co/r/articles/build/html-tags/) in your app
+]
+
+---
+# Customizing your theme
+
+There are a number of themes within the `{shinydashboard}` package. This avoids the need to modify the CSS yourself. 
+
+--
+
+You can change the appearance by modifying the 'skin' color argument. 
+
+``` r
+dashboardPage(skin = "purple")
+```
+
+The available colors are: blue *(default)*, black, purple, green, red, yellow. More information on available themes can be found [here.](https://rstudio.github.io/shinydashboard/appearance.html). 
+
+There is also the [`{shinydashboardPlus}` package](https://rinterface.github.io/shinydashboardPlus/articles/shinydashboardPlus.html) that has extra features including customization and layouts. Here is an [example](https://adminlte.io/themes/AdminLTE/index2.html).
+
+.footnote[
+*If you are building a Shiny app without the {shinydashboard} package, you can use the [`{shinythemes}`](https://rstudio.github.io/shinythemes/) package to customize.*
+]
+---
+# Add a logo
+We can use HTML to add a logo to our dashboard header, as part of the `title` argument. 
+
+The HTML tag that we need to use is `&lt;img&gt;` to embed an image. It requires a `src` attribute to specify the path to the image and we can define styling elements such as the padding around the image or the width/height of the image. 
+
+--
+
+``` r
+dashboardPage(
+  header = dashboardHeader(
+    title = HTML('&lt;img style = 
+                      "padding: 5px;
+                       src=logo.png"&gt; 
+                 Situation report dashboard') 
+  )
+)
+```
+
+.footnote[
+[More resources on HTML can be found [here](https://shiny.posit.co/r/articles/build/html-tags/)
+]
+
+???
+Mention that we will not cover HTML in detail in this course, but provide some tricks that they can implement in their own dashboard apps
+
+---
+# Advanced app structure
+The more complex our app gets, the more it will benefit from 'modularization'. 
+
+--
+
+.pull-left[
+Our app structure before:
+
+``` r
+ui &lt;- fluidPage(
+  dashboardPage(
+    # some code
+  ))
+
+server &lt;- function(input, output, session){
+  # some code
+} 
+
+# run our app
+shinyApp(ui = ui, 
+         server = server) 
+```
+]
+
+--
+.pull-right[
+A modular app structure:
+
+- **Option 1**: *Separate files*
+
+``` r
+~/myModularApp
+|-- ui.R
+|-- server.R
+```
+
+To run: `runApp("myModularApp")`
+
+- **Option 2**: *Modules/Namespaces*:
+A module is a set of UI and server functions (constructed as a namespace)
+
+See [Mastering Shiny](https://mastering-shiny.org/scaling-modules.html#scaling-modules) for more details
+]
+
+???
+Do NOT spend much time on modules/NS - explain that it is like modularizing many simple shiny apps and then chaining them together. You can briefly mention that it is a useful approach for more complex apps because it makes debugging and scaling easier and allows for easier collaborative dev
+
+---
+# Sharing and deploying your app
+
+There are several options for sharing your app both static and 'live'.
+
+- Share the code and have users build locally (eg static .zip file)
+  - *Requires end-users to maintain an R installation!*
+- Publish to a server
+  - *shinyapps.io*: easiest place to publish shiny apps, some free but limited licenses
+
+**You will be deploying your first app by the end of this course!**
+
+---
+class: inverse, center, middle
+# Demo Part 2
+
+---
+class: inverse, center, middle
+# Exercises part 2
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

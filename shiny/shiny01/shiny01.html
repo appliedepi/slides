@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Dashboards with Shiny</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Dashboards with Shiny
+]
+.subtitle[
+## <br>Getting started with Shiny basics
+]
+.author[
+### 
+]
+.date[
+### <a href="mailto:contact@appliedepi.org">contact@appliedepi.org</a>
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+&lt;/style&gt;
+
+
+
+&lt;style type="text/css"&gt;
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+&lt;/style&gt;
+
+
+
+
+
+# Today: objectives &amp; schedule
+
+#### In this first module, we aim to help you:-
+
+- Learn the fundamentals of Shiny.
+- Understand how to structure a shiny application.
+- Become familiar with the concepts and principles of reactive programming.
+- Create a simple interactive web application/dashboard using Shiny and implement basic user interface customization.
+
+
+
+---
+# Our final creation!
+
+&lt;img src="images/complete_shiny_app.png" width="97%" height="100%" /&gt;
+
+
+---
+# What is a dashboard?
+
+- Information management tool used to organize and display key information, data or metrics interactively.
+
+- Most dashboards are linked to live databases providing real-time data displays i.e. reported cases of coronavirus disease.
+
+--
+
+&lt;img src="images/sample_dashboard.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+- Commonly used technologies: [Power BI](https://learn.microsoft.com/en-us/power-bi/fundamentals/power-bi-overview), [Tableau](https://www.tableau.com/en-gb), [Excel](https://clickup.com/blog/how-to-create-a-dashboard-in-excel/) etc.
+
+
+
+---
+# Dashboard use cases
+
+When is a dashboard a requirement?
+
+--
+
+- Data aggregation for comprehensive view when data is scattered across multiple sources for public health communication.
+
+&lt;/br&gt;
+
+--
+
+- Real-time monitoring of key data outputs such as visualizations, summary tables and other key metrics such as outbreak detection.
+
+&lt;/br&gt;
+
+--
+
+- Simplifies the complexity of presenting data insights to non-technical stakeholders.
+
+&lt;/br&gt;
+
+--
+
+- Data curation and query management, such as data quality &amp; completeness.
+
+&lt;!-- &lt;/br&gt; --&gt;
+
+&lt;!-- -- --&gt;
+
+&lt;!-- - And many more use/need cases ... --&gt;
+
+
+---
+# What is Shiny?
+
+--
+.pull-left[
+
+- An R package for building interactive web applications and dashboards.
+
+&lt;/br&gt;
+
+- It's free and open source, inter-operable and runs R code in the back-end. 
+
+&lt;/br&gt;
+
+- Transform analyses into responsive web applications without front-end languages like JavaScript.
+
+]
+
+
+.pull-right[
+
+&lt;img src="images/shiny_logo.png" width="65%" height="60%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+---
+# Why use Shiny
+
+--
+
+- Ideal for non-web developers, leveraging R skills to build dynamic web application with ease.
+
+&lt;/br&gt;
+--
+
+- Integrate with databases &amp; APIs to seamlessly generate **automated** reports, analysis and visualization.
+
+&lt;/br&gt;
+--
+
+- Combine with front-end languages i.e. JavaScript to create visually appealing and user-friendly interfaces.
+
+&lt;/br&gt;
+--
+
+- **Consistency &amp; Reproducibility:** Efficiently **package** &amp; **re-use code** for similar databases/data and analyses.
+
+
+
+---
+# Anatomy of a Shiny app
+
+- Written on a single R script **app.R** inside a directory.
+
+- Has 3 major components comprising purely of R codes.
+
+    - **User interface(UI)** - *Define layout &amp; appearance/aesthetics*
+    - **Server function/logic** - *Instructions on how to build objects to display*
+    - **A call to launch the app** - *By combining UI and server*
+    
+    
+--
+.pull-left[
+
+&lt;img src="images/shiny_app_code.png" width="100%" height="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+--
+
+.pull-right[
+
+&lt;img src="images/simple_shiny.png" width="150%" height="150%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+---
+# {shinydashboard}
+
+- {shinydashboard} is an extension of {shiny} for creating dashboards with ease.
+
+- Design professional &amp; interactive dashboards with very minimal code.
+
+--
+
+&lt;img src="images/dashboard_structure.png" width="70%" height="60%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+- This course will focus on using the [shinydashboard](https://rstudio.github.io/shinydashboard/structure.html) package to design dashboards using R.
+
+
+---
+# {shinydashboard} - Features 
+
+- Unique set of UI components designed for dashboards.
+
+&lt;/br&gt;
+- Flexible layout options
+
+   - **dashboardHeader()** - *Add logos, titles etc*
+   - **dashboardSidebar()** - *App navigation menu and controls.*
+   - **dashboardBody()** - *Organize dashboard contents in boxes.*
+
+&lt;/br&gt;
+- In-build interactive components for displaying key information/metrics (value boxes,info boxes etc)
+
+&lt;/br&gt;
+- **Styling/theming:** Integrate with custom CSS or use one of the built-in skins
+
+
+---
+# User Interface 
+
+- A dashboard UI layout has three basic parts.
+
+
+``` r
+## load packages
+pacman::p_load(shiny, shinydashboard)
+
+# user interface(ui)
+ui &lt;- dashboardPage(
+  dashboardHeader(),   # header contents here
+  dashboardSidebar(),  # sidebar and menu/controls
+  dashboardBody()      # body contents
+)
+```
+
+--
+
+.pull-left[
+
+``` r
+## app.R 
+# user interface(ui)
+ui &lt;- dashboardPage(    
+  dashboardHeader(),
+  dashboardSidebar(),
+  dashboardBody()
+)
+
+# server logic/function
+server &lt;- function(input, output, session){ }
+
+# Run the application
+shinyApp(ui = ui, server = server)
+```
+]
+
+--
+
+.pull-right[
+&lt;img src="images/blank_app.png" width="100%" height="100%" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+# UI - dashboardHeader()
+
+- Create &amp; customize a header for a dashboard page.
+
+- Add a title, custom logos and other header menus.
+
+--
+
+.pull-left[
+
+``` r
+## app.R 
+# user interface(ui)
+ui &lt;- dashboardPage(    
+  dashboardHeader(
+    title = "Ebola Dashboard",
+    titleWidth = "250px"
+  ),
+  dashboardSidebar(),
+  dashboardBody()
+)
+
+# server logic/function
+server &lt;- function(input, output, session){ }
+
+# Run the application
+shinyApp(ui = ui, server = server)
+```
+]
+
+--
+
+.pull-right[
+
+&lt;img src="images/ui_header.png" width="100%" height="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+--
+
+- More details on dashboard header elements &amp; customization [here](https://rstudio.github.io/shinydashboard/structure.html#header)
+
+
+---
+# UI - dashboardSidebar()
+
+- The main navigation tool within shinydashboards.
+
+- Organizes and enables switching between displays on the app's body.
+
+- Key components to structure a `dashboardSidebar()`
+
+    - `sidebarMenu()`: Creates the sidebar panel
+    - `menuItem()`: Creates sections/tabs in the sidebar for navigating the app.
+    - **icon**: argument within menuItem() that enhances visual cues for menus.
+
+--
+
+.pull-left[
+
+``` r
+## Sidebar content
+dashboardSidebar(
+        menuItem("Situation report",
+                 tabName = "tab_sitrep",
+                 icon = icon("globe-europe"))
+        )
+```
+]
+
+--
+
+.pull-right[
+&lt;img src="images/ui_sidebar.png" width="100%" height="100%" style="display: block; margin: auto;" /&gt;
+]
+
+- Further details on dashboardSidebar [here](https://rstudio.github.io/shinydashboard/structure.html#sidebar)
+
+---
+# UI - dashboardBody()
+
+- Main area defining structure and organization of core content.
+
+
+- Comprises of UI elements like rows, tabs, boxes, inputs etc.
+
+
+
+
+``` r
+## app.R 
+dashboardBody(
+      tabItems(
+        tabItem(tabName = "tab_sitrep",
+                fluidRow(
+                  box(title = "Confirmed cases by date of onset",
+                      plotOutput("surv_epicurve"))
+                  ))))
+```
+
+--
+
+- Key features:-
+
+    - `tabItems` - *Display/output contents in multiple tabs.*
+    - `fluidRow()` - *Creates responsive layout &amp; Organizes contents in rows.*
+    - `box()` - *Contains Shiny outputs i.e. plots, tables and interactive elements `plotOutput()`, `tableOutput()` etc.*
+
+- More details on dashboard body layout &amp; customization [here](https://rstudio.github.io/shinydashboard/structure.html#body)
+
+
+
+---
+# UI Elements
+
+- Shiny provides UI elements and widgets for defining input and output functionalists of the app.
+
+&lt;/br&gt;
+- Three broad categories of UI elements:-
+
+    - Layouts: `fluidRow()`, `fluidPage()`, `column()`, `box()` etc
+    - Input widgets: `selectInput()`, `radioButtons()`, `fileInput()` etc.
+    - Output widgets: `plotOutput()`, `tableOutput()`, `textOutput()` etc.
+
+- Input widgets collects/captures values/inputs from the user i.e. texts, numeric values, files etc.
+
+
+&lt;/br&gt;
+- Output widgets displays objects generated i.e plots, tables, text etc.
+
+
+&lt;/br&gt;
+- **NB:** UI widget corresponds to an input or output function on the server logic.
+
+
+---
+# UI Elements - Input widgets
+
+- Essential for controlling the app's behavior, collect users' input, making selections etc.
+
+
+- General syntax: **＿**Input(), where **＿** is the input type for instance **select**Input for creating single-select drop down selection list.
+
+--
+
+.pull-left[
+
+``` r
+  # District drop down syntax
+selectInput(inputId  = "select_district",
+            label = "District",
+            choices = c("All", "Central II", "Mountain Rural", "East II", ".."),
+            selected = "All")
+```
+]
+
+--
+
+.pull-right[
+&lt;img src="images/ui_selectinput.png" width="100%" height="40%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+- ALL **inputId**s **MUST** be unique in your app. They are used to access values provided by the user in the server logic.
+
+
+- More about UI input widgets [here](https://shiny.posit.co/r/getstarted/build-an-app/reactive-flow/ui-inputs.html),
+alongside examples found [here](https://shiny.posit.co/r/gallery/widgets/widget-gallery/)
+
+
+
+---
+# UI Elements - Output widgets
+
+- Responsible for displaying dynamic content such as plots, tables and any calculation from server-side on the UI.
+
+
+- General syntax: **＿**Output(), where **＿** is the output type to be displayed i.e **plot**Output() and *dataTable*Output() to display plots and tables respectively.
+
+--
+
+.pull-left[
+
+``` r
+fluidRow(
+  # Full page box for plotly output
+  box(width = 12,
+    plotOutput(outputId = "surv_epicurve")),
+  
+  # Full page box for data table output
+  box(width = 12,
+    dataTableOutput(outputId = "surv_datatable"))
+  )
+)
+```
+]
+
+--
+
+.pull-right[
+&lt;img src="images/ui_plot.png" width="100%" height="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+--
+
+- As with inputId's, ALL **outputId**'s **MUST** be unique in your shiny app.
+
+
+&lt;/br&gt;
+- More on UI output widgets [here](https://shiny.posit.co/r/getstarted/build-an-app/reactive-flow/ui-outputs.html)
+
+
+---
+# Server-side
+
+-	This is where the back-end logic of a shiny app is implemented. Input from the UI are processed and dynamic outputs are created.
+
+-	Basically telling Shiny how to build objects to be displayed in the UI, using regular R code.
+
+
+
+``` r
+# server logic/function
+server &lt;- function(input, output, session){ 
+  
+  # All server logic/instructions go here
+  # Including R code
+  }
+```
+
+- A large R function, with 3 arguments and comprises of smaller tasks/sub-tasks for the app to perform.
+
+    - `input` - Makes it possible to access user-provided values from UI in server side.
+    
+    - `output` - Represent R objects created to be displayed in shiny UI.
+
+
+
+
+---
+# Integrating UI and server
+
+--
+
+&lt;img src="images/diagram_ui_server.png" width="90%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+.footnote[
+[Image sourced from Intro to Data Science ](https://bookdown.org/hneth/i2ds/shiny.html)
+
+]
+
+---
+# Integrating UI and server
+
+- **render** functions are used to create outputs to display on the UI.
+
+- They take input or data &amp; generate dynamic outputs. Each render function returns a specific type of output e.g., table, plot etc.
+
+- The endpoints produced in the server are passed to the UI using **outputId**'s.
+
+- General syntax: render**＿**, where **＿** is the output type, i.e. render**Plot()** for outputing plots, render**Table()** to output tables etc.
+
+--
+
+
+``` r
+# server logic/function
+server &lt;- function(input, output, session){ 
+  
+  # generate a plot for the UI
+  output$plotId &lt;- renderPlot({
+    
+    # R code to produce a histogram
+    ggplot(data = surv, aes(x = date, fill = district)) +
+      geom_histogram()
+  })
+  }
+```
+
+--
+
+- **output$plotId** passes back the object to be displayed in the UI.
+
+
+---
+# Integrating UI and server
+
+
+.pull-left[
+
+- Sidebar menu
+
+
+``` r
+## Sidebar content
+dashboardSidebar(
+        menuItem("Situation report",
+                 tabName = "tab_sitrep",
+                 icon = icon("globe-europe"))
+        )
+```
+
+- Dashboard body
+
+
+``` r
+dashboardBody(
+      tabItems(
+        tabItem(tabName = "tab_sitrep",
+                fluidRow(
+                  box(plotOutput(outputId = "surv_epicurve"))
+                  ))))
+```
+
+]
+
+--
+
+.pull-right[
+
+- Inside server side
+
+
+``` r
+  output$surv_epicurve &lt;- renderPlot({
+    # R code to produce a histogram 'outputId' in UI
+    ggplot(data = surv, aes(x = date, fill = district)) +
+      geom_histogram()
+  })
+```
+
+- UI display
+
+&lt;img src="images/ui_plot.png" width="100%" height="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+--
+
+- NOTE: **tabName** in sidebar menu and dashboard body; UI plot's **outputId** as used in server logic.
+
+---
+# Intro. to reactivity
+
+- Programming concept where UI outputs (plots, tables etc) auto-update as user inputs are changed.
+
+-	ALL **render＿** functions in the server create a reactive context, thus reactive outputs.
+
+- Reactive values such as UI inputs MUST be accessed inside reactive context.
+
+--
+
+
+``` r
+# UI input to select district
+selectInput(inputId  = "select_district",
+            label = "District",
+            choices = c("All", "Central II", "Mountain Rural", "East II"),
+            selected = "All")
+```
+
+
+``` r
+ # server side to access value of district drop down selected
+  output$surv_epicurve &lt;- renderPlot({
+    surv %&gt;%  
+      filter(district == input$select_district) |&gt; 
+      ggplot(aes(x = date, fill = district)) +
+      geom_histogram()
+  })
+```
+
+- Reactivity is the backbone of shiny, read more [here](https://mastering-shiny.org/basic-reactivity.html)
+
+
+---
+# How reactivity works
+
+- The plot depends on the value of **input$select_district** supplied by user selection.
+--
+
+&lt;img src="images/reactive_0.png" width="70%" height="50%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+--
+
+&lt;img src="images/reactive_all.png" width="70%" height="50%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+--
+
+&lt;img src="images/reactive_central.png" width="70%" height="50%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+
+---
+# UI page layouts
+
+- The UI page can be taken as a region comprising 12 columns of equal width &amp; unlimited number of rows.
+
+- Placing a box or output in the region, you specify how many of the 12 columns you want it to utilize using **width** argument
+
+.pull-left[
+&lt;img src="images/ui_layouts.png" width="78%" height="50%" style="display: block; margin: auto 0 auto auto;" /&gt;
+  
+]
+
+
+.pull-right[
+    
+
+  ]
+ 
+ 
+- Three types of layouts:-
+
+   - Row-based layout
+   - Column-based layout
+   - Mixing row and column layout
+
+- More on layouts [here](https://mastering-shiny.org/action-layout.html) and this [article](https://rstudio.github.io/shinydashboard/structure.html#layouts)
+
+
+---
+# Row-based layout
+
+- **box()**es goes in a row created by **fluidrow()** with width specified by **with=** argument.
+
+
+.pull-left[
+
+``` r
+  dashboardBody(
+    fluidRow(
+      box(width = 4,  # row 1 column 1 for inputs
+               sliderInput("num", "Number of Random Points:", min = 10, max = 100, value = 50),
+               selectInput("color", "Choose Point Color:", 
+                           choices = c("Red", "Blue", "Green"))
+      ),
+      box(width = 8,  # row 1 column 2 for outputs
+               plotOutput("scatterPlot")
+      )
+    )
+  )
+```
+ 
+]
+
+--
+
+.pull-right[
+    
+&lt;img src="images/row_layout.png" width="100%" height="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+&lt;/br&gt;
+
+- In row-based layouts, tops of boxes will align but bottoms might not based on content to display.
+
+
+---
+# Column-based layout
+
+- Create **column()**s of desired **with=** and place outputs/items within those columns.
+
+
+.pull-left[
+
+``` r
+  dashboardBody(
+    fluidRow(
+      column(width = 4,  # Left column for inputs
+               title = "Inputs",
+               sliderInput("num", "Number of Random Points:", min = 10, max = 100, value = 50),
+               selectInput("color", "Choose Point Color:", 
+                           choices = c("Red", "Blue", "Green"))
+      ),
+      column(width = 8,  # Right column for outputs
+               plotOutput("scatterPlot")
+      )
+    )
+  )
+)
+```
+ 
+]
+
+--
+
+.pull-right[
+    
+&lt;img src="images/column_layout.png" width="100%" height="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+&lt;/br&gt;
+
+- First column contains inputs while second column has the outputs.
+
+
+---
+# Summary
+
+&lt;img src="images/summary_shiny.png" width="88%" height="50%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: inverse, center, middle
+
+
+## Time for a live demo 
+
+
+
+
+
+---
+class: inverse, center, middle
+
+
+## Exercises - Time to try out some shiny coding😊
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
