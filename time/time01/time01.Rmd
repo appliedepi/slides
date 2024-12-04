@@ -1,0 +1,629 @@
+---
+title: "Time Series"
+subtitle: "<br>1. Working with clean data<br><br>"
+author: ""
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: TRUE
+    lib_dir: libs
+    self_contained: true
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: [xaringan-themer.css] 
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, eval=F, echo=F, include = F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+devtools::install_github("gadenbuie/countdown")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,      # coloring text
+  kableExtra, # for output tables
+  flextable,  # for some tables and styling
+  xaringanthemer,  # for styling presentation 
+  countdown
+)
+
+```
+
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  # add logo to the title page (bit bigger)
+  title_slide_background_image = "../../images/logo.png",
+  title_slide_background_position = "95% 95%",
+  title_slide_background_size = "25%",
+  ## add logo to all following slides
+  background_image = here::here("/images/template/logo.png"), 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+  
+.center2 {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+```
+
+
+
+```{css, echo = F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+```{r, echo=F, eval=T}
+timeseries <- rio::import("../data/norsyss.xlsx")
+```
+
+# Thank you for joining us  
+
+**Thank you for your service** *to your community in these busy times for public health. We are glad that you are taking the time to learn R with us.*  
+
+- Brief introductions from the instructors  
+- Brief round of introductions from the participants
+
+---
+
+# Time series
+
+- A set of observations arranged in chronological order
+- Performed in many fields, many applications
+- We will be focusing on "anomaly detection"
+- Used in near real-time surveillance to identify unexpected patterns in data
+- Allows for informed decision-making and outbreak detection
+
+---
+
+# Words are important
+
+You always have "**recorded** cases" or "**recorded** deaths", not "cases" or "deaths".
+
+What is an outbreak?
+
+- The occurrence of disease cases in excess of normal expectancy.
+- Might go unnoticed if there is poor surveillance.
+- If noticed, might not be declared an outbreak for political reasons.
+
+What is a week?
+
+- Week = 7 day period
+- Isoweek* = ?
+- Epiweek = ?
+- Seasonweek = ?
+
+
+.footnote[*Remember that isoweeks must be used with isoyears, not calendar years.]
+
+---
+
+# Scenario 1: No historical data
+
+Lets consider a situation where we have no historical data (or in the absence of consistent seasonal patterns).
+
+Reasons for this may be:
+
+- Opened a new health clinic in a new geographical region.
+- Included a new disease in your surveillance system (e.g. RSV).
+- Started a temporary surveillance system for an outbreak/new situation.
+- Novel disease has been found (e.g. HIV in 1983, COVID-19 in 2019).
+- Disease does not have a seasonal pattern (e.g. COVID-19 in 2023).
+- Fundamental changes in the surveillance system (e.g. COVID-19 testing requirements changing, health infrastructure destroyed in conflict).
+
+From a statistical perspective, all of these situations are the same.
+
+All of these situations can occur anywhere.
+
+---
+
+## How can we describe the epidemiological situation?
+
+**Magnitude**
+
+- E.g. Number of recorded cases, hospitalizations, deaths.
+
+**Trend**
+
+- E.g. Increasing/not increasing
+- Decreasing is more difficult
+
+---
+
+# Magnitude
+
+*WARNING*: **Categorizing** magnitude tends to not be **statistical**, especially when there is limited historical data.
+
+There is no objective measure of how much infection or disease is "too much" in a population.
+
+The population, health authorities, and political class together determine what an acceptable level of infection/disease is. 
+
+If a society chooses an elimination and/or supression strategy, then no amount of disease spread will be acceptable.
+
+**First** present your data in a neutral manner with scientific integrity.
+
+- Show the reader the real numbers (**don't categorize into low/medium/high**).
+- Be careful of displaying multiple time series with different population sizes (e.g. 100 deaths / 1 million vaccinated vs 10 deaths / 10 unvaccinated). You may want to display rates (i.e. deaths / 100k people).
+
+**Then** you may interpret (or leave that to the reader).
+
+---
+
+# Magnitude
+
+.pull-right[
+```{r, echo=F, eval=T}
+pd <- timeseries %>% 
+  filter(icpc2group_tag == "covid19") %>% 
+  filter(location_code == "nation_nor") %>% 
+  filter(isoyear %in% 2021:2022)
+
+ggplot(
+  pd, 
+  aes(
+    x = as.Date(sunday_of_isoweek), 
+    y = consultations_icpc2group_n
+  )) +
+  geom_point() +
+  geom_line() + 
+  expand_limits(y = 0) +
+  scale_y_continuous(
+    "Consultations",
+    expand = expansion(mult = c(0, 0.1))
+  ) +
+  scale_x_date(NULL, date_labels = "%b-%Y", expand = expansion(mult = 0)) +
+  coord_cartesian(clip = "off") +
+  theme_minimal() + 
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = as.Date(-Inf)) +
+  theme(legend.position = "bottom")
+```
+]
+
+---
+
+# Short-term trend
+
+.pull-left[
+- Increasing/not increasing
+- Restrict the data to a specific time period
+- Run a (quasi-)poisson regression
+- Outcome: Number of cases
+- Exposure: Time (linear)
+]
+
+.pull-right[
+```{r, echo=F, eval=T}
+pd <- timeseries %>% 
+  filter(icpc2group_tag == "covid19") %>% 
+  filter(location_code == "nation_nor") %>% 
+  filter(isoyearweek >= "2023-40" & isoyearweek <= "2023-44")
+
+ggplot(
+  pd, 
+  aes(
+    x = as.Date(sunday_of_isoweek), 
+    y = consultations_icpc2group_n
+  )) +
+  geom_point(size = 3) +
+  stat_smooth(method="lm", se=FALSE, color = "red") + 
+  expand_limits(y = 0) +
+  scale_y_continuous(
+    "Consultations",
+    expand = expansion(mult = c(0, 0.1))
+  ) +
+  scale_x_date(NULL, date_labels = "%b-%Y") +
+  coord_cartesian(clip = "off") +
+  theme_minimal() + 
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = as.Date(-Inf)) +
+  theme(legend.position = "bottom")
+```
+]
+
+---
+
+# Short-term trend
+
+.pull-right[
+```{r, echo=F, eval=T}
+pd <- timeseries %>% 
+  filter(icpc2group_tag == "covid19") %>% 
+  filter(location_code == "nation_nor") %>% 
+  filter(isoyear >= 2020)
+data.table::setDT(pd)
+cstidy::set_csfmt_rts_data_v1(pd)
+pd <- csalert::short_term_trend(
+  pd,
+  numerator = "consultations_icpc2group_n",
+  include_decreasing = F
+)
+cstidy::remove_class_csfmt_rts_data(pd)
+pd <- pd[isoyear %in% 2021:2022]
+
+q <- ggplot(
+  pd, 
+  aes(
+    x = as.Date(sunday_of_isoweek), 
+    y = consultations_icpc2group_n
+  ))
+q <- q + geom_text(
+  data = pd[consultations_icpc2group_trend0_41_status=="increasing"],
+  mapping = aes(
+    y = 0,
+    label = "▲"
+  ),
+  color = "red",
+  vjust = 0
+)
+q <- q + geom_point()
+q <- q + geom_line()
+q <- q + expand_limits(y = 0)
+q <- q + scale_y_continuous(
+    "Consultations",
+    expand = expansion(mult = c(0, 0.1))
+  )
+q <- q + scale_x_date(NULL, date_labels = "%b-%Y", expand = expansion(mult = 0))
+q <- q + coord_cartesian(clip = "off")
+q <- q + theme_minimal()
+q <- q + geom_hline(yintercept = 0)
+q <- q + geom_vline(xintercept = as.Date(-Inf))
+q
+```
+]
+
+---
+
+# Exercise time
+
+The best way to learn is to try it yourself!
+
+**As you go along, please remember to type into the chat if you have any questions.**
+
+---
+
+# Scenario 2: With historical data
+
+.pull-left[
+- Data registration/collection must be consistent.
+- Needs to have predictable seasonality.
+]
+
+.pull-right[
+- Magnitude is the same as before.
+- Short-term trends are the same as before.
+- Introducing **alerts**.
+- With historical data, we can analyze what is expected vs what is not expected (alert!).
+- Alerts are something for you to pay attention to, and investigate further.
+- Alerts may or may not be outbreaks.
+]
+
+
+---
+
+# Prediction vs. Confidence
+
+1. **Purpose**:
+   - **Confidence Interval (CI)**: Estimates a range for the *average outcome* in a population.
+   - **Prediction Interval (PI)**: Estimates a range for a *single future outcome* in a population.
+
+2. **Uncertainty**:
+   - **CI**: Shows how confident we are about the *mean* of the population.
+   - **PI**: Shows the likely range for a *new observation* from the population.
+
+3. **Size of the Interval**:
+   - **PI** is usually wider than a **CI** because it accounts for the extra uncertainty of predicting an individual outcome.
+   - **(Uncertainty of estimating the mean)** + **(random variability of a single observation)**
+---
+
+# Alert
+
+.pull-left[
+- Typical dataset to identify if 2023-W44 is **higher than expected**
+- 6 Baseline years (can be adjusted)
+- ± 1 week window (can be adjusted)
+]
+
+.pull-right[
+```{r, echo=F, eval=T}
+pd_display <- timeseries %>% 
+  data.frame() %>%
+  dplyr::filter(location_code=="nation_nor") %>%
+  dplyr::filter(icpc2group_tag=="r80") %>%
+  dplyr::filter(isoweek %in% c(43:45)) %>%
+  dplyr::filter(isoyear >= 2017) %>%
+  dplyr::filter(!(isoweek!=44 & isoyear==2023)) %>%
+  dplyr::select(isoyear, isoweek, consultations_icpc2group_n) %>%
+  mutate(isoweek = paste0("W",isoweek)) %>% 
+  tidyr::pivot_wider(
+    id_cols = c("isoyear"),
+    names_from = c("isoweek"),
+    values_from = "consultations_icpc2group_n"
+  ) %>% as.data.frame()
+
+pd_display %>% 
+  mutate(isoyear = as.character(isoyear)) %>% 
+  qflextable()
+```
+]
+
+---
+
+# Alert
+
+.pull-left[
+We have created a **prediction** interval using the baseline data.
+
+(**Not a confidence interval!**)
+
+The upper bound of the prediction interval is often called the **threshold**.
+
+How to improve?
+- Wider window 
+    - More data
+    - More power
+    - Worse adjustment for seasonality
+- Narrower window
+    - Better adjustment for seasonality
+]
+
+.pull-right[
+```{r, echo=F, eval=T}
+pd1 <- timeseries %>% 
+  data.frame() %>%
+  dplyr::filter(location_code=="nation_nor") %>%
+  dplyr::filter(icpc2group_tag=="r80") %>%
+  dplyr::filter(isoweek %in% c(43:45)) %>%
+  dplyr::filter(isoyear >= 2017) %>%
+  dplyr::filter(!(isoweek!=44 & isoyear==2023)) %>%
+  dplyr::select(isoyearweek, consultations_icpc2group_n) %>%
+  dplyr::mutate(type = dplyr::if_else(
+    isoyearweek == "2023-44", 
+    "2023-W44", 
+    "Baseline"
+  )) %>%
+  dplyr::mutate(x = dplyr::if_else(
+    isoyearweek == "2023-44", 
+    0.5, 
+    runif(n(), min = 0.4, max = 0.6)
+  ))
+
+pd2 <- pd1 %>%
+  dplyr::group_by(type) %>%
+  dplyr::summarize(
+    mean = mean(consultations_icpc2group_n), 
+    l95 = mean(consultations_icpc2group_n) - 1.96 * sd(consultations_icpc2group_n) * sqrt(1 + 1/(nrow(pd1)-1)),
+    u95 = mean(consultations_icpc2group_n) + 1.96 * sd(consultations_icpc2group_n) * sqrt(1 + 1/(nrow(pd1)-1))
+  )
+  
+q <- ggplot()
+q <- q + geom_errorbar(data = pd2 %>% filter(type=="Baseline"), mapping = aes(x = 0.5, ymin = l95, ymax = u95, color = type), width = 0.2)
+q <- q + geom_point(data = pd1, mapping = aes(x = x, y = consultations_icpc2group_n, color = type), size = 5)
+q <- q + scale_color_brewer(NULL, palette="Set1")
+q <- q + expand_limits(y = 0)
+q <- q + scale_y_continuous(
+  "Consultations",
+  limits = c(0, 2000),
+  expand = expansion(mult = c(0, 0.1))
+)
+q <- q + scale_x_continuous(NULL, breaks = NULL, limits = c(0, 1), expand = expansion(mult = c(0, 0)))
+q <- q + theme_minimal()
+q <- q + geom_hline(yintercept = 0)
+q <- q + geom_vline(xintercept = 0)
+q <- q + theme(legend.position = "bottom")
+q
+```
+]
+
+---
+
+# Alert
+
+.pull-left[
+Improve by including a trend for years
+]
+
+.pull-right[
+```{r, echo=F, eval=T}
+pd1 <- timeseries %>% 
+  data.frame() %>%
+  dplyr::filter(location_code=="nation_nor") %>%
+  dplyr::filter(icpc2group_tag=="r80") %>%
+  dplyr::filter(isoweek %in% c(43:45)) %>%
+  dplyr::filter(isoyear >= 2017) %>%
+  dplyr::filter(!(isoweek!=44 & isoyear==2023)) %>%
+  dplyr::select(isoyearweek, consultations_icpc2group_n) %>%
+  dplyr::mutate(type = dplyr::if_else(
+    isoyearweek == "2023-44", 
+    "2023-W44", 
+    "Baseline"
+  )) %>%
+  dplyr::mutate(x = dplyr::if_else(
+    isoyearweek == "2023-44", 
+    0.5, 
+    runif(n(), min = 0.4, max = 0.6)
+  ))
+
+pd2 <- pd1 %>%
+  dplyr::group_by(type) %>%
+  dplyr::summarize(
+    mean = mean(consultations_icpc2group_n), 
+    l95 = mean(consultations_icpc2group_n) - 1.96 * sd(consultations_icpc2group_n) * sqrt(1 + 1/(nrow(pd1)-1)),
+    u95 = mean(consultations_icpc2group_n) + 1.96 * sd(consultations_icpc2group_n) * sqrt(1 + 1/(nrow(pd1)-1))
+  )
+  
+q <- ggplot()
+q <- q + geom_errorbar(data = pd2 %>% filter(type=="Baseline"), mapping = aes(x = "2023-44", ymin = l95, ymax = u95), width = 1, size = 2, color = "orange")
+q <- q + geom_point(data = pd1, mapping = aes(x = isoyearweek, y = consultations_icpc2group_n, color = type), size = 5)
+q <- q + stat_smooth(data = pd1, method = "lm", se=FALSE, mapping = aes(x = isoyearweek, y = consultations_icpc2group_n, group = 1), size = 2, color = "orange")
+q <- q + scale_color_brewer(NULL, palette="Set1")
+q <- q + expand_limits(y = 0)
+q <- q + scale_y_continuous(
+  "Consultations",
+  limits = c(0, 2000),
+  expand = expansion(mult = c(0, 0.1))
+)
+q <- q + scale_x_discrete(NULL)
+q <- q + theme_minimal()
+q <- q + geom_hline(yintercept = 0)
+q <- q + geom_vline(xintercept = -Inf)
+q <- q + theme(legend.position = "bottom")
+q <- q + csstyle::set_x_axis_vertical()
+q
+```
+]
+
+---
+
+# Alert
+
+.pull-left[
+**Maybe** improve by removing the window and explicitly modeling seasonality
+- Good if you get a good model fit
+- Bad if you get a bad model fit
+- **Lunar new year is a good example**: **Easter**
+- Remember that you must **always** have **baseline data** that comes **before** the **observation**
+- Need to **rerun** the entire model for **every week**, shifting the baseline data window
+]
+
+.pull-right[
+```{r, echo=F, eval=T}
+pd1 <- timeseries %>% 
+  data.frame() %>%
+  dplyr::filter(location_code=="nation_nor") %>%
+  dplyr::filter(icpc2group_tag=="r80") %>%
+  dplyr::filter(isoyearweek <= "2023-44") %>%
+  dplyr::filter(isoyear >= 2017) %>%
+  dplyr::filter(!(isoweek!=44 & isoyear==2023)) %>%
+  dplyr::select(isoyearweek, consultations_icpc2group_n) %>%
+  dplyr::mutate(type = dplyr::if_else(
+    isoyearweek == "2023-44", 
+    "2023-W44", 
+    "Baseline"
+  )) %>%
+  dplyr::mutate(x = dplyr::if_else(
+    isoyearweek == "2023-44", 
+    0.5, 
+    runif(n(), min = 0.4, max = 0.6)
+  ))
+
+q <- ggplot(data = pd1)
+q <- q + geom_point(mapping = aes(x = isoyearweek, y = consultations_icpc2group_n, color = type), size = 3)
+q <- q + geom_errorbar(data = pd2 %>% filter(type=="Baseline"), mapping = aes(x = "2023-44", ymin = 2000, ymax = 5000), width = 20, size = 2, color = "orange")
+q <- q + stat_smooth(data = pd1, span = 0.2, se=FALSE, mapping = aes(x = isoyearweek, y = consultations_icpc2group_n, group = 1), size = 2, color = "orange")
+q <- q + scale_color_brewer(NULL, palette="Set1")
+q <- q + expand_limits(y = 0)
+q <- q + scale_y_continuous(
+  "Consultations",
+  limits = c(0, 13000),
+  expand = expansion(mult = c(0, 0.1))
+)
+q <- q + scale_x_discrete(NULL, breaks = NULL)
+q <- q + coord_cartesian(clip = "off")
+q <- q + theme_minimal()
+q <- q + geom_hline(yintercept = 0)
+q <- q + geom_vline(xintercept = -Inf)
+q <- q + theme(legend.position = "bottom")
+q
+```
+]
+
+---
+
+# Alert
+
+Remember that you don't **need** to do the most complicated model.
+You can try all three models, and see if they are necessary.
+
+
+---
+
+# Exercise time
+
+The best way to learn is to try it yourself!
+
+**As you go along, please remember to type into the chat if you have any questions.**
+
+
+
+
+
