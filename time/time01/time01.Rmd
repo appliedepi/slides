@@ -141,10 +141,33 @@ timeseries <- rio::import("../data/norsyss.xlsx")
 **Thank you for your service** *to your community in these busy times for public health. We are glad that you are taking the time to learn R with us.*  
 
 - Brief introductions from the instructors  
-- From the participants, please write in the chat:
-    - Your name
-    - Your previous R experience
-    - A quick summary of your day-to-day job
+
+---
+
+# Overview
+
+```{r, eval = TRUE, echo = FALSE}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(("../images/course_overview.png"))
+```
+
+---
+
+# A little about you 
+
+**Thank you for your service** *to your community in these busy times for public health. We are glad that you are taking the time to learn R with us.*  
+
+Please write in the chat:
+
+- Your name
+- Your previous R experience
+- A quick summary of your day-to-day job
+- If you want to aim for:
+    - Target 1 (data cleaning + are cases going up?)
+    - Target 2 (are the cases higher than expected?)
+    - Target 3 (extras)
 
 ---
 
@@ -313,15 +336,28 @@ pd <- timeseries %>%
   filter(icpc2group_tag == "covid19") %>% 
   filter(location_code == "nation_nor") %>% 
   filter(isoyear >= 2020)
-data.table::setDT(pd)
-cstidy::set_csfmt_rts_data_v1(pd)
-pd <- csalert::short_term_trend(
-  pd,
-  numerator = "consultations_icpc2group_n",
-  include_decreasing = F
+
+sts <- surveillance::sts(
+  observed = pd$consultations_icpc2group_n, # observed data
+  start = c(
+    min(pd$isoyear), # first year of data
+    min(pd$isoweek) # first week of data
+  ),
+  frequency = 52 # weekly data
 )
-cstidy::remove_class_csfmt_rts_data(pd)
-pd <- pd[isoyear %in% 2021:2022]
+
+analysis_trend <- csalert::short_term_trend_sts_v1(
+  sts,
+  control = list(
+    w = 5,
+    alpha = 0.05
+  )
+)
+analysis_trend@alarm[,"observed1"]
+pd$status <- analysis_trend@alarm[,"observed1"]
+
+pd <- pd %>%
+  filter(isoyear %in% 2021:2022)
 
 q <- ggplot(
   pd, 
@@ -330,7 +366,7 @@ q <- ggplot(
     y = consultations_icpc2group_n
   ))
 q <- q + geom_text(
-  data = pd[consultations_icpc2group_trend0_41_status=="increasing"],
+  data = pd[pd$status==1,],
   mapping = aes(
     y = 0,
     label = "▲"
