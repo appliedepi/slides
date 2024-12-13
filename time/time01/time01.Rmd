@@ -21,9 +21,9 @@ editor_options:
 # Must do in order to render.
 
 pacman::p_load(xaringan)
-devtools::install_github("gadenbuie/xaringanExtra")
-devtools::install_github("gadenbuie/countdown")
-remotes::install_github("mitchelloharawild/icons")
+# devtools::install_github("gadenbuie/xaringanExtra")
+# devtools::install_github("gadenbuie/countdown")
+# remotes::install_github("mitchelloharawild/icons")
 icons::download_fontawesome()
 
 # Render with xaringan::infinite_moon_reader()
@@ -331,6 +331,7 @@ ggplot(
 # Short-term trend
 
 .pull-right[
+
 ```{r, echo=F, eval=T}
 pd <- timeseries %>% 
   filter(icpc2group_tag == "covid19") %>% 
@@ -353,27 +354,22 @@ analysis_trend <- csalert::short_term_trend_sts_v1(
     alpha = 0.05
   )
 )
-analysis_trend@alarm[,"observed1"]
+#analysis_trend@alarm[,"observed1"]
+
 pd$status <- analysis_trend@alarm[,"observed1"]
+pd$sunday_of_isoweek <- as.Date(pd$sunday_of_isoweek)
+pd_triangles <- pd[pd$status==1,]
+
 
 pd <- pd %>%
   filter(isoyear %in% 2021:2022)
 
 q <- ggplot(
-  pd, 
+  pd_triangles, 
   aes(
     x = as.Date(sunday_of_isoweek), 
     y = consultations_icpc2group_n
   ))
-q <- q + geom_text(
-  data = pd[pd$status==1,],
-  mapping = aes(
-    y = 0,
-    label = "▲"
-  ),
-  color = "red",
-  vjust = 0
-)
 q <- q + geom_point()
 q <- q + geom_line()
 q <- q + expand_limits(y = 0)
@@ -382,6 +378,17 @@ q <- q + scale_y_continuous(
     expand = expansion(mult = c(0, 0.1))
   )
 q <- q + scale_x_date(NULL, date_labels = "%b-%Y", expand = expansion(mult = 0))
+if(nrow(pd_triangles) > 0){
+    q <- q + geom_point(
+        data = pd_triangles,
+        mapping = aes(
+            y = 0
+        ),
+        shape = 17,
+        color = "red",
+        size = 2
+    )
+}
 q <- q + coord_cartesian(clip = "off")
 q <- q + theme_minimal()
 q <- q + geom_hline(yintercept = 0)
