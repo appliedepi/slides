@@ -1,0 +1,924 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../images/Applied_Epi_logo.png
+    css: ../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+---
+
+```{r}
+## colours
+aeblue <- "#012d78"
+
+```
+
+# Introduction to Applied Epidemiology in R
+
+## Data manipulation in R {.smaller}
+
+Often our data is not in the format we need:
+
+-   Too many columns
+-   Wrong aggregation
+-   In the wrong order
+-   Too many rows
+-   Too few columns
+-   Not grouped correctly
+
+## Data manipulation in R {.smaller}
+
+We are going to show you how to solve these problems using {`dplyr`}
+
+-   Too many columns: `select()`
+-   Wrong aggregation: `count()`
+-   In the wrong order: `arrange()`
+-   Too many rows: `filter()`
+-   Too few columns: `mutate()`
+-   Not grouped correctly: `group_by()` and `summarise()`
+
+# Selecting columns with {`dplyr`}
+
+## select()
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+- **Purpose:** To select the columns we want from the data
+- **Why:** Because it is easier to deal with fewer columns and it uses less space on your computer
+- **Example:** You want to create a linelist for analysis and remove columns that are not needed
+- **How:** We type out the names of the columns we want
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+Code
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+Code
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+input_data <- head(mtcars) |> 
+  dplyr::select(cyl, mpg, disp)
+
+tab_input <- input_data |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars)
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars)
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- tab_input 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars, cyl)
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(cyl) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars, mpg)
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(mpg) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars, disp)
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(disp) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars, mpg, cyl)
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(mpg, cyl) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars, mpg, cyl, disp)
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(mpg, cyl, disp) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars, -mpg)
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(-mpg) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## Code
+
+::: incremental
+-   select(**data**)
+-   select(data, **col1**): Select col1
+-   select(data, **-col1**): Deselect or remove col1
+-   select(data, col1, **col2**): Select col1 and col2
+-   select(data, col1, col2, **col3**)
+-   select(data, col1, col2, ..., **col100**)
+:::
+
+# Exercise: `select()`
+
+## Now it's your turn
+
+Use our interactive tool to select columns and see the code that you would write.
+
+1.  Go to shiny app link
+2.  Choose the select tab and pick columns that you want
+
+# Counting rows with {`dplyr`}
+
+## count()
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: definition
+::: word
+Purpose:
+:::
+
+::: definition-text
+To count the number of rows based on values in a column
+:::
+:::
+
+::: definition
+::: word
+Why:
+:::
+
+::: definition-text
+To quickly describe or checking data
+:::
+:::
+
+::: definition
+::: word
+Example:
+:::
+
+::: definition-text
+You need to check if there are duplicate identifiers, or to count the number of cases (rows) per hospital
+:::
+:::
+
+::: definition
+::: word
+How:
+:::
+
+::: definition-text
+We type out the names of the columns we want to count by
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+```{dot}
+// Create overall graph
+graph G {
+    // Use neato for manual positioning
+    rankdir = LR
+
+    // Define nodes with specific positions
+    A [label=< <B>Input:</B> <BR/>dataframe >, 
+       style="rounded, filled", fontcolor="#016601", fillcolor = "#f0f4f0", fontname="Source Sans Pro", shape=box, penwidth = 0];
+    B [label=< <B>Code:</B> <BR/>count(data, col1, col2, ...) >, 
+       style="rounded, filled",  fillcolor="#ebebeb", fontname="Source Sans Pro", shape=box, penwidth = 0];
+    C [label=< <B>Output:</B> <BR/> dataframe with count (N) <BR/>per combination of <BR/> col1 and col2 values>, 
+       style="rounded, filled", fontcolor="#012d78", fillcolor = "#edf6fc", fontname="Source Sans Pro", shape=box, penwidth = 0];
+    
+    // Define edges
+    A -- B [dir=forward];
+    B -- C [dir=forward];
+}
+
+```
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+count(mtcars, cyl)
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::count(cyl) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+count(mtcars, cyl, mpg)
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::count(cyl, mpg) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+# Arranging rows with {`dplyr`} {.smaller}
+
+## arrange()
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+- **Purpose:** To sort (arrange) rows in a certain order based on column content
+- **Why:** Because it's easier to understand a sorted table, and so you can extract some information.
+- **Example:** You order a linelist by onset date to find the 10 earliest cases
+- **How:** We type out the names of the columns we want to sort by
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+```{dot}
+// Create overall graph
+graph G {
+    // Use neato for manual positioning
+    rankdir = LR
+
+    // Define nodes with specific positions
+    A [label=< <B>Input:</B> <BR/>dataframe >, 
+       style="rounded, filled", fontcolor="#016601", fillcolor = "#f0f4f0", fontname="Source Sans Pro", shape=box, penwidth = 0];
+    B [label=< <B>Code:</B> <BR/>arrange(data, col1, col2, ...) >, 
+       style="rounded, filled",  fillcolor="#ebebeb", fontname="Source Sans Pro", shape=box, penwidth = 0];
+    C [label=< <B>Output:</B> <BR/>dataframe with rows <BR/>in ascending order <BR/>of col1 and col2>, 
+       style="rounded, filled", fontcolor="#012d78", fillcolor = "#edf6fc", fontname="Source Sans Pro", shape=box, penwidth = 0];
+    
+    // Define edges
+    A -- B [dir=forward];
+    B -- C [dir=forward];
+}
+
+```
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+arrange(mtcars, cyl)
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::arrange(cyl) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+arrange(mtcars, cyl, mpg)
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::arrange(cyl, mpg) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+```{dot}
+// Create overall graph
+graph G {
+    // Use neato for manual positioning
+    rankdir = LR
+
+    // Define nodes with specific positions
+    A [label=< <B>Input:</B> <BR/>dataframe >, 
+       style="rounded, filled", fontcolor="#016601", fillcolor = "#f0f4f0", fontname="Source Sans Pro", shape=box, penwidth = 0];
+    B [label=< <B>Code:</B> <BR/>arrange(data,   <B> desc</B> (col1),<B> desc</B>(col2), ...) >, 
+       style="rounded, filled",  fillcolor="#ebebeb", fontname="Source Sans Pro", shape=box, penwidth = 0];
+    C [label=< <B>Output:</B> <BR/>dataframe with rows <BR/>in <B>descending </B>  order<BR/> of col1 and col2>, 
+       style="rounded, filled", fontcolor="#012d78", fillcolor = "#edf6fc", fontname="Source Sans Pro", shape=box, penwidth = 0];
+    
+    // Define edges
+    A -- B [dir=forward];
+    B -- C [dir=forward];
+}
+
+```
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+```{dot}
+// Create overall graph
+graph G {
+    // Use neato for manual positioning
+    rankdir = LR
+
+    // Define nodes with specific positions
+    A [label=< <B>Input:</B> <BR/>vector>, 
+       style="rounded, filled", fontcolor="#016601", fillcolor = "#f0f4f0", fontname="Source Sans Pro", shape=box, penwidth = 0];
+    B [label=< <B>Code:</B> <BR/><B>desc</B>(col1) >, 
+       style="rounded, filled",  fillcolor="#ebebeb", fontname="Source Sans Pro", shape=box, penwidth = 0];
+    C [label=< <B>Output:</B> <BR/>vector <BR/>in <B>descending </B>  order<BR/>>, 
+       style="rounded, filled", fontcolor="#012d78", fillcolor = "#edf6fc", fontname="Source Sans Pro", shape=box, penwidth = 0];
+    
+    // Define edges
+    A -- B [dir=forward];
+    B -- C [dir=forward];
+}
+
+```
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+arrange(mtcars, desc(cyl))
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::arrange(desc(cyl)) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
