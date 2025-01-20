@@ -1,0 +1,827 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+---
+
+# Module 2
+
+## Learning objectives
+
+-   Understand what functions are and their general structure
+-   Get familiar with writing simple functions to inspect data and tabulate columns
+
+# Recap
+
+## Last time we discussed...
+
+-   Functions are pieces of code with particular tasks
+-   Functions take inputs to produce outputs
+-   Outputs and values can be printed or saved
+
+# Functions
+
+## The anatomy of a function
+
+Functions can take:
+
+-   Values (e.g. sum, min, max)
+-   Vector
+-   List
+-   Dataframe
+-   Columns within a dataframe
+
+## Where do functions come from?
+
+Functions can come from:
+
+-   *R:* R has many functions that are ready-to-use (base R functions)
+-   *Installation:* Thousands of other functions, written by other R users and even companies, have been written to extend R functionality. Similar functions are grouped together in packages, which can be downloaded and installed from online repositories like CRAN (the Comprehensive R Archive Network)
+-   *You:* You can write your own functions!
+
+## In other words...
+
+![](images/pliers.png){width="100"} A *function* is like a *tool* <br>
+![](images/tool-box.png){width="100"} A *package* is like a *toolbox* <br>
+![](images/tool-shed.png){width="100"} The collection of packages installed in your computer is like your tool-shed <br>
+
+For now - just know that you some functions belong to certain packages. We will talk about installation later.
+
+::: {.attribution}
+Tool and toolbox by FreePik, shed by Paul J
+:::
+
+## Functions that process dataframes
+
+These are base R functions:
+
+-   ncol()
+-   nrow()
+
+## Functions that manipulate columns
+
+These are dplyr functions:
+
+-   count()
+-   select()
+-   arrange()
+-   tabyl()
+
+## select()
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+-   *Purpose:*To select the columns we want from the data
+-   *Why:*Because it is easier to deal with fewer columns and it uses less space on your computer
+-   *Example:*You want to create a linelist for analysis and remove columns that are not needed
+-   *How:*We type out the names of the columns we want
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+Code
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+Code
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+input_data <- head(mtcars) |> 
+  dplyr::select(cyl, mpg, disp)
+
+tab_input <- input_data |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars)
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars)
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- tab_input 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars, cyl)
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(cyl) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars, mpg)
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(mpg) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars, disp)
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(disp) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars, mpg, cyl)
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(mpg, cyl) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars, mpg, cyl, disp)
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(mpg, cyl, disp) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+select(mtcars, -mpg)
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(-mpg) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## Code
+
+::: incremental
+-   select(**data**)
+-   select(data, **col1**): Select col1
+-   select(data, **-col1**): Deselect or remove col1
+-   select(data, col1, **col2**): Select col1 and col2
+-   select(data, col1, col2, **col3**)
+-   select(data, col1, col2, ..., **col100**)
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+count(mtcars, cyl)
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::count(cyl) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+count(mtcars, cyl, mpg)
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::count(cyl, mpg) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+# Arranging rows with {`dplyr`} {.smaller}
+
+## arrange()
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+-   *Purpose:*To sort (arrange) rows in a certain order based on column content
+-   *Why:*Because it's easier to understand a sorted table, and so you can extract some information.
+-   *Example:*You order a linelist by onset date to find the 10 earliest cases
+-   *How:*We type out the names of the columns we want to sort by
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+arrange(mtcars, cyl)
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::arrange(cyl) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+arrange(mtcars, cyl, mpg)
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::arrange(cyl, mpg) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+arrange(mtcars, desc(cyl))
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::arrange(desc(cyl)) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+
+# Counting rows with {`dplyr`}
+
+## count()
+
+::: slide-header
+{dplyr}
+:::
+
+- *Purpose:* To count the number of rows based on values in a column
+- *Why:* To quickly describe or checking data 
+- *Example:* You need to check if there are duplicate identifiers, or to count the number of cases (rows) per hospital 
+- *How:* We type out the names of the columns we want to count by
+
+
+# Exercise
+
+## Scenario
+
+It’s now been a week since the last sitrep was generated by your colleague, and you have new clean data. 
+
+Your boss wants to know the following nationally:
+
+- The latest case numbers
+- Demographics
+- Case outcomes
+- Trends over time based on symptom onset date
+- Symptoms
+
+Go ahead and investigate the clean data with some simple functions!
+
+## Access the exercises
+
+Use our interactive tool to select columns and see the code that you would write.
+
+1.  Go to shiny app link
+2.  Choose the select tab and pick columns that you want
+
