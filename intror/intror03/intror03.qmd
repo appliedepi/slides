@@ -1,0 +1,723 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+---
+
+# Module 2
+
+## Learning objectives
+
+- Understand logical evaluation and its relevance data manipulation
+- Understand classes
+- Explain more complex functions: filter, mutate
+
+## Recap
+
+Blabla
+
+# Logical evaluation and classes
+
+## What is Logical Evaluation?
+
+- Logical evaluation checks whether a condition is `TRUE` or `FALSE`.
+
+- It uses comparison operators:
+
+::: {#general-box style="text-align: left; width: 550px; background: #ebebeb; margin: 0 auto; font-size: 29px;"}
+| Operator | Description                         |
+|----------|-------------------------------------|
+| `==`     | Equals                              |
+| `!=`     | Not equal                           |
+| `>`      | Greater than                        |
+| `>=`     | Greater than or equal to            |
+| `<`      | Less than                           |
+| `<=`     | Less than or equal to               |
+:::
+
+- Logical results are often used to filter data or make decisions in code.
+
+## For example
+
+This code assesses if 1 is less than 4:
+
+:::::::::: columns
+
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`1 < 4`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`TRUE`
+:::
+::::
+::::::::::
+<br>
+This code assesses if the object assigned as 3 is less than 2:
+
+:::::::::: columns
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`x <- 3` <br>
+`x == 2`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+<br>
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`FALSE` <br>
+<br>
+:::
+::::
+::::::::::
+
+
+## What are classes in R?
+
+- Those examples use numbers, but there are many other object "classes" (types)
+- Some common examples are:
+
+::: {#general-box style="text-align: left; width: 850px; background: #ebebeb; margin: 0 auto; font-size: 29px;"}
+
+| Class      | Description                                  |
+|------------|----------------------------------------------|
+| Numeric    | Numbers, which can include decimal points (e.g. 1.3) |
+| Character  | Text or string values (e.g., "hello")        |
+| Logical    | Boolean values (`TRUE`, `FALSE`)             |
+| Factor     | Categorical data (e.g., "low", "medium", "high") |
+| Date       | Dates (e.g. "2025-01-01")                    |
+:::
+
+- You can check the class of an object with the function `class()` from {base}
+
+
+## For example
+
+This code assigns a number to object a. We can check that the class is 'numeric'
+
+:::::::::: columns
+
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`a <- 4` <br>
+`class(a)`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`numeric`
+:::
+::::
+::::::::::
+
+<br> 
+This code assigns the word "hello" to object b. We can check that the class is 'character'
+
+:::::::::: columns
+
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`b <- "hello"` <br>
+`class(b)`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`character`
+:::
+::::
+::::::::::
+
+
+## Why are classes important?
+
+- Filtering and other data manipulations depend on the data type.
+
+- E.g. Adding two objects of numeric class will work:
+
+:::::::::: columns
+
+::: {.column width="10%"}
+:::
+
+:::: {.column width="40%"}
+
+::: code-box-small
+`a <- sum(1,2,4)` <br>
+`b <- 10` <br>
+`a + b`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+
+&#8594;
+:::
+::::
+
+:::: {.column width="45%"}
+
+::: output-box
+<br>
+`17` <br>
+<br>
+:::
+::::
+::::::::::
+
+
+- But adding a numeric to a character object will not work:
+
+:::::::::: columns
+
+::: {.column width="10%"}
+:::
+
+:::: {.column width="40%"}
+
+::: code-box-small
+`a <- sum(1,2,4)` <br>
+`b <- "10"` <br>
+`a + b`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+
+&#8594;
+:::
+::::
+
+:::: {.column width="45%"}
+
+::: output-box
+`Error in a + b : non-numeric argument to binary operator` <br>
+:::
+::::
+::::::::::
+
+## Quiz!
+
+<br>
+Will these equal `TRUE` or `FALSE`? 
+
+<br>
+<br>
+
+:::::::::: columns
+
+::: {.column width="50%"}
+
+::: {.general-box style="text-align: center; width: 400px; background: #fcc7c780; margin: 0 auto; font-size: 29px;"}
+`y <- “I love R”` <br>
+<br>
+`y == “i love r”` <br>
+<br>
+:::
+
+:::
+
+::: {.column width="50%"}
+
+::: {.general-box style="text-align: center; width: 400px; background: #aed9a040; margin: 0 auto; font-size: 29px;"}
+`a <- (8 + 4)/3` <br>
+`b <- 9 + a` <br>
+<br>
+`a + b > 17` <br>
+:::
+
+:::
+
+::::::::::
+
+## Quiz!
+
+What about these? They combine conditional statements with `&` for "and" and `|` for "or". Note how conditions with different classes can be used:
+
+
+::: {.general-box style="text-align: center; width: 750px; background: #fce28150; margin: 0 auto; font-size: 29px;"}
+`learning_r <- "fun" `<br>
+`year == 2025` <br>
+<br>
+`learning_r == "fun" & year == 2025` <br>
+:::
+<br>
+
+::: {.general-box style="text-align: center; width: 750px; background: #d0d7f750; margin: 0 auto; font-size: 29px;"}
+`fav_food <- "pizza"` <br>
+`fav_drink <- "coffee"` <br>
+<br>
+`fav_food == "pizza" | fav_drink == "tea"`
+:::
+
+
+# Filtering data with {dplyr}
+
+## filter()
+
+::: slide-header
+{dplyr}
+:::
+
+-   *Purpose:* To filter data to specific rows of interest
+-   *Why:* So you retain only the relevant observations for a particular data processing or analysis step
+-   *Example:* You want to create a regional linelist, as a subset of a national linelist
+
+
+## filter()
+
+::: slide-header
+{dplyr}
+:::
+
+* *How:*
+   * Provide the data frame and a logical condition to evaluate each row
+   * Only rows that satisfy the condition will be kept
+   * Remember: Class matters! Use the correct types for comparison (e.g., numeric for numbers, character for text)
+
+::: code-box
+`filter(data, col == X)`
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+<br>
+
+::: code-box
+`filter(mtcars, cyl ==6)`
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+input_data <- head(mtcars) |> 
+  dplyr::select(cyl, mpg, disp)
+
+tab_input <- input_data |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::filter(cyl==6) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+SECOND EXAMPLE WITH TEXT
+
+::: code-box
+`filter(mtcars, cyl ==6)`
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::filter(cyl==6) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+
+
+## Checking column classes
+
+To make sure you are writing you conditional statement correctly, you can correct the class of a column with `class()`.
+
+To specify the column, write it like this, with the name of the data frame and a $ sign before the column name so that R knows where to find the column: <br>
+<span class="inline-code">`class(data$column)`</span> <br>
+<br>
+
+:::::::::: columns
+
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`class(mtcars$date_onset)`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`Date`
+:::
+::::
+::::::::::
+
+## 
+
+
+::: slide-header
+{dplyr}
+:::
+
+THIRD EXAMPLE WITH TEXT AND NUMBER
+
+::: code-box
+`filter(mtcars, cyl ==6)`
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::filter(cyl==6) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+
+# Creating new columns with {dplyr}
+
+## mutate()
+
+::: slide-header
+{dplyr}
+:::
+
+* *Purpose*: Add new columns or modify existing ones in your data frame
+* *Why:* Create calculated fields, transform data, or perform computations for deeper insights
+* *Example*: You want to create a new column in a linelist to identify cases reported in the last 7 days
+* *How*: Write an argument to define the new column:
+
+::: {.code-box style="width: 800px;"}
+`mutate(data, new_column = expression)`
+:::
+
+## mutate()
+
+::: slide-header
+{dplyr}
+:::
+
+The expression for the new column can be:
+
+- A *single value* for a column with a constant value: <br>
+<span class="inline-code">   `mutate(data, year = 2025)`</span> <br>
+<br>
+- A *mathematical expression* for a column with calculated values: <br>
+<span class="inline-code">`mutate(data, age_in_months = age * 12)`</span> <br>
+<br>
+- A *logical expression* for a column with `TRUE` or `FALSE`: <br>
+<span class="inline-code">`mutate(data, is_young_female = sex == "female" & age < 18)`</span> <br>
+<br>
+- A *function* for more complex transformations: <br>
+<span class="inline-code">`mutate(data, rounded_height = round(height, 1))`</span>
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+Example with calculation
+
+::: code-box
+`filter(mtcars, cyl ==6)`
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::filter(cyl==6) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+Example with condition
+
+::: code-box
+`filter(mtcars, cyl ==6)`
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::filter(cyl==6) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## Column names
+
+::::::: columns
+::: {.column width="60%"}
+Just like object names, column names in R are case sensitive. 
+
+R requires that column names:
+-   Start with a letter, not a number
+-   Are unique (two columns in a dataframe cannot have the same name)
+
+It is good practice that column names:
+-   Not contain any spaces
+-   Not contain special characters other than underscores or periods
+-   Be short and easy to understand
+-   Not be the same name as an existing function
+:::
+
+::::: {.column width="40%"}
+::: {style="background: #DAF7A650; width=120px; "}
+✔ age
+✔ sex
+✔ date_onset
+:::
+
+::: {style="background: #f5bcb150; width=120p;  "}
+❌ 18_or_younger
+❌ Sex
+❌ Age in years
+❌ age_in_days_rounded_to_closes...
+:::
+:::::
+:::::::
+
+
+# Exercise
+
+## Scenario {.exercise-slide}
+
+::: incremental
+
+- Your boss presented your previous findings at a national meeting but returned stressed! 
+
+- He reported a decline in cases as the peak in onset dates had passed, but faced questions about reporting delays. He wants you to investigate!
+
+- Go investigating reporting delays by filtering rows and creating new columns!
+
+:::
+
+## Access the exercises {.exercise-slide}
+
+Instructions here
+
