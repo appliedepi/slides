@@ -21,64 +21,113 @@ fig-align: center
 
 ## Learning objectives
 
--   Understand what functions are and their general structure
--   Get familiar with writing simple functions to inspect data and tabulate columns
+-   *Understand the general structure of functions*
+-   *Get familiar with writing simple functions to inspect data and tabulate columns*
 
-# Recap
-
-## Last time we discussed...
-
--   Functions are pieces of code with particular tasks
--   Functions take inputs to produce outputs
--   Outputs and values can be printed or saved
-
-# Functions
+# Explaining functions
 
 ## The anatomy of a function
 
-Functions can take:
+*Functions have arguments*, which give more specific instructions on how the function works.
 
--   Values (e.g. sum, min, max)
--   Vector
--   List
--   Dataframe
--   Columns within a dataframe
+![](/images/functionanatomy2.png)
 
-## Where do functions come from?
+## Function arguments
 
-Functions can come from:
+-   Function arguments *can be optional* and *have names*
 
--   *R:* R has many functions that are ready-to-use (base R functions)
--   *Installation:* Thousands of other functions, written by other R users and even companies, have been written to extend R functionality. Similar functions are grouped together in packages, which can be downloaded and installed from online repositories like CRAN (the Comprehensive R Archive Network)
--   *You:* You can write your own functions!
+-   E.g. the round() function takes two arguments:
 
-## In other words...
+    -   `x`: the input; a number to be rounded
+    -   `digits`: the number of decimals to round it to
 
-![](images/pliers.png){width="100"} A *function* is like a *tool* <br>
-![](images/tool-box.png){width="100"} A *package* is like a *toolbox* <br>
-![](images/tool-shed.png){width="100"} The collection of packages installed in your computer is like your tool-shed <br>
-
-For now - just know that you some functions belong to certain packages. We will talk about installation later.
-
-::: {.attribution}
-Tool and toolbox by FreePik, shed by Paul J
+:::::::::: columns
+::: {.column width="5%"}
 :::
 
-## Functions that process dataframes
+:::: {.column width="55%"}
+<br>
 
-These are base R functions:
+::: code-box-small
+`round(x = 33.556, digits = 1)`
+:::
+::::
 
--   ncol()
--   nrow()
+:::: {.column width="5%"}
+::: arrow-box
+<br><br> `r r2symbols::symbol(3)`
+:::
+::::
 
-## Functions that manipulate columns
+:::: {.column width="35%"}
+<br>
 
-These are dplyr functions:
+::: output-box
+`33.6`
+:::
+::::
+::::::::::
 
--   count()
--   select()
--   arrange()
--   tabyl()
+## Function arguments
+
+-   Remember `sqrt`? This is a simple function with only one argument: the input
+
+-   You don't always need to show the argument name. This is why `round(16)` worked fine in the previous lesson.
+
+:::::::::: columns
+::: {.column width="5%"}
+:::
+
+:::: {.column width="55%"}
+<br>
+
+::: code-box-small
+`round(x = 81)`
+:::
+::::
+
+:::: {.column width="5%"}
+::: arrow-box
+<br><br> `r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="35%"}
+<br>
+
+::: output-box
+`9`
+:::
+::::
+::::::::::
+
+## How are functions organised?
+
+-   Functions are grouped into *packages*.
+-   Functions in a package particularly have the same theme
+-   The ready-to-use functions that come with R are available in a {base} package
+-   You can also install many other packages (more on that later), for example:
+
+![](/images/hex.png)
+
+## Helpful functions for dataframes
+
+*{base} R package:*
+
+-   *ncol()*: To count the number of columns
+-   *nrow()*: To count the number of rows
+
+*{dplyr} package:*
+
+-   *select()*: To restrict a dataframe to specific columns
+-   *count()*: To count the number of rows within one or more groups
+-   *arrange()*: To order the rows by the value of specific columns
+
+*{janitor} package*: -
+
+-   *tabyl()*: To produce frequency tables
+
+# select() from {dplyr}
 
 ## select()
 
@@ -86,12 +135,14 @@ These are dplyr functions:
 {dplyr}
 :::
 
-  <!-- This adds a linespace -->
+-   *Purpose:* To select the columns we want from the data
+-   *Why:* Because it is easier to deal with fewer columns and it uses less space on your computer
+-   *Example:* You want to create a linelist for analysis and remove columns that are not needed
+-   *How:*
 
--   *Purpose:*To select the columns we want from the data
--   *Why:*Because it is easier to deal with fewer columns and it uses less space on your computer
--   *Example:*You want to create a linelist for analysis and remove columns that are not needed
--   *How:*We type out the names of the columns we want
+::: code-box
+`select(data, col1, col2, col3,...)`
+:::
 
 ## 
 
@@ -182,7 +233,7 @@ Output
   <!-- This adds a linespace -->
 
 ::: code-box
-select(mtcars)
+`select(mtcars)`
 :::
 
   <!-- This adds a linespace -->
@@ -220,7 +271,7 @@ Output
   <!-- This adds a linespace -->
 
 ::: code-box
-select(mtcars)
+`select(mtcars)`
 :::
 
   <!-- This adds a linespace -->
@@ -264,7 +315,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-select(mtcars, cyl)
+`select(mtcars, cyl)`
 :::
 
   <!-- This adds a linespace -->
@@ -310,7 +361,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-select(mtcars, mpg)
+`select(mtcars, mpg)`
 :::
 
   <!-- This adds a linespace -->
@@ -356,53 +407,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-select(mtcars, disp)
-:::
-
-  <!-- This adds a linespace -->
-
-::::::::: columns
-:::: {.column width="47%"}
-::: input-box
-Input
-
-```{r}
-tab_input
-```
-:::
-::::
-
-:::: {.column width="6%"}
-::: arrow-box
-`r r2symbols::symbol(3)`
-:::
-::::
-
-:::: {.column width="47%"}
-::: output-box
-Output
-
-```{r}
-tab_output <- input_data |> dplyr::select(disp) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
-  gt::tab_options(table.font.size = 22) 
-
-tab_output
-```
-:::
-::::
-:::::::::
-
-## 
-
-::: slide-header
-{dplyr}
-:::
-
-  <!-- This adds a linespace -->
-
-::: code-box
-select(mtcars, mpg, cyl)
+`select(mtcars, mpg, cyl)`
 :::
 
   <!-- This adds a linespace -->
@@ -448,7 +453,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-select(mtcars, mpg, cyl, disp)
+`select(mtcars, mpg, cyl, disp)`
 :::
 
   <!-- This adds a linespace -->
@@ -531,110 +536,7 @@ tab_output
 ::::
 :::::::::
 
-## Code
-
-::: incremental
--   select(**data**)
--   select(data, **col1**): Select col1
--   select(data, **-col1**): Deselect or remove col1
--   select(data, col1, **col2**): Select col1 and col2
--   select(data, col1, col2, **col3**)
--   select(data, col1, col2, ..., **col100**)
-:::
-
-## 
-
-::: slide-header
-{dplyr}
-:::
-
-  <!-- This adds a linespace -->
-
-::: code-box
-count(mtcars, cyl)
-:::
-
-  <!-- This adds a linespace -->
-
-::::::::: columns
-:::: {.column width="47%"}
-::: input-box
-Input
-
-```{r}
-tab_input
-```
-:::
-::::
-
-:::: {.column width="6%"}
-::: arrow-box
-`r r2symbols::symbol(3)`
-:::
-::::
-
-:::: {.column width="47%"}
-::: output-box
-Output
-
-```{r}
-tab_output <- input_data |> dplyr::count(cyl) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
-  gt::tab_options(table.font.size = 22) 
-
-tab_output
-```
-:::
-::::
-:::::::::
-
-## 
-
-::: slide-header
-{dplyr}
-:::
-
-  <!-- This adds a linespace -->
-
-::: code-box
-count(mtcars, cyl, mpg)
-:::
-
-  <!-- This adds a linespace -->
-
-::::::::: columns
-:::: {.column width="47%"}
-::: input-box
-Input
-
-```{r}
-tab_input
-```
-:::
-::::
-
-:::: {.column width="6%"}
-::: arrow-box
-`r r2symbols::symbol(3)`
-:::
-::::
-
-:::: {.column width="47%"}
-::: output-box
-Output
-
-```{r}
-tab_output <- input_data |> dplyr::count(cyl, mpg) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
-  gt::tab_options(table.font.size = 22) 
-
-tab_output
-```
-:::
-::::
-:::::::::
-
-# Arranging rows with {`dplyr`} {.smaller}
+# arrange() from {dplyr}
 
 ## arrange()
 
@@ -644,10 +546,15 @@ tab_output
 
   <!-- This adds a linespace -->
 
--   *Purpose:*To sort (arrange) rows in a certain order based on column content
--   *Why:*Because it's easier to understand a sorted table, and so you can extract some information.
--   *Example:*You order a linelist by onset date to find the 10 earliest cases
--   *How:*We type out the names of the columns we want to sort by
+-   *Purpose:* To sort (arrange) rows in a certain order based on column content
+-   *Why:* Because it's easier to understand a sorted table, and so you can extract some information.
+-   *Example:* You order a linelist by onset date to find the 10 earliest cases
+-   *How:*
+
+::: code-box
+`arrange(data, col1, col2, col3,...)`
+:::
+
 
 ## 
 
@@ -658,7 +565,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-arrange(mtcars, cyl)
+`arrange(mtcars, cyl)`
 :::
 
   <!-- This adds a linespace -->
@@ -704,7 +611,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-arrange(mtcars, cyl, mpg)
+`arrange(mtcars, cyl, mpg)`
 :::
 
   <!-- This adds a linespace -->
@@ -750,7 +657,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-arrange(mtcars, desc(cyl))
+`arrange(mtcars, desc(cyl))`
 :::
 
   <!-- This adds a linespace -->
@@ -787,8 +694,7 @@ tab_output
 ::::
 :::::::::
 
-
-# Counting rows with {`dplyr`}
+# count() from {dplyr}
 
 ## count()
 
@@ -796,32 +702,237 @@ tab_output
 {dplyr}
 :::
 
-- *Purpose:* To count the number of rows based on values in a column
-- *Why:* To quickly describe or checking data 
-- *Example:* You need to check if there are duplicate identifiers, or to count the number of cases (rows) per hospital 
-- *How:* We type out the names of the columns we want to count by
+-   *Purpose:* To count the number of rows based on values in a column
+-   *Why:* To quickly describe or checking data
+-   *Example:* You need to check if there are duplicate identifiers, or to count the number of cases (rows) per hospital
+-   *How:*
 
+::: code-box
+`count(data, col1, col2, col3,...)`
+:::
+
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`count(mtcars, cyl)`
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::count(cyl) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`count(mtcars, cyl, mpg)`
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::count(cyl, mpg) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+# tabyl() from {janitor}
+
+## tabyl()
+
+::: slide-header
+{janitor}
+:::
+
+-   *Purpose:* To easily create frequency tables
+-   *Why:* To look at distributions of categorical values in data
+-   *Example:* You want to quickly find out the proportion of cases in a linelist who were hospitalised 
+-   *How:* At its simplest:
+
+::: code-box
+`tabyl(data, col1, col2, col3)`
+:::
+
+
+## 
+
+::: slide-header
+{janitor}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`tabyl(mtcars, cyl)`
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> janitor::tabyl(cyl) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{janitor}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`tabyl(mtcars, cyl, mpg)`
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> janitor::tabyl(cyl, mpg) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
 
 # Exercise
 
-## Scenario
+## Scenario {.exercise-slide}
 
-It’s now been a week since the last sitrep was generated by your colleague, and you have new clean data. 
+It’s now been a week since the last sitrep was generated by your colleague, and you have new clean data.
 
 Your boss wants to know the following nationally:
 
-- The latest case numbers
-- Demographics
-- Case outcomes
-- Trends over time based on symptom onset date
-- Symptoms
+-   The latest case numbers
+-   Demographics
+-   Case outcomes
+-   Trends over time based on symptom onset date
+-   Symptoms
 
 Go ahead and investigate the clean data with some simple functions!
 
-## Access the exercises
+## Access the exercises {.exercise-slide}
 
 Use our interactive tool to select columns and see the code that you would write.
 
 1.  Go to shiny app link
 2.  Choose the select tab and pick columns that you want
-
