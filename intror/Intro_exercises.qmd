@@ -1,0 +1,1214 @@
+---
+title: "Intro to R: Exercise questions"
+format: 
+  html:
+    css: styles.css
+    self-contained: true
+    page-layout: full
+    grid:
+      sidebar-width: 10px
+      body-width: 900px
+      margin-width: 400px
+editor: visual
+toc: true
+---
+
+```{r echo=F}
+### Prepare
+pacman::p_load(dplyr, ggplot2, tidyr, forcats, lubridate, scales, janitor, patchwork, stringr, flextable, here)
+
+```
+
+```{r, echo=F, warning=F, message=F, include=F}
+
+linelist_full <- readRDS(here("Data/SNO_linelist_complete.RDS"))
+
+filetable <- linelist_full |> 
+  group_by(datastage, datastage_filename) |> 
+  summarize(`Latest report date` = max(date_report)) |> 
+  rename(`Date in file names` = datastage_filename) |> 
+  mutate(`File contents recevied by students` = case_when(datastage==1 ~ "Manually cleaned data for first 12 days, with no cholera testing data",
+                                    datastage==2 ~ "Messy linelist with data collection starting AFTER previous clean file, with data up to two weeks later. Includes cholera RDT data, with lab and symptom data to merge on",
+                                    datastage==3 ~ "Updated messy linelist data; refresh of previous plus several weeks more of data, with lab and symptom data to merge on",
+                                    datastage==4 ~ "Not used yet. For case study?")) |> 
+  mutate(`File names` = case_when(datastage==1 ~ "SNO_linelist_clean",
+                                    datastage==2 ~ "SNO_linelist, SNO_symptoms, SNO_results, (and SNO_linelist_clean for backup)",
+                                    datastage==3 ~ "SNO_linelist, SNO_symptoms, SNO_results, (and SNO_linelist_clean for backup)",
+                                    datastage==4 ~ "")) |> 
+  ungroup() |> 
+  select(!datastage) 
+
+filetable |> 
+  flextable() |> 
+  width(width=1.2) |> 
+  width(j=3, width=3) |> 
+  width(j=4, width=2.5) 
+
+```
+
+# This document
+
+This document contains the text that will be in the exercises for the new Intro to R course. It includes narrative, questions, multiple choice answers, and explanations that should only show up after an answer is given. It needs to be translated into the right tech, with formatting and interactive questions and storing of responses.
+
+# **Session 1: Level 1** - Getting excited and learning fundamentals!
+
+```{r, echo=F}
+linelist <- readRDS(here("Data/SNO_2021-05-25_linelist_clean.RDS"))
+```
+
+## Welcoming blurb
+
+First exerciese so some text goes here
+
+## Learning objectives
+
+-   Understand power of R code
+-   Understand what code is
+-   Understand what functions are
+-   Understand what assigning is
+-   Get acquainted with running code
+
+## Scenario
+
+*You*: You are a local epidemiologist working in a surveillance unit located in the South of Nepal.
+
+*Outbreak!*: Last week an outbreak of severe gastro-intestinal disease was detected in your area. Cholera is suspected.
+
+*Data collection*: Your team has sent out electronic questionnaires to local clinics to enable epidemiological analysis of cases.
+
+*Analysis*: Your colleague, Pragya, was manually cleaning the data and analysing it using R. But... she is now on holiday and you are her replacement!
+
+## Task overview
+
+You have seen her sitrep code, but need to learn a bit of R first before you try to produce a sitrep!
+
+During this lesson, get familiar with running functions.
+
+## Exercise questions: level E
+
+**Part 1: Play with code to create plots**
+
+Go to this website XXXX.
+
+::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+What is the output? (a plot)
+
+Change something - what do you see?
+
+Change something else - what do you see?
+
+Identify functions
+:::
+
+**Part 2: Run basic functions**
+
+::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+Run this code. What do you see?
+
+```{r}
+1+1
+```
+
+Run this code. What is the output?
+
+```{r}
+1+3+5
+```
+
+Run this code as another way to sum the numbers:
+
+```{r}
+sum(1,3,5)
+```
+
+QUESTION: What are the inputs? Answer options:
+
+-   Numbers 1, 3, and 5
+-   9
+-   There are none
+
+How about multiplying the numbers?
+
+```{r}
+prod(1,3,5)
+```
+
+QUESTION: What is the name of this function? Answer options:
+
+-   prod
+-   product
+-   Prod Explain: function names are exact and are case sensitive!
+
+Now run this code to find the minimum value of these numbers
+
+```{r}
+min(1,3,5)
+```
+
+QUESTION: What is the function name if trying to find the maximum value? Write the answer: max()
+
+QUESTION: Which of these is the correct way of writing the 'sum' function? Answer options:
+
+-   sum(1,3)
+-   sum 1 + 3
+-   sum\[1,3\] Explanation: In R, the round parentheses are used for functions!
+
+QUESTION: Do you notice the punctuation that separates the input number? Write the answer: comma
+:::
+
+**Part 3: Assign some objects!**
+
+::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+Run this code. Does the output of 1+1 get printed this time?
+
+```{r}
+x <- sum(1,1)
+```
+
+QUESTION: Why is it not printed? Answer options:
+
+-   The output is stored as the object x
+-   Trick question - the output was printed!
+-   The code loses the output entirely
+
+Explanation: The output, which is the answer to 1 + 1, gets stored as an object called x. This means R can use it later! It is not lost.
+
+Run this code.
+
+```{r}
+x
+```
+
+QUESTION: Now what gets printed? Answer options:
+
+-   2
+-   1+1
+-   sum(1,1)
+
+Explanation: You are printing the object that is named x. The object is the output from code you ran earlier, 1+1.
+
+Let's do more maths! Run this code.
+
+```{r}
+x + 1
+```
+
+QUESTION: Can x and 1 be added together? Why? Answer options:
+
+-   Yes, because x represents the number 2 which can be added to 1
+-   No
+-   Yes, because x is always a number
+
+Explanation: Earlier you saved the output of sum(1,1), which equals 2, to an object called x. 2 is a number so it can be added to 1!
+
+Run this:
+
+```{r, error=T}
+y
+```
+
+QUESTION: Why doesn't running this code work? Answer options:
+
+-   Because we haven't defined what y means yet
+-   Because y is stored as a different type of object
+-   It does work - try harder!
+
+Explanation: y is not a value that comes with R, and we have not defined it yet. So it does not exist! We need to assign an object as y first.
+
+Run this code now:
+
+```{r}
+y <- x + 1
+```
+
+QUESTION: What will happen if you run 'y' now? Answer options:
+
+-   Nothing
+-   "3" will be printed (because 2 + 1 is 3)
+-   "2 + 1" will be printed because x is 2
+
+Explanation: x is 2, so 2 + 1 = 3!
+
+Now, redefine x as 3. This will write-over your previous object x which you had saved as 2.
+
+```{r}
+x <- 3
+```
+
+QUESTION: By running code to redefine x, does this automatically change y? Answer options
+
+-   Yes they are linked
+-   No, you need to run the code that defines y again
+
+Explanation: y will not automatically change, you need to rerun the code that redefines it!
+
+Let's do that now and print y:
+
+```{r}
+y <- x + 1
+y
+```
+
+Let's try one more thing:
+
+```{r}
+z <- "3"
+```
+
+What happens when you try to add y and z? Why?
+
+```{r, error=T}
+x + z
+```
+:::
+
+## Exercise questions: Level I
+
+**Part 1: Run more functions!**
+
+::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+Now let's try using a function instead of a mathematical operator to add numbers:
+
+```{r}
+sum(1,1)
+```
+
+What if we want to add more numbers?
+
+```{r}
+sum(1,3,4,5)
+```
+
+Can we do this in two steps: assign those numbers to an object and then add up the object?
+
+```{r}
+numbers <- c(1,3,4,5)
+sum(numbers)
+```
+
+Cool! What if I want to calculate the minimum of those numbers?
+
+```{r}
+min(numbers)
+```
+
+And the maximum?
+
+```{r}
+max(numbers)
+```
+
+And the median! *Note: it's okay to just ignore that min/max don't need the concatenation?*
+
+```{r}
+median(numbers)
+```
+:::
+
+# **Session 1: Level 2** - Running basic functions to interrogate data
+
+## Learning objectives
+
+-   Understand what functions are and their general structure
+-   Get familiar with writing simple functions to inspect data and tabulate columns
+
+*Should skimr/glimpse be here?*
+
+## Slides
+
+-   Recap of previous:
+    -   Input, function, output
+    -   We previously applied functions to values (e.g. sum(1,1) and vectors sum(number)) *(is this correct)*
+-   Explain functions:
+    -   Different types *(Is that the right word)* of inputs: values, vector *or list?*, dataframe, column in a dataframe
+    -   Today we look at functions that apply to data frames: Show generic structure with arguments being data or data + column or data + multiple columns
+-   Introduce specific functions for data:
+    -   Briefly explain that functions are part of base or part of packages (don't explain installation etc)
+    -   **Base functions:** ncol(), nrow()
+    -   **Dplyr:** count() - count within groups (build on nrow())
+    -   **Dplyr:** select() - look at columns - build by showing use of - to deselect
+    -   **Dplyr:** arrange() - arrange a linelist - build by showing desc() for particular order
+    -   *Dplyr: distinct() - maybe don't introduce this yet as it's not so intuitive*
+    -   Janitor: tabyl() - introduced because allows quick check of data
+
+## Narrative
+
+It's now been a week since the last sitrep was generated by your colleague. The junior member of staff in your surveillance unit has cleaned the latest data of electronic submissions from clinics in Southern Nepal. He shares it with you.
+
+Your boss wants to know the latest case numbers, demographics, outcomes, and trends over time based on symptom onset date: nationally as well as within regions! He also wants to know what proportion of suspected cases have acute watery diarrhoea, which is the hallmark symptom of Cholera. He'll be reporting them to a meeting with the national team.
+
+Go ahead and investigate the clean data with some simple functions.
+
+## Exercise
+
+Note: The exercise questions purposefully does not investigate report date because it is part of the narrative to not 'realize' that the number of cases is still increasing.
+
+**Part 1:** Functions with the entire dataframe as the input
+
+::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+First, print the linelist to just take a look at it. Note how you can either just write linelist or print(linelist)
+
+```{r}
+linelist
+```
+
+You could also just look at the top six rows:
+
+```{r}
+head(linelist)
+```
+
+Or the last six rows:
+
+```{r}
+tail(linelist)
+```
+
+Use the ncol() function to count how many columns are in the dataset
+
+```{r}
+ncol(linelist)
+```
+
+Use the nrow() function to count how many rows there are
+
+```{r}
+nrow(linelist)
+```
+:::
+
+**Part 2:** Selecting columns
+
+There are more columns than we need for the analysis requested by our boss. To make it easier to look at the data, why don't we create a version of the linelist with only the necessary columns.
+
+::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+First, let's look at just the ID column, to practice selecting one column.
+
+```{r}
+select(linelist, id)
+```
+
+Let's look at just id and sex and age
+
+```{r}
+select(linelist, id, sex, age)
+```
+
+And remember, we can also assign this dataframe with fewer columns to a new object!
+
+```{r}
+linelist_a <- select(linelist, id, sex, age)
+```
+
+Let's look at it:
+
+```{r}
+head(linelist_a)
+```
+
+How many rows and columns does it have?
+
+```{r}
+ncol(linelist_a)
+nrow(linelist_a)
+```
+
+Or, we can replace that new object and select all columns except for the malaria RDT columns
+
+```{r}
+linelist_a <- select(linelist, -malaria_rdt_result, -malaria_rdt_positive, -malaria_rdt_date_test)
+```
+
+Now how many rows and columns does it have?
+
+```{r}
+ncol(linelist_a)
+nrow(linelist_a)
+```
+
+Finally, you can mke up your mind and create the dataset you **really** want, which has only the columns that your boss has said he is interested in (demographics, region, and onset date)
+
+```{r}
+
+linelist_a <- select(linelist, area_name, sex, age, agecat, date_onset, outcome, symp_diarrhea)
+```
+:::
+
+**Part 3:** Deriving numbers out of data
+
+::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+Use the count() function to look at the number of cases per region. Which location has reported most cases?
+
+```{r}
+count(linelist_a, area_name)
+```
+
+Use the count() function to look at the number of cases that have died and recovered. How many have died overall? How many have an unknown outcome, what might this mean?
+
+```{r}
+tabyl(linelist_a, outcome)
+```
+
+Use the count() function to look at the number of cases that died and recovered, per region. Does the order of the columns listed matter? Which areas have reported deaths?
+
+```{r}
+count(linelist_a, area_name, outcome)
+```
+
+Use the count() function to see the age group of those who died versus recovered. What agegroup are most cases who died in?
+
+```{r}
+count(linelist_a, agecat, outcome)
+```
+
+Use the count() function to look at the number of cases with onset of symptoms each day. When was the first and when was the most recent date of reported symptoms? How many have unknown onset dates? And when was the peak in cases?
+
+```{r}
+count(linelist_a, date_onset)
+```
+
+Use the arrange() function to look at the first case (onset) in this outbreak. What region did they live in, and what age-group are they in? *Adjust so it's just one index case? then maybe adjust narrative to reflect this one person being known about first, maybe died*
+
+```{r}
+arrange(linelist_a, date_onset)
+```
+
+Use the arrange() function to look at the last cases (onset) in this outbreak. What region did they live in, and what is their sex?
+
+```{r}
+arrange(linelist_a, desc(date_onset))
+```
+
+Use the tabyl() function to look at the trend in onset dates across the different regions. Why is this easier to look at rather than using count()? Does the order of the columns listed matter? On which day did Gaur have the most cases? On which day did Paroha have the most cases?
+
+```{r}
+tabyl(linelist_a, date_onset, area_name)
+```
+
+Use the tabyl() function to see the proportion of cases reported acute watery diarrhoea. How many are unknown?
+
+```{r}
+tabyl(linelist_a, symp_diarrhea)
+```
+
+Use the tabyl() function to assess how many cases have reported acute watery diarrhoea per region. Is it being observed across all affected regions? *Need to adjust this as only the cholera regions should have it*
+
+```{r}
+tabyl(linelist_a, area_name, symp_diarrhea)
+```
+:::
+
+## Wrap up
+
+You know from your most recent investigations that the date with the highest number of cases starting their symptoms was the 17th of May, and the earliest onset date was 10th of May. 8 people have died, only in two regions Paroha and Gaur, and most were young, aged less than 5 years. *Some comment about cute water diarrhoea*.
+
+Your boss goes away with this information!
+
+# **Session 2: Level 3** - Writing functions to interrogate data
+
+## Learning objectives
+
+-   Understand how R understands and treats different data classes in R
+-   Learn how to use key dplyr functions to manipulate data, including filtering rows and creating new columns
+-   Practice writing out code to manipulate data
+
+## Slides
+
+-   Explain classes and how you can assess them with the class() function.
+-   Explain how you can refer to columns with the \$ approach
+-   Explain logical evaluation (is this what's called): == and & and \|
+-   Explain functions in more detail (with more arguments)
+    -   Reiterate structure, demonstrating that there can be more arguments
+    -   filter(),
+    -   mutate(),
+    -   group_by(), *Might want to move this to the next session*
+    -   summarize()
+
+## Narrative
+
+Your boss has presented all the new information at the big national meeting.
+
+However, he has come back very stressed. He had reported, based on your symptom onset numbers, that the number of cases was decreasing and the outbreak was ending. But he has received many questions now about when cases have been reported, and the reporting delays overall and within regions.
+
+He needs you to better understand these questions!
+
+## Exercise
+
+**Part 1:** Object classes and logic
+
+:::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+Write some code to check: what class is: 1?
+
+```{r}
+class(1)
+```
+
+Write some code to check: what class is "1"?
+
+```{r}
+class("1")
+```
+
+What is the class of y?
+
+```{r}
+a <- 50/10
+class(a)
+```
+
+What is the class of the linelist column "id"?
+
+```{r}
+class(linelist$id)
+```
+
+What is the class of the linelist column "date_report"?
+
+```{r}
+class(linelist$date_report)
+```
+
+What is the class of the linelist column "date_onset"?
+
+```{r}
+class(linelist$date_onset)
+```
+
+What is this code doing, and what do the results tell us?
+
+```{r}
+a==5
+```
+
+What does this code mean?
+
+```{r}
+a==4
+```
+
+Why can these two statements by added with the sum() function?
+
+```{r}
+sum(a==5, a==4)
+```
+
+What does this code mean, why is the answer 'TRUE':
+
+```{r}
+a==5 | 1==2
+```
+
+What does this code mean, why is the answer 'FALSE':
+
+```{r}
+a==5 & 1==2
+```
+
+What does this code mean, why is the answer 'TRUE':
+
+```{r}
+(a==5 & 1==2) | 3==3
+```
+
+*Can possibly think of a better exercise than the above but I think it's good to get people to understand the boolean thing and how true= 1 and adds up, as this is the basis for further manipulation*
+
+**Part 2: Using mutate to create new columns**
+
+::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+Let's start first by looking at the trend by reporting date. What does it tell us?
+
+```{r}
+tabyl(linelist, date_report)
+```
+
+Oops! So it looks like even though the "peak" in onset date was a week ago, the peak in cases reported to us was actually just yesterday! This means that low number of cases with an onset date in the last few days is artificial because we just don't know about them yet, as it can take a few days to get reported!
+
+The question is - how many days?
+
+Let's take a look.
+
+Use mutate() to create a new column called "timediff" which holds the difference between report date and onset date, in the original linelist
+
+```{r}
+linelist <- mutate(linelist, timediff = date_report - date_onset)
+```
+
+What is the class of this new column? *This will be a newly encountered class but demonstrates how there are many and the time difference between dates is a specific kind*
+
+```{r}
+class(linelist$timediff)
+```
+
+Use the median() function to look at the median reporting delay for this column. Why doesn't this work?
+
+```{r}
+median(linelist$timediff)
+```
+
+Now try it out with the code "na.rm=T"
+
+```{r}
+median(linelist$timediff, na.rm=T)
+```
+
+*Is this too boring or unecessary to introduce here? Want to show it across all data before going to group_by and summarize*
+
+Can you calculate the min and the max reporting delay in the same way?
+
+```{r}
+max(linelist$timediff, na.rm=T)
+
+min(linelist$timediff, na.rm=T)
+```
+
+Now, use mutate() to create a new column that labels if the timediff is 3 or less days
+
+```{r}
+linelist <- mutate(linelist, timediff_3 = timediff<=3)
+```
+
+Now use tabyl to inspect what proportion of cases took 3 or fewer days to get reported! What proportion have an unknown reporting delay? And what proportion were reported in 3 or less days?
+
+```{r}
+tabyl(linelist, timediff_3)
+```
+:::
+
+**Part 3:** Filtering data
+
+Use filter() to inspect the cases whose reporting delay is 2 or less days.
+
+```{r}
+filter(linelist, timediff<=2)
+```
+
+Now use filter() to inspect the cases whose reporting delay is exactly 5 days.
+
+```{r}
+filter(linelist, timediff==5)
+```
+
+Now filter() to cases with a reporting delay of 5 days and who live in Paroha, and assign to a new object called linelist_paroha
+
+```{r}
+linelist_paroha <- filter(linelist, area_name=="Paroha")
+```
+
+What is the median reporting delay in Paroha only? *or change to tabulate binary var of delay*
+
+```{r}
+median(linelist_paroha$timediff, na.rm=T)
+```
+
+Now filter() to cases who do not live in Paroha, and assign a new object called linelist_otherareas
+
+```{r}
+linelist_otherareas <- filter(linelist, area_name!="Paroha")
+```
+
+What is the median reporting delay in these other areas? *or change to tabulate binary var of delay*
+
+```{r}
+median(linelist_otherareas$timediff, na.rm=T)
+```
+
+*Extra?* Now you want to inspect the cases who have been reported in the last 3 days. Today is the 25th of May.
+
+```{r}
+filter(linelist, as.Date("2021-05-25") - date_report <= 3)
+```
+
+Adjust your code so that this linelist is assigned to a new dataframe called linelist_new
+
+```{r}
+linelist_new <- filter(linelist, as.Date("2021-05-25") - date_report <= 3)
+```
+::::
+
+# **Session 2: Level 4** - Pipes and combining dplyr functions
+
+## Learning objectives
+
+-   To understand how to sequentially combine tidyverse functions using the pipe
+-   To be able to construct a summary table using a combination of group_by and summarize
+
+## Slides
+
+-   Go through key functions so far
+-   Explain pipe
+-   Demonstrate pipe showing use of filter() and select()
+-   Show group_by() and summarize(), with reference to the different functions that can be used to summarize columns, e.g. n(), sum(), min(), max(), median() etc
+    -   This should just be building on what they have already learned
+
+## Narrative
+
+You decide you want to keep looking at reporting delays within individual areas, but rather than creating separate linelists for each region and anaylsing them separately, you can put all that information into a single summary table. You also want to put all your epi analyses by region into one table.
+
+## Exercise
+
+Create summary tables that summarize the epidemiology of cases and reporting delays
+
+::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+Print a summary table showing the number of cases per region
+
+```{r}
+linelist |> 
+  group_by(area_name) |> 
+  summarize(cases = n())
+```
+
+Print a summary table showing the number of cases who died. Which region has had the highest number of deaths related to this outbreak?
+
+```{r}
+linelist |> 
+  group_by(area_name) |> 
+  summarize(died = sum(outcome=="died", na.rm=T))
+```
+
+Print a summary table showing the number of cases per region, the number who died, the median age. Which region has had the oldest cases?
+
+```{r}
+linelist |> 
+  group_by(area_name) |> 
+  summarize(cases = n(),
+            died = sum(outcome=="died", na.rm=T),
+            age_median = median(age, na.rm=T))
+```
+
+Create a summary table showing the min, median, and max reporting delay per region, as well as the number whose reporting delay was 3 or less days. Which region has had the slowest reporting times? *Do we need to create reporting delay column again in the browser?*
+
+```{r}
+linelist |> 
+  mutate(timediff = date_report - date_onset) |> 
+  group_by(area_name) |> 
+  summarize(delay_min = min(timediff, na.rm=T),
+            delay_median = median(timediff, na.rm=T),
+            delay_max = max(timediff, na.rm=T),
+            delay_3days = sum(timediff<=3, na.rm=T))
+
+```
+
+*More advanced?* Create a summary table showing the number of cases per region and the number and proportion who died
+
+```{r}
+linelist |> 
+  group_by(area_name) |> 
+  summarize(cases = n(),
+            died = sum(outcome=="died", na.rm=T)) |> 
+  mutate(died_prop = died/cases*100)
+```
+:::
+
+# **Session 3: Level 5** - Importing data into RStudio!
+
+## Learning objectives
+
+-   Become familiar with the RStudio interface
+-   Understand how to deal with packages
+-   Understand how to import data into R
+
+## Slides
+
+This will be quite demo-based.
+
+-   Demonstration of RStudio:
+    -   Script (where code goes)
+    -   Console (remind them of printing, or where code can be written instead of console)
+    -   Environment (remind them of assigning)
+    -   Files/plots/packages pane etc
+-   Packages
+    -   Reiterate concept of functions in packages
+    -   Concept of package installation (from CRAN or elsewhere) and loading
+    -   Pacman vs base install.packages() + library()
+    -   Explain tidyverse
+-   Start a script
+    -   Clear file name
+    -   Comments
+    -   Packages first
+-   Rio: import/export
+-   File paths:
+    -   here()
+    -   R projects??
+    -   File naming conventions *Too much?*
+
+## Narrative
+
+It's now *10 days* later. Cases have been rising, and data collection has continued. The new data also now includes rapid diagnostic test results, which from *XXXX date* started being admintered at local clinics in the affected regions.
+
+However, your junior member of staff is no longer able to manually clean all the data for you in excel because it's far too time consuming.
+
+The full raw data from the beginning of the outbreak will now come to you directly. You need to automate the cleaning!
+
+This is the name of the updates file: **SNO_2021-06-05_linelist.RDS** *Change into CSV?*
+
+You are also sent laboratory results separately, called this: \* **SNO_2021-06-05_lab.RDS**
+
+Both files are in the 'Data/raw' folder in your project. Import them!
+
+Import it and begin to clean it!
+
+## Exercise
+
+**Part 1:** Practice cleaning file names and altering the import function.
+
+What should your import command be if: \* If file name is X and it's in the Y subfolder \* If file name is X and it's in the Y subfolder, and you want the Z sheet
+
+Why is this command not working \* Example of typo \* Example of in the wrong folder
+
+Which is a better file name? \* Several examples to compare
+
+**Part 2:** Get used to RStudio
+
+-   Start a script and add comments
+
+::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+```{r}
+# Title of script:
+# Date started:
+# Purpose of script
+
+```
+:::
+
+*Project?*
+
+-   Add comments
+-   Reviewing all the packages they have encountered so far and including them in p_load()
+
+```{r}
+pacman::p_load(rio, janitor, dplyr)
+```
+
+-   Play with simple objects.
+
+**Part 2:** Import data
+
+::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+```{r}
+linelist_raw <- import(here("Data/SNO_2021-06-05_linelist.RDS"))
+```
+:::
+
+**Part 3:** Explore the data
+
+*Glimpse/skim here?* \* nrow() \* ncol() \* tabyl()
+
+**Extra**: Import other types of data
+
+*Will they have received prep calls etc prior to this?*
+
+# **Session 3: Level 6** - Cleaning date: Standardizing columns names
+
+## Learning objectives
+
+-   Understand the difference between messy and clean data
+-   Learn how to clean column names
+-   Understand how to organize data appropriate across columns *is this the way to refer to it?*
+
+## Slides
+
+-   Discuss what clean column names looks like in R
+-   Functions to tidy names: clean_names(), rename()
+-   Discuss how to hold data acoss columns
+    -   E.g. dates in one column
+    -   Age can be one column and one unit
+-   Functions to move data across columns: split, coalesce, unite
+
+## Narrative
+
+You want to clean the data so that it matches the format of the previous clean data.
+
+For example, you have observed that you need to calculate age from birthdate.
+
+You also become aware that the data entry system differs slightly between different clinics, so the report date column is not consistent. Instead, report date is sometimes "told on", "reported", "discovered", "FOND ON", or "report", and need to be combined into one column.
+
+## Exercise
+
+*Need to add to this once agreed*
+
+1)  Clean column names
+2)  Unite DOB?
+3)  Split?
+
+::: {.callout-note collapse="true" title="Click here for questions" icon="false"}
+```{r}
+linelist <- linelist_raw |> 
+  clean_names()
+
+```
+:::
+
+# **Session 4: Level 7** - Cleaning: Standardizing data within columns
+
+## Learning objectives
+
+-   Learn how to standardize values within columns, including dates
+-   Be able to manipulate dates and their formatting in R
+
+## Slides
+
+-   Recoding: case_match()
+-   How to use stringr to clean up text: str_detect()?
+-   Date formats
+-   How to convert different non-date classes into date-class with lubridate() (including string and from excel with dates represents as numbers)
+-   How to extract year/month/day (including floor_date())
+-   How to format dates
+-   Extra: how to prioritise dates or date formats when there are multiple/mixed columns
+
+## Narrative
+
+None
+
+## Exercise
+
+Part 1: Identify what needs cleaning *There can be a checklist here*
+
+Part 2: Clean messy values
+
+-   Capitalize (str_to_upper etc)
+-   Remove spaces (str stuff)
+-   Remove punctuation (str stuff)
+-   Male/female with case_match
+-   Region names with case_match
+-   Convert to correct class
+
+Part 2: Dates
+
+-   Convert onset date to an actual date
+-   Convert admission date to an actual date
+-   Convert outcome date to an actual date
+-   Calculate age and convert it to age in years
+
+# **Session 4: Level 8** - Data manipulation: Extracting information into new columns
+
+## Learning objectives
+
+-   Learn how to create new columns using logic
+-   Learn how to create new columns based on string detection
+-   Learn how to creae new columns summarizing dates
+
+## Slides
+
+-   str_detect
+-   floor_date()
+-   case_when and if_else
+
+*Need to figure out the right order since they overlap a bit*
+
+## Narrative
+
+Finally, you have been given the case definition of cholera, so you want to create a new column to analyse how many confirmed, probable, suspected, and possible cases there actually are! Go estimate.
+
+## Exercise
+
+**Part 1**: Extrating strings
+
+-   Play with symptoms column
+
+**Part 2:** Create new categories
+
+Case definition
+
+```{r, eval=F}
+linelist<- linelist |> 
+  mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea == 1 ~ "Suspected", 
+                              (symp_diarrhea ==1 | symp_vomiting==1) & symp_dehydration==1 ~ "Possible",
+                              TRUE ~ "Unclear"
+                              ))
+```
+
+*Other*?
+
+**Part 3**: New summary data columns
+
+*Note this is separated out from standardizing content??*
+
+-   Create column for month
+-   Create column for week
+-   Calculate reporting delay
+-   Create column for reported in the last wek
+
+# **Session 5: Level 9** - Combining datasets
+
+## Learning objectives
+
+-   Learn how to append and join linelists
+
+## Slides
+
+-   Explain bind_rows() and bind_cols()
+-   Explain different kinds of joines
+
+## Narrative
+
+Now that you have cleaned your new linelist, you need to append it to the previously manually cleaned linelist.
+
+You also now have lab data with PCR results.
+
+## Exercise
+
+-   Join the symptom data
+-   Append to the old data
+-   Join the lab data
+-   Update case definition
+-   Make sure to save clean data!
+
+```{r, echo=F, include=F}
+linelist <- import(here("Data/SNO_2021-06-05_linelist_clean.RDS"))
+```
+
+*Update this to include AWD*
+
+```{r}
+
+linelist<- linelist |> 
+  mutate(case_def = case_when(cholera_pcr_positive==1 ~ "Confirmed",
+                              cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea == 1 ~ "Suspected", 
+                              (symp_diarrhea ==1 | symp_vomiting==1) & symp_dehydration==1 ~ "Possible",
+                              TRUE ~ "Unclear"
+                              )) 
+
+
+tabyl(linelist$case_def)
+```
+
+# **Session 5: Level 10** - Pivoting data
+
+## Learning objectives
+
+-   Learn how to reshape data
+
+## Slides
+
+-   Explain long and wide data
+-   Explain pivot_wider() and pivot_longer()
+-   Show how to manipulate values so they look less like column names
+-   Jog memory on group_by() and summarize()
+
+## Narrative
+
+Now that you have a full set of symptoms, you want to better analyse the full combination of symptoms being experienced by cases.
+
+## Exercise
+
+Pivot_longer() for symptoms to be reorganized
+
+```{r}
+# Pivot and manipulate data
+table_symptoms_df <- linelist |> select(starts_with("symp")) |> 
+  pivot_longer(cols = starts_with("symp"), 
+               names_to = "Symptom", 
+               values_to = "value") 
+```
+
+Take a look at the data
+
+```{r}
+table_symptoms_df
+```
+
+Create a summary table for proportion of cases with symptoms reported *Change this so it's not gsub?*
+
+```{r}
+
+table_symptoms_df |> 
+  mutate(Symptom = gsub("_", " ", Symptom)) |> 
+  mutate(Symptom = gsub("symp ", "", Symptom)) |> 
+  mutate(Symptom = str_to_title(Symptom)) |> 
+  group_by(Symptom) |> 
+  summarize(`Symptom reported`= sum(value==1, na.rm=T),
+            `Percent reporting symptom` = percent(sum(value==1, na.rm=T)/(sum(!is.na(value)))),
+            `Complete information` = sum(!is.na(value), na.rm=T),
+            `Percent complete` = percent(sum(!is.na(value))/n())) |> 
+  arrange(desc(`Symptom reported`))
+```
+
+# **Session 6: Level 11** - Creating plots
+
+## Learning objectives
+
+-   Learn how to create a basic ggplot
+
+## Slides
+
+-   Explain grammar of graphics
+-   Demonstrate basic epicurve
+-   Demonstrate facetting
+
+## Narrative
+
+It is clear that you need to start visualizing data to get the best understanding of what is going on.
+
+Create epicurves to visualize cases by day, looking at both onset date and report date.
+
+## Exercise
+
+-   Create epicurve for report date
+
+-   Create epicurve for report date, faceting by region
+
+-   Create epicurve for onset date
+
+-   Create epicurve for onset date, faceting by region
+
+-   Create epicurve for onset date, with fill by report date
+
+-   Create epicurve for onset date, with fill by case definition
+
+-   Play with different aesthetics
+
+-   Create bar graph for sex
+
+-   Create bar graph for age
+
+# **Session 6: Level 12** - Beautifying plots
+
+-   Learn how to customize a ggplot
+
+## Slides
+
+-   Reiterate ggplot structure
+-   Explain scales and themes:
+    -   Palettes
+    -   Additional packages like ggpubr
+-   Show annotations and vline/hline
+-   Patchwork
+-   Extra: theme_set()
+
+## Narrative
+
+No new information - keep going
+
+## Exercise
+
+-   Create age-sex pyramid
+-   Customize palettes of previous graphs
+-   Add vline with annotation to epicurve with case defs to indicate when RDTs first started
+-   Calculate 90th percentile reporting delay and add vline with annotation to onset epicurve
+
+# **Session 7: Level 13** - Creating tables for presentation
+
+## Learning objectives
+
+-   Learn how to create outputs compatible with reporting
+
+## Slides
+
+-   Explain flextable()
+
+## Narrative
+
+None - continued presentation
+
+## Exercise
+
+-   Format previous symptoms table
+-   Create new summary tables with group_by() and summarize() *Note they then need to refresh their memory*
+
+# **Session 8: Level 14** - Improving tables
+
+# **Session 9: Level 15** - Facetting
+
+-   I think this can be covered in ggplot section. Need to rearrange slightly anyway
