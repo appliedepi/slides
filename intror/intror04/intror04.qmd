@@ -1,0 +1,360 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+---
+
+# Module 2: Part 2
+
+## Learning objectives
+
+-   ✔ Understand logical evaluation and its role in data manipulation
+-   ✔ Recognize different data classes and their importance in logical comparisons
+-   Learn key {dplyr} functions for data manipulation: `filter()`, `mutate()`, `group_by`, and \`summarize()
+-   Learn how to chain functions together with pipes
+
+# Pipes
+
+## Connecting functions
+
+-   You’ve already learned select(), filter(), mutate(), and arrange().
+-   What if you want to apply **several functions** to a dataframe at once?
+
+## Connecting functions
+
+-   You’ve already learned select(), filter(), mutate(), and arrange().
+-   What if you want to apply **several functions** to a dataframe at once? <br> <br>
+-   You could write this code with **multiple intermediate objects**:
+
+::: {.code-box style="width: 700px;"}
+```{r eval= F, echo=T}
+df_f <- filter(df, sex == "female")  
+df_m <- mutate(df_f, age_child = age<18)  
+df_a <- select(df_m, age, age_child, outcome)  
+```
+:::
+
+::: {style="text-align: right;"}
+<br> See how the output of each function <br> is the input for the next function!
+:::
+
+## Connecting functions
+
+-   You’ve already learned select(), filter(), mutate(), and arrange().
+-   What if you want to apply **several functions** to a dataframe at once? <br> <br>
+-   Or you could use **nested functions**
+
+```{r eval= F, echo=T}
+df_a <- select(mutate(filter(df, sex == "female"), age_child = age<18), age, age_child, outcome)  
+```
+
+::: {style="text-align: right;"}
+<br> See how the functions are "nested" so that the output <br> becomes the input argument
+:::
+
+## Pipes
+
+-   Or, use the *pipe* to chain these functions together! <br>
+
+![](/images/pipe2.png){fig-align="center" width="20%"}
+
+## Pipes
+
+-   The pipe sends the output of one function straight to the next
+-   It is like saying *"and then"*
+
+*Instead of this:* <br>
+Here the dataframe input is the first argument
+
+::: {.code-box style="width: 700px;"}
+```{r eval= F, echo=T}
+filter(df, sex == "female")  
+```
+:::
+
+## Pipes
+
+-   The pipe sends the output of one function straight to the next
+-   It is like saying *"and then"*
+
+*Instead of this:* <br>
+Here the dataframe input is the first argument
+
+::: {.code-box style="width: 700px;"}
+```{r eval= F, echo=T}
+filter(df, sex == "female")  
+```
+:::
+
+*Write this:* <br>
+Here you pipe from the dataframe *and then* you filter it
+
+::: {.code-box style="width: 700px;"}
+```{r eval=F, echo=T}
+df %>% filter(sex == "female")  
+```
+:::
+
+## Pipes
+
+-   The pipe sends the output of one function straight to the next
+-   It is like saying *"and then"*
+
+*Instead of this:*
+
+::: {.code-box style="width: 700px;"}
+```{r eval= F, echo=T}
+df_a <- filter(df, sex == "female")  
+```
+:::
+
+*Write this:*
+
+
+::: {.code-box style="width: 700px;"}
+```{r eval=F, echo=T}
+fd_a <- df %>% filter(sex == "female")
+```
+:::
+
+## Pipes
+
+-   The pipe sends the output of one function straight to the next
+-   It is like saying *"and then"*
+
+*Instead of this:*
+
+::: {.code-box style="width: 700px;"}
+```{r eval= F, echo=T}
+df_f <- filter(df, sex == "female") 
+df_m <- mutate(df_f, age_child = age<18)  
+
+```
+:::
+
+*Write this:*
+
+::: {.code-box style="width: 700px;"}
+```{r eval=F, echo=T}
+df_m <- df %>% filter(sex == "female")  %>% 
+        mutate(age_child = age<18) 
+```
+:::
+
+# group_by() and summarize() from {dplyr}
+
+## group_by()
+
+::: slide-header
+{dplyr}
+:::
+(Can make this like the structure of the others?)
+
+::: incremental
+- Next: What if you want summary statistics for groups within your data?
+- Example:
+   - Calculate the average age by region
+   - Find the earliest onset_date by region
+- `group_by()` tells R to split your data into groups before applying a function
+- It doesn’t change the data itself but prepares it for grouping operations.
+
+:::
+   
+## group_by()
+
+::: slide-header
+{dplyr}
+:::
+
+::: code-box
+```{r eval = F, echo=T}
+
+mtcars %>% group_by(area_name)
+
+```
+:::
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+input_data <- head(mtcars) |> 
+  dplyr::select(cyl, mpg, disp)
+
+tab_input <- input_data |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::filter(cyl==6) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## summarize()
+
+::: incremental
+
+- Bullets about summarize
+
+:::
+
+::: {.code-box}
+
+```{r echo=T, eval=F}
+linelist %>% summarize(summary_column = function(column))
+```
+
+:::
+
+## summarize()
+
+::: incremental
+
+- Bullets about summarize
+
+:::
+
+::: {.code-box}
+
+```{r echo=T, eval=F}
+linelist %>% summarize(summary_column = function(column),
+                       summary_column2 = function(column2))
+```
+
+:::
+
+## combining group_by() and summarize()
+
+::: incremental
+
+- Bullets about summarize
+
+:::
+
+::: {.code-box}
+
+```{r echo=T, eval=F}
+linelist %>% 
+  group_by() %>% 
+  summarize(summary_column = function(column),
+                       summary_column2 = function(column2))
+```
+
+:::
+
+## group_by() and summarize()
+
+::: slide-header
+{dplyr}
+:::
+
+::: code-box
+```{r eval = F, echo=T}
+
+mtcars %>% group_by(area_name)
+
+```
+:::
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+input_data <- head(mtcars) |> 
+  dplyr::select(cyl, mpg, disp)
+
+tab_input <- input_data |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::filter(cyl==6) |> 
+  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## Combine it altogether
+
+
+Note how code can be read over multiple lines, and this vertical coding approach is actually good/easier to read.
+
+# Exercise
+
+## Scenario {.exercise-slide}
+
+::: incremental
+
+:::
+
+## Access the exercises {.exercise-slide}
+
+Instructions here
+
+# Recap
+
+## Learning objectives
+
+
+
