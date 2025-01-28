@@ -1,0 +1,322 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+---
+
+```{r}
+pacman::p_load(rio, here, janitor, dplyr)
+
+df_raw <- import(here("intror/GIoutbreak_2021-06-05_linelist.csv"))
+lab_raw <- import(here("intror/GIoutbreak_2021-06-05_labs.xlsx"))
+
+```
+
+# Module 4: Part 1
+
+## Learning objectives
+
+-   Learn the principles of tidy and clean data
+-   Get introduced to functions that clean column names 
+-   Get introduced to functions that enable one column per variable
+
+# Recap
+
+## Your script should look like this
+
+```{r eval=F, echo=T}
+
+# Intro course
+# Title of script: Cleaning and analysis of GI outbreak data
+# Date started: 5th June 2021
+# Name: Paula Blomquist
+
+# Load packages-----------------------------
+
+pacman::p_load(rio, here, janitor, dplyr)
+
+# Import data ------------------------------
+
+df_raw <- import(here("data/raw/GIoutbreak_2021-06-05_linelist.csv"))
+lab_raw <- import(here("data/raw/GIoutbreak_2021-06-05_labs.xlsx"))
+### CHANGE SO ITS MULTIPLE LAB FILES
+
+```
+
+# Clean and tidy data
+
+## Public health data
+
+Often, raw public health data looks like this:
+
+![](/images/messy.png)
+
+What are the problems with this data?
+
+## Clean data
+
+*Clean Data* is **accurate and in the correct format**, in that it is free from errors, inconsistencies, and irrelevant information. 
+
+::: {.fragment}
+
+For example:
+
+:::
+
+::::: {column}
+
+:::: {.column width="50%"  .fragment}
+
+*Dirty data:* Spelling mistakes, inconsistent column name formatting, non-standardised categories 
+```{r}
+
+data.frame(
+  case = c("CASE1", "Case2", "Case 3", "Case 4"),
+  `AGE IN YEARS` = c(31, 24, 18, 33),
+  Sex = c("f", "m", "MLE", "female")
+) |> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+::::
+
+:::: {.column width="50%" .fragment}
+
+*Clean:* Machine-readable column names, consistent ways of presenting information, no errors
+
+```{r}
+
+data.frame(
+  case = c("Case 1", "Case 2", "Case 3", "Case 4"),
+  age = c(31, 24, 18, 33),
+  sex = c("female", "male", "male", "female")
+) |> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+::::
+
+:::::
+
+## Tidy data
+
+"Tidy data" means data that is easy to work with, analyse, and visualize. 
+
+Below are 3 core principles of "tidy data":
+
+::: incremental 
+
+- Each *value* must have its own *cell*
+- Each *variable* must have its own *column*
+- Each *observation* must have its own *row*
+
+:::
+
+## Terminology
+
+::: incremental
+
+- Structurally, "data frames" in R consist of columns and rows.
+- However, "variables" and "observations" are more abstract concepts:
+   - Variables measure one underlying attribute (age, outcome, or date of onset)
+   - Observations relate to a unit of analysis
+- Ideally, they align: columns = variables and rows = observations
+
+:::
+
+<img src="images/tidy.png" class="fragment" />
+
+## Tidy data examples
+
+::::::: columns
+:::: {.column width="50%"}
+
+*Messy:* Age and sex are in the same column
+
+```{r}
+
+data.frame(
+  case = c("Case 1", "Case 2", "Case 3", "Case 4"),
+  age_sex = c("31female", "24male", "18male", "33female")
+) |> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+
+::::
+:::: {.column width="50%" .fragment}
+
+*Clean:* Variables of age and the age unit are in their own columns
+
+```{r}
+
+data.frame(
+  case = c("Case 1", "Case 2", "Case 3", "Case 4"),
+  age = c(31, 24, 18, 33),
+  sex = c("female", "male", "male", "female")
+) |> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+::::
+
+:::::::
+
+## Tidy data examples
+
+::::::: columns
+:::: {.column width="50%"}
+
+*Messy:* Small dataframe of mosquito nets distributed per month per clinic
+
+```{r}
+
+nets <- data.frame(
+  clinic = c("Clinic 1", "Clinic 2", "Clinic 3"),
+  January = c(100, 120, 200),
+  February = c(110, 125, 240),
+  March = c(100, 115, 190)
+)
+
+nets |> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+
+::::
+:::: {.column width="50%" .fragment}
+
+*Clean:* Columns for month and net counts; one row per combination of clinic and month
+
+```{r}
+
+nets |> 
+  tidyr:: pivot_longer(cols = January:March, 
+               names_to = "month", 
+               values_to = "nets") |> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+
+::::
+
+:::::::
+
+
+## Tidy data examples
+
+::::::: columns
+:::: {.column width="40%"}
+
+*Messy:* Small dataframe of hobbies of two people
+
+```{r}
+
+data.frame(
+  Name = c("Paula", "Chris"),
+  Hobbies = c("Reading, Cooking", "Hiking")
+)|> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+```
+
+::::
+:::: {.column width="60%" .fragment}
+
+*Clean:* One column for each hobby
+```{r}
+
+data.frame(
+  name = c("Paula", "Chris"),
+  hobby_reading = c(TRUE, FALSE),
+  hobby_cooking = c(TRUE, FALSE),
+  hobby_hiking = c(FALSE, TRUE)
+)|> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+
+::::
+
+:::::::
+
+## Tidy vs clean data
+
+**Important**: Data can be clean but not tidy; and tidy but not clean!
+
+- *Tidy Data*: Data is **organized** so that each variable has its own column, each observation is a row, and each type of observational unit is a table. 
+- *Clean Data*: Data **content** is **accurate and in the correct format**, in that it is free from errors, inconsistencies, and irrelevant information
+
+## Tidy vs clean
+
+![](/images/quadrants.png)
+
+## How we will approach data processing
+
+Over the next few sessions we will learn how to:
+
+- Make data tidy:
+    - Combine and split columns (now)
+- Clean data:
+    - Clean column names (after the break)
+    - Standardise and remove errors of values (next session)
+    - Deduplicate (next session)
+
+# Exercise
+
+## Scenario {.exercise-slide}
+
+::: incremental
+
+- It's now *10 days* later. 
+
+- Cases have been rising, and data collection has continued. The new data also now includes rapid diagnostic test results, which from *XXXX date* started being admintered at local clinics in the affected regions.
+- However, your junior member of staff is no longer able to manually clean all the data for you in excel because it's far too time consuming.
+- The full raw data from the beginning of the outbreak will now come to you directly. You need to automate the cleaning!
+   - This is the name of the updates file: **GIoutbreak_2021-06-05_linelist.RDS** *Change into CSV?*
+   - You are also sent laboratory results separately, called this: \* **GIoutbreak_2021-06-05_lab.RDS**
+- Both files are in the 'Data/raw' folder in your project. Import them!
+
+Import the data!
+
+
+:::
+
+## Access the exercises {.exercise-slide}
+
+Instructions here
+
+# Recap
+
+## Learning objectives
+
+
+# Drop later
