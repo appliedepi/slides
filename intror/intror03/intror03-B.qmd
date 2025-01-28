@@ -1,0 +1,233 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+---
+
+# Module 3: Part B
+
+## Learning objectives
+
+-   ✔ Understand logical evaluation and its role in data manipulation
+-   ✔ Recognize different data classes and their importance in logical comparisons
+-   Learn key {dplyr} functions for data manipulation: `filter()`, `mutate()`, `group_by`, and \`summarize()
+-   Learn how to chain functions together with pipes
+
+# Let's load some data...
+
+## Scenario {.exercise-slide}
+
+::: incremental
+
+- Pragya emailed you a folder of her scripts and data before she went on holiday. 
+- She suggests that you keep working in the same folder: GIoutbreak. 
+- Let's take a look!
+
+:::
+
+
+## {rio} for loading data
+
+-   The {rio} package enables simple importing and exporting of data (the developers call it "the Swiss-army knife of importing and exporting of data"!)
+-   The `import()` function can import many different file types: .csv, .xlsx, .dta, etc...
+
+![](/images/rio.png){fig-align="center"}
+
+## {rio} for loading data
+
+-   Let's take a look at Pragya's sitrep code.
+-   She has sent you a folder called 'GIoutbreak', in which she has sub-folders for her scripts and her data
+
+![](/images/folder.png){fig-align="center"}
+
+## {rio} for loading data
+
+- The start of Pragya's sitrep code is below
+- You can see she loads two different files of different types using the import function
+
+```{r, echo=T, eval=F}
+# Load packages
+pacman::p_load(rio, dplyr, janitor, ggplot2)
+
+# Import data
+linelist <- import("C:/Users/Pragya.Roy/Documents/GIoutbreak/data/linelist_clean_2024-05-10.csv")
+symptoms <- import("C:/Users/Pragya.Roy/Documents/GIoutbreak/data/symptoms_2024-05-10.xlsx")
+```
+<br>
+
+::: incremental
+- Do you think this code will work on your computer?
+:::
+
+## Absolute file paths
+
+Pragya's code uses absolute file paths that specify the exact location on her computer; this will not work on yours.
+
+- *Absolute File Path*: Full path starting from the root directory (e.g., C:/Users/...).
+- *Relative File Path*: Path relative to the working directory (e.g., data/my_file.csv). These are easier to share and avoids hardcoding machine-specific paths.
+
+Let's see how to create relative file-paths with RStudio Projects
+
+# RStudio Projects
+
+## What are RStudio Projects?
+
+::::::: columns
+:::: {.column width="65%"}
+
+RStudio Projects help you organize your work by:
+
+- Creating a *dedicated folder* for your scripts, data, and outputs
+- Automatically setting the project folder as the *working directory*
+- Including an *.Rproj file* that links your files to the project
+
+This means your project files are organized, your code has shorter file paths, and the code is "portable" across computers.
+
+::::
+
+:::: {.column width="2%"}
+::::
+
+:::: {.column width="33%"}
+
+Example:
+
+::: {.general-box style="font-size: 15px !important; background-color: #ebebeb; padding: 10px;"}
+
+- 📁 FluAnalysis
+   - FluAnalysis.Rproj
+   - 📁 data
+      - 📃 epidata.csv
+      - 📃 labdata.csv
+   - 📁 scripts
+      - 📄 analysis.R
+::::
+
+::::
+
+:::::::
+
+## Setting up an RStudio Project
+
+As Pragya's folder doesn't have an RStudio project, let's set one up!
+
+## Setting up an RStudio Project
+
+As Pragya's folder doesn't have an RStudio project, let's set one up!
+
+We start by clicking on this button in RStudio:
+
+
+![](/images/rproject1.png){fig-align="center"}
+
+##
+
+As a folder already exists...
+
+![](/images/rproject2.png){fig-align="center"}
+
+##
+
+![](/images/rproject3.png){fig-align="center"}
+
+## {rio} for loading data
+
+- Now that the folder has an RStudio Project, the filepaths can be shortened, because R knows that it needs to start looking in the root folder GIoutbreak.
+
+<br>
+
+```{r, echo=T, eval=F}
+# Load packages
+pacman::p_load(rio, dplyr, janitor, ggplot2)
+
+# Import data
+linelist <- import("data/linelist_clean_2024-05-10.csv")
+symptoms <- import("data/symptoms_2024-05-10.xlsx")
+```
+<br>
+
+## Using here()
+
+- Sometimes R can still get confused with the root folder, particularly if you are running scripts within sub-folders. 
+- So you can use here() from the {here} package to create file paths that are relative to the root directory of an R project. 
+- This will be more relevant when you are creating reporting workflows, but good to get used to it now. 
+
+<br>
+
+```{r, echo=T, eval=F}
+# Load packages
+pacman::p_load(rio, dplyr, janitor, ggplot2)
+
+# Import data
+linelist <- import(here("data/linelist_clean_2024-05-10.csv"))
+symptoms <- import(here("data/symptoms_2024-05-10.xlsx"))
+```
+<br>
+
+# Organizing yourself
+
+## Tidy file names
+
+More here on files and folder names?
+
+# Exercise
+
+## Scenario {.exercise-slide}
+
+::: incremental
+
+- It's now *10 days* later. There is new clinic data **and** now lab data. 
+- Your junior colleagues are no longer able to manually clean the data in excel because it's too time consuming.
+- Instead, you get an email with the *full raw data* from the beginning of the outbreak. You need to automate the cleaning!
+- You have downloaded the data and put it in the 'Data' folder of your project.
+   - The updated file: **GIoutbreak_2021-06-05_linelist.csv** 
+   - The laboratory results: **GIoutbreak_2021-06-05_lab.xlsx**
+
+- *Import the data!*
+
+
+:::
+
+## Access the exercises {.exercise-slide}
+
+Instructions here
+
+# Recap
+
+## Loading packages and importing data
+
+Your code should now look something like this:
+
+```{r eval=F, echo=T}
+
+# Intro course
+# Title of script: Cleaning and analysis of GI outbreak data
+# Date started: 5th June 2021
+# Name: Paula Blomquist
+
+# Load packages-----------------------------
+
+pacman::p_load(rio, here, janitor, dplyr)
+
+# Import data ------------------------------
+
+df_raw <- import(here("data/GIoutbreak_2021-06-05_linelist.csv"))
+lab_raw <- import(here("data/GIoutbreak_2021-06-05_labs.xlsx"))
+### CHANGE SO ITS MULTIPLE LAB FILES
+
+```
+
+## Learning objectives

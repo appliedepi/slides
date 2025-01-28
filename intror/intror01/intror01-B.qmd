@@ -1,0 +1,1004 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+---
+
+```{r}
+## Data
+pacman::p_load(rio)
+df <- import(here::here("intror/GIoutbreak_2021-05-25_linelist_clean_DEMO.RDS"))
+
+input_data <- df |> 
+  dplyr::select(id, region, age, sex)
+
+tab_input <- input_data |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+```
+
+# Module 1: Part B
+
+## Learning objectives
+
+We've talked about:
+
+-   ✔ Understand power of R in applied epidemiology
+-   ✔ Understand three key concepts: code, functions, assignment
+
+Next we will:
+
+-   Understand how functions are structured and organized in packages
+-   Get introduced to key functions from base, {dplyr}, and {janitor}
+-   Get familiar with running and writing simple R code to quickly summarize data
+
+# Explaining functions
+
+## The anatomy of a function
+
+*Functions have arguments*, which give more specific instructions on how the function works.
+
+![](/images/functionanatomy2.png)
+
+## Function arguments
+
+-   Function arguments *can be optional* and *have names*
+
+-   E.g. the round() function takes two arguments:
+
+    -   `x`: the input; a number to be rounded
+    -   `digits`: the number of decimals to round it to
+
+:::::::::: columns
+::: {.column width="5%"}
+:::
+
+:::: {.column width="55%"}
+<br>
+
+::: code-box-small
+`round(x = 33.556, digits = 1)`
+:::
+::::
+
+:::: {.column width="5%"}
+::: arrow-box
+<br><br> `r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="35%"}
+<br>
+
+::: output-box
+`33.6`
+:::
+::::
+::::::::::
+
+## Function arguments
+
+-   Function arguments *can be optional* and *have names*
+
+-   E.g. the round() function takes two arguments:
+
+    -   `x`: the input; a number to be rounded
+    -   `digits`: the number of decimals to round it to
+
+:::::::::: columns
+::: {.column width="5%"}
+:::
+
+:::: {.column width="55%"}
+<br>
+
+::: code-box-small
+`round(33.556, 1)`
+:::
+::::
+
+:::: {.column width="5%"}
+::: arrow-box
+<br><br> `r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="35%"}
+<br>
+
+::: output-box
+`33.6`
+:::
+::::
+::::::::::
+
+You don’t always need to name arguments! R often knows them by their order in the function.
+
+
+## How are functions organised?
+
+-   Functions are grouped into *packages*.
+-   Functions in a package typically have the same theme
+-   The ready-to-use functions that come with R are available in a {base} package
+-   You can also install many other packages (more on that later), for example:
+
+![](/images/hex.png)
+
+## Today's functions
+
+Today we will be looking at some important functions that are helpful for inspecting and summarizing dataframes. 
+
+## Today's functions
+
+*{base} R package:*
+
+-   *ncol()* and *nrow()*: To count the number of columns and rows
+-   *head()* and *tail()*: To view the top six and bottom six rows
+
+*{dplyr} package:*
+
+-   *select()*: To restrict a dataframe to specific columns
+-   *count()*: To count the number of rows within one or more groups
+-   *arrange()*: To order the rows by the value of specific columns
+
+*{janitor} package*:
+
+-   *tabyl()*: To produce frequency tables
+
+# select() from {dplyr}
+
+## select()
+
+::: slide-header
+{dplyr}
+:::
+
+-   *Purpose:* To select the columns we want from the data
+-   *Why:* Because it is easier to deal with fewer columns and it uses less space on your computer
+-   *Example:* You want to create a linelist for analysis and remove columns that are not needed
+-   *How:*
+
+::: code-box
+`select(data, col1, col2, col3,...)`
+:::
+
+## Let's take a look
+
+We will use a small version of the GI outbreak data:
+
+<br>
+
+```{r}
+tab_input
+```
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+Code
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+Code
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`select(df)`
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`select(df)`
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- tab_input 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`select(df, region)`
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- df |> dplyr::select(region) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`select(df, age)`
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(age) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`select(df, region, age)`
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(region, age) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`select(df, id, region, age)`
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(id, region, age) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`select(df, -id)`
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::select(-id) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+# arrange() from {dplyr}
+
+## arrange()
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+-   *Purpose:* To sort (arrange) rows in a certain order based on column content
+-   *Why:* Because it's easier to understand a sorted table, and so you can extract some information.
+-   *Example:* You order a linelist by onset date to find the 10 earliest cases
+-   *How:*
+
+::: code-box
+`arrange(data, col1, col2, col3,...)`
+:::
+
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`arrange(df, age)`
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::arrange(age) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`arrange(df, sex, age)`
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::arrange(sex, age) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`arrange(df, desc(age))`
+:::
+
+  <!-- This adds a linespace -->
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::arrange(desc(age)) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+# count() from {dplyr}
+
+## count()
+
+::: slide-header
+{dplyr}
+:::
+
+-   *Purpose:* To count the number of rows based on values in a column
+-   *Why:* To quickly describe or checking data
+-   *Example:* You need to check if there are duplicate identifiers, or to count the number of cases (rows) per hospital
+-   *How:*
+
+::: code-box
+`count(data, col1, col2, col3,...)`
+:::
+
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`count(df, sex)`
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::count(sex) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`count(df, region, sex)`
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::count(region, sex) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+# tabyl() from {janitor}
+
+## tabyl()
+
+::: slide-header
+{janitor}
+:::
+
+-   *Purpose:* To easily create frequency tables
+-   *Why:* To look at distributions of categorical values in data
+-   *Example:* You want to quickly find out the proportion of cases in a linelist who were hospitalised 
+-   *How:* At its simplest:
+
+::: code-box
+`tabyl(data, col1, col2, col3)`
+:::
+
+
+## 
+
+::: slide-header
+{janitor}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`tabyl(df, sex)`
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> janitor::tabyl(sex) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{janitor}
+:::
+
+  <!-- This adds a linespace -->
+
+::: code-box
+`tabyl(df, region, sex)`
+:::
+
+  <!-- This adds a linespace -->
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> janitor::tabyl(region, sex) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+# Exercise
+
+## Scenario {.exercise-slide}
+
+It’s now been a week since the last sitrep was generated by your colleague, and you have new clean data.
+
+Your boss wants to know the following nationally:
+
+-   The latest case numbers
+-   Demographics
+-   Case outcomes
+-   Trends over time based on symptom onset date
+-   Symptoms
+
+Go ahead and investigate the clean data with some simple functions!
+
+## Access the exercises {.exercise-slide}
+
+Instructions here
+
+# Wrap-up
+
+## Your investigation {.exercise-slide}
+
+Well done on doing a descriptive analysis in R!
+
+Your boss is satisfied with the updated case numbers, demographic breakdown, and the information that the peak of cases  has passed, based on the pattern of onset dates. 
+
+
+## Learning objectives
+
+::: incremental
+
+-   ✔ *Understand power of R in applied epidemiology*: Reproducibility, time saving and efficiency, collaboration, scalability, and quality of outputs. For surveillance data processing, report production, reproducible analyses....
+-   ✔ *Understand three key concepts: code, functions, assignment*: Functions are pieces of code that process inputs to produce outputs, and you can assign their results to objects for R to remember.
+-   ✔ *Understand how functions are structured and organized in packages*: Functions have arguments and are either built into R's base package or available in themed packages.
+
+::: 
+
+## Learning objectives
+
+::: incremental
+
+-   ✔ *Get introduced to some important functions from {base}, {dplyr}, and {janitor}*: 
+    - {base}: min(), max(), sum(), names(), prod(), ncol(), nrow(), names()
+    - {dplyr}: select(), arrange(), count()
+    - {janitor}: tabyl()
+-   ✔ *Get familiar with running and writing R simple code to quickly summarize data*: You have managed to summarize the current outbreak!
+
+:::
+
+# Congratulations on finishing module 1!
+
+
+
