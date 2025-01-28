@@ -17,6 +17,17 @@ resources:
 fig-align: center
 ---
 
+```{r}
+## Data
+pacman::p_load(rio, dplyr)
+df <- import(here::here("intror/GIoutbreak_2021-05-25_linelist_clean_DEMO.RDS")) |> 
+  dplyr::select(id, region, age, sex)
+
+tab_input <- df |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+```
+
 # Module 2: Part 2
 
 ## Learning objectives
@@ -41,9 +52,9 @@ fig-align: center
 
 ::: {.code-box style="width: 700px;"}
 ```{r eval= F, echo=T}
-df_f <- filter(df, sex == "female")  
-df_m <- mutate(df_f, age_child = age<18)  
-df_a <- select(df_m, age, age_child, outcome)  
+df1 <- filter(df, sex == "female")  
+df2 <- mutate(df_f, age_child = age<18)  
+df2 <- select(df_m, age, age_child)  
 ```
 :::
 
@@ -58,7 +69,7 @@ df_a <- select(df_m, age, age_child, outcome)
 -   Or you could use **nested functions**
 
 ```{r eval= F, echo=T}
-df_a <- select(mutate(filter(df, sex == "female"), age_child = age<18), age, age_child, outcome)  
+df1 <- select(mutate(filter(df, sex == "female"), age_child = age<18), age, age_child, outcome)  
 ```
 
 ::: {style="text-align: right;"}
@@ -67,92 +78,142 @@ df_a <- select(mutate(filter(df, sex == "female"), age_child = age<18), age, age
 
 ## Pipes
 
--   Or, use the *pipe* to chain these functions together! <br>
+-   Or, use the *pipe* from {dplyr} to chain these functions together! <br>
 
-![](/images/pipe2.png){fig-align="center" width="20%"}
-
-## Pipes
-
--   The pipe sends the output of one function straight to the next
--   It is like saying *"and then"*
-
-*Instead of this:* <br>
-Here the dataframe input is the first argument
-
-::: {.code-box style="width: 700px;"}
-```{r eval= F, echo=T}
-filter(df, sex == "female")  
-```
-:::
+![](/images/pipe2.png){fig-align="center"}
 
 ## Pipes
 
--   The pipe sends the output of one function straight to the next
+-   The pipe (%>%) makes a function's *output* the next function's *input*
 -   It is like saying *"and then"*
 
-*Instead of this:* <br>
-Here the dataframe input is the first argument
-
-::: {.code-box style="width: 700px;"}
-```{r eval= F, echo=T}
-filter(df, sex == "female")  
-```
-:::
-
-*Write this:* <br>
-Here you pipe from the dataframe *and then* you filter it
-
-::: {.code-box style="width: 700px;"}
-```{r eval=F, echo=T}
-df %>% filter(sex == "female")  
-```
-:::
+![](/images/piped3.png){fig-align="center"}
 
 ## Pipes
 
--   The pipe sends the output of one function straight to the next
--   It is like saying *"and then"*
-
+:::: columns
+:::: {.column width="62%"}
 *Instead of this:*
 
-::: {.code-box style="width: 700px;"}
+::: {.code-box style="width: 640px;"}
 ```{r eval= F, echo=T}
-df_a <- filter(df, sex == "female")  
+filter(df, sex == "female") 
 ```
 :::
 
-*Write this:*
+::::
 
-
-::: {.code-box style="width: 700px;"}
-```{r eval=F, echo=T}
-fd_a <- df %>% filter(sex == "female")
-```
-:::
+:::: {.column width="38%"}
+::::
+::::
 
 ## Pipes
 
--   The pipe sends the output of one function straight to the next
--   It is like saying *"and then"*
-
+:::: columns
+:::: {.column width="62%"}
 *Instead of this:*
 
-::: {.code-box style="width: 700px;"}
+::: {.code-box style="width: 640px;"}
 ```{r eval= F, echo=T}
-df_f <- filter(df, sex == "female") 
-df_m <- mutate(df_f, age_child = age<18)  
+filter(df, sex == "female") 
+```
+:::
+<br>
+<br>
+*Write this:* 
+
+::: {.code-box style="width: 640px;"}
+```{r eval=F, echo=T}
+df %>% filter(sex == "female") 
+```
+:::
+::::
+
+:::: {.column width="38%"}
+<br>
+<br>
+<br>
+<br>
+<br>
+
+1) *Pipe* from the input object into the filter function
+::::
+::::
+
+## Pipes
+
+:::: columns
+:::: {.column width="62%"}
+*Instead of this:*
+
+::: {.code-box style="width: 640px;"}
+```{r eval= F, echo=T}
+df1 <- filter(df, sex == "female") 
+```
+:::
+<br>
+<br>
+*Write this:* 
+
+::: {.code-box style="width: 640px;"}
+```{r eval=F, echo=T}
+df1 <- df %>% filter(sex == "female")
+```
+:::
+::::
+
+:::: {.column width="38%"}
+<br>
+<br>
+<br>
+<br>
+<br>
+
+1) *Pipe* from the input object into the filter function
+2) Assign an object as before
+::::
+::::
+
+## Pipes
+
+:::: columns
+:::: {.column width="62%"}
+*Instead of this:*
+
+::: {.code-box style="width: 640px;"}
+```{r eval= F, echo=T}
+df1 <- filter(df, sex == "female") 
+df2 <- mutate(df_f, age_child = age<18)  
 
 ```
 :::
+<br>
+*Write this:* 
 
-*Write this:*
-
-::: {.code-box style="width: 700px;"}
+::: {.code-box style="width: 640px;"}
 ```{r eval=F, echo=T}
-df_m <- df %>% filter(sex == "female")  %>% 
+df1 <- df %>% filter(sex == "female")  %>% 
         mutate(age_child = age<18) 
 ```
 :::
+::::
+
+:::: {.column width="38%"}
+<br>
+<br>
+<br>
+<br>
+<br>
+
+1) *Pipe* from the input object into the filter function
+2) You can assign a new object as before
+3) Then *pipe* into the next function, no need for intermediate object!
+
+::::
+::::
+
+
+
 
 # group_by() and summarize() from {dplyr}
 
@@ -161,18 +222,33 @@ df_m <- df %>% filter(sex == "female")  %>%
 ::: slide-header
 {dplyr}
 :::
-(Can make this like the structure of the others?)
 
-::: incremental
-- Next: What if you want summary statistics for groups within your data?
-- Example:
-   - Calculate the average age by region
-   - Find the earliest onset_date by region
-- `group_by()` tells R to split your data into groups before applying a function
-- It doesn’t change the data itself but prepares it for grouping operations.
+:::: incremental
+-   *Purpose:* Organize your data into groups for calculations and transformations within each group.
+-   *Why:* Essential for creating summary tables and analyzing grouped data.
+-   *Examples:*
+    -   Group by region, to prepare for finding the earliest onset date per region
+    -   Group by sex, to prepare for calculating the average age per sex
+::::
 
+## group_by()
+
+::: slide-header
+{dplyr}
 :::
-   
+
+-   *Purpose:* Organize your data into groups for calculations and transformations within each group.
+-   *Why:* Essential for creating summary tables and analyzing grouped data.
+-   *Examples:*
+    -   Group by region, to prepare for finding the earliest onset date per region
+    -   Group by sex, to prepare for calculating the average age per sex
+-   *How*
+
+::: code-box
+`data %>% group_by(grouping_column)`
+:::
+
+
 ## group_by()
 
 ::: slide-header
@@ -182,103 +258,95 @@ df_m <- df %>% filter(sex == "female")  %>%
 ::: code-box
 ```{r eval = F, echo=T}
 
-mtcars %>% group_by(area_name)
+df %>% group_by(region)
 
 ```
 :::
+
 <br>
 
-::: columns
-::: {.column width="47%"}
+::::::::: columns
+:::: {.column width="47%"}
 ::: input-box
 Input
 
 ```{r}
-input_data <- head(mtcars) |> 
-  dplyr::select(cyl, mpg, disp)
-
-tab_input <- input_data |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
-  gt::tab_options(table.font.size = 22) 
-
-
 tab_input
 ```
 :::
-:::
+::::
 
-::: {.column width="6%"}
+:::: {.column width="6%"}
 ::: arrow-box
 `r r2symbols::symbol(3)`
 :::
-:::
+::::
 
-::: {.column width="47%"}
+:::: {.column width="47%"}
 ::: output-box
 Output
 
 ```{r}
-tab_output <- input_data |> dplyr::filter(cyl==6) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- df |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
 ```
 :::
-:::
-:::
+::::
+:::::::::
+Note: It doesn't visibly change the data itself!
 
 ## summarize()
 
 ::: incremental
-
-- Bullets about summarize
-
-:::
-
-::: {.code-box}
-
-```{r echo=T, eval=F}
-linelist %>% summarize(summary_column = function(column))
-```
-
+-   *Purpose:* Compute summary statistics for your data
+-   *Why:* Extract key information or simplify your data
+-   *Example:* Create a table showing average age per region
 :::
 
 ## summarize()
 
-::: incremental
+-   *Purpose:* Compute summary statistics for your data
+-   *Why:* Extract key information or simplify your data
+-   *Example:* Create a table showing average age per region
+-   *How:*
 
-- Bullets about summarize
-
-:::
-
-::: {.code-box}
-
+::: {.code-box style="width: 800px;"}
 ```{r echo=T, eval=F}
-linelist %>% summarize(summary_column = function(column),
-                       summary_column2 = function(column2))
+data %>% summarize(summary_column = function(column))
 ```
-
 :::
 
-## combining group_by() and summarize()
+## group_by() and summarize()
 
-::: incremental
+-   However, the beauty of summarize is *in combination* with `group_by()`
 
-- Bullets about summarize
-
-:::
-
-::: {.code-box}
-
+::: {.code-box style="width: 800px;"}
 ```{r echo=T, eval=F}
-linelist %>% 
-  group_by() %>% 
-  summarize(summary_column = function(column),
-                       summary_column2 = function(column2))
+data %>%
+  group_by(grouping_column) %>% 
+  summarize(summary_column = function(column))
 ```
-
 :::
+
+## group_by() and summarize()
+
+-   However, the beauty of summarize is *in combination* with `group_by()`
+
+::: {.code-box style="width: 800px;"}
+```{r echo=T, eval=F}
+data %>%
+  group_by(grouping_column) %>% 
+  summarize(summary_column = function(column))
+```
+:::
+
+-   The function to create a new column can be one of the ones we've already seen: min(), max(), sum()
+-   We'll also try new ones:
+    -   median()
+    -   n()
 
 ## group_by() and summarize()
 
@@ -286,59 +354,210 @@ linelist %>%
 {dplyr}
 :::
 
-::: code-box
+::: {.code-box}
 ```{r eval = F, echo=T}
 
-mtcars %>% group_by(area_name)
+df %>% summarize(min_age = min(age))
 
 ```
 :::
+
 <br>
 
-::: columns
-::: {.column width="47%"}
+::::::::: columns
+:::: {.column width="47%"}
 ::: input-box
 Input
 
 ```{r}
-input_data <- head(mtcars) |> 
-  dplyr::select(cyl, mpg, disp)
-
-tab_input <- input_data |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
-  gt::tab_options(table.font.size = 22) 
-
 
 tab_input
 ```
 :::
-:::
+::::
 
-::: {.column width="6%"}
+:::: {.column width="6%"}
 ::: arrow-box
 `r r2symbols::symbol(3)`
 :::
-:::
+::::
 
-::: {.column width="47%"}
+:::: {.column width="47%"}
 ::: output-box
 Output
 
 ```{r}
-tab_output <- input_data |> dplyr::filter(cyl==6) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- df |> dplyr::summarize(min_age = min(age)) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
 ```
 :::
+::::
+:::::::::
+
+## group_by() and summarize()
+
+::: slide-header
+{dplyr}
 :::
+
+::: {.code-box}
+```{r eval = F, echo=T}
+
+df %>% 
+  group_by(region) %>% 
+  summarize(min_age = min(age))
+
+```
 :::
 
-## Combine it altogether
+<br>
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- df %>% 
+  dplyr::group_by(region) %>% 
+  dplyr::summarize(min_age = min(age)) %>% 
+  gt::gt() %>%   gtExtras::gt_theme_guardian() %>% 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+
+Note how R can read code over multiple lines. This vertical coding approach is easier to read.
+:::::::::
+
+## group_by() and summarize()
+
+::: slide-header
+{dplyr}
+:::
+
+::: {.code-box}
+```{r eval = F, echo=T}
+
+df %>% 
+  group_by(region) %>% 
+  summarize(min_age = min(age),
+            max_age = max(age),
+            cases = n())
+  
+```
+:::
+
+<br>
+
+::::::::: columns
+:::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+
+tab_input
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+::::
+
+:::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- df %>% 
+  dplyr::group_by(sex) %>% 
+  dplyr::summarize(min_age = min(age),
+            max_age = max(age),
+            cases = n()) %>% 
+  gt::gt() %>%   gtExtras::gt_theme_guardian() %>% 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+::::
+:::::::::
+
+## Altogether now! 
 
 
-Note how code can be read over multiple lines, and this vertical coding approach is actually good/easier to read.
+::: slide-header
+{dplyr}
+:::
+
+<br>
+
+
+::: {.code-box style="width: 1000px;"}
+```{r eval = F, echo=T}
+
+df %>% 
+  group_by(region) %>% 
+  mutate(age_child = age<18) %>% 
+  summarize(min_age = min(age),
+            max_age = max(age),
+            cases = n(),
+            cases_child = sum(age_child == TRUE)) %>% 
+  mutate(cases_child_percent = round(cases_child/cases*100,1)) %>% 
+  arrange(cases)
+  
+```
+
+:::
+
+::: arrow-box
+&#x2193;
+:::
+
+::: output-box
+```{r}
+tab_output <- df %>% 
+  group_by(region) %>% 
+  mutate(age_child = age<18) %>% 
+  summarize(min_age = min(age),
+            max_age = max(age),
+            cases = n(),
+            cases_child = sum(age_child == TRUE)) %>% 
+  mutate(cases_child_percent = round(cases_child/cases*100,1)) %>% 
+  arrange(cases) %>% 
+  gt::gt() %>%   gtExtras::gt_theme_guardian() %>% 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+
 
 # Exercise
 
@@ -346,6 +565,11 @@ Note how code can be read over multiple lines, and this vertical coding approach
 
 ::: incremental
 
+- Before the break you used mutate() to create two new columns on reporting delay. You then summarized the data, using filter() to look specifically at reporting delays in one region Paroha. 
+
+- You decide you want to keep looking at reporting delays within individual areas, but rather than creating separate linelists for each region and anaylsing them separately, you decide to use group_by() and summarize() to put all that information into a single summary table. 
+
+- Let's go!
 :::
 
 ## Access the exercises {.exercise-slide}
@@ -355,6 +579,3 @@ Instructions here
 # Recap
 
 ## Learning objectives
-
-
-

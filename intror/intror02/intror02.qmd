@@ -17,6 +17,19 @@ resources:
 fig-align: center
 ---
 
+```{r}
+## Data
+pacman::p_load(rio)
+df <- import(here::here("intror/GIoutbreak_2021-05-25_linelist_clean_DEMO.RDS"))
+
+input_data <- df |> 
+  dplyr::select(id, region, age, sex)
+
+tab_input <- input_data |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+```
+
 # Module 2
 
 ## Learning objectives
@@ -78,9 +91,12 @@ Next we will:
 
 ## Function arguments
 
--   Remember `sqrt`? This is a simple function with only one argument: the input
+-   Function arguments *can be optional* and *have names*
 
--   You don't always need to show the argument name. This is why `round(16)` worked fine in the previous lesson.
+-   E.g. the round() function takes two arguments:
+
+    -   `x`: the input; a number to be rounded
+    -   `digits`: the number of decimals to round it to
 
 :::::::::: columns
 ::: {.column width="5%"}
@@ -90,7 +106,7 @@ Next we will:
 <br>
 
 ::: code-box-small
-`round(x = 81)`
+`round(33.556, 1)`
 :::
 ::::
 
@@ -104,26 +120,33 @@ Next we will:
 <br>
 
 ::: output-box
-`9`
+`33.6`
 :::
 ::::
 ::::::::::
 
+You don’t always need to name arguments! R often knows them by their order in the function.
+
+
 ## How are functions organised?
 
 -   Functions are grouped into *packages*.
--   Functions in a package particularly have the same theme
+-   Functions in a package typically have the same theme
 -   The ready-to-use functions that come with R are available in a {base} package
 -   You can also install many other packages (more on that later), for example:
 
 ![](/images/hex.png)
 
-## Helpful functions for dataframes
+## Today's functions
+
+Today we will be looking at some important functions that are helpful for inspecting and summarizing dataframes. 
+
+## Today's functions
 
 *{base} R package:*
 
--   *ncol()*: To count the number of columns
--   *nrow()*: To count the number of rows
+-   *ncol()* and *nrow()*: To count the number of columns and rows
+-   *head()* and *tail()*: To view the top six and bottom six rows
 
 *{dplyr} package:*
 
@@ -131,7 +154,7 @@ Next we will:
 -   *count()*: To count the number of rows within one or more groups
 -   *arrange()*: To order the rows by the value of specific columns
 
-*{janitor} package*: -
+*{janitor} package*:
 
 -   *tabyl()*: To produce frequency tables
 
@@ -152,6 +175,16 @@ Next we will:
 `select(data, col1, col2, col3,...)`
 :::
 
+## Let's take a look
+
+We will use a small version of the GI outbreak data:
+
+<br>
+
+```{r}
+tab_input
+```
+
 ## 
 
 ::: slide-header
@@ -206,14 +239,6 @@ Code
 Input
 
 ```{r}
-input_data <- head(mtcars) |> 
-  dplyr::select(cyl, mpg, disp)
-
-tab_input <- input_data |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
-  gt::tab_options(table.font.size = 22) 
-
-
 tab_input
 ```
 :::
@@ -241,7 +266,7 @@ Output
   <!-- This adds a linespace -->
 
 ::: code-box
-`select(mtcars)`
+`select(df)`
 :::
 
   <!-- This adds a linespace -->
@@ -279,7 +304,7 @@ Output
   <!-- This adds a linespace -->
 
 ::: code-box
-`select(mtcars)`
+`select(df)`
 :::
 
   <!-- This adds a linespace -->
@@ -323,7 +348,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-`select(mtcars, cyl)`
+`select(df, region)`
 :::
 
   <!-- This adds a linespace -->
@@ -350,8 +375,8 @@ tab_input
 Output
 
 ```{r}
-tab_output <- input_data |> dplyr::select(cyl) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- df |> dplyr::select(region) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
@@ -369,7 +394,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-`select(mtcars, mpg)`
+`select(df, age)`
 :::
 
   <!-- This adds a linespace -->
@@ -396,8 +421,8 @@ tab_input
 Output
 
 ```{r}
-tab_output <- input_data |> dplyr::select(mpg) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- input_data |> dplyr::select(age) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
@@ -415,7 +440,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-`select(mtcars, mpg, cyl)`
+`select(df, region, age)`
 :::
 
   <!-- This adds a linespace -->
@@ -442,8 +467,8 @@ tab_input
 Output
 
 ```{r}
-tab_output <- input_data |> dplyr::select(mpg, cyl) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- input_data |> dplyr::select(region, age) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
@@ -461,7 +486,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-`select(mtcars, mpg, cyl, disp)`
+`select(df, id, region, age)`
 :::
 
   <!-- This adds a linespace -->
@@ -488,8 +513,8 @@ tab_input
 Output
 
 ```{r}
-tab_output <- input_data |> dplyr::select(mpg, cyl, disp) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- input_data |> dplyr::select(id, region, age) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
@@ -507,7 +532,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-select(mtcars, -mpg)
+`select(df, -id)`
 :::
 
   <!-- This adds a linespace -->
@@ -534,8 +559,8 @@ tab_input
 Output
 
 ```{r}
-tab_output <- input_data |> dplyr::select(-mpg) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- input_data |> dplyr::select(-id) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
@@ -573,7 +598,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-`arrange(mtcars, cyl)`
+`arrange(df, age)`
 :::
 
   <!-- This adds a linespace -->
@@ -600,8 +625,8 @@ tab_input
 Output
 
 ```{r}
-tab_output <- input_data |> dplyr::arrange(cyl) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- input_data |> dplyr::arrange(age) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
@@ -619,7 +644,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-`arrange(mtcars, cyl, mpg)`
+`arrange(df, sex, age)`
 :::
 
   <!-- This adds a linespace -->
@@ -646,8 +671,8 @@ tab_input
 Output
 
 ```{r}
-tab_output <- input_data |> dplyr::arrange(cyl, mpg) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- input_data |> dplyr::arrange(sex, age) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
@@ -665,7 +690,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-`arrange(mtcars, desc(cyl))`
+`arrange(df, desc(age))`
 :::
 
   <!-- This adds a linespace -->
@@ -692,8 +717,8 @@ tab_input
 Output
 
 ```{r}
-tab_output <- input_data |> dplyr::arrange(desc(cyl)) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- input_data |> dplyr::arrange(desc(age)) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
@@ -729,7 +754,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-`count(mtcars, cyl)`
+`count(df, sex)`
 :::
 
   <!-- This adds a linespace -->
@@ -756,8 +781,8 @@ tab_input
 Output
 
 ```{r}
-tab_output <- input_data |> dplyr::count(cyl) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- input_data |> dplyr::count(sex) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
@@ -775,7 +800,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-`count(mtcars, cyl, mpg)`
+`count(df, region, sex)`
 :::
 
   <!-- This adds a linespace -->
@@ -802,8 +827,8 @@ tab_input
 Output
 
 ```{r}
-tab_output <- input_data |> dplyr::count(cyl, mpg) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- input_data |> dplyr::count(region, sex) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
@@ -839,7 +864,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-`tabyl(mtcars, cyl)`
+`tabyl(df, sex)`
 :::
 
   <!-- This adds a linespace -->
@@ -866,8 +891,8 @@ tab_input
 Output
 
 ```{r}
-tab_output <- input_data |> janitor::tabyl(cyl) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- input_data |> janitor::tabyl(sex) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
@@ -885,7 +910,7 @@ tab_output
   <!-- This adds a linespace -->
 
 ::: code-box
-`tabyl(mtcars, cyl, mpg)`
+`tabyl(df, region, sex)`
 :::
 
   <!-- This adds a linespace -->
@@ -912,8 +937,8 @@ tab_input
 Output
 
 ```{r}
-tab_output <- input_data |> janitor::tabyl(cyl, mpg) |> 
-  gt::gt() |>  gtExtras::gt_theme_espn() |> 
+tab_output <- input_data |> janitor::tabyl(region, sex) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 22) 
 
 tab_output
@@ -943,6 +968,13 @@ Go ahead and investigate the clean data with some simple functions!
 Instructions here
 
 # Wrap-up
+
+## Your investigation {.exercise-slide}
+
+Well done on doing a descriptive analysis in R!
+
+Your boss is satisfied with the updated case numbers, demographic breakdown, and the information that the peak of cases  has passed, based on the pattern of onset dates. 
+
 
 ## Learning objectives
 
