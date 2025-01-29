@@ -1,0 +1,501 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+---
+
+```{r}
+
+# Packages
+pacman::p_load(rio, here, janitor, dplyr, gtExtras, gt, tidyr)
+
+# Load data as needed 
+df_raw <- import(here("intror/GIoutbreak_2021-06-05_linelist.csv"), na = "") 
+lab_raw <- import(here("intror/GIoutbreak_2021-06-05_labs.xlsx"))
+
+df_raw[df_raw == ""] <- NA
+
+# Create the sub versions needed (df = as clean as appropriate for this module, _demo = filtered to fewer rows when need to show on slides)
+
+df_raw_demo <- df_raw |> 
+  filter(row_number()<6)
+
+df <- df_raw %>% clean_names() |> rename(date_onset = symptoms_started) |> 
+  unite("date_of_birth", 
+        c("birthyear", "month_of_birth", "daybirth"), 
+        sep = "-") |> 
+  mutate(
+    date_report = 
+      coalesce(
+        told_on,
+        reported,
+        discovered,
+        found_on,
+        report)) |> 
+  select(-told_on,
+        - reported,
+        - discovered,
+        - found_on,
+        - report)
+
+df_demo <- df |> 
+  filter(row_number()<6)
+
+```
+
+# Module 5: Part A
+
+## Learning objectives
+
+-   Learn to deduplicate data
+-   Learn to combine or split columns
+
+# Recap
+
+# Deduplication
+
+## distinct()
+
+::: slide-header
+{dplyr}
+:::
+
+- *Purpose*: Removes duplicate rows based on selected columns.
+- *Why*: Ensures unique observations in a datase
+- *Example*: You want to remove duplicate test results for the same person in a case linelist 
+
+## distinct()
+
+::: slide-header
+{dplyr}
+:::
+
+*How*: 
+
+To remove **exact duplicates**:
+
+::: {.code-box-small style="width: 900px; font-size: 30px;"}
+`data %>% distinct()`
+:::
+<br>
+To remove **partial duplicates** where rows have matching values in only col1 and col2. Add .keep_all to retain all the columns, not just those specified:
+
+::: {.code-box-small style="width: 900px; font-size: 30px;"}
+`data %>% distinct(col1, col2, .keep_all = TRUE)`
+:::
+
+::: {.obs-box}
+⚠️ **IMPORTANT!** The first row is kept when deduplicating with distinct() 
+:::
+
+## Example
+
+::: slide-header
+{dplyr}
+:::
+
+Deduplication of exact row matches:
+
+::: {.code-box-small style="width: 700px; font-size: 40px;"}
+```{r echo=T, eval=F}
+example %>% distinct()
+```
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+```{r}
+example <- data.frame(
+  name = c("Alice", "Bob", "Alice", "Charlie", "Bob", "Alice"),
+  birthday = as.Date(c("1990-01-01", "1985-05-12", "1990-01-01", "1992-07-23", "1985-05-12", "1990-01-01")),
+  test_result = c("Positive", "Negative", "Negative", "Positive", "Positive", "Negative"),
+  report_date = as.Date(c("2023-01-21", "2023-01-16", "2023-01-20", "2023-01-18", "2023-01-19", "2023-01-20"))
+)
+
+example |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 19) 
+
+```
+:::
+
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+```{r}
+example |> distinct() |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 19) 
+```
+:::
+:::
+:::
+
+
+## Example
+
+::: slide-header
+{dplyr}
+:::
+
+Deduplication of rows with the same name and birthday:
+
+::: {.code-box-small style="width: 900px; font-size: 40px;"}
+```{r echo=T, eval=F}
+example %>% distinct(name, birthday, .keep_all = T)
+```
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+```{r}
+example |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 19) 
+
+```
+:::
+
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+```{r}
+example |> distinct(name, birthday, .keep_all = T) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 19) 
+```
+:::
+:::
+:::
+
+
+## Example
+
+::: slide-header
+{dplyr}
+:::
+
+Deduplication of rows with the same name and birthday, but keeping the first test:
+
+::: {.code-box-small style="width: 900px; font-size: 40px;"}
+```{r echo=T, eval=F}
+example %>%
+  arrange(report_date) |> 
+  distinct(name, birthday, .keep_all = T)
+```
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+```{r}
+example |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 19) 
+
+```
+:::
+
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+```{r}
+example |>   arrange(report_date) |> 
+  distinct(name, birthday, .keep_all = T) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 19) 
+```
+:::
+:::
+:::
+
+
+# Moving content between columns 
+
+## unite()
+
+::: slide-header
+{tidyr}
+:::
+
+
+- *Purpose:* To bring values from multiple columns into a single column.
+- *Why:* To bring together scattered information on one variable
+- *Example:* To combine first_name and last_name columns into one column name.
+- *How:*
+
+::: {.code-box style="width: 900px"}
+`data %>% unite(new_column, c(col1, col2, ...), sep = "separator")`
+:::
+
+## Example
+
+::: slide-header
+{tidyr}
+:::
+
+<br>
+
+::: {.code-box-small style="width: 800px; font-size: 40px;"}
+```{r eval=F, echo=T}
+df <- df |> 
+  unite("date_of_birth", 
+        c("birthyear", "month_of_birth", "daybirth"), 
+        sep = "-")
+```
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+df_demo |> select(id, birthyear, month_of_birth, daybirth) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 20) 
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+
+df_demo |> select(id, birthyear, month_of_birth, daybirth) |> 
+  unite("date_of_birth", 
+        c("birthyear", "month_of_birth", "daybirth"), 
+        sep = "-") |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 20) 
+
+```
+:::
+:::
+:::
+
+## coalesce() 
+
+- *Purpose*: To replace missing values by taking the first non-missing value from multiple columns.
+- *Why*: To fill in gaps in data using all available information spread across column
+- *Example*: You have columns phone_primary and phone_backup, and want to create create a phone column that takes the first available number.
+- *How*: Combine with mutate
+
+::: {.code-box-small}
+`data %>% mutate(new_column = coalesce(col1, col2, col3, ...))`
+:::
+
+## Example
+
+::: slide-header
+{tidyr}
+:::
+
+<br>
+
+::: {.code-box-small style="font-size: 38px;"}
+```{r eval=F, echo=T}
+df <- df |> 
+  mutate(date_report = coalesce(told_on, reported, discovered, found_on, report))
+```
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+df_demo |> select(id, told_on,
+        reported,
+        discovered,
+        found_on,
+        report) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 20) 
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+
+df_demo |> select(id, told_on,
+        reported,
+        discovered,
+        found_on,
+        report) |> 
+  mutate(
+    date_report = 
+      coalesce(
+        told_on,
+        reported,
+        discovered,
+        found_on,
+        report)) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 20) 
+
+```
+:::
+:::
+:::
+
+## Example
+
+::: slide-header
+{tidyr}
+:::
+
+<br>
+
+::: {.code-box-small style="font-size: 38px;"}
+```{r eval=F, echo=T}
+df <- df %>%
+  mutate(date_report = coalesce(told_on, reported, discovered, found_on, report)) %>%
+  select(-told_on, -reported, -discovered, -found_on, -report)
+```
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+df_demo |> select(id, told_on,
+        reported,
+        discovered,
+        found_on,
+        report) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 20) 
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+
+df_demo |> select(id, told_on,
+        reported,
+        discovered,
+        found_on,
+        report) |> 
+  mutate(
+    date_report = 
+      coalesce(
+        told_on,
+        reported,
+        discovered,
+        found_on,
+        report)) |> 
+  select(-told_on, -reported, -discovered, -found_on, -report) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 20) 
+
+```
+:::
+:::
+:::
+    
+# Exercise
+
+## Scenario {.exercise-slide}
+
+::: incremental
+
+- Point 1
+- Point 2
+
+:::
+
+## Access the exercises {.exercise-slide}
+
+Instructions here
+
+# Recap
+
+## Put code altogether
+
+## Learning objectives
