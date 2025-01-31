@@ -28,19 +28,20 @@ df_raw[df_raw == ""] <- NA
 df_raw_demo <- df_raw |> 
   filter(row_number()<6)
 
-df <- df_raw %>% clean_names() |> rename(date_onset = symptoms_started)
-
-df_demo <- df_raw_demo %>% clean_names() |> rename(date_onset = symptoms_started)
-
 ```
 
 # Module 4: Part A
 
-## Learning objectives
+## Module 4 learning objectives
+
+In part A you will:
 
 -   Learn the principles of tidy and clean data
 -   Get introduced to functions that clean column names 
--   Learn about date formats in R
+
+In part B you will:
+
+-   Learn how to change the class of a column, in particular deal with dates
 -   Get introduced to functions that clean and standardize values
 
 # Recap
@@ -270,67 +271,70 @@ data.frame(
 
 ![](/images/quadrants.png)
 
-## Functions today
-
-We will cover:
-
-- *glimpse()* from {dplyr} and *tabyl()* from {janitor} to inspect data
-- *clean_names()* from {janitor} and *rename()* from {dplyr} to clean column names
-- *case_match()* from {dplyr} to standardize values
-- *unite* and *blabla* from {bla} to move data between columns FIX THIS
-
 # Inspecting the overall data
 
 ## Our data {.exercise-slide}
 
-We will use the new linelist shared by your colleagues (GIoutbreak_2021-06-05_linelist.csv). 
+<style>
+.scroll-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  width: 100%;
+  max-width: 100%;
+}
+</style>
 
-```{r}
-df_raw_demo |> 
-  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
-  gt::tab_options(table.font.size = 13) 
-```    
+We will use the new linelist shared by your colleagues. 
 
-::: {.obs-box}
-⚠️ **NOTE!** Remember from the last module that you can use the `View()` function to inspect the whole dataset!
-:::
+*Brainstorm: What needs 🟧cleaning or 🟦tidying?*
 
-## glimpse()
+::: {.scroll-container}
+![](/images/dfraw.png){style="max-height: 50vh;"}
 
-::: slide-header
-{dplyr}
-:::
-
-You can also use glimpse() from {dplyr}
-
-- *Purpose*: To provide a quick overview of the data: column names, data types, and preview of top values. 
-- *Why*: To give you an output that helps you understand the data quickly
-- *Example*: You want to get an understanding of how clean and complete a dataset is
-- *How*: 
-
-::: {.code-box}
-`glimpse(data)`
 :::
 
 ::: {.obs-box}
-⚠️ **NOTE!** You could also write `data %>% glimpse()`. However as you will not continue the pipe chain, it is simpler to not use the pipe. 
-:::
-    
-## Example
-
-::: {.code-box}
-`glimpse(df_raw)`
+⚠️ **NOTE!** Remember that you can use the `View()` function to do this!
 :::
 
-::: {.arrow-box}
-&#8595;
+## Our data {.exercise-slide}
+
+<style>
+.scroll-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  width: 100%;
+  max-width: 100%;
+}
+</style>
+
+We will use the new linelist shared by your colleagues. 
+
+*Brainstorm: What needs 🟧cleaning or 🟦tidying?*
+
+::: {.scroll-container}
+![](/images/dfraw_label.png){style="max-height: 50vh;"}
+
+:::
+
+::: {.obs-box}
+⚠️ **NOTE!** Remember that you can use the `View()` function to do this!
 :::
 
 
-```{r}
-glimpse(df_raw)
-```
+## Today's functions
 
+*Cleaning columns names*:
+
+- *clean_names()* from {janitor} and *rename()* from {dplyr}
+- *glimpse()* from {dplyr} and *tabyl()* from {janitor} to inspect data
+
+*Cleaning column content*:
+
+- *as.xxx()* functions from {baseR} to change column class
+- *dmy()*, *mdy()*, and *ymd()* from {lubridate} to transform columns to date class
+- *str_to_xxx()* functions from {stringr} to standardize capitalisation of values
+- *case_match()* from {dplyr} to correct and standardize values
 
 # Cleaning column names
 
@@ -409,7 +413,7 @@ data.frame(column_names = colnames(df_cols |> clean_names())) |>
 ## rename()
 
 - *Purpose:* To specify new column names for one or more columns in a dataset.
-- *Why:* So column names are more meaningful, consistent, or aligned with a preferred naming convention, making them easier to use.
+- *Why:* So column names are more meaningful, consistent, or aligned with a naming convention, making them easier to use.
 - *Example:* If your dataset has a column named Age_Yrs but you want to rename it to age, you can use rename(data, age = Age_Yrs).
 - *How:* 
 
@@ -427,7 +431,7 @@ data.frame(column_names = colnames(df_cols |> clean_names())) |>
 
 ::: {.code-box-small style="width: 700px; font-size: 40px;"}
 ```{r echo=T, eval=F}
-df_raw %>% rename(date_onset = symptoms_started)
+df_raw %>% clean_names()
 ```
 :::
 

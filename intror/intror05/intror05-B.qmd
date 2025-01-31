@@ -1,0 +1,768 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    code-line-numbers: false
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+---
+
+```{r}
+
+# Packages
+pacman::p_load(rio, here, janitor, dplyr, gtExtras, gt, tidyr, lubridate, stringr)
+
+# Load data as needed 
+df_raw <- import(here("intror/GIoutbreak_2021-06-05_linelist.csv"), na = "") 
+lab_raw <- import(here("intror/GIoutbreak_2021-06-05_labs.xlsx"))
+
+df_raw[df_raw == ""] <- NA
+
+# Create the sub versions needed (df = as clean as appropriate for this module, _demo = filtered to fewer rows when need to show on slides)
+
+df_raw_demo <- df_raw |> 
+  filter(row_number()<6)
+
+df <- df_raw %>% clean_names() |> rename(date_onset = symptoms_started)
+
+df_demo <- df_raw_demo %>% clean_names() |> rename(date_onset = symptoms_started)
+
+```
+
+# Module 5: Part A
+
+## Scenario {.exercise-slide}
+
+::: incremental
+-   You have been given information about the case definition for cholera
+-   Your boss has now asked you to:
+    -   Create a column with a case category, based on applying the case definition to existing columns.
+    -   Share information on the number of cases by week!
+-   Luckily you have already cleaned report dates! Let's continue preparing the data for the task!
+:::
+
+## Learning objectives
+
+In Part A you:
+
+-   Learned to deduplicate data
+-   Learned to combine or split columns
+
+In Part B you will:
+
+-   Learn to derive date information from existing columns, using {lubridate} functions
+-   Learn to derive information from existing columns and make new ones, using case_when(), if_else(), and stringr()
+-   Learn about factor values
+
+# Extracting date information
+
+## More {lubridate} functions
+
+::: slide-header
+{lubridate}
+:::
+<br>
+You have already learned about *{lubridate}* function to convert columns to date class. {lubridate] has several other functions for extracting date information:
+
+::: {#general-box style="text-align: left; width: 1050px; background: #ebebeb; margin: 0 auto; font-size: 22px;"}
+| **Function** | **Purpose** | **Output** <br> \[if x is 2021-01-03\] |
+|----------------------------|---------------------------------|------------------|
+| **`floor_date(x, unit = "month")`** | Rounds down to the nearest unit (can be week, month, year). | `2021-01-01` |
+| **`year(x)`** | Extracts year | `2021` |
+| **`month(x, label = TRUE)`** | Extracts month as a name (with optional `label = TRUE`) or integer | `"Jan"` |
+| **`week(x)`** | Extracts calendar week number (starts from Jan 1st). | `1` |
+| **`isoweek(x)`** | Extracts ISO week number (first week contains the first Thursday). | `53` |
+:::
+
+## Example
+
+::: slide-header
+{lubridate}
+:::
+
+<br>
+
+::: {.code-box-small style="width: 700px; font-size: 40px;"}
+```{r echo=T, eval=F}
+df_dates %>%
+  mutate(onset_weeknum = week(onset_date))
+
+```
+:::
+
+<br>
+
+::::::::: columns
+:::: {.column width="30%"}
+::: input-box
+```{r}
+
+df_dates <- data.frame(
+  id = 1:6,
+  onset_date = ymd(c("2021-01-01", "2021-03-15", "2021-06-10", 
+                      "2021-07-20", "2021-09-05", "2021-11-12")))
+
+df_dates |> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 18) 
+
+
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+&#8594;
+:::
+::::
+
+:::: {.column width="64%" .fragment}
+::: output-box
+```{r}
+df_dates |> 
+ mutate(onset_weeknum = week(onset_date)) |> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 18) 
+```
+:::
+::::
+:::::::::
+
+
+## Example
+
+::: slide-header
+{lubridate}
+:::
+
+<br>
+
+::: {.code-box-small style="width: 700px; font-size: 40px;"}
+```{r echo=T, eval=F}
+df_dates %>%
+  mutate(onset_weeknum = week(onset_date),
+         onset_week = floor_date(onset_date, "week"))
+
+```
+:::
+
+<br>
+
+::::::::: columns
+:::: {.column width="30%"}
+::: input-box
+```{r}
+
+df_dates |> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 18) 
+
+
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+&#8594;
+:::
+::::
+
+:::: {.column width="64%"}
+::: output-box
+```{r}
+df_dates |> 
+  mutate(onset_weeknum = week(onset_date),
+         onset_week = floor_date(onset_date, "week")) |> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 18) 
+```
+:::
+::::
+:::::::::
+
+
+## Example
+
+::: slide-header
+{lubridate}
+:::
+
+<br>
+
+::: {.code-box-small style="width: 900px; font-size: 40px;"}
+```{r echo=T, eval=F}
+df_dates %>%
+  mutate(onset_weeknum = week(onset_date),
+         onset_week = floor_date(onset_date, "week", week_start=1))
+
+```
+:::
+
+<br>
+
+::::::::: columns
+:::: {.column width="30%"}
+::: input-box
+```{r}
+
+df_dates |> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 18) 
+
+
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+&#8594;
+:::
+::::
+
+:::: {.column width="64%"}
+::: output-box
+```{r}
+df_dates |> 
+  mutate(onset_weeknum = week(onset_date),
+         onset_week = floor_date(onset_date, "week", week_start=1)) |> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 18) 
+```
+:::
+::::
+:::::::::
+
+::: obs-box
+⚠️ **NOTE!** Sunday is the default first day of the week in `floor_date()`. To start on Monday, add week_start=1, on Tuesday week_start=3 etc. 
+:::
+
+
+
+
+
+# Extracting information from strings
+
+## str_detect()
+
+You encountered {stringr} previously for changing the capitalisation of strings. Another important function is `str_detect()`
+
+::: slide-header
+{stringr}
+:::
+
+- *Purpose*: Detects if a string contains a specific pattern and returns `TRUE`/`FALSE` accordingly
+- *Why*: Helps filter or flag observations based on text patterns
+- *Example*: You want to search descriptions of symptoms for specific symptoms
+- *How*: 
+
+:::::: columns
+
+
+:::: {.column .fragment style="text-align: centre; width: 35%;"}
+
+**E.g. search a value:**
+```{r eval=F, echo=T}
+str_detect(x, "pattern")
+```
+::::
+
+:::: {.column .fragment style="text-align: centre; width: 60%;"}
+
+**Or label rows containing a value:**
+```{r eval=F, echo=T}
+data %>% mutate(col1 = str_detect(col2))
+```
+
+::::
+:::::
+
+
+
+## Example
+
+::: slide-header
+{stringr}
+:::
+
+For instance: create a `TRUE`/`FALSE` column indicating whether 'fever' is present in a symptoms description column
+
+::: {.code-box-small style="width: 900px; font-size: 40px;"}
+```{r echo=T, eval=F}
+
+df_symptoms %>%
+  mutate(fever = str_detect(symptoms, "fever"))
+```
+:::
+
+<br>
+
+::::::::: columns
+:::: {.column width="30%"}
+::: input-box
+```{r}
+
+df_symptoms <- data.frame(
+  id = 1:6,
+  symptoms = c("diarrhoea other fever", "headache", "fever and cough", 
+               "vomiting and diarrhoea", "fever", "diarrhoea and nausea")
+)
+
+df_symptoms |> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 18) 
+
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+&#8594;
+:::
+::::
+
+:::: {.column width="64%" .fragment}
+::: output-box
+```{r}
+df_symptoms |> 
+  mutate(fever = str_detect(symptoms, "fever")) |> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 18) 
+```
+:::
+::::
+:::::::::
+
+
+## Example
+
+::: slide-header
+{stringr}
+:::
+
+You can also search for multiple patterns within the function, separated with |.
+
+::: {.code-box-small style="width: 900px; font-size: 40px;"}
+```{r echo=T, eval=F}
+
+df_symptoms %>%
+  mutate(fever = str_detect(symptoms, "fever|pyrexia|high temperature"))
+```
+:::
+
+<br>
+
+::::::::: columns
+:::: {.column width="30%"}
+::: input-box
+```{r}
+
+df_symptoms <- data.frame(
+  id = 1:6,
+  symptoms = c("diarrhoea other fever", "headache", "high temperature and cough", 
+               "vomiting and diarrhoea", "pyrexia", "diarrhoea and nausea")
+)
+
+df_symptoms |> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 18) 
+
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+&#8594;
+:::
+::::
+
+:::: {.column width="64%" .fragment}
+::: output-box
+```{r}
+df_symptoms |> 
+  mutate(fever = str_detect(symptoms, "fever|pyrexia|high temperature")) |> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 18) 
+```
+:::
+::::
+:::::::::
+
+
+::: {.obs-box .fragment}
+⚠️ **NOTE!** {stringr} has many useful functions to count, transform, locate, order, and otherwise manage strings that we don't have time to cover! Look up the package for more information. 
+:::
+
+# Creating new categorical columns 
+
+## if_else()
+
+- *Purpose*: Evaluates a condition and returns one value if TRUE and another if FALSE.
+- *Why*: Helps create new categorical labels based on a condition.
+- *Example*: You want to classify ages into "Adult" or "Minor" based on whether the age is 18 or older.
+- *How*:
+
+
+:::: {.code-box-small .fragment style="text-align: centre; width: 60%; font-size: 42px;"}
+
+```{r eval=F, echo=T}
+data %>% mutate(col1 = if_else(condition, 
+                               value_if_true,
+                               value_if_false))
+```
+
+::::
+
+::: obs-box
+This is an extension of just writing the conditional statement, so that there is a bespoke value if true or false. 
+:::
+
+
+## Example
+
+::: slide-header
+{dplyr}
+:::
+
+For instance: let's create a new column in a small dataframe of ages, indicating if a person is an adult or minor. 
+
+::: {.code-box-small style="width: 900px; font-size: 40px;"}
+```{r echo=T, eval=F}
+
+df_ages %>%
+  mutate(age_group = if_else(age >= 18, "Adult", "Minor"))
+```
+:::
+
+<br>
+
+::::::::: columns
+:::: {.column width="30%"}
+::: input-box
+```{r}
+
+df_ages <- data.frame(
+  id = 1:5,
+  age = c(1, 4, 19, 30, 14)
+)
+
+df_ages |> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 23) 
+
+```
+:::
+::::
+
+:::: {.column width="6%"}
+::: arrow-box
+&#8594;
+:::
+::::
+
+:::: {.column width="64%" .fragment}
+::: output-box
+```{r}
+df_ages %>%
+  mutate(age_group = if_else(age >= 18, "Adult", "Minor"))|> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 23) 
+
+```
+:::
+::::
+
+
+:::::::::
+
+
+## case_when()
+
+::: slide-header
+{dplyr}
+:::
+
+::: incremental
+- *Purpose*: Evaluates **multiple conditions** and returns values based on the first TRUE condition.
+- *Why*: Creates new labels or categories based on complex conditions.
+- *Example*: Classify several age-groups based on an age column. 
+- *How*:
+
+:::
+
+:::: {.code-box-small .fragment style="text-align: centre; width: 100%; font-size: 42px;"}
+
+```{r eval=F, echo=T}
+data %>% mutate(col1 = case_when(condition1 ~ value_if_true,
+                                 condition2 ~ value_if_true,
+                                 condition3 ~ value_if_true,
+                                 TRUE ~ value))   # Value if no condition is met
+```
+
+::::
+
+::: {.obs-box .fragment}
+⚠️ **NOTE!** This syntax uses a tilde (~), not only commas!
+:::
+
+## Example
+
+::: slide-header
+{dplyr}
+:::
+
+For instance: let's use the same small dataframe as before and create a column with **several** age groups. 
+
+::::::::: columns
+:::: {.column width="60%"}
+::: {.code-box-small style="font-size: 40px;"}
+```{r echo=T, eval=F}
+
+df_ages <- df_ages %>%
+  mutate(age_group = case_when(
+    age < 1 ~ "Infant",         
+    age >= 1 & age < 3 ~ "Toddler",
+    age >= 3 & age < 13 ~ "Child", 
+    age >= 13 & age < 18 ~ "Adolescent", 
+    age >= 18 ~ "Adult",
+    TRUE ~ NA_character_
+  )) 
+
+df_ages
+```
+:::
+::::
+
+:::: {.column width="3%"}
+::: arrow-box
+&#8594;
+:::
+::::
+
+:::: {.column width="37%" .fragment}
+::: output-box
+```{r}
+df_ages <- df_ages %>%
+  mutate(age_group = case_when(
+    age < 1 ~ "Infant",         
+    age >= 1 & age < 3 ~ "Toddler",
+    age >= 3 & age < 13 ~ "Child", 
+    age >= 13 & age < 18 ~ "Adolescent", 
+    age >= 18 ~ "Adult",
+    TRUE ~ NA_character_
+  )) 
+
+df_ages|> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 23) 
+
+```
+:::
+
+<br>
+<br>
+
+::: {.obs-box .fragment}
+⚠️ **NOTE**: This time we're assigning and printing df_ages as we'll use this new column again in a moment!
+:::
+
+
+::::
+
+:::::::::
+
+## Factors
+
+- A class of data for categorical values (e.g. age group, gender, case definitions)
+- This class allows R to recognize data as categories rather than text
+- Useful for ordering categories; R otherwise orders values alphabetically 
+- You can use the `factor()` function from baseR. 
+
+::: code-box
+```{r eval=F, echo=T}
+factor(x, levels= c(level1, level2, level3))
+```
+:::
+
+## Factors
+
+For example:
+
+::: slide-header
+{baseR}
+:::
+
+::::: columns
+
+:::: {.column width="35%"}
+
+::: {.code-box-small style="font-size: 38px;"}
+```{r, eval=F, echo=T}
+
+df_ages %>% 
+  count(age_group) 
+
+
+```
+:::
+
+::: arrow-box
+↓
+:::
+
+```{r}
+
+df_ages %>% 
+  count(age_group) |> 
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 23) 
+
+```
+::::
+
+
+:::: {.column width="65%"}
+
+::: {.code-box-small style="font-size: 38px;"}
+```{r, eval=F, echo=T}
+
+df_ages %>% 
+  mutate(age_group = factor(age_group, 
+                            levels = c("Infant", 
+                                       "Toddler", 
+                                       "Child", 
+                                       "Adolescent", 
+                                       "Adult"))) |> 
+  count(age_group)
+```
+:::
+
+::: arrow-box
+↓
+:::
+
+```{r}
+
+df_ages %>% 
+  mutate(age_group = factor(age_group, 
+                            levels = c("Infant", "Toddler", "Child",
+                                       "Adolescent", "Adult"))) |> 
+  count(age_group) %>%
+  gt() %>%  gt_theme_guardian() %>% 
+  tab_options(table.font.size = 23) 
+
+```
+::::
+:::::
+
+# Exercises
+
+## Scenario {.exercise-slide}
+
+::: incremental
+-   Point 1
+-   Point 2
+:::
+
+## Access the exercises {.exercise-slide}
+
+Instructions here
+
+# Recap
+
+## Your code
+
+Your code should now look like this!
+
+```{r eval=F, echo=T}
+
+# Intro course
+# Title of script: Cleaning and analysis of GI outbreak data
+# Date started: 5th June 2021
+# Name: Paula Blomquist
+
+# Load packages-----------------------------
+
+pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate)
+
+# Import data ------------------------------
+
+df_raw <- import(here("data/GIoutbreak_2021-06-05_linelist.csv"))
+lab_raw <- import(here("data/GIoutbreak_2021-06-05_labs.xlsx"))
+### CHANGE SO ITS MULTIPLE LAB FILES
+
+# Clean data ---------------------------
+
+df2 <- df_raw %>%
+  
+    # Clean column names
+    clean_names() %>%
+    rename(date_onset = symptoms_started) %>%
+  
+    # Change character class
+    mutate(admission = mdy(admission),
+           discovered = dmy(discovered),
+           found_on = mdy(found_on),
+           reported = ydm(reported),
+           told_on = mdy(told_on),
+           report  = mdy(report)) %>%
+  
+    # Clean column content  
+    mutate(region = str_to_title(region),
+           sex = str_to_title(sex), 
+           sex = case_match(sex, 
+                            c("F", "Fem", "Female") ~ "Female",
+                            c("M","Man", "Male") ~ "Male",
+                            .default = NA),
+           region = case_match(region,
+             c("Balara", "Balra") ~ "Balara",
+             c("Baudhimai") ~ "Baudhimai",
+             c("Durga Bhagwati") ~ "Durga Bhagwati",
+             c("Gaur", "Guar") ~ "Gaur",
+             c("Ishanath") ~ "Ishanath",
+             c("Paroha", "Parha") ~ "Paroha",
+             c("Rajdevi", "Rajdeve") ~ "Rajdevi",
+             c("Rajpur") ~ "Rajpur",
+             c("yemunamai") ~ "Yemunamai",
+             .default = NA_character_))  |> 
+  
+  # Deduplicate to one row per case - EDIT THIS??
+  distinct() %>%
+  
+  # Combine some columns
+  unite("date_of_birth", 
+          c("birthyear", "month_of_birth", "daybirth"), sep = "-") %>% 
+  mutate(date_of_birth = ymd(date_of_birth)) %>%
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) %>% 
+    select(-told_on, -reported, -discovered, -found_on, -report) %>%
+  
+  # Create columns labelling diarrhoea or dehydration
+  mutate(symptoms = str_to_lower(symptoms),
+         symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
+         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids")) %>%
+  
+  # Create case definition column
+  mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) 
+  
+
+
+
+```
+
