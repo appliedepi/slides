@@ -23,21 +23,6 @@ fig-align: center
 # Packages
 pacman::p_load(rio, here, janitor, dplyr, gtExtras, gt, tidyr, lubridate, stringr)
 
-# Load data as needed 
-df_raw <- import(here("intror/GIoutbreak_2021-06-05_linelist.csv"), na = "") 
-lab_raw <- import(here("intror/GIoutbreak_2021-06-05_labs.xlsx"))
-
-df_raw[df_raw == ""] <- NA
-
-# Create the sub versions needed (df = as clean as appropriate for this module, _demo = filtered to fewer rows when need to show on slides)
-
-df_raw_demo <- df_raw |> 
-  filter(row_number()<6)
-
-df <- df_raw %>% clean_names() |> rename(date_onset = symptoms_started)
-
-df_demo <- df_raw_demo %>% clean_names() |> rename(date_onset = symptoms_started)
-
 ```
 
 # Module 5: Part A
@@ -95,7 +80,7 @@ You have already learned about *{lubridate}* function to convert columns to date
 
 ::: {.code-box-small style="width: 700px; font-size: 40px;"}
 ```{r echo=T, eval=F}
-df_dates %>%
+df_dates |>
   mutate(onset_weeknum = week(onset_date))
 
 ```
@@ -114,7 +99,7 @@ df_dates <- data.frame(
                       "2021-07-20", "2021-09-05", "2021-11-12")))
 
 df_dates |> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 18) 
 
 
@@ -133,7 +118,7 @@ df_dates |>
 ```{r}
 df_dates |> 
  mutate(onset_weeknum = week(onset_date)) |> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 18) 
 ```
 :::
@@ -151,7 +136,7 @@ df_dates |>
 
 ::: {.code-box-small style="width: 700px; font-size: 40px;"}
 ```{r echo=T, eval=F}
-df_dates %>%
+df_dates |>
   mutate(onset_weeknum = week(onset_date),
          onset_week = floor_date(onset_date, "week"))
 
@@ -166,7 +151,7 @@ df_dates %>%
 ```{r}
 
 df_dates |> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 18) 
 
 
@@ -186,7 +171,7 @@ df_dates |>
 df_dates |> 
   mutate(onset_weeknum = week(onset_date),
          onset_week = floor_date(onset_date, "week")) |> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 18) 
 ```
 :::
@@ -204,7 +189,7 @@ df_dates |>
 
 ::: {.code-box-small style="width: 900px; font-size: 40px;"}
 ```{r echo=T, eval=F}
-df_dates %>%
+df_dates |>
   mutate(onset_weeknum = week(onset_date),
          onset_week = floor_date(onset_date, "week", week_start=1))
 
@@ -219,7 +204,7 @@ df_dates %>%
 ```{r}
 
 df_dates |> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 18) 
 
 
@@ -239,7 +224,7 @@ df_dates |>
 df_dates |> 
   mutate(onset_weeknum = week(onset_date),
          onset_week = floor_date(onset_date, "week", week_start=1)) |> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 18) 
 ```
 :::
@@ -264,10 +249,14 @@ You encountered {stringr} previously for changing the capitalisation of strings.
 {stringr}
 :::
 
+::: incremental
+
 - *Purpose*: Detects if a string contains a specific pattern and returns `TRUE`/`FALSE` accordingly
 - *Why*: Helps filter or flag observations based on text patterns
 - *Example*: You want to search descriptions of symptoms for specific symptoms
 - *How*: 
+
+:::
 
 :::::: columns
 
@@ -284,7 +273,7 @@ str_detect(x, "pattern")
 
 **Or label rows containing a value:**
 ```{r eval=F, echo=T}
-data %>% mutate(col1 = str_detect(col2))
+data |> mutate(col1 = str_detect(col2))
 ```
 
 ::::
@@ -303,7 +292,7 @@ For instance: create a `TRUE`/`FALSE` column indicating whether 'fever' is prese
 ::: {.code-box-small style="width: 900px; font-size: 40px;"}
 ```{r echo=T, eval=F}
 
-df_symptoms %>%
+df_symptoms |>
   mutate(fever = str_detect(symptoms, "fever"))
 ```
 :::
@@ -322,7 +311,7 @@ df_symptoms <- data.frame(
 )
 
 df_symptoms |> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 18) 
 
 ```
@@ -340,7 +329,7 @@ df_symptoms |>
 ```{r}
 df_symptoms |> 
   mutate(fever = str_detect(symptoms, "fever")) |> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 18) 
 ```
 :::
@@ -359,7 +348,7 @@ You can also search for multiple patterns within the function, separated with |.
 ::: {.code-box-small style="width: 900px; font-size: 40px;"}
 ```{r echo=T, eval=F}
 
-df_symptoms %>%
+df_symptoms |>
   mutate(fever = str_detect(symptoms, "fever|pyrexia|high temperature"))
 ```
 :::
@@ -378,7 +367,7 @@ df_symptoms <- data.frame(
 )
 
 df_symptoms |> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 18) 
 
 ```
@@ -396,7 +385,7 @@ df_symptoms |>
 ```{r}
 df_symptoms |> 
   mutate(fever = str_detect(symptoms, "fever|pyrexia|high temperature")) |> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 18) 
 ```
 :::
@@ -421,7 +410,7 @@ df_symptoms |>
 :::: {.code-box-small .fragment style="text-align: centre; width: 60%; font-size: 42px;"}
 
 ```{r eval=F, echo=T}
-data %>% mutate(col1 = if_else(condition, 
+data |> mutate(col1 = if_else(condition, 
                                value_if_true,
                                value_if_false))
 ```
@@ -444,7 +433,7 @@ For instance: let's create a new column in a small dataframe of ages, indicating
 ::: {.code-box-small style="width: 900px; font-size: 40px;"}
 ```{r echo=T, eval=F}
 
-df_ages %>%
+df_ages |>
   mutate(age_group = if_else(age >= 18, "Adult", "Minor"))
 ```
 :::
@@ -462,7 +451,7 @@ df_ages <- data.frame(
 )
 
 df_ages |> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 23) 
 
 ```
@@ -478,9 +467,9 @@ df_ages |>
 :::: {.column width="64%" .fragment}
 ::: output-box
 ```{r}
-df_ages %>%
+df_ages |>
   mutate(age_group = if_else(age >= 18, "Adult", "Minor"))|> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 23) 
 
 ```
@@ -508,7 +497,7 @@ df_ages %>%
 :::: {.code-box-small .fragment style="text-align: centre; width: 100%; font-size: 42px;"}
 
 ```{r eval=F, echo=T}
-data %>% mutate(col1 = case_when(condition1 ~ value_if_true,
+data |> mutate(col1 = case_when(condition1 ~ value_if_true,
                                  condition2 ~ value_if_true,
                                  condition3 ~ value_if_true,
                                  TRUE ~ value))   # Value if no condition is met
@@ -533,7 +522,7 @@ For instance: let's use the same small dataframe as before and create a column w
 ::: {.code-box-small style="font-size: 40px;"}
 ```{r echo=T, eval=F}
 
-df_ages <- df_ages %>%
+df_ages <- df_ages |>
   mutate(age_group = case_when(
     age < 1 ~ "Infant",         
     age >= 1 & age < 3 ~ "Toddler",
@@ -557,7 +546,7 @@ df_ages
 :::: {.column width="37%" .fragment}
 ::: output-box
 ```{r}
-df_ages <- df_ages %>%
+df_ages <- df_ages |>
   mutate(age_group = case_when(
     age < 1 ~ "Infant",         
     age >= 1 & age < 3 ~ "Toddler",
@@ -568,7 +557,7 @@ df_ages <- df_ages %>%
   )) 
 
 df_ages|> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 23) 
 
 ```
@@ -604,7 +593,7 @@ factor(x, levels= c(level1, level2, level3))
 For example:
 
 ::: slide-header
-{baseR}
+{base}
 :::
 
 ::::: columns
@@ -614,7 +603,7 @@ For example:
 ::: {.code-box-small style="font-size: 38px;"}
 ```{r, eval=F, echo=T}
 
-df_ages %>% 
+df_ages |> 
   count(age_group) 
 
 
@@ -627,9 +616,9 @@ df_ages %>%
 
 ```{r}
 
-df_ages %>% 
+df_ages |> 
   count(age_group) |> 
-  gt() %>%  gt_theme_guardian() %>% 
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 23) 
 
 ```
@@ -641,7 +630,7 @@ df_ages %>%
 ::: {.code-box-small style="font-size: 38px;"}
 ```{r, eval=F, echo=T}
 
-df_ages %>% 
+df_ages |> 
   mutate(age_group = factor(age_group, 
                             levels = c("Infant", 
                                        "Toddler", 
@@ -658,12 +647,12 @@ df_ages %>%
 
 ```{r}
 
-df_ages %>% 
+df_ages |> 
   mutate(age_group = factor(age_group, 
                             levels = c("Infant", "Toddler", "Child",
                                        "Adolescent", "Adult"))) |> 
-  count(age_group) %>%
-  gt() %>%  gt_theme_guardian() %>% 
+  count(age_group) |>
+  gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 23) 
 
 ```
@@ -698,21 +687,25 @@ Your code should now look like this!
 
 # Load packages-----------------------------
 
-pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate)
+pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, tidyr)
 
 # Import data ------------------------------
 
-df_raw <- import(here("data/GIoutbreak_2021-06-05_linelist.csv"))
-lab_raw <- import(here("data/GIoutbreak_2021-06-05_labs.xlsx"))
-### CHANGE SO ITS MULTIPLE LAB FILES
+# Linelist
+df_raw <- import(here("data/gi_2021-07-07_linelist.xlsx"))
+
+# Labs
+lab_luh <- import(here("data/gi_2021-07-07_labLUH.csv"))
+lab_nvrl <- import(here("data/gi_2021-07-07_labLUH.csv"))
+lab_ghc <- import(here("data/gi_2021-07-07_labLUH.csv"))
 
 # Clean data ---------------------------
 
-df2 <- df_raw %>%
+df <- df_raw |>
   
     # Clean column names
-    clean_names() %>%
-    rename(date_onset = symptoms_started) %>%
+    clean_names() |>
+    rename(date_onset = symptoms_started) |>
   
     # Change character class
     mutate(admission = mdy(admission),
@@ -720,7 +713,7 @@ df2 <- df_raw %>%
            found_on = mdy(found_on),
            reported = ydm(reported),
            told_on = mdy(told_on),
-           report  = mdy(report)) %>%
+           report  = mdy(report)) |>
   
     # Clean column content  
     mutate(region = str_to_title(region),
@@ -730,37 +723,46 @@ df2 <- df_raw %>%
                             c("M","Man", "Male") ~ "Male",
                             .default = NA),
            region = case_match(region,
-             c("Balara", "Balra") ~ "Balara",
-             c("Baudhimai") ~ "Baudhimai",
-             c("Durga Bhagwati") ~ "Durga Bhagwati",
-             c("Gaur", "Guar") ~ "Gaur",
-             c("Ishanath") ~ "Ishanath",
-             c("Paroha", "Parha") ~ "Paroha",
-             c("Rajdevi", "Rajdeve") ~ "Rajdevi",
-             c("Rajpur") ~ "Rajpur",
-             c("yemunamai") ~ "Yemunamai",
+             c("Bexar") ~ "Bexar",
+             c("Keda", "Kedah") ~ "Keda",
+             c("Liora", "Lioraah") ~ "Liora",
+             c("Nellus", "Nelos") ~ "Nelos",
+             c("New Ardin", "New Arden") ~ "New Arden",
+             c("Sorel", "Sorell") ~ "Sorel",
+             c("Taris") ~ "Taris",
+             c("Varek") ~ "Varek",
+             c("West Morin") ~ "West Morin",
              .default = NA_character_))  |> 
   
   # Deduplicate to one row per case - EDIT THIS??
-  distinct() %>%
+  distinct() |>
   
   # Combine some columns
   unite("date_of_birth", 
-          c("birthyear", "month_of_birth", "daybirth"), sep = "-") %>% 
-  mutate(date_of_birth = ymd(date_of_birth)) %>%
-  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) %>% 
-    select(-told_on, -reported, -discovered, -found_on, -report) %>%
+          c("birthyear", "month_of_birth", "daybirth"), sep = "-") |> 
+  mutate(date_of_birth = ymd(date_of_birth)) |>
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |> 
+    select(-told_on, -reported, -discovered, -found_on, -report) |>
   
   # Create columns labelling diarrhoea or dehydration
   mutate(symptoms = str_to_lower(symptoms),
          symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
-         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids")) %>%
+         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids")) |>
   
   # Create case definition column
   mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
                               symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
-                              TRUE ~ "Unclear")) 
+                              TRUE ~ "Unclear")) |> 
   
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable"))) |> 
+  
+  # Create week column for onset date
+ # mutate(date_onset_week = floor_date(date_onset, "week")) |> 
+  
+  # Create week column for report date
+  mutate(date_report_week = floor_date(date_report, "week")) 
+  
+
 
 
 

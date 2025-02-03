@@ -21,10 +21,7 @@ fig-align: center
 ```{r}
 pacman::p_load(rio, here, janitor, dplyr, gtExtras, gt, tidyr, stringr, lubridate)
 
-df_raw <- import(here("intror/GIoutbreak_2021-06-05_linelist.csv"), na = "") 
-lab_raw <- import(here("intror/GIoutbreak_2021-06-05_labs.xlsx"))
-
-df_raw[df_raw == ""] <- NA
+df_raw <- import(here("intror/gi_2021-07-07_linelist.xlsx"), na = "") 
 
 df_raw_demo <- df_raw |> 
   filter(row_number()<6)
@@ -213,9 +210,13 @@ df_demo %>% select(admission) |>
   gt::tab_options(table.font.size = 19) 
 ```
 :::
-:::
+
+::: {.obs-box .fragment}
+⚠️ **NOTE**: Any values that R cannot recognise as a date become missing values (`NA`)
 :::
 
+:::
+:::
 
 
 ## Example
@@ -635,9 +636,13 @@ pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate)
 
 # Import data ------------------------------
 
-df_raw <- import(here("data/GIoutbreak_2021-06-05_linelist.csv"))
-lab_raw <- import(here("data/GIoutbreak_2021-06-05_labs.xlsx"))
-### CHANGE SO ITS MULTIPLE LAB FILES
+# Linelist
+df_raw <- import(here("data/gi_2021-07-07_linelist.xlsx"))
+
+# Labs
+lab_luh <- import(here("data/gi_2021-07-07_labLUH.csv"))
+lab_nvrl <- import(here("data/gi_2021-07-07_labLUH.csv"))
+lab_ghc <- import(here("data/gi_2021-07-07_labLUH.csv"))
 
 # Clean data ---------------------------
 
@@ -663,15 +668,15 @@ df <- df_raw %>%
                             c("M","Man", "Male") ~ "Male",
                             .default = NA),
            region = case_match(region,
-             c("Balara", "Balra") ~ "Balara",
-             c("Baudhimai") ~ "Baudhimai",
-             c("Durga Bhagwati") ~ "Durga Bhagwati",
-             c("Gaur", "Guar") ~ "Gaur",
-             c("Ishanath") ~ "Ishanath",
-             c("Paroha", "Parha") ~ "Paroha",
-             c("Rajdevi", "Rajdeve") ~ "Rajdevi",
-             c("Rajpur") ~ "Rajpur",
-             c("yemunamai") ~ "Yemunamai",
+             c("Bexar") ~ "Bexar",
+             c("Keda", "Kedah") ~ "Keda",
+             c("Liora", "Lioraah") ~ "Liora",
+             c("Nellus", "Nelos") ~ "Nelos",
+             c("New Ardin", "New Arden") ~ "New Arden",
+             c("Sorel", "Sorell") ~ "Sorel",
+             c("Taris") ~ "Taris",
+             c("Varek") ~ "Varek",
+             c("West Morin") ~ "West Morin",
              .default = NA_character_))  # Handle unexpected cases
 
 

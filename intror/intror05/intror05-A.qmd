@@ -24,19 +24,15 @@ fig-align: center
 pacman::p_load(rio, here, janitor, dplyr, gtExtras, gt, tidyr, lubridate, stringr)
 
 # Load data as needed 
-df_raw <- import(here("intror/GIoutbreak_2021-06-05_linelist.csv"), na = "") 
-lab_raw <- import(here("intror/GIoutbreak_2021-06-05_labs.xlsx"))
-
-df_raw[df_raw == ""] <- NA
+df_raw <- import(here("intror/gi_2021-07-07_linelist.xlsx")) 
 
 # Clean 
 
-
-df <- df_raw %>%
+df <- df_raw |>
   
     # Clean column names
-    clean_names() %>%
-    rename(date_onset = symptoms_started) %>% 
+    clean_names() |>
+    rename(date_onset = symptoms_started) |> 
   
     # Change character class
     mutate(admission = mdy(admission),
@@ -44,7 +40,7 @@ df <- df_raw %>%
            found_on = mdy(found_on),
            reported = ydm(reported),
            told_on = mdy(told_on),
-           report  = mdy(report)) %>% 
+           report  = mdy(report)) |> 
   
     # Clean column content  
     mutate(region = str_to_title(region),
@@ -54,33 +50,33 @@ df <- df_raw %>%
                             c("M","Man", "Male") ~ "Male",
                             .default = NA),
            region = case_match(region,
-             c("Balara", "Balra") ~ "Balara",
-             c("Baudhimai") ~ "Baudhimai",
-             c("Durga Bhagwati") ~ "Durga Bhagwati",
-             c("Gaur", "Guar") ~ "Gaur",
-             c("Ishanath") ~ "Ishanath",
-             c("Paroha", "Parha") ~ "Paroha",
-             c("Rajdevi", "Rajdeve") ~ "Rajdevi",
-             c("Rajpur") ~ "Rajpur",
-             c("yemunamai") ~ "Yemunamai",
+             c("Bexar") ~ "Bexar",
+             c("Keda", "Kedah") ~ "Keda",
+             c("Liora", "Lioraah") ~ "Liora",
+             c("Nellus", "Nelos") ~ "Nelos",
+             c("New Ardin", "New Arden") ~ "New Arden",
+             c("Sorel", "Sorell") ~ "Sorel",
+             c("Taris") ~ "Taris",
+             c("Varek") ~ "Varek",
+             c("West Morin") ~ "West Morin",
              .default = NA_character_))  # Handle unexpected cases
 
 df_end <- df |>  
-  distinct() %>%
+  distinct() |>
   
   # Combine some columns
   unite("date_of_birth", 
-          c("birthyear", "month_of_birth", "daybirth"), sep = "-") %>% 
-  mutate(date_of_birth = ymd(date_of_birth)) %>%
-  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) %>% 
+          c("birthyear", "month_of_birth", "daybirth"), sep = "-") |> 
+  mutate(date_of_birth = ymd(date_of_birth)) |>
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |> 
     select(-told_on, -reported, -discovered, -found_on, -report) 
 
 # Create the sub versions needed (df = as clean as appropriate for this module, _demo = filtered to fewer rows when need to show on slides)
 
-df_raw_demo <- df_raw %>% 
+df_raw_demo <- df_raw |> 
   filter(row_number()<6)
 
-df_demo <- df %>% 
+df_demo <- df |> 
   filter(row_number()<6)
 
 ```
@@ -124,11 +120,11 @@ lab_raw <- import(here("data/GIoutbreak_2021-06-05_labs.xlsx"))
 
 # Clean data ---------------------------
 
-df <- df_raw %>%
+df <- df_raw |>
   
     # Clean column names
-    clean_names() %>%
-    rename(date_onset = symptoms_started) %>%
+    clean_names() |>
+    rename(date_onset = symptoms_started) |>
   
     # Change character class
     mutate(admission = mdy(admission),
@@ -136,7 +132,7 @@ df <- df_raw %>%
            found_on = mdy(found_on),
            reported = ydm(reported),
            told_on = mdy(told_on),
-           report  = mdy(report)) %>%
+           report  = mdy(report)) |>
   
     # Clean column content  
     mutate(region = str_to_title(region),
@@ -146,15 +142,15 @@ df <- df_raw %>%
                             c("M","Man", "Male") ~ "Male",
                             .default = NA),
            region = case_match(region,
-             c("Balara", "Balra") ~ "Balara",
-             c("Baudhimai") ~ "Baudhimai",
-             c("Durga Bhagwati") ~ "Durga Bhagwati",
-             c("Gaur", "Guar") ~ "Gaur",
-             c("Ishanath") ~ "Ishanath",
-             c("Paroha", "Parha") ~ "Paroha",
-             c("Rajdevi", "Rajdeve") ~ "Rajdevi",
-             c("Rajpur") ~ "Rajpur",
-             c("yemunamai") ~ "Yemunamai",
+             c("Bexar") ~ "Bexar",
+             c("Keda", "Kedah") ~ "Keda",
+             c("Liora", "Lioraah") ~ "Liora",
+             c("Nellus", "Nelos") ~ "Nelos",
+             c("New Ardin", "New Arden") ~ "New Arden",
+             c("Sorel", "Sorell") ~ "Sorel",
+             c("Taris") ~ "Taris",
+             c("Varek") ~ "Varek",
+             c("West Morin") ~ "West Morin",
              .default = NA_character_))  # Handle unexpected cases
 
 
@@ -204,13 +200,13 @@ glimpse(df)
 To remove **exact duplicates**:
 
 ::: {.code-box-small style="width: 900px; font-size: 30px;"}
-`data %>% distinct()`
+`data |> distinct()`
 :::
 <br>
 To remove **partial duplicates** where rows have matching values in only col1 and col2. Add .keep_all to retain all the columns, not just those specified:
 
 ::: {.code-box-small style="width: 900px; font-size: 30px;"}
-`data %>% distinct(col1, col2, .keep_all = TRUE)`
+`data |> distinct(col1, col2, .keep_all = TRUE)`
 :::
 
 ::: {.obs-box}
@@ -227,7 +223,7 @@ Deduplication of exact row matches:
 
 ::: {.code-box-small style="width: 700px; font-size: 40px;"}
 ```{r echo=T, eval=F}
-example %>% distinct()
+example |> distinct()
 ```
 :::
 
@@ -245,8 +241,8 @@ example <- data.frame(
   report_date = as.Date(c("2023-01-21", "2023-01-16", "2023-01-20", "2023-01-18", "2023-01-19", "2023-01-20"))
 )
 
-example %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+example |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 19) 
 
 ```
@@ -264,8 +260,8 @@ example %>%
 ::: output-box
 Output
 ```{r}
-example %>% distinct() %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+example |> distinct() |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 19) 
 ```
 :::
@@ -283,7 +279,7 @@ Deduplication of rows with the same name and birthday:
 
 ::: {.code-box-small style="width: 900px; font-size: 40px;"}
 ```{r echo=T, eval=F}
-example %>% distinct(name, birthday, .keep_all = T)
+example |> distinct(name, birthday, .keep_all = T)
 ```
 :::
 
@@ -294,8 +290,8 @@ example %>% distinct(name, birthday, .keep_all = T)
 ::: input-box
 Input
 ```{r}
-example %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+example |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 19) 
 
 ```
@@ -313,8 +309,8 @@ example %>%
 ::: output-box
 Output
 ```{r}
-example %>% distinct(name, birthday, .keep_all = T) %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+example |> distinct(name, birthday, .keep_all = T) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 19) 
 ```
 :::
@@ -332,8 +328,8 @@ Deduplication of rows with the same name and birthday, but keeping the first tes
 
 ::: {.code-box-small style="width: 900px; font-size: 40px;"}
 ```{r echo=T, eval=F}
-example %>%
-  arrange(report_date) %>% 
+example |>
+  arrange(report_date) |> 
   distinct(name, birthday, .keep_all = T)
 ```
 :::
@@ -345,8 +341,8 @@ example %>%
 ::: input-box
 Input
 ```{r}
-example %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+example |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 19) 
 
 ```
@@ -364,9 +360,9 @@ example %>%
 ::: output-box
 Output
 ```{r}
-example %>%   arrange(report_date) %>% 
-  distinct(name, birthday, .keep_all = T) %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+example |>   arrange(report_date) |> 
+  distinct(name, birthday, .keep_all = T) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 19) 
 ```
 :::
@@ -390,7 +386,7 @@ example %>%   arrange(report_date) %>%
 
 ::: {.code-box style="width: 900px"}
 ```{r eval=F, echo=T}
-data %>% unite(new_column, c(col1, col2, ...), sep = "separator")
+data |> unite(new_column, c(col1, col2, ...), sep = "separator")
 ```
 :::
 
@@ -406,7 +402,7 @@ data %>% unite(new_column, c(col1, col2, ...), sep = "separator")
 
 ::: {.code-box-small style="width: 850px; font-size: 35px;"}
 ```{r eval=F, echo=T}
-df <- df %>%
+df <- df |>
   unite("date_of_birth", 
         c("birthyear", "month_of_birth", "daybirth"), sep = "-")
 ```
@@ -418,8 +414,8 @@ df <- df %>%
 ::: {.column width="47%"}
 ::: input-box
 ```{r}
-df_demo %>% clean_names() %>% select(id, birthyear, month_of_birth, daybirth) %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+df_demo |> clean_names() |> select(id, birthyear, month_of_birth, daybirth) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 20) 
 ```
 :::
@@ -435,11 +431,11 @@ df_demo %>% clean_names() %>% select(id, birthyear, month_of_birth, daybirth) %>
 ::: output-box
 ```{r}
 
-df_demo %>% clean_names() %>% select(id, birthyear, month_of_birth, daybirth) %>% 
+df_demo |> clean_names() |> select(id, birthyear, month_of_birth, daybirth) |> 
   unite("date_of_birth", 
         c("birthyear", "month_of_birth", "daybirth"), 
-        sep = "-") %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+        sep = "-") |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 20) 
 
 ```
@@ -460,9 +456,9 @@ Now how do we make date_of_birth a date?
 
 ::: {.code-box-small style="width: 850px; font-size: 35px;"}
 ```{r eval=F, echo=T}
-df <- df %>%
+df <- df |>
   unite("date_of_birth", 
-        c("birthyear", "month_of_birth", "daybirth"), sep = "-") %>%
+        c("birthyear", "month_of_birth", "daybirth"), sep = "-") |>
   mutate(date_of_birth = ymd(date_of_birth))
 ```
 :::
@@ -473,8 +469,8 @@ df <- df %>%
 ::: {.column width="47%"}
 ::: input-box
 ```{r}
-df_demo %>% clean_names() %>% select(id, birthyear, month_of_birth, daybirth) %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+df_demo |> clean_names() |> select(id, birthyear, month_of_birth, daybirth) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 20) 
 ```
 :::
@@ -490,12 +486,12 @@ df_demo %>% clean_names() %>% select(id, birthyear, month_of_birth, daybirth) %>
 ::: output-box
 ```{r}
 
-df_demo %>% clean_names() %>% select(id, birthyear, month_of_birth, daybirth) %>% 
+df_demo |> clean_names() |> select(id, birthyear, month_of_birth, daybirth) |> 
   unite("date_of_birth", 
         c("birthyear", "month_of_birth", "daybirth"), 
-        sep = "-") %>% 
-  mutate(date_of_birth = ymd(date_of_birth)) %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+        sep = "-") |> 
+  mutate(date_of_birth = ymd(date_of_birth)) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 20) 
 
 ```
@@ -517,7 +513,7 @@ df_demo %>% clean_names() %>% select(id, birthyear, month_of_birth, daybirth) %>
 
 ::: {.code-box-small .fragment style="width: 900px; font-size: 45px;"}
 ```{r eval=F, echo=T}
-data %>% mutate(new_column = coalesce(col1, col2, col3, ...))
+data |> mutate(new_column = coalesce(col1, col2, col3, ...))
 ```
 :::
 
@@ -531,7 +527,7 @@ data %>% mutate(new_column = coalesce(col1, col2, col3, ...))
 
 ::: {.code-box-small style="font-size: 38px;"}
 ```{r eval=F, echo=T}
-df <- df %>% 
+df <- df |> 
   mutate(date_report = coalesce(told_on, reported, discovered, found_on, report))
 ```
 :::
@@ -542,12 +538,12 @@ df <- df %>%
 ::: {.column width="47%"}
 ::: input-box
 ```{r}
-df_demo %>% clean_names() %>% select(id, told_on,
+df_demo |> clean_names() |> select(id, told_on,
         reported,
         discovered,
         found_on,
-        report) %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+        report) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 18) 
 ```
 :::
@@ -563,11 +559,11 @@ df_demo %>% clean_names() %>% select(id, told_on,
 ::: output-box
 ```{r}
 
-df_demo %>% clean_names() %>% select(id, told_on,
+df_demo |> clean_names() |> select(id, told_on,
         reported,
         discovered,
         found_on,
-        report) %>% 
+        report) |> 
   mutate(
     date_report = 
       coalesce(
@@ -575,8 +571,8 @@ df_demo %>% clean_names() %>% select(id, told_on,
         reported,
         discovered,
         found_on,
-        report)) %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+        report)) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 18) 
 
 ```
@@ -594,8 +590,8 @@ df_demo %>% clean_names() %>% select(id, told_on,
 
 ::: {.code-box-small style="font-size: 38px;"}
 ```{r eval=F, echo=T}
-df <- df %>%
-  mutate(date_report = coalesce(told_on, reported, discovered, found_on, report)) %>%
+df <- df |>
+  mutate(date_report = coalesce(told_on, reported, discovered, found_on, report)) |>
   select(-told_on, -reported, -discovered, -found_on, -report)
 ```
 :::
@@ -606,12 +602,12 @@ df <- df %>%
 ::: {.column width="47%"}
 ::: input-box
 ```{r}
-df_demo %>% select(id, told_on,
+df_demo |> select(id, told_on,
         reported,
         discovered,
         found_on,
-        report) %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+        report) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 18) 
 ```
 :::
@@ -627,11 +623,11 @@ df_demo %>% select(id, told_on,
 ::: output-box
 ```{r}
 
-df_demo %>% select(id, told_on,
+df_demo |> select(id, told_on,
         reported,
         discovered,
         found_on,
-        report) %>% 
+        report) |> 
   mutate(
     date_report = 
       coalesce(
@@ -639,9 +635,9 @@ df_demo %>% select(id, told_on,
         reported,
         discovered,
         found_on,
-        report)) %>% 
-  select(-told_on, -reported, -discovered, -found_on, -report) %>% 
-  gt::gt() %>%  gtExtras::gt_theme_guardian() %>% 
+        report)) |> 
+  select(-told_on, -reported, -discovered, -found_on, -report) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
   gt::tab_options(table.font.size = 18) 
 
 ```
@@ -689,17 +685,21 @@ pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate)
 
 # Import data ------------------------------
 
-df_raw <- import(here("data/GIoutbreak_2021-06-05_linelist.csv"))
-lab_raw <- import(here("data/GIoutbreak_2021-06-05_labs.xlsx"))
-### CHANGE SO ITS MULTIPLE LAB FILES
+# Linelist
+df_raw <- import(here("data/gi_2021-07-07_linelist.xlsx"))
+
+# Labs
+lab_luh <- import(here("data/gi_2021-07-07_labLUH.csv"))
+lab_nvrl <- import(here("data/gi_2021-07-07_labLUH.csv"))
+lab_ghc <- import(here("data/gi_2021-07-07_labLUH.csv"))
 
 # Clean data ---------------------------
 
-df <- df_raw %>%
+df <- df_raw |>
   
     # Clean column names
-    clean_names() %>%
-    rename(date_onset = symptoms_started) %>%
+    clean_names() |>
+    rename(date_onset = symptoms_started) |>
   
     # Change character class
     mutate(admission = mdy(admission),
@@ -707,7 +707,7 @@ df <- df_raw %>%
            found_on = mdy(found_on),
            reported = ydm(reported),
            told_on = mdy(told_on),
-           report  = mdy(report)) %>%
+           report  = mdy(report)) |>
   
     # Clean column content  
     mutate(region = str_to_title(region),
@@ -717,25 +717,25 @@ df <- df_raw %>%
                             c("M","Man", "Male") ~ "Male",
                             .default = NA),
            region = case_match(region,
-             c("Balara", "Balra") ~ "Balara",
-             c("Baudhimai") ~ "Baudhimai",
-             c("Durga Bhagwati") ~ "Durga Bhagwati",
-             c("Gaur", "Guar") ~ "Gaur",
-             c("Ishanath") ~ "Ishanath",
-             c("Paroha", "Parha") ~ "Paroha",
-             c("Rajdevi", "Rajdeve") ~ "Rajdevi",
-             c("Rajpur") ~ "Rajpur",
-             c("yemunamai") ~ "Yemunamai",
+             c("Bexar") ~ "Bexar",
+             c("Keda", "Kedah") ~ "Keda",
+             c("Liora", "Lioraah") ~ "Liora",
+             c("Nellus", "Nelos") ~ "Nelos",
+             c("New Ardin", "New Arden") ~ "New Arden",
+             c("Sorel", "Sorell") ~ "Sorel",
+             c("Taris") ~ "Taris",
+             c("Varek") ~ "Varek",
+             c("West Morin") ~ "West Morin",
              .default = NA_character_))  |> 
   
   # Deduplicate to one row per case - EDIT THIS??
-  distinct() %>%
+  distinct() |>
   
   # Combine some columns
   unite("date_of_birth", 
-          c("birthyear", "month_of_birth", "daybirth"), sep = "-") %>% 
-  mutate(date_of_birth = ymd(date_of_birth)) %>%
-  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) %>% 
+          c("birthyear", "month_of_birth", "daybirth"), sep = "-") |> 
+  mutate(date_of_birth = ymd(date_of_birth)) |>
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |> 
     select(-told_on, -reported, -discovered, -found_on, -report) 
 
 
