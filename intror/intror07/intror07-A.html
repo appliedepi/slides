@@ -405,38 +405,84 @@
 <h1>Module 7: Part A</h1>
 
 </section>
-<section id="learning-objectives" class="slide level2">
-<h2>Learning objectives</h2>
+<section id="module-7-learning-objectives" class="slide level2">
+<h2>Module 7 learning objectives</h2>
+<p>In Part A you will:</p>
+<ul>
+<li>Learn how to append data with <code>bind_rows()</code></li>
+<li>Learn how to conduct data linkage with <code>join_xxx()</code> functions</li>
+</ul>
+</section>
+<section id="in-part-b-you-will" class="slide level2">
+<h2>In Part B you will:</h2>
 </section></section>
+<section>
 <section id="recap" class="title-slide slide level1 center">
 <h1>Recap</h1>
 
 </section>
-
-<section id="bringing-data-together" class="title-slide slide level1 center">
-<h1>Bringing data together</h1>
-<p><em>Brainstorm!</em></p>
-<p>Why do we bring different datasets together?</p>
+<section id="recap-1" class="slide level2">
+<h2>Recap</h2>
+<p>In previous data cleaning modules, you learned how to:</p>
 <div>
 <ul>
-<li class="fragment">Combining data submissions from different sources into one dataframe:
-<ul>
-<li class="fragment">E.g. different clinic sites submitting clinical datasets</li>
-<li class="fragment">Or different labs submitting test results</li>
-</ul></li>
-<li class="fragment">Joining different types of data for a more complete epidemiological picture and wider analysis
-<ul>
-<li class="fragment">E.g. joining survey data and lab result data for a case-control study</li>
-</ul></li>
+<li class="fragment"><code>select()</code> columns and <code>filter()</code> rows</li>
+<li class="fragment">Combine columns with <code>glue()</code> and split columns with <code>XX</code></li>
+<li class="fragment">Standardize capitalisation with <code>str_to_xxx()</code> functions and clean contents with <code>case_match()</code></li>
+<li class="fragment">Change column class, including with {lubridate} functions and with factor()</li>
+<li class="fragment"><code>mutate()</code> new columns, including with logic e.g.&nbsp;<code>if_else()</code> and <code>case_when()</code> and more {lubridate} functions</li>
 </ul>
 </div>
+<div class="fragment" style="background-color: lightblue; padding: 1px; border-radius: 5px; text-align: center;">
+<p>Great! Your dataframes will need to be clean (especially identifiers and column names) to effectively combine them!</p>
+</div>
 </section>
-
-<section id="appending-and-joining" class="title-slide slide level1 center">
-<h1>Appending and joining</h1>
+<section id="scenario" class="slide level2 exercise-slide">
+<h2>Scenario</h2>
+<div>
+<ul>
+<li class="fragment">You loaded your lab data previously, but haven’t done anything with it yet!</li>
+<li class="fragment">Now it’s time to join your lab data so you can use it in your analysis.</li>
+</ul>
+</div>
+</section></section>
+<section>
+<section id="combining-data-together" class="title-slide slide level1 center">
+<h1>Combining data together</h1>
 
 </section>
+<section id="brainstorm" class="slide level2">
+<h2>Brainstorm!</h2>
+<p>What are examples of combining datasets together in epidemiology?</p>
+<div class="columns">
+<div class="column" style="width:70%;">
+<div>
+<p><br></p>
+<ul>
+<li class="fragment"><p>To combine cholera PCR results from different labs</p></li>
+<li class="fragment"><p>To collate surveillance data from different sites <br> <br><br></p></li>
+<li class="fragment"><p>To link survey and lab data for a case-control study</p></li>
+<li class="fragment"><p>To merge different surveillance datasets for a more comprehensive dataset</p></li>
+</ul>
+</div>
+</div><div class="column fragment" style="width:30%;">
+<p><br></p>
+<div style="background-color: lightblue; padding: 1px; border-radius: 5px; text-align: center;">
+<p>These are examples of <em>appending data</em></p>
+</div>
+<p><br><br></p>
+<div style="background-color: lightblue; padding: 1px; border-radius: 5px; text-align: center;">
+<p>These are examples of <em>joining data</em></p>
+</div>
+</div></div>
+</section>
+<section id="appending-vs-joining" class="slide level2">
+<h2>Appending vs joining</h2>
 
+<img data-src="images/define.png" style="width:50.0%" class="r-stretch"><div class="obs-box fragment">
+<p>💡 <strong>NOTE</strong> Joining is also referred to as linking, merging, matching…</p>
+</div>
+</section></section>
 <section>
 <section id="appending" class="title-slide slide level1 center">
 <h1>Appending</h1>
@@ -447,15 +493,17 @@
 <div class="slide-header">
 <p>{dplyr}</p>
 </div>
+<div>
 <ul>
-<li><em>Purpose</em>: Stack data frames on top of each other (row-wise).</li>
-<li><em>Why</em>: To combine subsets of a wider dataframe together and enable more complete analysis</li>
-<li><em>Example</em>: Combine dataframes with test results from different labs testing in the same outbreak</li>
-<li><em>How</em>:</li>
+<li class="fragment"><em>Purpose</em>: Stack data frames on top of each other (row-wise).</li>
+<li class="fragment"><em>Why</em>: To combine subsets of a wider dataframe together and enable more complete analysis</li>
+<li class="fragment"><em>Example</em>: Combine dataframes with test results from different labs testing in the same outbreak</li>
+<li class="fragment"><em>How</em>:</li>
 </ul>
-<div class="code-box">
+</div>
+<div class="code-box fragment">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_combined <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(df1, df2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_combined <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(df1, df2, df3, ...)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div class="obs-box fragment">
@@ -467,34 +515,67 @@
 <h1>Joining</h1>
 
 </section>
+<section id="xxx_join-functions" class="slide level2">
+<h2>xxx_join functions</h2>
+<div class="slide-header">
+<p>{dplyr}</p>
+</div>
+<ul>
+<li>{dplyr} has several functions for joining data. We will look at three: <code>left_join()</code>, <code>full_join()</code>, and <code>anti_join()</code></li>
+</ul>
+</section>
+<section id="xxx_join-functions-1" class="slide level2">
+<h2>xxx_join functions</h2>
+<div class="slide-header">
+<p>{dplyr}</p>
+</div>
+<ul>
+<li><p>{dplyr} has several functions for joining data. We will look at three: <code>left_join()</code>, <code>full_join()</code>, and <code>anti_join()</code></p></li>
+<li><p>They use this syntax, where the first argument (<code>df1</code> here) is the “left” dataframe:</p></li>
+</ul>
+
+<img data-src="images/leftright.png" style="display: block; margin: auto; width: 70%;" class="r-stretch"></section>
+<section id="xxx_join-functions-2" class="slide level2">
+<h2>xxx_join functions</h2>
+<div class="slide-header">
+<p>{dplyr}</p>
+</div>
+<ul>
+<li><p>{dplyr} has several functions for joining data. We will look at three: <code>left_join()</code>, <code>full_join()</code>, and <code>anti_join()</code></p></li>
+<li><p>They use this syntax, where the first argument (<code>df1</code> here) is the “left” dataframe.</p></li>
+</ul>
+
+<img data-src="images/leftright_pipe.png" style="display: block; margin: auto; width: 70%;" class="r-stretch"></section>
 <section id="left_join" class="slide level2">
 <h2>left_join()</h2>
 <div class="slide-header">
 <p>{dplyr}</p>
 </div>
+<div>
 <ul>
-<li><em>Purpose</em>: Merge two datasets, keeping all rows from the left table.</li>
-<li><em>Why</em>: Use when you want to keep all observations from one dataset and bring in matching data from another.</li>
-<li><em>Example</em>: You want to add test results to a dataframe of survey data, while keeping all survey data.</li>
-<li><em>How</em>:</li>
+<li class="fragment"><em>Purpose</em>: Merge two datasets, keeping <strong>all rows from the left dataframe</strong> and only <strong>matching rows from the right</strong></li>
+<li class="fragment"><em>Why</em>: Use when you want to keep all observations from one dataset and bring in matching data from another</li>
+<li class="fragment"><em>Example</em>: You want to add test results to a dataframe of survey data, while keeping all survey data</li>
+<li class="fragment"><em>How</em>:</li>
 </ul>
-<div class="code-box">
+</div>
+<div class="code-box fragment">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_joined <span class="ot">&lt;-</span> <span class="fu">left_join</span>(df1, df2, <span class="at">by =</span> <span class="st">"id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<div class="obs-box fragment">
-<p>💡 <strong>NOTE</strong> Rows from <code>df2</code> with a matching id as a row in <code>df1</code> will be joined.</p>
-</div>
 </section>
 <section id="left_join-1" class="slide level2">
 <h2>left_join()</h2>
+<div class="slide-header">
+<p>{dplyr}</p>
+</div>
 <p>We will look at two small example dataframes:</p>
 
 <img data-src="images/start_join.png" style="display: block; margin: auto; width: 100%;" class="r-stretch"></section>
 <section id="left_join-2" class="slide level2">
 <h2>left_join()</h2>
-<div class="code-box">
+<div class="code-box-small" style="width: 70%; font-size: 40px;">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_joined <span class="ot">&lt;-</span> <span class="fu">left_join</span>(df_survey, df_lab, <span class="at">by =</span> <span class="st">"id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -506,22 +587,26 @@
 <div class="slide-header">
 <p>{dplyr}</p>
 </div>
+<div>
 <ul>
-<li><em>Purpose</em>: Merge two datasets, keeping all rows from both tables.</li>
-<li><em>Why</em>: This may allow you to have more complete data, or to conduct more detailed on analyses of matches.<br>
-</li>
-<li><em>Example</em>: You have clinic attendance and lab results for a disease. Some cases lack lab tests, and some positive tests are unreported cases. You want to merge both datasets to keep all records for an accurate case count.</li>
-<li><em>How</em>:</li>
+<li class="fragment"><em>Purpose</em>: Merge two datasets, keeping <strong>all rows</strong> from both dataframes</li>
+<li class="fragment"><em>Why</em>: For more complete data, or to conduct detailed on analyses of matches</li>
+<li class="fragment"><em>Example</em>: You have clinic attendance and lab results for a disease. Some cases lack lab tests, and some positive tests are unreported cases. You want to merge both datasets to keep all records for an accurate case count</li>
+<li class="fragment"><em>How</em>:</li>
 </ul>
-<div class="code-box">
+</div>
+<div class="code-box fragment">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_joined <span class="ot">&lt;-</span> <span class="fu">full_join</span>(df1, df2, <span class="at">by =</span> <span class="st">"id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </section>
-<section id="left_join-3" class="slide level2">
-<h2>left_join()</h2>
-<div class="code-box">
+<section id="full_join-1" class="slide level2">
+<h2>full_join()</h2>
+<div class="slide-header">
+<p>{dplyr}</p>
+</div>
+<div class="code-box-small" style="width: 70%; font-size: 40px;">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_joined <span class="ot">&lt;-</span> <span class="fu">full_join</span>(df_survey, df_lab, <span class="at">by =</span> <span class="st">"id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -533,21 +618,26 @@
 <div class="slide-header">
 <p>{dplyr}</p>
 </div>
+<div>
 <ul>
-<li><em>Purpose</em>: Return rows from the left dataframe that do <strong>not</strong> have a match in the right dataset.</li>
-<li><em>Why</em>: Use when you want to find missing or unmatched data.</li>
-<li><em>Example</em>: You want to specifically review which cases in a clinical linelist do not have lab results.</li>
-<li><em>How</em>:</li>
+<li class="fragment"><em>Purpose</em>: Return rows from the left dataframe that do <strong>not</strong> have a match in the right dataset.</li>
+<li class="fragment"><em>Why</em>: Use when you want to find missing or unmatched data</li>
+<li class="fragment"><em>Example</em>: You want to specifically review which cases in a clinical linelist do not have lab results</li>
+<li class="fragment"><em>How</em>:</li>
 </ul>
-<div class="code-box">
+</div>
+<div class="code-box fragment">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_unmatched <span class="ot">&lt;-</span> <span class="fu">anti_join</span>(df1, df2, <span class="at">by =</span> <span class="st">"id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </section>
-<section id="antijoin" class="slide level2">
-<h2>antijoin()</h2>
-<div class="code-box">
+<section id="anti_join-1" class="slide level2">
+<h2>anti_join()</h2>
+<div class="slide-header">
+<p>{dplyr}</p>
+</div>
+<div class="code-box-small" style="width: 70%; font-size: 40px;">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_joined <span class="ot">&lt;-</span> <span class="fu">anti_join</span>(df_survey, df_lab, <span class="at">by =</span> <span class="st">"id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -555,14 +645,101 @@
 
 <img data-src="images/anti_join.png" style="display: block; margin: auto; width: 100%;" class="r-stretch"></section></section>
 <section>
+<section id="real-life-scenaios" class="title-slide slide level1 center">
+<h1>Real-life scenaios</h1>
+
+</section>
+<section id="multiple-identifiers" class="slide level2">
+<h2>Multiple identifiers</h2>
+<div class="slide-header">
+<p>{dplyr}</p>
+</div>
+<p>Here, each person is identified by <strong>name</strong> and <strong>date of birth</strong>, not just id.</p>
+<p>There are two Bobs, with different birthdays.</p>
+
+<img data-src="images/ids.png" style="display: block; margin: auto; width: 100%;" class="r-stretch"></section>
+<section id="multiple-identifiers-1" class="slide level2">
+<h2>Multiple identifiers</h2>
+<div class="slide-header">
+<p>{dplyr}</p>
+</div>
+<p>You can list multiple identifiers inside a <code>c()</code> to correctly join:</p>
+<div class="code-box-small" style="width: 90%; font-size: 40px;">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_joined <span class="ot">&lt;-</span> <span class="fu">left_join</span>(df_survey, df_lab, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"name"</span>, <span class="st">"date_birth"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+
+<img data-src="images/ids_joined.png" style="display: block; margin: auto; width: 100%;" class="r-stretch"></section>
+<section id="key-ids-with-differing-names" class="slide level2">
+<h2>Key ids with differing names</h2>
+<div class="slide-header">
+<p>{dplyr}</p>
+</div>
+<p>For this scenario, you can explicitly specify which columns link:</p>
+<div class="code-box-small" style="width: 90%; font-size: 40px;">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_joined <span class="ot">&lt;-</span> <span class="fu">left_join</span>(df_survey, df_lab, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"name"</span> <span class="ot">=</span> <span class="st">"Name"</span>, </span>
+<span id="cb9-2"><a href="" aria-hidden="true" tabindex="-1"></a>                                                 <span class="st">"date_birth"</span> <span class="ot">=</span> <span class="st">"birthday"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+
+<img data-src="images/diffids.png" style="display: block; margin: auto; width: 100%;" class="r-stretch"></section>
+<section id="rows-with-duplicate-key-ids" class="slide level2">
+<h2>Rows with duplicate key ids</h2>
+<div class="slide-header">
+<p>{dplyr}</p>
+</div>
+<p>In this example, there is only one Bob, but repeated in <code>df_survey</code>.</p>
+<p>The results of <code>df_lab</code> get repeated in <code>df_joined</code> too. This is a many-to-one join.</p>
+<div class="code-box-small" style="width: 90%; font-size: 40px;">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_joined <span class="ot">&lt;-</span> <span class="fu">anti_join</span>(df_survey, df_lab, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"name"</span> <span class="ot">=</span> <span class="st">"Name"</span>, </span>
+<span id="cb10-2"><a href="" aria-hidden="true" tabindex="-1"></a>                                                 <span class="st">"date_birth"</span> <span class="ot">=</span> <span class="st">"birthday"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+
+<img data-src="images/manytoone.png" style="display: block; margin: auto; width: 100%;" class="r-stretch"></section>
+<section id="rows-with-duplicate-key-ids-1" class="slide level2">
+<h2>Rows with duplicate key ids</h2>
+<div class="slide-header">
+<p>{dplyr}</p>
+</div>
+<p>Some terms:</p>
+<ul>
+<li>A <strong>many-to-one</strong> join means the left dataframe has duplicates, the right has only unique values</li>
+<li>A <strong>one-to-many</strong> means the left has unique values, the right has duplicates</li>
+<li>A <strong>many-to-many</strong> means both have dataframes have duplicates. This would cause a big headache!</li>
+</ul>
+</section>
+<section id="duplicate-non-linking-columns" class="slide level2">
+<h2>Duplicate non-linking columns</h2>
+<div class="slide-header">
+<p>{dplyr}</p>
+</div>
+<p>If columns not used for linkage have the same name, R will preserve both of them in a <code>left_join()</code> or <code>full_join()</code>.</p>
+<p>But, it will add an <code>.x</code> and <code>.y</code> suffix to differentiate between columns from the left and right dataframes respectively.</p>
+<div class="code-box-small" style="width: 70%; font-size: 40px;">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_joined <span class="ot">&lt;-</span> <span class="fu">anti_join</span>(df_survey, df_lab, <span class="at">by =</span> <span class="st">"id"</span>)<span class="er">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+
+<img data-src="images/samecols.png" style="display: block; margin: auto; width: 100%;" class="r-stretch"></section></section>
+<section>
 <section id="exercise" class="title-slide slide level1 center">
 <h1>Exercise</h1>
 
 </section>
-<section id="scenario" class="slide level2 exercise-slide">
+<section id="scenario-1" class="slide level2 exercise-slide">
 <h2>Scenario</h2>
 <div>
-
+<p>Your task now is to:</p>
+<ul>
+<li class="fragment">Create one lab dataframe by appending the three lab-specific dataframes</li>
+<li class="fragment">Link the lab data to the <code>df</code> linelist</li>
+<li class="fragment">Write a new case definition, which adds the “Confirmed” category if a case has a positive pcr result</li>
+</ul>
 </div>
 </section>
 <section id="access-the-exercises" class="slide level2 exercise-slide">
@@ -570,117 +747,1031 @@
 <p>Instructions here</p>
 </section></section>
 <section>
-<section id="recap-1" class="title-slide slide level1 center">
+<section id="recap-2" class="title-slide slide level1 center">
 <h1>Recap</h1>
 
 </section>
-<section id="your-code" class="slide level2 exercise-slide">
-<h2>Your code</h2>
-<p>Your code should now look like this!</p>
+<section id="your-appending-and-linking-code" class="slide level2 exercise-slide">
+<h2>Your appending and linking code</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Intro course</span></span>
-<span id="cb8-2"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Title of script: Cleaning and analysis of GI outbreak data</span></span>
-<span id="cb8-3"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Date started: 5th June 2021</span></span>
-<span id="cb8-4"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Name: Paula Blomquist</span></span>
-<span id="cb8-5"><a href="" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Load packages-----------------------------</span></span>
-<span id="cb8-7"><a href="" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(rio, here, janitor, dplyr, stringr, lubridate, tidyr)</span>
-<span id="cb8-9"><a href="" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Import data ------------------------------</span></span>
-<span id="cb8-11"><a href="" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Linelist</span></span>
-<span id="cb8-13"><a href="" aria-hidden="true" tabindex="-1"></a>df_raw <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="fu">here</span>(<span class="st">"data/gi_2021-07-07_linelist.xlsx"</span>))</span>
-<span id="cb8-14"><a href="" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-15"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Labs</span></span>
-<span id="cb8-16"><a href="" aria-hidden="true" tabindex="-1"></a>lab_luh <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="fu">here</span>(<span class="st">"data/gi_2021-07-07_labLUH.csv"</span>))</span>
-<span id="cb8-17"><a href="" aria-hidden="true" tabindex="-1"></a>lab_nvrl <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="fu">here</span>(<span class="st">"data/gi_2021-07-07_labLUH.csv"</span>))</span>
-<span id="cb8-18"><a href="" aria-hidden="true" tabindex="-1"></a>lab_ghc <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="fu">here</span>(<span class="st">"data/gi_2021-07-07_labLUH.csv"</span>))</span>
-<span id="cb8-19"><a href="" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-20"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean data ---------------------------</span></span>
-<span id="cb8-21"><a href="" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-22"><a href="" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df_raw <span class="sc">|&gt;</span></span>
-<span id="cb8-23"><a href="" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-24"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Clean column names</span></span>
-<span id="cb8-25"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="fu">clean_names</span>() <span class="sc">|&gt;</span></span>
-<span id="cb8-26"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">date_onset =</span> symptoms_started) <span class="sc">|&gt;</span></span>
-<span id="cb8-27"><a href="" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-28"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Change character class</span></span>
-<span id="cb8-29"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">admission =</span> <span class="fu">mdy</span>(admission),</span>
-<span id="cb8-30"><a href="" aria-hidden="true" tabindex="-1"></a>           <span class="at">discovered =</span> <span class="fu">dmy</span>(discovered),</span>
-<span id="cb8-31"><a href="" aria-hidden="true" tabindex="-1"></a>           <span class="at">found_on =</span> <span class="fu">mdy</span>(found_on),</span>
-<span id="cb8-32"><a href="" aria-hidden="true" tabindex="-1"></a>           <span class="at">reported =</span> <span class="fu">ydm</span>(reported),</span>
-<span id="cb8-33"><a href="" aria-hidden="true" tabindex="-1"></a>           <span class="at">told_on =</span> <span class="fu">mdy</span>(told_on),</span>
-<span id="cb8-34"><a href="" aria-hidden="true" tabindex="-1"></a>           <span class="at">report  =</span> <span class="fu">mdy</span>(report)) <span class="sc">|&gt;</span></span>
-<span id="cb8-35"><a href="" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-36"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Clean column content  </span></span>
-<span id="cb8-37"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">region =</span> <span class="fu">str_to_title</span>(region),</span>
-<span id="cb8-38"><a href="" aria-hidden="true" tabindex="-1"></a>           <span class="at">sex =</span> <span class="fu">str_to_title</span>(sex), </span>
-<span id="cb8-39"><a href="" aria-hidden="true" tabindex="-1"></a>           <span class="at">sex =</span> <span class="fu">case_match</span>(sex, </span>
-<span id="cb8-40"><a href="" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">c</span>(<span class="st">"F"</span>, <span class="st">"Fem"</span>, <span class="st">"Female"</span>) <span class="sc">~</span> <span class="st">"Female"</span>,</span>
-<span id="cb8-41"><a href="" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">c</span>(<span class="st">"M"</span>,<span class="st">"Man"</span>, <span class="st">"Male"</span>) <span class="sc">~</span> <span class="st">"Male"</span>,</span>
-<span id="cb8-42"><a href="" aria-hidden="true" tabindex="-1"></a>                            <span class="at">.default =</span> <span class="cn">NA</span>),</span>
-<span id="cb8-43"><a href="" aria-hidden="true" tabindex="-1"></a>           <span class="at">region =</span> <span class="fu">case_match</span>(region,</span>
-<span id="cb8-44"><a href="" aria-hidden="true" tabindex="-1"></a>             <span class="fu">c</span>(<span class="st">"Bexar"</span>) <span class="sc">~</span> <span class="st">"Bexar"</span>,</span>
-<span id="cb8-45"><a href="" aria-hidden="true" tabindex="-1"></a>             <span class="fu">c</span>(<span class="st">"Keda"</span>, <span class="st">"Kedah"</span>) <span class="sc">~</span> <span class="st">"Keda"</span>,</span>
-<span id="cb8-46"><a href="" aria-hidden="true" tabindex="-1"></a>             <span class="fu">c</span>(<span class="st">"Liora"</span>, <span class="st">"Lioraah"</span>) <span class="sc">~</span> <span class="st">"Liora"</span>,</span>
-<span id="cb8-47"><a href="" aria-hidden="true" tabindex="-1"></a>             <span class="fu">c</span>(<span class="st">"Nellus"</span>, <span class="st">"Nelos"</span>) <span class="sc">~</span> <span class="st">"Nelos"</span>,</span>
-<span id="cb8-48"><a href="" aria-hidden="true" tabindex="-1"></a>             <span class="fu">c</span>(<span class="st">"New Ardin"</span>, <span class="st">"New Arden"</span>) <span class="sc">~</span> <span class="st">"New Arden"</span>,</span>
-<span id="cb8-49"><a href="" aria-hidden="true" tabindex="-1"></a>             <span class="fu">c</span>(<span class="st">"Sorel"</span>, <span class="st">"Sorell"</span>) <span class="sc">~</span> <span class="st">"Sorel"</span>,</span>
-<span id="cb8-50"><a href="" aria-hidden="true" tabindex="-1"></a>             <span class="fu">c</span>(<span class="st">"Taris"</span>) <span class="sc">~</span> <span class="st">"Taris"</span>,</span>
-<span id="cb8-51"><a href="" aria-hidden="true" tabindex="-1"></a>             <span class="fu">c</span>(<span class="st">"Varek"</span>) <span class="sc">~</span> <span class="st">"Varek"</span>,</span>
-<span id="cb8-52"><a href="" aria-hidden="true" tabindex="-1"></a>             <span class="fu">c</span>(<span class="st">"West Morin"</span>) <span class="sc">~</span> <span class="st">"West Morin"</span>,</span>
-<span id="cb8-53"><a href="" aria-hidden="true" tabindex="-1"></a>             <span class="at">.default =</span> <span class="cn">NA_character_</span>))  <span class="sc">|&gt;</span> </span>
-<span id="cb8-54"><a href="" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-55"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Deduplicate to one row per case - EDIT THIS??</span></span>
-<span id="cb8-56"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>() <span class="sc">|&gt;</span></span>
-<span id="cb8-57"><a href="" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-58"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Combine some columns</span></span>
-<span id="cb8-59"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unite</span>(<span class="st">"date_of_birth"</span>, </span>
-<span id="cb8-60"><a href="" aria-hidden="true" tabindex="-1"></a>          <span class="fu">c</span>(<span class="st">"birthyear"</span>, <span class="st">"month_of_birth"</span>, <span class="st">"daybirth"</span>), <span class="at">sep =</span> <span class="st">"-"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb8-61"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_of_birth =</span> <span class="fu">ymd</span>(date_of_birth)) <span class="sc">|&gt;</span></span>
-<span id="cb8-62"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_report =</span>  <span class="fu">coalesce</span>(told_on, reported, discovered, found_on, report)) <span class="sc">|&gt;</span> </span>
-<span id="cb8-63"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>told_on, <span class="sc">-</span>reported, <span class="sc">-</span>discovered, <span class="sc">-</span>found_on, <span class="sc">-</span>report) <span class="sc">|&gt;</span></span>
-<span id="cb8-64"><a href="" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-65"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create columns labelling diarrhoea or dehydration</span></span>
-<span id="cb8-66"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">symptoms =</span> <span class="fu">str_to_lower</span>(symptoms),</span>
-<span id="cb8-67"><a href="" aria-hidden="true" tabindex="-1"></a>         <span class="at">symp_diarrhea =</span> <span class="fu">str_detect</span>(symptoms, <span class="st">"diarrhoea|diarrhea|watery stool|loose stool|awd"</span>),</span>
-<span id="cb8-68"><a href="" aria-hidden="true" tabindex="-1"></a>         <span class="at">symp_dehydration =</span> <span class="fu">str_detect</span>(symptoms, <span class="st">"dehydra|lack of fluids|lack fluids"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb8-69"><a href="" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-70"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create case definition column</span></span>
-<span id="cb8-71"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">case_def =</span> <span class="fu">case_when</span>(cholera_rdt_positive<span class="sc">==</span><span class="dv">1</span> <span class="sc">~</span> <span class="st">"Probable"</span>,</span>
-<span id="cb8-72"><a href="" aria-hidden="true" tabindex="-1"></a>                              symp_diarrhea <span class="sc">==</span><span class="cn">TRUE</span> <span class="sc">&amp;</span> symp_dehydration<span class="sc">==</span><span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Suspected"</span>, </span>
-<span id="cb8-73"><a href="" aria-hidden="true" tabindex="-1"></a>                              <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Unclear"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb8-74"><a href="" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-75"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">case_def =</span> <span class="fu">factor</span>(case_def, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Unclear"</span>, <span class="st">"Suspected"</span>, <span class="st">"Probable"</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb8-76"><a href="" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-77"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create week column for onset date</span></span>
-<span id="cb8-78"><a href="" aria-hidden="true" tabindex="-1"></a> <span class="co"># mutate(date_onset_week = floor_date(date_onset, "week")) |&gt; </span></span>
-<span id="cb8-79"><a href="" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-80"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create week column for report date</span></span>
-<span id="cb8-81"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_report_week =</span> <span class="fu">floor_date</span>(date_report, <span class="st">"week"</span>)) </span>
-<span id="cb8-82"><a href="" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-83"><a href="" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-84"><a href="" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-85"><a href="" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-86"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Plots ------------------------------------------</span></span>
-<span id="cb8-87"><a href="" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-88"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># By report date and case definition breakdown</span></span>
-<span id="cb8-89"><a href="" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb8-90"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">data =</span> df,</span>
-<span id="cb8-91"><a href="" aria-hidden="true" tabindex="-1"></a>           <span class="fu">aes</span>(<span class="at">x=</span>date_report_week,</span>
-<span id="cb8-92"><a href="" aria-hidden="true" tabindex="-1"></a>               <span class="at">fill =</span> case_def))</span>
-<span id="cb8-93"><a href="" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-94"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># By report date and case definition breakdown and region</span></span>
-<span id="cb8-95"><a href="" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb8-96"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">data =</span> df,</span>
-<span id="cb8-97"><a href="" aria-hidden="true" tabindex="-1"></a>           <span class="fu">aes</span>(<span class="at">x=</span>date_report_week,</span>
-<span id="cb8-98"><a href="" aria-hidden="true" tabindex="-1"></a>               <span class="at">fill =</span> case_def)) <span class="sc">+</span></span>
-<span id="cb8-99"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(.<span class="sc">~</span>region)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean and append lab data------------------------</span></span>
+<span id="cb12-2"><a href="" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="" aria-hidden="true" tabindex="-1"></a>df_lab_luh <span class="ot">&lt;-</span> df_lab_luh <span class="sc">|&gt;</span> </span>
+<span id="cb12-4"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>()</span>
+<span id="cb12-5"><a href="" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="" aria-hidden="true" tabindex="-1"></a>df_lab_ghc <span class="ot">&lt;-</span> df_lab_ghc <span class="sc">|&gt;</span> </span>
+<span id="cb12-7"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">cholera_pcr_result =</span> pcr_result,</span>
+<span id="cb12-8"><a href="" aria-hidden="true" tabindex="-1"></a>         <span class="at">cholera_pcr_positive =</span> pcr_positive,</span>
+<span id="cb12-9"><a href="" aria-hidden="true" tabindex="-1"></a>         <span class="at">cholera_pcr_date_test =</span> pcr_date_test,</span>
+<span id="cb12-10"><a href="" aria-hidden="true" tabindex="-1"></a>         <span class="at">cholera_pcr_date_result =</span> pcr_date_result)</span>
+<span id="cb12-11"><a href="" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="" aria-hidden="true" tabindex="-1"></a>df_lab <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(df_lab_luh, df_lab_ghc, df_lab_vnrl)</span>
+<span id="cb12-13"><a href="" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Link to df -------------------------------------</span></span>
+<span id="cb12-15"><a href="" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="" aria-hidden="true" tabindex="-1"></a>df_joined <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span> </span>
+<span id="cb12-17"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(df_lab, <span class="at">by =</span> <span class="st">"id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="learning-objectives-1" class="slide level2">
-<h2>Learning objectives</h2>
+<section id="inspecting-values" class="slide level2 exercise-slide">
+<h2>Inspecting values</h2>
+<div class="slide-header">
+<p>{dplyr; janitor}</p>
+</div>
+<p>You can see that all test results in <code>df_lab</code> were joined to the <code>df</code> linelist</p>
+<div class="columns">
+<div class="column" style="width:48%;">
+<div class="code-box-small" style="width; 450px; font-size: 40px">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_lab <span class="sc">|&gt;</span> </span>
+<span id="cb13-2"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tabyl</span>(cholera_pcr_positive)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="arrow-box">
+<p>↓</p>
+</div>
+<div class="output-box">
+<div class="cell">
+<div class="cell-output-display">
+<div id="gqwqcxdquf" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+#gqwqcxdquf table {
+  font-family: 'Noto Sans', system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#gqwqcxdquf thead, #gqwqcxdquf tbody, #gqwqcxdquf tfoot, #gqwqcxdquf tr, #gqwqcxdquf td, #gqwqcxdquf th {
+  border-style: none;
+}
+
+#gqwqcxdquf p {
+  margin: 0;
+  padding: 0;
+}
+
+#gqwqcxdquf .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 17px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #F6F6F6;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #40C5FF;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 3px;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#gqwqcxdquf .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#gqwqcxdquf .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #F6F6F6;
+  border-bottom-width: 0;
+}
+
+#gqwqcxdquf .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #F6F6F6;
+  border-top-width: 0;
+}
+
+#gqwqcxdquf .gt_heading {
+  background-color: #F6F6F6;
+  text-align: left;
+  border-bottom-color: #F6F6F6;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#gqwqcxdquf .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 0px;
+  border-bottom-color: #D3D3D3;
+}
+
+#gqwqcxdquf .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #40C5FF;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #ECECEC;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#gqwqcxdquf .gt_col_heading {
+  color: #333333;
+  background-color: #F6F6F6;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#gqwqcxdquf .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #F6F6F6;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#gqwqcxdquf .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#gqwqcxdquf .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#gqwqcxdquf .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #ECECEC;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#gqwqcxdquf .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#gqwqcxdquf .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #F6F6F6;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #BEBEBE;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: #BEBEBE;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#gqwqcxdquf .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #F6F6F6;
+  font-size: 100%;
+  font-weight: bold;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #BEBEBE;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: #BEBEBE;
+  vertical-align: middle;
+}
+
+#gqwqcxdquf .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#gqwqcxdquf .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#gqwqcxdquf .gt_row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: white;
+  border-top-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#gqwqcxdquf .gt_stub {
+  color: #333333;
+  background-color: #F6F6F6;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#gqwqcxdquf .gt_stub_row_group {
+  color: #333333;
+  background-color: #F6F6F6;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#gqwqcxdquf .gt_row_group_first td {
+  border-top-width: 1px;
+}
+
+#gqwqcxdquf .gt_row_group_first th {
+  border-top-width: 1px;
+}
+
+#gqwqcxdquf .gt_summary_row {
+  color: #333333;
+  background-color: #F6F6F6;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#gqwqcxdquf .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#gqwqcxdquf .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#gqwqcxdquf .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#gqwqcxdquf .gt_grand_summary_row {
+  color: #333333;
+  background-color: #F6F6F6;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#gqwqcxdquf .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#gqwqcxdquf .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#gqwqcxdquf .gt_striped {
+  background-color: #ECECEC;
+}
+
+#gqwqcxdquf .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 3px;
+  border-bottom-color: #FFFFFF;
+}
+
+#gqwqcxdquf .gt_footnotes {
+  color: #333333;
+  background-color: #F6F6F6;
+  border-bottom-style: none;
+  border-bottom-width: 0px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#gqwqcxdquf .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#gqwqcxdquf .gt_sourcenotes {
+  color: #333333;
+  background-color: #F6F6F6;
+  border-bottom-style: none;
+  border-bottom-width: 0px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#gqwqcxdquf .gt_sourcenote {
+  font-size: 12px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#gqwqcxdquf .gt_left {
+  text-align: left;
+}
+
+#gqwqcxdquf .gt_center {
+  text-align: center;
+}
+
+#gqwqcxdquf .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#gqwqcxdquf .gt_font_normal {
+  font-weight: normal;
+}
+
+#gqwqcxdquf .gt_font_bold {
+  font-weight: bold;
+}
+
+#gqwqcxdquf .gt_font_italic {
+  font-style: italic;
+}
+
+#gqwqcxdquf .gt_super {
+  font-size: 65%;
+}
+
+#gqwqcxdquf .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#gqwqcxdquf .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#gqwqcxdquf .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#gqwqcxdquf .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#gqwqcxdquf .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#gqwqcxdquf .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#gqwqcxdquf .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#gqwqcxdquf .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#gqwqcxdquf div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="header gt_col_headings">
+<th id="cholera_pcr_positive" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">cholera_pcr_positive</th>
+<th id="n" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">n</th>
+<th id="percent" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">percent</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right" headers="cholera_pcr_positive" style="border-top-width: 0px; border-top-style: solid; border-top-color: white">0</td>
+<td class="gt_row gt_right" headers="n" style="border-top-width: 0px; border-top-style: solid; border-top-color: white">89</td>
+<td class="gt_row gt_right" headers="percent" style="border-top-width: 0px; border-top-style: solid; border-top-color: white">0.4836957</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right gt_striped" headers="cholera_pcr_positive">1</td>
+<td class="gt_row gt_right gt_striped" headers="n">95</td>
+<td class="gt_row gt_right gt_striped" headers="percent">0.5163043</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:2%;">
+
+</div><div class="column" style="width:48%;">
+<div class="code-box-small" style="width; 450px; font-size: 40px">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="" aria-hidden="true" tabindex="-1"></a>df_joined <span class="sc">|&gt;</span> </span>
+<span id="cb14-2"><a href="" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tabyl</span>(cholera_pcr_positive)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="arrow-box">
+<p>↓</p>
+</div>
+<div class="output-box">
+<div class="cell">
+<div class="cell-output-display">
+<div id="bbmdfpolif" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+#bbmdfpolif table {
+  font-family: 'Noto Sans', system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#bbmdfpolif thead, #bbmdfpolif tbody, #bbmdfpolif tfoot, #bbmdfpolif tr, #bbmdfpolif td, #bbmdfpolif th {
+  border-style: none;
+}
+
+#bbmdfpolif p {
+  margin: 0;
+  padding: 0;
+}
+
+#bbmdfpolif .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 17px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #F6F6F6;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #40C5FF;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 3px;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#bbmdfpolif .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#bbmdfpolif .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #F6F6F6;
+  border-bottom-width: 0;
+}
+
+#bbmdfpolif .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #F6F6F6;
+  border-top-width: 0;
+}
+
+#bbmdfpolif .gt_heading {
+  background-color: #F6F6F6;
+  text-align: left;
+  border-bottom-color: #F6F6F6;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bbmdfpolif .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 0px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bbmdfpolif .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #40C5FF;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #ECECEC;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bbmdfpolif .gt_col_heading {
+  color: #333333;
+  background-color: #F6F6F6;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#bbmdfpolif .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #F6F6F6;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#bbmdfpolif .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#bbmdfpolif .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#bbmdfpolif .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #ECECEC;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#bbmdfpolif .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#bbmdfpolif .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #F6F6F6;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #BEBEBE;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: #BEBEBE;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#bbmdfpolif .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #F6F6F6;
+  font-size: 100%;
+  font-weight: bold;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #BEBEBE;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: #BEBEBE;
+  vertical-align: middle;
+}
+
+#bbmdfpolif .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#bbmdfpolif .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#bbmdfpolif .gt_row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: white;
+  border-top-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#bbmdfpolif .gt_stub {
+  color: #333333;
+  background-color: #F6F6F6;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bbmdfpolif .gt_stub_row_group {
+  color: #333333;
+  background-color: #F6F6F6;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#bbmdfpolif .gt_row_group_first td {
+  border-top-width: 1px;
+}
+
+#bbmdfpolif .gt_row_group_first th {
+  border-top-width: 1px;
+}
+
+#bbmdfpolif .gt_summary_row {
+  color: #333333;
+  background-color: #F6F6F6;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bbmdfpolif .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#bbmdfpolif .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#bbmdfpolif .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bbmdfpolif .gt_grand_summary_row {
+  color: #333333;
+  background-color: #F6F6F6;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bbmdfpolif .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#bbmdfpolif .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bbmdfpolif .gt_striped {
+  background-color: #ECECEC;
+}
+
+#bbmdfpolif .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 3px;
+  border-bottom-color: #FFFFFF;
+}
+
+#bbmdfpolif .gt_footnotes {
+  color: #333333;
+  background-color: #F6F6F6;
+  border-bottom-style: none;
+  border-bottom-width: 0px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bbmdfpolif .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bbmdfpolif .gt_sourcenotes {
+  color: #333333;
+  background-color: #F6F6F6;
+  border-bottom-style: none;
+  border-bottom-width: 0px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bbmdfpolif .gt_sourcenote {
+  font-size: 12px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bbmdfpolif .gt_left {
+  text-align: left;
+}
+
+#bbmdfpolif .gt_center {
+  text-align: center;
+}
+
+#bbmdfpolif .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#bbmdfpolif .gt_font_normal {
+  font-weight: normal;
+}
+
+#bbmdfpolif .gt_font_bold {
+  font-weight: bold;
+}
+
+#bbmdfpolif .gt_font_italic {
+  font-style: italic;
+}
+
+#bbmdfpolif .gt_super {
+  font-size: 65%;
+}
+
+#bbmdfpolif .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#bbmdfpolif .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#bbmdfpolif .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#bbmdfpolif .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#bbmdfpolif .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#bbmdfpolif .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#bbmdfpolif .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#bbmdfpolif .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#bbmdfpolif div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="header gt_col_headings">
+<th id="cholera_pcr_positive" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">cholera_pcr_positive</th>
+<th id="n" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">n</th>
+<th id="percent" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">percent</th>
+<th id="valid_percent" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">valid_percent</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right" headers="cholera_pcr_positive" style="border-top-width: 0px; border-top-style: solid; border-top-color: white">0</td>
+<td class="gt_row gt_right" headers="n" style="border-top-width: 0px; border-top-style: solid; border-top-color: white">89</td>
+<td class="gt_row gt_right" headers="percent" style="border-top-width: 0px; border-top-style: solid; border-top-color: white">0.06942278</td>
+<td class="gt_row gt_right" headers="valid_percent" style="border-top-width: 0px; border-top-style: solid; border-top-color: white">0.4836957</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right gt_striped" headers="cholera_pcr_positive">1</td>
+<td class="gt_row gt_right gt_striped" headers="n">95</td>
+<td class="gt_row gt_right gt_striped" headers="percent">0.07410296</td>
+<td class="gt_row gt_right gt_striped" headers="valid_percent">0.5163043</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="cholera_pcr_positive">NA</td>
+<td class="gt_row gt_right" headers="n">1098</td>
+<td class="gt_row gt_right" headers="percent">0.85647426</td>
+<td class="gt_row gt_right" headers="valid_percent">NA</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</div>
+</div></div>
 <div class="quarto-auto-generated-content">
 <p><img src="../../images/Applied_Epi_logo.png" class="slide-logo"></p>
 <div class="footer footer-default">

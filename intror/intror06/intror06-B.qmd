@@ -62,8 +62,8 @@ df <- df_raw |>
              c("West Morin") ~ "West Morin",
              .default = NA_character_))  |> 
   
-  # Deduplicate to one row per case - EDIT THIS??
-  distinct() |>
+  # Deduplicate to one row per case, based on case ID
+  distinct(id, .keep_all = TRUE) |>
   
   # Combine some columns
   unite("date_of_birth", 
@@ -1011,11 +1011,11 @@ pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, tidyr)
 df_raw <- import(here("data/gi_2021-07-07_linelist.xlsx"))
 
 # Labs
-lab_luh <- import(here("data/gi_2021-07-07_labLUH.csv"))
-lab_nvrl <- import(here("data/gi_2021-07-07_labLUH.csv"))
-lab_ghc <- import(here("data/gi_2021-07-07_labLUH.csv"))
+df_lab_luh <- import(here("data/gi_2021-07-07_lab_luh.csv"))
+df_lab_vnrl <- import(here("data/gi_2021-07-07_lab_vnrl.csv"))
+df_lab_ghc <- import(here("data/gi_2021-07-07_lab_ghc.csv"))
 
-# Clean data ---------------------------
+# Clean linelist data ---------------------------
 
 df <- df_raw |>
   
@@ -1050,8 +1050,8 @@ df <- df_raw |>
              c("West Morin") ~ "West Morin",
              .default = NA_character_))  |> 
   
-  # Deduplicate to one row per case - EDIT THIS??
-  distinct() |>
+  # Deduplicate to one row per case, based on case ID
+  distinct(id, .keep_all = TRUE) |>
   
   # Combine some columns
   unite("date_of_birth", 
@@ -1085,7 +1085,18 @@ df <- df_raw |>
 ggplot() +
   geom_bar(data = df,
            aes(x=date_report_week,
-               fill = case_def))
+               fill = case_def)) +
+  scale_fill_manual(values = c("Unclear" = "gray70",
+                               "Suspected" = "lightblue",
+                               "Probable" = "seagreen")) +
+scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  labs(title = "Cases by report week, presented by case category and region",
+       subtitle = glue("Data as of {max(df$date_report, na.rm=T)+1}"),
+       fill = "Case category",
+       x = "Week of report (week starting)",
+       y = "Weekly case count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # By report date and case definition breakdown and region
 ggplot() +
@@ -1094,8 +1105,8 @@ ggplot() +
                fill = case_def)) +
   facet_wrap(.~region) +
   scale_fill_manual(values = c("Unclear" = "gray70",
-                               "Suspected" = "seagreen",
-                               "Probable" = "navy")) +
+                               "Suspected" = "lightblue",
+                               "Probable" = "seagreen")) +
 scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
   labs(title = "Cases by report week, presented by case category and region",
        subtitle = glue("Data as of {max(df$date_report, na.rm=T)+1}"),

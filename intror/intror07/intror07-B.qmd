@@ -1,0 +1,812 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    code-line-numbers: false
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+
+# Packages
+pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, gtExtras, gt, tidyr, ggplot2, glue, datapasta, reprex)
+
+
+# Lab data -------------------------------
+# Labs
+df_lab_luh <- import(here("intror/gi_2021-07-07_lab_luh.csv"))
+df_lab_vnrl <- import(here("intror/gi_2021-07-07_lab_vnrl.csv"))
+df_lab_ghc <- import(here("intror/gi_2021-07-07_lab_ghc.csv"))
+
+
+# Load data as needed 
+df_raw <- import(here("intror/gi_2021-07-07_linelist.xlsx")) 
+
+
+
+# Clean linelist data ---------------------------
+
+df <- df_raw |>
+  
+    # Clean column names
+    clean_names() |>
+    rename(date_onset = symptoms_started) |>
+  
+    # Change character class
+    mutate(admission = mdy(admission),
+           discovered = dmy(discovered),
+           found_on = mdy(found_on),
+           reported = ydm(reported),
+           told_on = mdy(told_on),
+           report  = mdy(report)) |>
+  
+    # Clean column content  
+    mutate(region = str_to_title(region),
+           sex = str_to_title(sex), 
+           sex = case_match(sex, 
+                            c("F", "Fem", "Female") ~ "Female",
+                            c("M","Man", "Male") ~ "Male",
+                            .default = NA),
+           region = case_match(region,
+             c("Bexar") ~ "Bexar",
+             c("Keda", "Kedah") ~ "Keda",
+             c("Liora", "Lioraah") ~ "Liora",
+             c("Nellus", "Nelos") ~ "Nelos",
+             c("New Ardin", "New Arden") ~ "New Arden",
+             c("Sorel", "Sorell") ~ "Sorel",
+             c("Taris") ~ "Taris",
+             c("Varek") ~ "Varek",
+             c("West Morin") ~ "West Morin",
+             .default = NA_character_))  |> 
+  
+  # Deduplicate to one row per case, based on case ID
+  distinct(id, .keep_all = TRUE) |>
+  
+  # Combine some columns
+  unite("date_of_birth", 
+          c("birthyear", "month_of_birth", "daybirth"), sep = "-") |> 
+  mutate(date_of_birth = ymd(date_of_birth)) |>
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |> 
+    select(-told_on, -reported, -discovered, -found_on, -report) |>
+  
+  # Create columns labelling diarrhoea or dehydration
+  mutate(symptoms = str_to_lower(symptoms),
+         symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
+         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids")) |>
+  
+  # Create case definition column
+  mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable"))) |> 
+  
+  # Create week column for onset date
+ # mutate(date_onset_week = floor_date(date_onset, "week")) |> 
+  
+  # Create week column for report date
+  mutate(date_report_week = floor_date(date_report, "week")) 
+  
+
+# Clean and append lab data------------------------
+
+df_lab_luh <- df_lab_luh |> 
+  clean_names()
+
+df_lab_ghc <- df_lab_ghc |> 
+  rename(cholera_pcr_result = pcr_result,
+         cholera_pcr_positive = pcr_positive,
+         cholera_pcr_date_test = pcr_date_test,
+         cholera_pcr_date_result = pcr_date_result)
+
+df_lab <- bind_rows(df_lab_luh, df_lab_ghc, df_lab_vnrl)
+
+# Link to df -------------------------------------
+
+df_joined <- df |> 
+  left_join(df_lab, by = "id")
+
+df_joined <- df_joined |>   
+  mutate(case_def = case_when(cholera_pcr_positive==1 ~ "Confirmed",
+                              cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable", "Confirmed"))) 
+```
+
+# Module 7: Part B
+
+## Module 7 learning objectives
+
+In Part A you:
+
+-   Learned how to append data with `bind_rows()`
+-   Learned how to conduct data linkage with `join_xxx()` functions
+
+In Part B you will:
+
+-   Get more familiar with error messages in R
+-   Learn how to seek help in R, including with reprex
+-   Update your case definitions and epicurves with lab data
+
+# Errors and revision!
+
+## 
+
+*What happened here?*
+
+![](images/error1.png){style="display: block; margin: auto; width: 70%;"}
+
+::: {.obs-box .fragment}
+💡 **ANSWER:** The package {rio} is not yet loaded! You can see this in
+the package pane on the right as well - {rio} is unticked
+:::
+
+## 
+
+*Why this error?*
+
+![](images/error2.png){style="display: block; margin: auto; width: 70%;"}
+
+::: {.obs-box .fragment}
+💡 **ANSWER:** {pacman} needs to be loaded first with `library(pacman)`,
+or explicitly called with `pacman::p_load(...)`
+:::
+
+## 
+
+*Okay we've fixed packages - but now what?*
+
+![](images/error3.png){style="display: block; margin: auto; width: 70%;"}
+
+::: {.obs-box .fragment}
+💡 **ANSWER:** You can see from the File pane that the .csv file does
+not actually exist in the data folder! You should alter the code to the
+correct location or move the data here.
+:::
+
+## 
+
+*After loading data - now we can't rename?*
+
+![](images/error4.png){style="display: block; margin: auto; width: 70%;"}
+
+::: {.obs-box .fragment}
+💡 **ANSWER:** In the `rename()` function, the new column name is on the
+left, and the old on the right! We need to swap the column names.
+:::
+
+## 
+
+*Okay we've cleaned data - what's wrong with this linkage code?*
+
+![](images/error5.png){style="display: block; margin: auto; width: 70%;"}
+
+::: {.obs-box .fragment}
+💡 **ANSWER:** The key id in the `xxx_join()` function should have
+quotation marks: `left_join(df_lab, by = "id")`
+:::
+
+## 
+
+*After correcting the code, now why is it frozen?*
+
+![](images/error6.png){style="display: block; margin: auto; width: 70%;"}
+
+::: {.obs-box .fragment}
+💡 **ANSWER:** Only part of the code was run! You need to highlight and
+run the full command or else R will wait for the rest. You can see it is
+"waiting" with the `+` in the console.
+:::
+
+## 
+
+*I've run the entire code - why is it frozen again?*
+
+![](images/error7.png){style="display: block; margin: auto; width: 70%;"}
+
+::: {.obs-box .fragment}
+💡 **ANSWER:** If you run a new complete command with the `+` in the
+console, R will attach it to the previous unfinished command. You should
+press `Esc` first
+:::
+
+## 
+
+*Here is R looks like when it is ready for a new command*
+
+![](images/error7B.png){style="display: block; margin: auto; width: 70%;"}
+
+::: {.obs-box .fragment}
+💡 See the "\>" symbol!
+:::
+
+# Getting help
+
+## Getting help
+
+When you encounter an error or other problem, what are your options?
+
+::: incremental
+-   R documentation, in RStudio itself
+-   Online resources
+    -   The Epi R Handbook! Designed for epidemiologists learning R
+    -   AI tools such as ChatGPT
+    -   A search engine (e.g. Google) - this will likely direct you to
+        similar Forum posts made by other R users
+-   Get personalised help
+    -   Ask a friend
+    -   Book a call with Applied Epi’s 24/7 multilingual R Support Desk
+        (unlimited tutoring during the course!)
+    -   Post a question on a beginner-friendly forum, like Applied Epi’s
+        Community Forum or StackOverflow
+:::
+
+## R documentation
+
+Check documentation in R by typing ? or ?? and the function/package
+name. For instance: `?bind_rows()` will return the help page for the
+function (if it is loaded).
+
+![](images/rhelp.png){style="display: block; margin: auto; width: 70%;"}
+
+## Applied Epi's Community Forum
+
+*Applied Epi’s Community Forum* is a place to discuss R and epi You need
+an Applied Epi account to post, but answers from others are free!
+
+![](images/community.png){style="display: block; margin: auto; width: 70%;"}
+
+# Asking for R help
+
+## Asking well
+
+If you want to write about your problem, e.g. in a forum, your post
+should:
+
+-   Include a clear and succinct description of the problem
+-   Include R error messages (if applicable)
+-   Show the relevant code you tried to run
+-   Ideally, include an example of the data so others can actually
+    **reproduce** your problem
+
+## Sharing data with dpasta()
+
+::: slide-header
+{datapasta}
+:::
+
+-   *Purpose*: To create shareable snippits of **data generated by
+    code**
+-   *Why*: To easily share data examples and allow others to reproduce
+    your issue
+-   *Example*: You want to share data in a forum post about a code error
+    without uploading a file
+-   *How*: Use the dpasta() function with the data object as the
+    argument. This will generate code to create the data.
+
+::: code-box
+```{r eval=F, echo=T}
+dpasta(data)
+```
+:::
+
+## Sharing data with dpasta()
+
+::: slide-header
+{datapasta}
+:::
+
+<br>
+
+::: {.code-box-small style="width: 300px; font-size: 38px;"}
+```{r echo=T, eval=F}
+dpasta(case_data)
+```
+:::
+
+<br>
+
+:::::::: columns
+:::: {.column width="35%"}
+`dpasta()` takes in this small dataframe:
+
+::: input-box
+```{r}
+# Create the dataset
+case_data <- data.frame(
+  case_id = 1:5,  # Case ID numbers
+  date_report = ymd(c("2024-01-10", "2024-01-12", "2024-01-15", "2024-01-17", "2024-01-19")),  # Reported dates
+  date_onset = ymd(c("2024-01-01", "2024-01-10", "2024-01-11", "2024-01-16", "2024-01-18"))  # Onset dates
+)
+
+case_data |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 17) 
+```
+:::
+::::
+
+:::: {.column width="2%"}
+::: arrow-box
+<br> <br> <br> <br> `r r2symbols::symbol(3)`
+:::
+::::
+
+::: {.column style="width: 63%; font-size: 38px;"}
+... And generates this code in your script: NOTE IT IS CHARACTER??
+
+```{r, eval=F, echo=T}
+data.frame(
+      case_id = c(1L, 2L, 3L, 4L, 5L),
+     date_report = c("2024-01-10","2024-01-12",
+                     "2024-01-15","2024-01-17",
+                     "2024-01-19"),
+      date_onset = c("2024-01-01","2024-01-10",
+                     "2024-01-11","2024-01-16",
+                     "2024-01-18"))
+```
+:::
+::::::::
+
+::: {.obs-box .fragment}
+💡 **NOTE**: This won't be reasonable for large sensitive datasets. You
+could filter to the top few rows or scramble data before this step, to
+make it shareable.
+:::
+
+## Reproducible examples
+
+::: slide-header
+{reprex}
+:::
+
+-   *Purpose*: Create reproducible examples of **code and output**
+-   *Why*: To share minimal code snippets that others can run to
+    replicate your issue
+-   *Example*: Posting a question in a forum with the error message and
+    the code that produces it.
+-   *How*: Wrap the reprex() function around the code you want to share.
+    This will create a shareable output that includes error messages.
+
+::: code-box
+```{r eval=F, echo=T}
+reprex({
+  code
+  })
+```
+:::
+
+::: {.obs-box .fragment}
+💡 **NOTE**: The code needs to be **entirely self-contained** to
+reproduce the problem, including loading packages and data.
+:::
+
+## Reproducible examples
+
+::: slide-header
+{reprex}
+:::
+
+Let's say you are analysing the `case_data` dataframe, but are getting
+an error when trying to run your code:
+
+::: code-box
+```{r eval=F, echo=T}
+
+case_data |> 
+  mutate(report_date - date_onset)
+
+```
+:::
+
+<br> <br>
+
+:::::::: columns
+:::: {.column width="35%"}
+::: input-box
+```{r}
+case_data  |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 17) 
+```
+:::
+::::
+
+:::: {.column width="2%"}
+::: arrow-box
+<br> <br> `r r2symbols::symbol(3)`
+:::
+::::
+
+::: {.column style="width: 63%; font-size: 38px;"}
+```{r, eval=T, echo=F, error=T}
+
+case_data |> 
+  mutate(report_date - date_onset)
+
+```
+:::
+::::::::
+
+## Reproducible examples
+
+::::::: columns
+
+::: {.column style="width: 49%; font-size: 30px;"}
+
+<span style="font-size: 30px;">
+To make this a reproducible example, wrap the code
+`reprex()`, including the `dpasta()` code to produce the dataframe.
+</span>
+
+```{r echo=T, eval=F}
+
+reprex({
+    # Load packages
+    pacman::p_load(dplyr)
+    
+    # Generate data
+    case_data <- data.frame(
+          case_id = c(1L, 2L, 3L, 4L, 5L),
+         date_report = c("2024-01-10","2024-01-12",
+                         "2024-01-15","2024-01-17",
+                         "2024-01-19"),
+          date_onset = c("2024-01-01","2024-01-10",
+                         "2024-01-11","2024-01-16",
+                         "2024-01-18"))
+    
+    # Code that doesn't work
+    case_data |> 
+      mutate(report_date - date_onset)
+})
+```
+:::
+
+:::: {.column width="1.5%"}
+::: arrow-box
+<br> <br> <br> <br>`r r2symbols::symbol(3)`
+:::
+::::
+
+::: {.column style="width: 48%; font-size: 30px;"}
+This saves a reproducible code output to your clipboard, which you can
+paste into a forum post!
+
+```{r eval=F, echo=T}
+# Load packages
+pacman::p_load(dplyr)
+
+# Generate data
+case_data <- data.frame(
+      case_id = c(1L, 2L, 3L, 4L, 5L),
+     date_report = c("2024-01-10","2024-01-12",
+                     "2024-01-15","2024-01-17",
+                     "2024-01-19"),
+      date_onset = c("2024-01-01","2024-01-10",
+                     "2024-01-11","2024-01-16",
+                     "2024-01-18"))
+
+# Code that doesn't work
+case_data |> 
+  mutate(report_date - date_onset)
+#> Error in `mutate()`:
+#> ℹ In argument: `report_date - date_onset`.
+#> Caused by error:
+#> ! object 'report_date' not found
+```
+
+:::
+:::::::
+
+# Exercise
+
+## Scenario {.exercise-slide}
+
+::: incremental
+Your task now is to:
+
+-   Continue with lab data linkage if you have not finished it yet
+-   Write a new case definition, which adds the "Confirmed" category if
+    a case has a positive pcr result
+-   When you encounter a problem related to the case definition, post a reprex in the Community Forum! 
+:::
+
+# Recap
+
+## Updating your case definition {.exercise-slide}
+
+The exercise asked you to create a new case category column with this code:
+
+::: {.code-box-small style="font-size: 35px;"}
+```{r eval=F, echo=T}
+df_joined <- df_joined |>   
+  mutate(case_def = case_when(cholera_pcr_positive==1 ~ Confirmed,
+                              cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  mutate(case_def = factor(case_def, levels = c("Unclear", 
+                                                "Suspected", 
+                                                "Probable", 
+                                                "Confirmed"))) 
+```
+:::
+
+But you got an error!
+
+::: {.code-box-small style="font-size: 35px;"}
+```{r error=T}
+df_joined <- df_joined |>   
+  mutate(case_def = case_when(cholera_pcr_positive==1 ~ Confirmed,
+                              cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  mutate(case_def = factor(case_def, levels = c("Unclear", 
+                                                "Suspected", 
+                                                "Probable", 
+                                                "Confirmed"))) 
+```
+:::
+
+## Updating your case definition {.exercise-slide}
+
+You used `dpasta()` to write code that reproduced a mini version of `df_joined`, then reprex() to share the a reproducible problem on the Applied Epi Community.
+
+::: {.code-box-small style="font-size: 35px;"}
+```{r eval=F, echo=T}
+# Create the code to generate a smaller version 
+dpasta(df_joined |> select(cholera_pcr_positive, cholera_rdt_positive, symp_diarrhea, symp_dehydration) |> filter(row_number()<5))
+
+# Create the reprex
+
+reprex({
+  
+  # Packages
+  pacman::p_load(dplyr)
+  
+  # Data (mini-version of df_joined)
+  df_joined_small <- data.frame(
+                cholera_pcr_positive = c(0L, 1L, NA, NA),
+                cholera_rdt_positive = c(NA, 1, 0, 0),
+                       symp_diarrhea = c(TRUE, TRUE, TRUE, TRUE),
+                    symp_dehydration = c(FALSE, FALSE, FALSE, FALSE))
+  
+  df_joined_small <- df_joined_small |>   
+    mutate(case_def = case_when(cholera_pcr_positive==1 ~ Confirmed,
+                                cholera_rdt_positive==1 ~ "Probable",
+                                symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                                TRUE ~ "Unclear")) |> 
+    mutate(case_def = factor(case_def, levels = c("Unclear", 
+                                                  "Suspected", 
+                                                  "Probable", 
+                                                  "Confirmed"))) 
+ 
+   })
+```
+:::
+
+## Updating your case definition {.exercise-slide}
+
+Thanks to a kind forum response (or perhaps you already knew how to correct the code), you were then able to update the case definition!
+
+::: {.code-box-small style="font-size: 35px;"}
+```{r eval=F, echo=T}
+df_joined <- df_joined |>   
+  mutate(case_def = case_when(cholera_pcr_positive==1 ~ "Confirmed",
+                              cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  mutate(case_def = factor(case_def, levels = c("Unclear", 
+                                                "Suspected", 
+                                                "Probable", 
+                                                "Confirmed"))) 
+```
+:::
+
+## Updating your case definition {.exercise-slide}
+
+Now when you run your ggplot code, with `data = df_joined`, you should
+get this:
+
+```{r}
+# By report date and case definition breakdown and region
+ggplot() +
+  geom_bar(data = df_joined,
+           aes(x=date_report_week,
+               fill = case_def)) +
+  facet_wrap(.~region) +
+  scale_fill_manual(values = c("Unclear" = "gray70",
+                               "Suspected" = "lightblue",
+                               "Probable" = "seagreen",
+                               "Confirmed" = "navy")) +
+scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  labs(title = "Cases by report week, presented by case category and region",
+       subtitle = glue("Data as of {max(df$date_report, na.rm=T)+1}"),
+       fill = "Case category",
+       x = "Week of report (week starting)",
+       y = "Weekly case count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Your total code {.exercise-slide}
+
+Your code should now look like this!
+
+```{r eval=F, echo=T}
+
+# Intro course
+# Title of script: Cleaning and analysis of GI outbreak data
+# Date started: 5th June 2021
+# Name: Paula Blomquist
+
+# Load packages-----------------------------
+
+pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, tidyr, glue, ggplot2)
+
+# Import data ------------------------------
+
+# Linelist
+df_raw <- import(here("data/gi_2021-07-07_linelist.xlsx"))
+
+# Labs
+df_lab_luh <- import(here("data/gi_2021-07-07_lab_luh.csv"))
+df_lab_vnrl <- import(here("data/gi_2021-07-07_lab_vnrl.csv"))
+df_lab_ghc <- import(here("data/gi_2021-07-07_lab_ghc.csv"))
+
+
+# Clean linelist data ---------------------------
+
+df <- df_raw |>
+  
+    # Clean column names
+    clean_names() |>
+    rename(date_onset = symptoms_started) |>
+  
+    # Change character class
+    mutate(admission = mdy(admission),
+           discovered = dmy(discovered),
+           found_on = mdy(found_on),
+           reported = ydm(reported),
+           told_on = mdy(told_on),
+           report  = mdy(report)) |>
+  
+    # Clean column content  
+    mutate(region = str_to_title(region),
+           sex = str_to_title(sex), 
+           sex = case_match(sex, 
+                            c("F", "Fem", "Female") ~ "Female",
+                            c("M","Man", "Male") ~ "Male",
+                            .default = NA),
+           region = case_match(region,
+             c("Bexar") ~ "Bexar",
+             c("Keda", "Kedah") ~ "Keda",
+             c("Liora", "Lioraah") ~ "Liora",
+             c("Nellus", "Nelos") ~ "Nelos",
+             c("New Ardin", "New Arden") ~ "New Arden",
+             c("Sorel", "Sorell") ~ "Sorel",
+             c("Taris") ~ "Taris",
+             c("Varek") ~ "Varek",
+             c("West Morin") ~ "West Morin",
+             .default = NA_character_))  |> 
+  
+  # Deduplicate to one row per case, based on case ID
+  distinct(id, .keep_all = TRUE) |>
+  
+  # Combine some columns
+  unite("date_of_birth", 
+          c("birthyear", "month_of_birth", "daybirth"), sep = "-") |> 
+  mutate(date_of_birth = ymd(date_of_birth)) |>
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |> 
+    select(-told_on, -reported, -discovered, -found_on, -report) |>
+  
+  # Create columns labelling diarrhoea or dehydration
+  mutate(symptoms = str_to_lower(symptoms),
+         symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
+         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids")) |>
+  
+  # Create case definition column
+  mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable"))) |> 
+  
+  # Create week column for onset date
+ # mutate(date_onset_week = floor_date(date_onset, "week")) |> 
+  
+  # Create week column for report date
+  mutate(date_report_week = floor_date(date_report, "week")) 
+  
+
+# Clean and append lab data------------------------
+
+df_lab_luh <- df_lab_luh |> 
+  clean_names()
+
+df_lab_ghc <- df_lab_ghc |> 
+  rename(cholera_pcr_result = pcr_result,
+         cholera_pcr_positive = pcr_positive,
+         cholera_pcr_date_test = pcr_date_test,
+         cholera_pcr_date_result = pcr_date_result)
+
+df_lab <- bind_rows(df_lab_luh, df_lab_ghc, df_lab_vnrl)
+
+# Link to df -------------------------------------
+
+df_joined <- df |> 
+  left_join(df_lab, by = "id")
+
+df_joined <- df_joined |>   
+  mutate(case_def = case_when(cholera_pcr_positive==1 ~ "Confirmed",
+                              cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable", "Confirmed"))) 
+
+
+# Check of joins ---------------------------------
+
+df_lab |> 
+  tabyl(cholera_pcr_positive)
+
+df_joined |> 
+  tabyl(cholera_pcr_positive)
+
+# Plots ------------------------------------------
+
+# By report date and case definition breakdown
+ggplot() +
+  geom_bar(data = df_joined,
+           aes(x=date_report_week,
+               fill = case_def)) +
+  scale_fill_manual(values = c("Unclear" = "gray70",
+                               "Suspected" = "lightblue",
+                               "Probable" = "seagreen",
+                               "Confirmed" = "navy")) +
+scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  labs(title = "Cases by report week, presented by case category and region",
+       subtitle = glue("Data as of {max(df$date_report, na.rm=T)+1}"),
+       fill = "Case category",
+       x = "Week of report (week starting)",
+       y = "Weekly case count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# By report date and case definition breakdown and region
+ggplot() +
+  geom_bar(data = df_joined,
+           aes(x=date_report_week,
+               fill = case_def)) +
+  facet_wrap(.~region) +
+  scale_fill_manual(values = c("Unclear" = "gray70",
+                               "Suspected" = "lightblue",
+                               "Probable" = "seagreen",
+                               "Confirmed" = "navy")) +
+scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  labs(title = "Cases by report week, presented by case category and region",
+       subtitle = glue("Data as of {max(df$date_report, na.rm=T)+1}"),
+       fill = "Case category",
+       x = "Week of report (week starting)",
+       y = "Weekly case count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+
+
+```

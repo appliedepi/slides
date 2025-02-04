@@ -695,11 +695,11 @@ pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, tidyr)
 df_raw <- import(here("data/gi_2021-07-07_linelist.xlsx"))
 
 # Labs
-lab_luh <- import(here("data/gi_2021-07-07_labLUH.csv"))
-lab_nvrl <- import(here("data/gi_2021-07-07_labLUH.csv"))
-lab_ghc <- import(here("data/gi_2021-07-07_labLUH.csv"))
+df_lab_luh <- import(here("data/gi_2021-07-07_lab_luh.csv"))
+df_lab_vnrl <- import(here("data/gi_2021-07-07_lab_vnrl.csv"))
+df_lab_ghc <- import(here("data/gi_2021-07-07_lab_ghc.csv"))
 
-# Clean data ---------------------------
+# Clean linelist data ---------------------------
 
 df <- df_raw |>
   
@@ -734,8 +734,8 @@ df <- df_raw |>
              c("West Morin") ~ "West Morin",
              .default = NA_character_))  |> 
   
-  # Deduplicate to one row per case - EDIT THIS??
-  distinct() |>
+  # Deduplicate to one row per case, based on case ID
+  distinct(id, .keep_all = TRUE) |>
   
   # Combine some columns
   unite("date_of_birth", 
