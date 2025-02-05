@@ -1,0 +1,586 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    code-line-numbers: false
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+
+# Packages
+pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, gtExtras, gt, tidyr, ggplot2, glue, datapasta, reprex)
+
+
+# Lab data -------------------------------
+# Labs
+df_lab_luh <- import(here("intror/gi_2021-06-17_lab_luh.csv"))
+df_lab_vnrl <- import(here("intror/gi_2021-06-17_lab_vnrl.csv"))
+df_lab_ghc <- import(here("intror/gi_2021-06-17_lab_ghc.csv"))
+
+
+# Load data as needed 
+df_raw <- import(here("intror/gi_2021-06-17_linelist.xlsx")) 
+
+# Other symptoms
+df_symptoms <- import(here("intror/gi_2021-06-17_symptoms.xlsx")) 
+
+# Clean linelist data ---------------------------
+
+df <- df_raw |>
+  
+    # Clean column names
+    clean_names() |>
+    rename(date_onset = symptoms_started) |>
+  
+    # Change character class
+    mutate(admission = mdy(admission),
+           discovered = dmy(discovered),
+           found_on = mdy(found_on),
+           reported = ydm(reported),
+           told_on = mdy(told_on),
+           report  = mdy(report)) |>
+  
+    # Clean column content  
+    mutate(region = str_to_title(region),
+           sex = str_to_title(sex), 
+           sex = case_match(sex, 
+                            c("F", "Fem", "Female") ~ "Female",
+                            c("M","Man", "Male") ~ "Male",
+                            .default = NA),
+           region = case_match(region,
+             c("Bexar") ~ "Bexar",
+             c("Keda", "Kedah") ~ "Keda",
+             c("Liora", "Lioraah") ~ "Liora",
+             c("Nellus", "Nelos") ~ "Nelos",
+             c("New Ardin", "New Arden") ~ "New Arden",
+             c("Sorel", "Sorell") ~ "Sorel",
+             c("Taris") ~ "Taris",
+             c("Varek") ~ "Varek",
+             c("West Morin") ~ "West Morin",
+             .default = NA_character_))  |> 
+  
+  # Deduplicate to one row per case, based on case ID
+  distinct(id, .keep_all = TRUE) |>
+  
+  # Combine some columns
+  unite("date_of_birth", 
+          c("birthyear", "month_of_birth", "daybirth"), sep = "-") |> 
+  mutate(date_of_birth = ymd(date_of_birth)) |>
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |> 
+    select(-told_on, -reported, -discovered, -found_on, -report) |>
+  
+  # Create columns labelling diarrhoea or dehydration
+  mutate(symptoms = str_to_lower(symptoms),
+         symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
+         symp_dehydration = str_detect(symptoms, "dehydr|lack of fluids|lack fluids|dry mou")) |>
+  
+  # Create case definition column
+  mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable"))) |> 
+  
+  # Create week column for onset date
+ # mutate(date_onset_week = floor_date(date_onset, "week")) |> 
+  
+  # Create week column for report date
+  mutate(date_report_week = floor_date(date_report, "week")) 
+  
+
+# Clean and append lab data------------------------
+
+df_lab_luh <- df_lab_luh |> 
+  clean_names()
+
+df_lab_ghc <- df_lab_ghc |> 
+  rename(cholera_pcr_result = pcr_result,
+         cholera_pcr_positive = pcr_positive,
+         cholera_pcr_date_test = pcr_date_test,
+         cholera_pcr_date_result = pcr_date_result)
+
+df_lab <- bind_rows(df_lab_luh, df_lab_ghc, df_lab_vnrl)
+
+# Link to df -------------------------------------
+
+df_joined <- df |> 
+  left_join(df_lab, by = "id") |> 
+  left_join(df_symptoms, by = "id")
+
+# Case def update -----------------------------------------
+
+df_joined <- df_joined |>   
+  mutate(case_def = case_when(cholera_pcr_positive==1 ~ "Confirmed",
+                              cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable", "Confirmed")))
+
+
+```
+
+# Module 8: Part A
+
+## Scenario {.exercise-slide}
+
+::: incremental
+-   You have been asked to better understand the symptoms of cases
+    across regions
+
+-   A very kind colleague has manually cleaned the remaining free-text
+    symptom data for you, so that there is one column per symptom.
+
+-   You need to process the data and then present it!
+:::
+
+## Module 8 learning objectives
+
+In Part A you will:
+
+-   Learn how to reshape data with `pivot_wider()` and pivot_longer()\`
+-   Practice making summary tables with pivoted data
+
+In Part B you will:
+
+-   Learn to format tables with `flextable()`
+
+# Recap
+
+## Recap
+
+# Reshaping
+
+## Reshaping
+
+::: slide-header
+{dplyr}
+:::
+
+NEED TO CLEAR UP TERMINOLOGY HERE
+
+![](images/explain.png){fig-align="center" width="50%"}
+
+## pivot_wider()
+
+::: slide-header
+{dplyr}
+:::
+
+-   *Purpose*: Convert data from long format to wide format
+-   *Why*: To create one row per subject with multiple columns for
+    different measurements
+-   *How*:
+
+::: {.general-box style="font-size: 40x;"}
+```{r eval=F, echo=T}
+
+df_wide <- df_long |> 
+  pivot_wider(
+    names_from = column_to_pivot     # Specify the column to use for new columns
+    values_from = column_with_values # Specify the column that contains the values
+  )
+```
+:::
+
+## pivot_wider() example
+
+::: slide-header
+{dplyr}
+:::
+
+::: code-box
+```{r eval=F, echo=T}
+
+df_weekly_wide <- df_weekly |> 
+  pivot_wider(
+    names_from = "week",  
+    values_from = "cases")
+```
+:::
+
+![](images/pivot_longer.png)
+
+```{r eval=T, echo=F}
+df_weekly <- data.frame(
+  region = c("Central", "Central", "Central", 
+             "North", "North", "North", 
+             "South", "South", "South"),
+  week = rep(1:3, 3),  # Repeating weeks 1, 2, 3 for each region
+  cases = c(2, 5, 6, 4, 7, 8, 10, 11, 14)
+)
+
+
+```
+
+## pivot_longer()
+
+::: slide-header
+{dplyr}
+:::
+
+-   *Purpose*: Convert data from wide format to long format
+-   *Why*: To create one row per observation, useful for analysis and
+    visualization
+-   *How*:
+
+::: {.general-box style="font-size: 36x;"}
+```{r eval=F, echo=T}
+df_long <- df_wide |> 
+  pivot_longer(
+    cols = columns_to_pivot,      # Specify columns to pivot into long format
+    names_to = "new_column_name",  # Name of new column that holds variable names
+    values_to = "new_value_column"  # Name of new column that holds the values
+  )
+```
+:::
+
+## pivot_longer() example
+
+::: slide-header
+{dplyr}
+:::
+
+::: {.general-box style="font-size: 36x; width: 900px;"}
+```{r eval=F, echo=T}
+
+df_dates_long <- df_dates |> 
+  pivot_longer(
+    cols = c(date_onset, date_report, date_admission), 
+    names_to = "date_type",  
+    values_to = "date")
+```
+:::
+
+![](images/pivot_longer.png)
+
+## pivot_longer() example
+
+::: slide-header
+{dplyr}
+:::
+
+See how the data is now analysable! We can create a timeline per case.
+
+::: code-box-small
+```{r echo=T, eval=F}
+df_dates_long |> 
+  ggplot() +
+  geom_line(aes(y = id, x = date)) +
+  geom_point(aes(y = id, x = date, shape = date_type, color = date_type), size = 5) +
+  scale_color_brewer(palette=9) +
+  theme_bw() +
+  labs(x = "Date", y = "ID", color = "Event", shape = "Event") +
+  theme(legend.position = "bottom")
+  
+```
+:::
+
+::: arrow-box
+↓
+:::
+
+```{r fig.height = 3, fig.align='center'}
+df_dates <- tibble(
+  id = as.character(1:3),
+  date_onset = ymd(c("2021-05-10", "2021-06-11", "2021-05-22")),
+  date_report =ymd(c("2021-05-15", "2021-06-14", "2021-05-30")),
+  date_admission = ymd(c("2021-05-16", NA, "2021-06-02"))
+)
+
+df_dates_long <- df_dates |> 
+  pivot_longer(
+    cols = c(date_onset, date_report, date_admission), 
+    names_to = "date_type",  
+    values_to = "date")
+
+df_dates_long |> 
+  ggplot() +
+  geom_line(aes(y = id, 
+                 x = date)) +
+  geom_point(aes(y = id, 
+                 x = date,
+                 shape = date_type,
+                 color = date_type), size = 5) +
+  scale_color_brewer(palette=9) +
+  theme_bw(base_size = 20) +
+  labs(x = "Date", y = "ID", color = "Event", shape = "Event") +
+  theme(legend.position = "bottom")
+```
+
+## Adding str_replace()
+
+::: slide-header
+{dplyr; stringr}
+:::
+
+Remember str_replace() from Module 4? Let's use it to systematically
+remove the `date_` prefix within the `date_type` column.
+
+::: code-box-small
+```{r eval=F, echo=T}
+
+df_dates_long <- df_dates |> 
+  pivot_longer(
+    cols = c(date_onset, date_report, date_admission), 
+    names_to = "date_type",  
+    values_to = "date") |> 
+  mutate(date_type = str_replace(date_type, "date_", "Date of "))
+  
+```
+:::
+
+![](images/pivot_longer_str.png)
+
+## Adding str_replace()
+
+::: slide-header
+{dplyr; stringr}
+:::
+
+See how this improves the legend values, without any changes to the
+ggplot code!
+
+::: code-box-small
+```{r echo=T, eval=F}
+df_dates_long |> 
+  ggplot() +
+  geom_line(aes(y = id, x = date)) +
+  geom_point(aes(y = id, x = date, shape = date_type, color = date_type), size = 5) +
+  scale_color_brewer(palette=9) +
+  theme_bw() +
+  labs(x = "Date", y = "ID", color = "Event", shape = "Event") +
+  theme(legend.position = "bottom")
+  
+```
+:::
+
+::: arrow-box
+↓
+:::
+
+```{r fig.height = 3, fig.align='center'}
+df_dates <- tibble(
+  id = as.character(1:3),
+  date_onset = ymd(c("2021-05-10", "2021-06-11", "2021-05-22")),
+  date_report =ymd(c("2021-05-15", "2021-06-14", "2021-05-30")),
+  date_admission = ymd(c("2021-05-16", NA, "2021-06-02"))
+)
+
+df_dates_long <- df_dates |> 
+  pivot_longer(
+    cols = c(date_onset, date_report, date_admission), 
+    names_to = "date_type",  
+    values_to = "date") |> 
+  mutate(date_type = str_replace(date_type, "date_", "Date of "))
+
+df_dates_long |> 
+  ggplot() +
+  geom_line(aes(y = id, 
+                 x = date)) +
+  geom_point(aes(y = id, 
+                 x = date,
+                 shape = date_type,
+                 color = date_type), size = 5) +
+  scale_color_brewer(palette=9) +
+  theme_bw(base_size = 20) +
+  labs(x = "Date", y = "ID", color = "Event", shape = "Event") +
+  theme(legend.position = "bottom")
+```
+
+# Exercise
+
+## Exercise {.exercise-slide}
+
+::: incremental
+-   Time for you to link in the clean symptom data and create some
+    intermediate dataframes that are sufficiently **tidy** for analysing
+    symptom data!
+
+-   Access exercises here:
+:::
+
+# Recap
+
+## Bringing in symptom data {.exercise-slide}
+
+First, you imported this file with `import()`, then you added a
+`left_join()` to link the symptom data to `df`
+
+::: code-box
+```{r eval = F, echo = T}
+df_joined <- df |>
+  left_join(df_lab, by = "id") |>
+  left_join(df_symptoms, by = "id")
+```
+:::
+
+## Pivoting longer {.exercise-slide}
+
+Your task was then to reshape several binary symptom columns. You used
+`pivot_longer()`, to select all columns starting with `symp_`, so that
+the column names became values within a new column `symp`.
+
+::::::: columns
+::: {.column style="width:50%; font-size: 31px;"}
+```{r eval=F, echo=T}
+df_joined |>
+  pivot_longer(cols = starts_with("symp_"),
+               values_to = "symp_reported",
+               names_to = "symp") |>
+  select(id, case_def, region, symp, symp_reported) 
+```
+:::
+
+::: {.column width="2%"}
+→
+:::
+
+::: {.column .fragment style="width:45%; font-size: 27px;"}
+```{r}
+df_joined |>
+  pivot_longer(cols = starts_with("symp_"),
+               values_to = "symp_reported",
+               names_to = "symp") |>
+  select(id, case_def, region, symp, symp_reported) 
+```
+:::
+
+::: {.obs-box .fragment}
+💡 **NOTE**: See how this is now **tidy**, as the variable of symptom
+type is in one column and can more easily be analysed
+:::
+:::::::
+
+## Pivoting longer {.exercise-slide}
+
+You can add some additional formatting with `str_to_title()` and
+`str_replace()` to improve the `symp` column.
+
+::: {.code-box-small style="width:70%; font-size: 35px; margin: auto;"}
+```{r eval=F, echo=T}
+...
+  mutate(symp = str_to_title(str_replace(symp, "symp_", ""))) |>
+  mutate(symp = str_replace(symp, "_", " "))
+```
+:::
+
+::::: fragment
+::: arrow-box
+↓
+:::
+
+::: {.output-box style="width:45%; font-size: 29px; margin: auto;"}
+```{r}
+df_symptoms_long <- df_joined |>
+  pivot_longer(cols = starts_with("symp_"),
+               values_to = "symp_reported",
+               names_to = "symp") |>
+  select(id, case_def, region, symp, symp_reported) |>
+  mutate(symp = str_to_title(str_replace(symp, "symp_", ""))) |>
+  mutate(symp = str_replace(symp, "_", " "))
+
+df_symptoms_long
+```
+:::
+:::::
+
+## Pivoting longer {.exercise-slide}
+
+You can now create a summary table with `group_by()` and `summarize()`.
+
+::: {.code-box-small style="width:70%; font-size: 32px; margin: auto;"}
+```{r eval=F, echo=T}
+ df_symptoms_long |>
+  group_by(symp) |>
+  summarize(
+    reported = sum(symp_reported == 1, na.rm = TRUE),
+    percent = percent(reported / sum(!is.na(symp_reported)))) |>
+  arrange(desc(reported))
+```
+:::
+
+::::: fragment
+::: arrow-box
+↓
+:::
+
+::: {.output-box style="width:45%; font-size: 32px; margin: auto;"}
+```{r}
+df_symptoms_long |>
+  group_by(symp) |>
+  summarize(
+    reported = sum(symp_reported == 1, na.rm = TRUE),
+    percent = scales::percent(reported / sum(!is.na(symp_reported)))) |>
+  arrange(desc(reported))
+```
+:::
+:::::
+
+## Pivoting wider {.exercise-slide}
+
+You also worked on one example of pivoting wider: You started with a
+`group_by()` and `summarize()` to produce this long table with the
+percentage of cases per region with each symptom.
+
+**Not very presentable!**
+
+::: {.general-box style="width: 600px; font-size: 35px;"}
+```{r}
+df_symptoms_long |>
+  group_by(symp, region) |>
+  summarize(
+    reported = sum(symp_reported == 1, na.rm = TRUE),
+    percent = scales::percent(reported / sum(!is.na(symp_reported)), 0.1)) |>
+  select(symp, region, percent)
+```
+:::
+
+## Pivoting wider {.exercise-slide}
+
+Then you used `pivot_wider()` to make a much more presentable table! See
+how the region names in the `region` column got moved to new region
+columns!
+
+::: {.general-box style="width: 800px; font-size: 35px;"}
+```{r eval=F, echo=T}
+table_symptoms_region|>
+  pivot_wider(names_from = region, values_from = percent)
+```
+:::
+
+::: arrow-box
+↓
+:::
+
+::: {.general-box style="width: 1000px; font-size: 35px;"}
+```{r}
+# Back to wide
+df_symptoms_long |>
+  group_by(symp, region) |>
+  summarize(
+    reported = sum(symp_reported == 1, na.rm = TRUE),
+    percent = reported / sum(!is.na(symp_reported))*100) |>
+  select(symp, region, percent) |>
+  pivot_wider(names_from = region, values_from = percent)
+
+
+```
+:::
+
+# Break!

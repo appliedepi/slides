@@ -1,0 +1,779 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    code-line-numbers: false
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+
+# Packages
+pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, gtExtras, gt, tidyr, ggplot2)
+
+# Load data as needed 
+df_raw <- import(here("intror/gi_2021-07-07_linelist.xlsx")) 
+
+df <- df_raw |>
+  
+    # Clean column names
+    clean_names() |>
+    rename(date_onset = symptoms_started) |>
+  
+    # Change character class
+    mutate(admission = mdy(admission),
+           discovered = dmy(discovered),
+           found_on = mdy(found_on),
+           reported = ydm(reported),
+           told_on = mdy(told_on),
+           report  = mdy(report)) |>
+  
+    # Clean column content  
+    mutate(region = str_to_title(region),
+           sex = str_to_title(sex), 
+           sex = case_match(sex, 
+                            c("F", "Fem", "Female") ~ "Female",
+                            c("M","Man", "Male") ~ "Male",
+                            .default = NA),
+           region = case_match(region,
+             c("Bexar") ~ "Bexar",
+             c("Keda", "Kedah") ~ "Keda",
+             c("Liora", "Lioraah") ~ "Liora",
+             c("Nellus", "Nelos") ~ "Nelos",
+             c("New Ardin", "New Arden") ~ "New Arden",
+             c("Sorel", "Sorell") ~ "Sorel",
+             c("Taris") ~ "Taris",
+             c("Varek") ~ "Varek",
+             c("West Morin") ~ "West Morin",
+             .default = NA_character_))  |> 
+  
+  # Deduplicate to one row per case, based on case ID
+  distinct(id, .keep_all = TRUE) |>
+  
+  # Combine some columns
+  unite("date_of_birth", 
+          c("birthyear", "month_of_birth", "daybirth"), sep = "-") |> 
+  mutate(date_of_birth = ymd(date_of_birth)) |>
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |> 
+    select(-told_on, -reported, -discovered, -found_on, -report) |>
+  
+  # Create columns labelling diarrhoea or dehydration
+  mutate(symptoms = str_to_lower(symptoms),
+         symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
+         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids")) |>
+  
+  # Create case definition column
+  mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  
+  # Create week column for onset date
+ # mutate(date_onset_week = floor_date(date_onset, "week")) |> 
+  
+  # Create week column for report date
+  mutate(date_report_week = floor_date(date_report, "week")) 
+  
+
+# Create the sub versions needed (df = as clean as appropriate for this module, _demo = filtered to fewer rows when need to show on slides)
+
+df_demo <- df |> 
+  filter(row_number()<6)
+
+```
+
+# Module 6: Part A
+
+## Learning objectives
+
+In Part A you will:
+
+- Learn why use {ggplot} for plotting in R
+- Learn to make a basic plot with {ggplot2}, including dynamic and static aesthetics and facetting
+
+In Part B you will:
+
+- Learn to customize your ggplot with themes and scales
+
+
+# Recap
+
+## Plotting with {ggplot2}
+
+::: slide-header
+{ggplot2}
+:::
+
+::: incremental
+-   *Purpose*: Data visualization
+-   *Why*: We pick ggplot() from {ggplot2} because:
+    -   It can create a very wide range of high-quality plots with
+        plenty customization
+    -   It has well-structured grammar
+    -   There are many compatible packages that expand functionality
+        (e.g. {gganimate}, {ggthemr}, {ggdendro}, {gghighlight},
+        {ggforce}...)
+    -   The {ggplot2} package is the most popular data visualization
+        tool in R
+:::
+
+::: {.obs-box .fragment}
+Other plotting options, which we will not cover, include base R,
+lattice, and plotly.
+:::
+
+## Examples
+
+::: slide-header
+{ggplot2}
+:::
+
+Professional looking plots...
+
+![](images/example_plot.png){style="display: block; margin: auto; width: 100%;"}
+
+## Examples
+
+::: slide-header
+{ggplot2}
+:::
+
+![](images/example_corr.png){style="display: block; margin: auto; width: 100%;"}
+
+## Examples
+
+::: slide-header
+{ggplot2}
+:::
+
+![](images/example_heat.png){style="display: block; margin: auto; width: 100%;"}
+
+## Examples
+
+::: slide-header
+{ggplot2}
+:::
+
+![](images/example_outline.png){style="display: block; margin: auto; width: 100%;"}
+
+## Examples
+
+::: slide-header
+{ggplot2}
+:::
+
+![](images/example_tree.png){style="display: block; margin: auto; width: 100%;"}
+
+## Examples
+
+::: slide-header
+{ggplot2}
+:::
+
+![](images/example_map.png){style="display: block; margin: auto; width: 100%;"}
+
+## Let's create a ggplot
+
+::: slide-header
+{ggplot2}
+:::
+
+::::::: columns
+<br> Let's start by "opening the canvas" with the ggplot() function.
+
+:::: {.column width="38%"}
+<br>
+
+::: {.code-box-small style="display: block; font-size: 32px;"}
+```{r eval=F, echo=T}
+ggplot() 
+```
+:::
+::::
+
+::: {.column style="width: 2%; text-align: center;"}
+<br> <br> →
+:::
+
+::: {.column display="width: 60%; margin: auto;"}
+```{r fig.height= 1, fig.width=1.2, dpi=200}
+ggplot() 
+
+set.seed(123)  # For reproducibility
+
+# Number of infants
+n <- 310  
+
+# Set the current year for consistency (e.g., 2025)
+current_year <- 2025
+
+# Simulating age (in months)
+age_months <- sample(0:48, n, replace = TRUE)
+
+# Calculate birth year based on current year and age in months
+age_years <- age_months / 12
+birth_year <- current_year - floor(age_years)
+
+# Simulating sex (50% probability of Male or Female)
+sex <- sample(c("Male", "Female"), n, replace = TRUE)
+
+# Adjust height and weight distributions based on sex (males slightly larger on avg)
+height_adjustment <- ifelse(sex == "Male", 1, -1)  # Males tend to be slightly taller
+weight_adjustment <- ifelse(sex == "Male", 0.2, -0.2)  # Males tend to be slightly heavier
+
+# Simulating height and weight based on age and sex
+height_cm <- rnorm(n, mean = 50 + age_months * 1.5 + height_adjustment, sd = 3)  
+weight_kg <- rnorm(n, mean = 3.2 + age_months * 0.5 + weight_adjustment, sd = 1)
+
+# Define underweight: Below 5th percentile (approximate rule-of-thumb)
+underweight <- ifelse(weight_kg < (3.2 + age_months * 0.45), "Under weight", "Not under-weight")
+
+# Create data frame
+df_infants <- tibble(
+  age_months,
+  sex,
+  height_cm,
+  weight_kg,
+  underweight,
+  birth_year
+)
+```
+:::
+:::::::
+
+## Let's create a ggplot
+
+::: slide-header
+{ggplot2}
+:::
+
+:::::::: columns
+<br> Then we select a specific `geom_xxx()` function. Here, we want a
+bar plot. <br>
+
+::::: {.column width="38%"}
+<br>
+
+::: {.code-box-small style="display: block; font-size: 32px;"}
+```{r eval=F, echo=T}
+ggplot() +
+  geom_point()
+```
+:::
+
+<br>
+
+::: obs-box
+⚠️ **NOTE** See how we use <br> the + symbol, not the pipe!
+:::
+:::::
+
+::: {.column style="width: 2%; text-align: center;"}
+<br> <br> →
+:::
+
+::: {.column display="width: 60%; margin: auto;"}
+```{r fig.height= 1, fig.width=1.2, dpi=200}
+ggplot() +
+  geom_point() +
+  theme_gray(base_size = 3.5) +  # Base font size
+  theme(
+    legend.key.size = unit(0.1, "cm"),  # Smaller legend keys
+    legend.text = element_text(size = 3),  # Legend text size
+    legend.title = element_text(size = 3)  # Legend title size
+  )
+```
+:::
+::::::::
+
+## Let's create a ggplot
+
+::: slide-header
+{ggplot2}
+:::
+
+::::::: columns
+<br> Then we add an aesthetics bracket. We specify how to map our data
+(e.g. the columns `height_cm` and `weight_kg`) to the plot 'aesthetics'
+(e.g. to x and y coordinates respectively).
+
+:::: {.column width="38%"}
+<br>
+
+::: {.code-box-small style="display: block; font-size: 32px;"}
+```{r eval=F, echo=T}
+ggplot() +
+  geom_point(data = df_infants,
+           aes(x= height_cm,
+               y = weight_kg))
+```
+:::
+::::
+
+::: {.column style="width: 2%; text-align: center;"}
+<br> <br> →
+:::
+
+::: {.column display="width: 60%; margin: auto;"}
+```{r fig.height= 1, fig.width=1.2, dpi=200}
+ggplot() +
+  geom_point(data = df_infants,
+           aes(x= height_cm,
+               y = weight_kg), size=0.3) +
+  theme_gray(base_size = 3.5) +  # Base font size
+  theme(
+    legend.key.size = unit(0.1, "cm"),  # Smaller legend keys
+    legend.text = element_text(size = 3),  # Legend text size
+    legend.title = element_text(size = 3)  # Legend title size
+  )
+```
+:::
+:::::::
+
+## Let's create a ggplot
+
+::: slide-header
+{ggplot2}
+:::
+
+::::::: columns
+<br> We can add other aesthetics, e.g `color` for the colour of the
+dots. <br>
+
+:::: {.column width="37%"}
+<br>
+
+::: {.code-box-small style="display: block; font-size: 32px;"}
+```{r eval=F, echo=T}
+ggplot() +
+  geom_point(data = df_infants,
+           aes(x= height_cm,
+               y = weight_kg,
+               color = sex))
+```
+:::
+::::
+
+::: {.column style="width: 3%; text-align: center;"}
+<br> <br> →
+:::
+
+::: {.column display="width: 60%; margin: auto;"}
+```{r fig.height= 1, fig.width=1.2, fig.dpi=200}
+ggplot() +
+  geom_point(data = df_infants,
+           aes(x= height_cm,
+               y = weight_kg,
+               color = sex), size = 0.3) +
+  theme_gray(base_size = 3.5) +  # Base font size
+  theme(
+    legend.key.size = unit(0.1, "cm"),  # Smaller legend keys
+    legend.text = element_text(size = 3),  # Legend text size
+    legend.title = element_text(size = 3)  # Legend title size
+  )
+```
+:::
+:::::::
+
+## Other geoms
+
+![](images/geoms.png){style="display: block; margin: auto; width: 100%;"}
+
+::: {.code-box-small style="display: block; font-size: 32px;"}
+```{r eval=F, echo=F}
+# USED TO MAKE THE IMAGE
+
+
+# Violin
+ggplot() +
+  geom_boxplot(data = df_infants,
+           aes(y = height_cm,
+               x = underweight))
+
+# Histogram
+ggplot() +
+  geom_histogram(data = df_infants, 
+           aes(x = age_months), binwidth=1)
+
+# Bar
+ggplot() +
+  geom_bar(data = df_infants,
+           aes(x = birth_year,
+               fill = underweight))
+
+# Violin
+ggplot() +
+  geom_line(data = df_infants |> count(birth_year, underweight),
+           aes(y = n,
+               x = birth_year,
+               group= underweight, 
+               color= underweight))
+```
+:::
+
+## Aesthetics assignments
+
+There are several aesthetics that can be assigned values, aside from `y`, `x`,
+and `colour`:
+
+::: {#general-box style="text-align: left; width: 850px; background: #ebebeb; margin: 0 auto; font-size: 24px;"}
+| *Name of argument* | *Aesthetic* |
+|----------------------|--------------------------------------------------------|
+| `shape` | Display of point as dot, star, triangle, square... |
+| `fill` | The interior color (e.g of bar or boxplot) |
+| `color` | The exterior line colour (e.g. of bar plot), or point color size |
+| `alpha` | Transparency: 0 (invisible) to 1 (opaque) |
+| `width` | Width of bar plot bars |
+| `linetype` | Either solid, dashed, dotted, etc |
+| `binwidth` | Width of histogram bins |
+:::
+
+## Dynamic vs static aesthetics
+
+::::columns
+
+::: {.column style="width: 50%; font-size: 30px;" .fragment}
+
+*Static aesthetic assignments*: **Fixed values** mapped **outside** `aes()`. 
+
+```{r eval=F, echo=T}
+ggplot() +
+  geom_point(data = df_infants,
+           aes(x= height_cm,
+               y = weight_kg), color = "blue") 
+```
+
+```{r fig.height= 1, fig.width=1.2, dpi=200}
+ggplot() +
+  geom_point(data = df_infants,
+           aes(x= height_cm,
+               y = weight_kg), color = "blue", size=0.25) +
+  theme_gray(base_size = 3.5) +  # Base font size
+  theme(
+    legend.key.size = unit(0.1, "cm"),  # Smaller legend keys
+    legend.text = element_text(size = 3),  # Legend text size
+    legend.title = element_text(size = 3)  # Legend title size
+  )
+
+```
+
+:::
+
+::: {.column style="width: 50%; font-size: 30px;" .fragment}
+
+*Dynamic aesthetic assignments*: **Data variables** mapped **inside** `aes()`.
+
+```{r eval=F, echo=T}
+ggplot() +
+  geom_point(data = df_infants,
+           aes(x= height_cm,
+               y = weight_kg,
+               color = sex)) 
+```
+
+```{r fig.height= 0.9, fig.width=1.25, dpi=200}
+ggplot() +
+  geom_point(data = df_infants,
+           aes(x= height_cm,
+               y = weight_kg,
+               color = sex), size=0.25) +
+  theme_gray(base_size = 3.5) +  # Base font size
+  theme(
+    legend.key.size = unit(0.1, "cm"),  # Smaller legend keys
+    legend.text = element_text(size = 3),  # Legend text size
+    legend.title = element_text(size = 3)  # Legend title size
+  )
+
+```
+
+
+:::
+::::
+
+# Exercise
+
+## Scenario {.exercise-slide}
+
+::: incremental
+-   You've been asked to create a number of different epicurves, using the new columns you created last time. This includes:
+  - Epicurve by report week 
+  - Epicurve by onset week
+  - Each overall and by case definition and region 
+:::
+
+## Access the exercises {.exercise-slide}
+
+Instructions here
+
+# Recap
+
+## Your new plots {.exercise-slide}
+
+::: slide-header
+{ggplot2}
+:::
+
+In the exercise, you used `geom_bar()` to show rows of data per report week: 
+
+::: {.code-box style="display: block; font-size: 32px; width=60%"}
+```{r eval=F, echo=T}
+ggplot() +
+  geom_bar(data = df,
+           aes(x=date_report_week)) 
+```
+:::
+
+
+::: arrow-box
+&#8595;
+:::
+
+```{r fig.dpi=300, fig.align="center"}
+ggplot() +
+  geom_bar(data = df,
+           aes(x=date_report_week)) +
+  theme_gray(base_size = 15) +  # Base font size
+  theme(
+    legend.text = element_text(size = 15),  # Legend text size
+    legend.title = element_text(size = 15)  # Legend title size
+  )
+
+
+# ggplot() +
+#   geom_point(data = df_infants,
+#            aes(x= height_cm,
+#                y = weight_kg,
+#                color = sex), size = 0.3) +
+#   theme_gray(base_size = 3.5) +  # Base font size
+#   theme(
+#     legend.key.size = unit(0.1, "cm"),  # Smaller legend keys
+#     legend.text = element_text(size = 3),  # Legend text size
+#     legend.title = element_text(size = 3)  # Legend title size
+#   )
+```
+
+::: obs-box
+⚠️ **NOTE** See how ggplot2 presents the correct date order, because the column is a Date class!
+:::
+
+## Your new plots {.exercise-slide}
+
+::: slide-header
+{ggplot2}
+:::
+
+Then you added a `fill` dynamic aesthetic to stack the bars by case category:
+
+::: {.code-box style="display: block; font-size: 32px; width=60%"}
+```{r eval=F, echo=T}
+ggplot() +
+  geom_bar(data = df,
+           aes(x=date_report_week, fill = case_def)) 
+```
+:::
+
+
+::: arrow-box
+&#8595;
+:::
+
+```{r fig.dpi=300, fig.align="center"}
+ggplot() +
+  geom_bar(data = df,
+           aes(x=date_report_week,
+               fill = case_def)) +
+  theme_gray(base_size = 15) +  # Base font size
+  theme(
+    legend.text = element_text(size = 15),  # Legend text size
+    legend.title = element_text(size = 15)  # Legend title size
+  )
+
+
+# ggplot() +
+#   geom_point(data = df_infants,
+#            aes(x= height_cm,
+#                y = weight_kg,
+#                color = sex), size = 0.3) +
+#   theme_gray(base_size = 3.5) +  # Base font size
+#   theme(
+#     legend.key.size = unit(0.1, "cm"),  # Smaller legend keys
+#     legend.text = element_text(size = 3),  # Legend text size
+#     legend.title = element_text(size = 3)  # Legend title size
+#   )
+```
+
+
+## Your new plots {.exercise-slide}
+
+::: slide-header
+{ggplot2}
+:::
+
+Then, you learned in the exercise, to use `facet_wrap()` for quick stratification!
+
+::: {.code-box style="display: block; font-size: 32px; width=60%"}
+```{r eval=F, echo=T}
+ggplot() +
+  geom_bar(data = df,
+           aes(x=date_report_week, fill = case_def)) +
+  facet_wrap(.~region)
+```
+:::
+
+
+::: arrow-box
+&#8595;
+:::
+
+```{r fig.dpi=300, fig.align="center"}
+ggplot() +
+  geom_bar(data = df,
+           aes(x=date_report_week,
+               fill = case_def)) +
+  facet_wrap(.~region)  +
+  theme_gray(base_size = 15) +  # Base font size
+  theme(
+    legend.text = element_text(size = 15),  # Legend text size
+    legend.title = element_text(size = 15)  # Legend title size
+  )
+
+
+# ggplot() +
+#   geom_point(data = df_infants,
+#            aes(x= height_cm,
+#                y = weight_kg,
+#                color = sex), size = 0.3) +
+#   theme_gray(base_size = 3.5) +  # Base font size
+#   theme(
+#     legend.key.size = unit(0.1, "cm"),  # Smaller legend keys
+#     legend.text = element_text(size = 3),  # Legend text size
+#     legend.title = element_text(size = 3)  # Legend title size
+#   )
+```
+
+## Your code {.exercise-slide}
+
+Your code should now look like this!
+
+```{r eval=F, echo=T}
+
+# Intro course
+# Title of script: Cleaning and analysis of GI outbreak data
+# Date started: 5th June 2021
+# Name: Paula Blomquist
+
+# Load packages-----------------------------
+
+pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, tidyr)
+
+# Import data ------------------------------
+
+# Linelist
+df_raw <- import(here("data/gi_2021-07-07_linelist.xlsx"))
+
+# Labs
+df_lab_luh <- import(here("data/gi_2021-07-07_labLUH.csv"))
+df_lab_vnrl <- import(here("data/gi_2021-07-07_labLUH.csv"))
+df_lab_ghc <- import(here("data/gi_2021-07-07_labLUH.csv"))
+
+# Clean linelist data ---------------------------
+
+df <- df_raw |>
+  
+    # Clean column names
+    clean_names() |>
+    rename(date_onset = symptoms_started) |>
+  
+    # Change character class
+    mutate(admission = mdy(admission),
+           discovered = dmy(discovered),
+           found_on = mdy(found_on),
+           reported = ydm(reported),
+           told_on = mdy(told_on),
+           report  = mdy(report)) |>
+  
+    # Clean column content  
+    mutate(region = str_to_title(region),
+           sex = str_to_title(sex), 
+           sex = case_match(sex, 
+                            c("F", "Fem", "Female") ~ "Female",
+                            c("M","Man", "Male") ~ "Male",
+                            .default = NA),
+           region = case_match(region,
+             c("Bexar") ~ "Bexar",
+             c("Keda", "Kedah") ~ "Keda",
+             c("Liora", "Lioraah") ~ "Liora",
+             c("Nellus", "Nelos") ~ "Nelos",
+             c("New Ardin", "New Arden") ~ "New Arden",
+             c("Sorel", "Sorell") ~ "Sorel",
+             c("Taris") ~ "Taris",
+             c("Varek") ~ "Varek",
+             c("West Morin") ~ "West Morin",
+             .default = NA_character_))  |> 
+  
+  # Deduplicate to one row per case, based on case ID
+  distinct(id, .keep_all = TRUE) |>
+  
+  # Combine some columns
+  unite("date_of_birth", 
+          c("birthyear", "month_of_birth", "daybirth"), sep = "-") |> 
+  mutate(date_of_birth = ymd(date_of_birth)) |>
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |> 
+    select(-told_on, -reported, -discovered, -found_on, -report) |>
+  
+  # Create columns labelling diarrhoea or dehydration
+  mutate(symptoms = str_to_lower(symptoms),
+         symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
+         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids")) |>
+  
+  # Create case definition column
+  mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable"))) |> 
+  
+  # Create week column for onset date
+ # mutate(date_onset_week = floor_date(date_onset, "week")) |> 
+  
+  # Create week column for report date
+  mutate(date_report_week = floor_date(date_report, "week")) 
+  
+
+  
+
+# Plots ------------------------------------------
+
+# By report date and case definition breakdown
+ggplot() +
+  geom_bar(data = df,
+           aes(x=date_report_week,
+               fill = case_def))
+
+# By report date and case definition breakdown and region
+ggplot() +
+  geom_bar(data = df,
+           aes(x=date_report_week,
+               fill = case_def)) +
+  facet_wrap(.~region)
+
+
+```
+
+
+
+## Learning objectives

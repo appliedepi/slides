@@ -1,0 +1,628 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+---
+
+```{r}
+pacman::p_load(rio, here, janitor, dplyr, gtExtras, gt, tidyr)
+
+df_raw <- import(here("intror/gi_2021-07-07_linelist.xlsx")) 
+
+df_raw_demo <- df_raw |> 
+  filter(row_number()<6)
+
+```
+
+# Module 4: Part A
+
+## Module 4 learning objectives
+
+In part A you will:
+
+-   Learn the principles of tidy and clean data
+-   Get introduced to functions that clean column names 
+
+In part B you will:
+
+-   Learn how to change the class of a column, in particular deal with dates
+-   Get introduced to functions that clean and standardize values
+
+# Recap
+
+## Your script should look like this
+
+```{r eval=F, echo=T}
+
+# Intro course
+# Title of script: Cleaning and analysis of GI outbreak data
+# Date started: 5th June 2021
+# Name: Paula Blomquist
+
+# Load packages-----------------------------
+
+pacman::p_load(rio, here, janitor, dplyr)
+
+# Import data ------------------------------
+
+# Linelist
+df_raw <- import(here("data/gi_2021-07-07_linelist.xlsx"))
+
+# Labs
+df_lab_luh <- import(here("data/gi_2021-07-07_lab_luh.csv"))
+df_lab_vnrl <- import(here("data/gi_2021-07-07_lab_vnrl.csv"))
+df_lab_ghc <- import(here("data/gi_2021-07-07_lab_ghc.csv"))
+
+```
+
+# Clean and tidy data
+
+## Public health data
+
+Often, raw public health data looks like this:
+
+![](/images/messy.png)
+
+What are the problems with this data?
+
+## Clean data
+
+*Clean Data* is **accurate and in the correct format**, in that it is free from errors, inconsistencies, and irrelevant information. 
+
+::: {.fragment}
+
+For example:
+
+:::
+
+::::: {column}
+
+:::: {.column width="50%"  .fragment}
+
+*Dirty data:* Spelling mistakes, inconsistent column name formatting, non-standardised categories 
+```{r}
+
+data.frame(
+  case = c("CASE1", "Case2", "Case 3", "Case 4"),
+  `AGE IN YEARS` = c(31, 24, 18, 33),
+  Sex = c("f", "m", "MLE", "female")
+) |> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+::::
+
+:::: {.column width="50%" .fragment}
+
+*Clean:* Machine-readable column names, consistent ways of presenting information, no errors
+
+```{r}
+
+data.frame(
+  case = c("Case 1", "Case 2", "Case 3", "Case 4"),
+  age = c(31, 24, 18, 33),
+  sex = c("female", "male", "male", "female")
+) |> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+::::
+
+:::::
+
+## Tidy data
+
+"Tidy data" means data that is easy to work with, analyse, and visualize. 
+
+Below are 3 core principles of "tidy data":
+
+::: incremental 
+
+- Each *value* must have its own *cell*
+- Each *variable* (attribute being analysed) must have its own *column*
+- Each *observation* (unit of analysis) must have its own *row*
+
+:::
+
+## Tidy data examples
+
+::::::: columns
+:::: {.column width="50%"}
+
+*Messy:* Age and sex are in the same column
+
+```{r}
+
+data.frame(
+  case = c("Case 1", "Case 2", "Case 3", "Case 4"),
+  age_sex = c("31female", "24male", "18male", "33female")
+) |> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+
+::::
+:::: {.column width="50%" .fragment}
+
+*Clean:* Variables of age and the age unit are in their own columns
+
+```{r}
+
+data.frame(
+  case = c("Case 1", "Case 2", "Case 3", "Case 4"),
+  age = c(31, 24, 18, 33),
+  sex = c("female", "male", "male", "female")
+) |> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+::::
+
+:::::::
+
+## Tidy data examples
+
+::::::: columns
+:::: {.column width="50%"}
+
+*Messy:* Small dataframe of mosquito nets distributed per month per clinic
+
+```{r}
+
+nets <- data.frame(
+  clinic = c("Clinic 1", "Clinic 2", "Clinic 3"),
+  January = c(100, 120, 200),
+  February = c(110, 125, 240),
+  March = c(100, 115, 190)
+)
+
+nets |> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+
+::::
+:::: {.column width="50%" .fragment}
+
+*Clean:* Columns for month and net counts; one row per combination of clinic and month
+
+```{r}
+
+nets |> 
+  tidyr:: pivot_longer(cols = January:March, 
+               names_to = "month", 
+               values_to = "nets") |> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+
+::::
+
+:::::::
+
+
+## Tidy data examples
+
+::::::: columns
+:::: {.column width="40%"}
+
+*Messy:* Small dataframe of hobbies of two people
+
+```{r}
+
+data.frame(
+  Name = c("Paula", "Chris"),
+  Hobbies = c("Reading, Cooking", "Hiking")
+)|> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+```
+
+::::
+:::: {.column width="60%" .fragment}
+
+*Clean:* One column for each hobby
+```{r}
+
+data.frame(
+  name = c("Paula", "Chris"),
+  hobby_reading = c(TRUE, FALSE),
+  hobby_cooking = c(TRUE, FALSE),
+  hobby_hiking = c(FALSE, TRUE)
+)|> 
+    gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22)
+
+
+```
+
+::::
+
+:::::::
+
+## Tidy vs clean data
+
+ Data can be clean but not tidy; and tidy but not clean!
+
+![](/images/quadrants.png)
+
+# Inspecting the overall data
+
+## Our data {.exercise-slide}
+
+<style>
+.scroll-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  width: 100%;
+  max-width: 100%;
+}
+</style>
+
+We will use the new linelist shared by your colleagues. 
+
+*Brainstorm: What needs 🟧cleaning or 🟦tidying?*
+
+::: {.scroll-container}
+![](/images/dfraw.png){style="max-height: 50vh;"}
+
+:::
+
+::: {.obs-box}
+⚠️ **NOTE!** Remember that you can use the `View()` function to do this!
+:::
+
+## Our data {.exercise-slide}
+
+<style>
+.scroll-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  width: 100%;
+  max-width: 100%;
+}
+</style>
+
+We will use the new linelist shared by your colleagues. 
+
+*Brainstorm: What needs 🟧cleaning or 🟦tidying?*
+
+::: {.scroll-container}
+![](/images/dfraw_label.png){style="max-height: 50vh;"}
+
+:::
+
+::: {.obs-box}
+⚠️ **NOTE!** Remember that you can use the `View()` function to do this!
+:::
+
+
+## Today's functions
+
+*Cleaning columns names*:
+
+- *clean_names()* from {janitor} and *rename()* from {dplyr}
+- *glimpse()* from {dplyr} and *tabyl()* from {janitor} to inspect data
+
+*Cleaning column content*:
+
+- *as.xxx()* functions from {base} to change column class
+- *dmy()*, *mdy()*, and *ymd()* from {lubridate} to transform columns to date class
+- *str_to_xxx()* functions from {stringr} to standardize capitalisation of values
+- *case_match()* from {dplyr} to correct and standardize values
+
+# Cleaning column names
+
+## clean_names()
+
+::: slide-header
+{janitor}
+:::
+
+- *Purpose:* To standardize column names by making them lowercase, machine-readable, and consistent.
+- *Why:* For easier use in programming and analysis, avoiding issues with special characters, spaces, or inconsistent formatting.
+- *Example:* If your dataset has columns like "First Name" or "AGE (Yrs)", clean_names(data) will convert them to first_name and age_yrs.
+- *How:* 
+
+::: {.code-box-small style="width: 600px"}
+`data %>% clean_names()`
+:::
+<br>
+
+::: {.obs-box}
+⚠️ **NOTE!** Use of pipe in these examples going forward
+:::
+
+## Example
+
+::: slide-header
+{dplyr}
+:::
+
+<br>
+
+::: {.code-box-small style="width: 700px; font-size: 40px;"}
+```{r echo=T, eval=F}
+df_raw %>% clean_names()
+```
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Raw column names (6 shown)
+
+```{r}
+
+df_cols <- df_raw |> select(id, region, Sex, `Month of birth`, symptoms_started, `FOUND ON`)
+                 
+data.frame(column_names = colnames(df_cols)) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Processed column names
+
+```{r}
+data.frame(column_names = colnames(df_cols |> clean_names())) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+```
+:::
+:::
+:::
+
+## rename()
+
+- *Purpose:* To specify new column names for one or more columns in a dataset.
+- *Why:* So column names are more meaningful, consistent, or aligned with a naming convention, making them easier to use.
+- *Example:* If your dataset has a column named Age_Yrs but you want to rename it to age, you can use rename(data, age = Age_Yrs).
+- *How:* 
+
+::: {.code-box-small style="width: 600px"}
+`data %>% (new_name = old_name)`
+:::
+
+## Starting from clean_names()...
+
+::: slide-header
+{dplyr}
+:::
+
+<br>
+
+::: {.code-box-small style="width: 700px; font-size: 40px;"}
+```{r echo=T, eval=F}
+df_raw %>% clean_names()
+```
+:::
+
+<br><br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Raw column names (6 shown)
+
+```{r}
+
+df_cols <- df_raw |> select(id, region, Sex, `Month of birth`, symptoms_started, `FOUND ON`)
+                 
+data.frame(column_names = colnames(df_cols)) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Processed column names
+
+```{r}
+data.frame(column_names = colnames(df_cols |> clean_names())) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+```
+:::
+:::
+:::
+
+
+## ...and add rename()
+
+::: slide-header
+{dplyr}
+:::
+
+<br>
+
+::: {.code-box-small style="width: 700px; font-size: 40px;"}
+```{r echo=T, eval=F}
+df_raw %>% clean_names() |> 
+  rename(date_onset = symptoms_started)
+```
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Raw column names (6 shown)
+
+```{r}
+data.frame(column_names = colnames(df_cols)) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+```
+:::
+
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Processed column names
+
+```{r}
+data.frame(column_names = colnames(df_cols |> clean_names() |> 
+                                    rename(date_onset = symptoms_started))) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+```
+:::
+:::
+:::
+
+
+## Now assign to new object!
+
+::: slide-header
+{dplyr}
+:::
+
+<br>
+
+::: {.code-box-small style="width: 700px; font-size: 40px;"}
+```{r echo=T, eval=F}
+df <- df_raw %>% clean_names() |> 
+  rename(date_onset = symptoms_started)
+```
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Raw column names (6 shown)
+
+```{r}
+data.frame(column_names = colnames(df_cols)) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+```
+:::
+
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+[Stored in environment]
+:::
+:::
+:::
+
+
+# Exercise
+
+## Scenario {.exercise-slide}
+
+::: incremental
+
+:::
+
+## Access the exercises {.exercise-slide}
+
+Instructions here
+
+# Recap
+
+## Put code altogether
+
+
+## Revision! Column names
+
+::::::: columns
+::: {.column width="60%"}
+Just like object names, column names in R are case sensitive. 
+
+R *requires* that column names:
+
+-   Start with a letter, not a number
+-   Are unique (two columns in a dataframe cannot have the same name)
+
+It is *good practice* that column names:
+
+-   Do not contain spaces or special characters other than underscores or periods
+-   Are short and easy to understand
+:::
+
+::::: {.column width="40%"}
+::: {style="background: #DAF7A650; width=120px; "}
+
+- ✔ age
+- ✔ sex
+- ✔ date_onset
+:::
+
+::: {style="background: #f5bcb150; width=120p;  "}
+
+- ❌ 18_or_younger
+- ❌ Sex
+- ❌ Age in years
+- ❌ age_in_days_round_t...
+:::
+:::::
+:::::::
+
+## Learning objectives

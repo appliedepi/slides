@@ -1,0 +1,916 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+---
+
+```{r}
+## Data
+pacman::p_load(rio)
+df <- import(here::here("intror/GIoutbreak_2021-05-25_linelist_clean_DEMO.RDS"))
+
+input_data <- df |> 
+  dplyr::select(id, region, age, sex)
+
+tab_input <- input_data |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+```
+
+# Module 2: Part A
+
+## Learning objectives
+
+- Understand logical evaluation and its role in data manipulation
+- Recognize different data classes and their importance in logical comparisons
+- Learn key {dplyr} functions for data manipulation: `filter()`, `mutate()`, `group_by`, and `summarize()`
+- Learn how to chain functions together with pipes
+
+## Recap
+
+Blabla
+
+# Logical evaluation and classes
+
+## What is logical evaluation?
+
+- Logical evaluation checks whether a condition is `TRUE` or `FALSE`.
+
+- It uses comparison operators:
+
+::: {#general-box style="text-align: left; width: 550px; background: #ebebeb; margin: 0 auto; font-size: 29px;"}
+| Operator | Description                         |
+|----------|-------------------------------------|
+| `==`     | Equals                              |
+| `!=`     | Not equal                           |
+| `>`      | Greater than                        |
+| `>=`     | Greater than or equal to            |
+| `<`      | Less than                           |
+| `<=`     | Less than or equal to               |
+:::
+
+- Logical evaluations are often used to filter data or make decisions in code.
+
+## For example
+
+This code assesses if 1 is less than 4:
+
+:::::::::: columns
+
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`1 < 4`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`TRUE`
+:::
+::::
+::::::::::
+<br>
+This code assesses if the object assigned as 3 + 5 is equal to 8:
+
+:::::::::: columns
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`x <- 3 + 5` <br>
+`x == 8`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+<br>
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`TRUE` <br>
+<br>
+:::
+::::
+::::::::::
+
+## Evaluating multiple conditions
+
+You can evaluate a combination of conditional statements with:
+
+- `&` for "and" 
+- `|` for "or"
+
+
+## Evaluating multiple conditions
+
+You can evaluate a combination of conditional statements with:
+
+- `&` for "and" 
+- `|` for "or"
+
+For example let's assign object `x`
+
+:::::::::: columns
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`x <- 1` <br>
+:::
+::::
+
+:::: {.column width="40%"}
+::::
+::::::::::
+
+
+
+## Evaluating multiple conditions
+
+You can evaluate a combination of conditional statements with:
+
+- `&` for "and" 
+- `|` for "or"
+
+For example let's assign object `x`
+
+:::::::::: columns
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`x <- 1` <br>
+:::
+::::
+
+:::: {.column width="40%"}
+::::
+::::::::::
+
+Then evaluate these conditional statements:
+
+:::::::::: columns
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`x < 10 & x > 5`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`FALSE` <br>
+:::
+::::
+::::::::::
+
+<br>
+
+## Evaluating multiple conditions
+
+You can evaluate a combination of conditional statements with:
+
+- `&` for "and" 
+- `|` for "or"
+
+For example let's assign object `x`
+
+:::::::::: columns
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`x <- 1` <br>
+:::
+::::
+
+:::: {.column width="40%"}
+::::
+::::::::::
+
+Then evaluate these conditional statements:
+
+:::::::::: columns
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`x < 10 & x > 5`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`FALSE` <br>
+:::
+::::
+::::::::::
+
+<br>
+
+:::::::::: columns
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`x < 10 | x > 5`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`TRUE` <br>
+:::
+::::
+::::::::::
+
+## Maths with logical values
+
+- R recognises the logical values `TRUE` and `FALSE` as numbers:
+   - `TRUE` is equivalent to 1
+   - `FALSE` is equivalent to 0
+   
+- This means you can do maths with them!
+
+<br>
+
+:::::::::: columns
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`(1<2) + (2<5)`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`2` <br>
+:::
+::::
+::::::::::
+
+## Quiz!
+
+<br>
+<br>
+What is the output of this code?
+
+::: {.general-box style="text-align: center; width: 800px; background: #aed9a040; margin: 0 auto; font-size: 29px;"}
+`threshold <- 5`
+<br><br>
+`sum(1<threshold, 2<threshold, 8<threshold)`
+<br>
+:::
+
+## Quiz!
+
+<br>
+<br>
+What is the output of this code?
+
+::: {.general-box style="text-align: center; width: 800px; background: #aed9a040; margin: 0 auto; font-size: 29px;"}
+`threshold <- 5`
+<br><br>
+`sum(1<threshold, 2<threshold, 8<threshold)`
+<br>
+:::
+
+<br>
+**Answer: 2!**
+
+`TRUE` + `TRUE` + `FALSE` <br>
+= `1` + `1` + `0` <br>
+= 2
+
+## Classes in logical evaluation
+
+This code *tries* to assess if a is less than b:
+
+:::::::::: columns
+
+::: {.column width="10%"}
+:::
+
+:::: {.column width="40%"}
+
+::: code-box-small
+`a <- 1` <br>
+`b <- "2"` <br>
+`a < b`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+
+&#8594;
+:::
+::::
+
+:::: {.column width="45%"}
+
+::: output-box
+<br>
+`FALSE` <br><br>
+:::
+::::
+::::::::::
+
+## Classes in logical evaluation
+
+This code *tries* to assess if a is less than b:
+<br>
+
+:::::::::: columns
+
+::: {.column width="10%"}
+:::
+
+:::: {.column width="40%"}
+
+::: code-box-small
+`a <- 1` <br>
+`b <- "2"` <br>
+`a < b`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+
+&#8594;
+:::
+::::
+
+:::: {.column width="45%"}
+
+::: output-box
+<br>
+`FALSE` <br><br>
+:::
+::::
+::::::::::
+<br>
+But! It doesn't work as expected, because *a is a number* and *b is a character*!
+
+In other words, they are different *classes* so cannot be directly compared.
+
+
+## What are classes in R?
+
+- There are many different classes (types) of object in R
+- Classes are important for correct data manipulation 
+
+::: {#general-box style="text-align: left; width: 850px; background: #ebebeb; margin: 0 auto; font-size: 29px;"}
+
+| Class      | Description                                  |
+|------------|----------------------------------------------|
+| Numeric    | Numbers, which can include decimal points (e.g. 1.3) |
+| Character  | Text or string values (e.g., "hello" but also "200")        |
+| Logical    | Boolean values (`TRUE`, `FALSE`)             |
+| Factor     | Categorical data (e.g., "low", "medium", "high") |
+| Date       | Dates (e.g. "2025-01-01")                    |
+:::
+
+## What class?
+
+You can check the class of an object, with the function `class()` from {base}
+
+:::::::::: columns
+
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`a <- 4` <br>
+`class(a)`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`numeric`
+:::
+::::
+::::::::::
+
+<br> 
+
+In our df dataset, we can check the class of the sex column this way:
+
+:::::::::: columns
+
+::: {.column width="10%"}
+:::
+
+:::: {.column width="45%"}
+
+::: code-box-small
+`class(df$sex)`
+:::
+::::
+
+:::: {.column width="5%"}
+
+::: arrow-box
+
+&#8594;
+:::
+::::
+
+:::: {.column width="35%"}
+
+::: output-box
+`character`
+:::
+::::
+::::::::::
+
+The \$ sign is quick syntax to specify a column in a dataframe (data$column), that we will sometimes use. 
+
+
+## Quiz!
+
+Will this equal `TRUE` or `FALSE`? 
+
+::: {.general-box style="text-align: center; width: 750px; background: #aed9a040; margin: 0 auto; font-size: 29px;"}
+`date1 <- "5th December 2025"` <br>
+`date2 <- "4th December 2025"` <br> <br>
+
+`date1 - date2 == 1`
+:::
+
+<br>
+
+::: {.fragment}
+**Answer**: Trick question! This code will result in an error: `non-numeric argument to binary operator`. This is because:
+
+- `date1` and `date2` are actually character values
+- R doesn't know how to minus one character value from another!
+
+(Note: We will learn how to transform the class of an object later!)
+:::
+
+
+
+
+# filter() data with {dplyr}
+
+## filter()
+
+::: slide-header
+{dplyr}
+:::
+
+-   *Purpose:* To filter data to specific rows of interest
+-   *Why:* So you retain only the relevant observations for a particular data processing or analysis step
+-   *Example:* You want to create a regional linelist, as a subset of a national linelist
+
+
+## filter()
+
+::: slide-header
+{dplyr}
+:::
+
+* *How:*
+   * Provide the data frame and a logical condition to evaluate each row
+   * Only rows that satisfy the condition will be kept
+   * Remember: Class matters!
+
+::: code-box
+`filter(data, col == X)`
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+<br>
+
+::: code-box
+`filter(df, sex == "Female")`
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::filter(sex=="Female") |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+<br>
+
+::: code-box
+`filter(df, age < 5)`
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::filter(age < 5) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+
+::: slide-header
+{dplyr}
+:::
+
+<br>
+
+::: code-box
+`filter(df, sex == "Female" & age <5)`
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::filter(sex == "Female" & age <5) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+
+# mutate() new columns with {dplyr}
+
+## mutate()
+
+::: slide-header
+{dplyr}
+:::
+
+* *Purpose*: Add new columns or modify existing ones in your data frame
+* *Why:* Create columns with new values or transformations of existing columns
+* *Example*: Create a new column to tag cases reported in the last 7 days
+* *How*: Write an argument to define the new column:
+
+::: {.code-box style="width: 800px;"}
+`mutate(data, new_column = expression)`
+:::
+
+## mutate()
+
+::: slide-header
+{dplyr}
+:::
+
+The expression for the new column can be:
+
+:::incremental 
+
+- A *single value* for a column with a constant value: <br>
+<span class="inline-code">   `mutate(data, year = 2025)`</span> <br>
+<br>
+- A *mathematical expression* for a column with calculated values: <br>
+<span class="inline-code">`mutate(data, age_in_months = age * 12)`</span> <br>
+<br>
+- A *logical expression* for a column with `TRUE` or `FALSE`: <br>
+<span class="inline-code">`mutate(data, is_young_female = sex == "female" & age < 18)`</span> <br>
+<br>
+- A *function* for more complex transformations: <br>
+<span class="inline-code">`mutate(data, rounded_height = round(height, 1))`</span>
+
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+<br>
+
+::: code-box
+`mutate(df, year = 2021)`
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::mutate(year=2021) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## 
+
+::: slide-header
+{dplyr}
+:::
+
+<br>
+
+::: code-box
+`filter(df, age_u5 = age < 5)`
+:::
+
+<br>
+
+::: columns
+::: {.column width="47%"}
+::: input-box
+Input
+
+```{r}
+tab_input
+```
+:::
+:::
+
+::: {.column width="6%"}
+::: arrow-box
+`r r2symbols::symbol(3)`
+:::
+:::
+
+::: {.column width="47%"}
+::: output-box
+Output
+
+```{r}
+tab_output <- input_data |> dplyr::mutate(age_u5 = age<5) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 22) 
+
+tab_output
+```
+:::
+:::
+:::
+
+## Column names
+
+::::::: columns
+::: {.column width="60%"}
+Just like object names, column names in R are case sensitive. 
+
+R *requires* that column names:
+
+-   Start with a letter, not a number
+-   Are unique (two columns in a dataframe cannot have the same name)
+
+It is *good practice* that column names:
+
+-   Do not contain spaces or special characters other than underscores or periods
+-   Are short and easy to understand
+:::
+
+::::: {.column width="40%"}
+::: {style="background: #DAF7A650; width=120px; "}
+
+- ✔ age
+- ✔ sex
+- ✔ date_onset
+:::
+
+::: {style="background: #f5bcb150; width=120p;  "}
+
+- ❌ 18_or_younger
+- ❌ Sex
+- ❌ Age in years
+- ❌ age_in_days_round_t...
+:::
+:::::
+:::::::
+
+
+# Exercise
+
+## Scenario {.exercise-slide}
+
+::: incremental
+
+- Your boss presented your previous findings at a national meeting but returned stressed! 
+
+- He reported an ongoing decline in cases as the peak in onset dates had passed, but faced questions about reporting delays. He wants you to investigate!
+
+- Go investigate reporting delays by filtering rows and creating new columns!
+
+:::
+
+## Access the exercises {.exercise-slide}
+
+Instructions here
+
+# Recap
+
+## Learning objectives
+
+- ✔ Understand logical evaluation and its role in data manipulation
+- ✔ Recognize different data classes and their importance in logical comparisons
+- Learn key {dplyr} functions for data manipulation: `filter()`, `mutate()`, `group_by`, and `summarize()
+- Learn how to chain functions together with pipes
+

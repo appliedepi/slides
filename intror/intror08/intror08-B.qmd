@@ -1,0 +1,816 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    code-line-numbers: false
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+
+# Packages
+pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, gtExtras, gt, tidyr, ggplot2, glue, datapasta, reprex, flextable, gtsummary)
+
+
+# Lab data -------------------------------
+# Labs
+df_lab_luh <- import(here("intror/gi_2021-06-17_lab_luh.csv"))
+df_lab_vnrl <- import(here("intror/gi_2021-06-17_lab_vnrl.csv"))
+df_lab_ghc <- import(here("intror/gi_2021-06-17_lab_ghc.csv"))
+
+
+# Load data as needed 
+df_raw <- import(here("intror/gi_2021-06-17_linelist.xlsx")) 
+
+# Other symptoms
+df_symptoms <- import(here("intror/gi_2021-06-17_symptoms.xlsx")) 
+
+# Clean linelist data ---------------------------
+
+df <- df_raw |>
+
+  # Clean column names
+  clean_names() |>
+  rename(date_onset = symptoms_started) |>
+
+  # Change character class
+  mutate(admission = mdy(admission),
+         date_onset = mdy(date_onset),
+         discovered = dmy(discovered),
+         found_on = mdy(found_on),
+         reported = ydm(reported),
+         told_on = mdy(told_on),
+         report  = ymd(report)) |>
+
+  # Clean column content
+  mutate(region = str_to_title(region),
+         sex = str_to_title(sex),
+         sex = case_match(sex,
+                          c("F", "Fem", "Female") ~ "Female",
+                          c("M","Man", "Male") ~ "Male",
+                          .default = NA),
+         region = case_match(region,
+                             c("Bexar") ~ "Bexar",
+                             c("Keda", "Kedah") ~ "Keda",
+                             c("Liora", "Lioraah") ~ "Liora",
+                             c("Nellus", "Nelos") ~ "Nelos",
+                             c("New Ardin", "New Arden") ~ "New Arden",
+                             c("Sorel", "Sorell") ~ "Sorel",
+                             c("Taris") ~ "Taris",
+                             c("Varek") ~ "Varek",
+                             c("West Morin") ~ "West Morin",
+                             .default = NA_character_))  |>
+
+  # Deduplicate to one row per case, based on case ID
+  distinct(id, .keep_all = TRUE) |>
+
+  # Bring data saved across multiple columns together
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |>
+  select(-told_on, -reported, -discovered, -found_on, -report) |>
+
+  # Separate outcome and date (tidyr)
+  separate_wider_delim(reported_outcome,
+                       delim = ":",
+                       names = c("outcome", "date_outcome")) |>
+  mutate(date_outcome = ymd(date_outcome)) |>
+
+  # Create date of birth and age
+  unite("date_of_birth",
+        c("birthyear", "month_of_birth", "daybirth"), sep = "-") |>
+ # mutate(date_of_birth = glue(birthyear-{month_of_birth}-{daybirth}))
+  mutate(date_of_birth = ymd(date_of_birth)) |>
+
+  # Calculate age
+  mutate(age_days = date_report - date_of_birth,
+         age_years = age_days / 365.25,
+         age = floor(age_years),
+         age = as.numeric(age)) |>
+
+  # Create columns labelling diarrhoea or dehydration
+  mutate(symptoms = str_to_lower(symptoms),
+         symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
+         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids|dry mouth")) |>
+
+  # Create case definition column
+  mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected",
+                              TRUE ~ "Unclear")) |>
+
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable"))) |>
+
+  # Create week column for onset date
+  mutate(date_onset_week = floor_date(date_onset, "week")) |>
+
+  # Create week column for report date
+  mutate(date_report_week = floor_date(date_report, "week")) |>
+
+  # Create column for whether cases are new
+  mutate(date_report_7 = if_else(date_report >=  ymd("2021-06-17")-7, "new", "previous"))
+
+# Clean and append lab data------------------------
+
+df_lab_luh <- df_lab_luh |>
+  clean_names()
+
+df_lab_ghc <- df_lab_ghc |>
+  rename(cholera_pcr_result = pcr_result,
+         cholera_pcr_positive = pcr_positive,
+         cholera_pcr_date_test = pcr_date_test,
+         cholera_pcr_date_result = pcr_date_result)
+
+df_lab <- bind_rows(df_lab_luh, df_lab_ghc, df_lab_vnrl)
+
+# Link datasets  -------------------------------------
+
+df_joined <- df |>
+  left_join(df_lab, by = "id") |>
+  left_join(df_symptoms, by = "id")
+
+df_joined <- df_joined |>
+  mutate(case_def = case_when(cholera_pcr_positive==1 ~ "Confirmed",
+                              cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected",
+                              TRUE ~ "Unclear")) |>
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable", "Confirmed")))
+
+
+
+```
+
+# Module 8: Part B
+
+## Scenario {.exercise-slide}
+
+::: incremental
+-   You have decided to collate all your analyses in an automated report, which will require formatted tables
+-   Of course, you will format your tables in R!
+
+:::
+
+## Module 8 learning objectives
+
+In Part A you:
+
+-   Learned how to reshape data with `pivot_wider()` and pivot_longer()\`
+-   Practiced making summary tables with pivoted data
+
+In Part B you will:
+
+-   Learn to create formatted tables with {janitor}, {flextable}, and {gtsummary}
+
+# Tables for presentation
+
+## Tables for presentation
+
+You've learned how to create summary tables in R using:
+
+- *tabyl()* for quick tabulations
+- *group_by()* and *summarise()* for showing several metrics across groups
+- *pivot_wider()* to reshape data for presentation
+- Even *_join() to link tables
+
+Now, let's learn how to format these tables for automated reporting!
+
+
+# {janitor}
+
+## adorn_*() functions
+
+::: slide-header
+{janitor}
+:::
+
+`tabyl()` from {janitor} is fantastic for quick tabulations, but is ugly. It can be customized with a range of adorn_*() functions.
+
+:::::: columns
+::: {.column width="48%"}
+**For example, instead of just this: **
+
+::: {.code-box-small style="font-size: 40px;"}
+```{r eval=F, echo=T}
+df_joined |> tabyl(case_def)
+```
+:::
+
+::: arrow-box
+<br>
+↓
+:::
+
+::: output-box
+```{r}
+df_joined |> tabyl(case_def) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 17) 
+```
+:::
+::::::
+
+::: {.column width="2%"}
+:::
+
+::: {.column width="48%"}
+**... you can add totals and formatting!**
+
+::: {.code-box-small style="font-size: 40px;"}
+```{r eval=F, echo=T}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting()
+```
+:::
+
+::: arrow-box
+↓
+:::
+
+::: output-box
+```{r}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting() |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 17) 
+```
+:::
+
+:::::
+
+:::::::
+
+## adorn_*() functions
+
+::: slide-header
+{janitor}
+:::
+
+**Here are other adorn_* functions:**
+
+::: {#general-box style="text-align: left; width: 1050px; background: #ebebeb; margin: 0 auto; font-size: 25px;"}
+| **Function** | **Purpose** |
+|-------------------------|-----------------------------------------------|
+| **`adorn_totals()`** | Adds row and column totals |
+| **`adorn_percentages()`** | Converts counts to percentages |
+| **`adorn_ns()`** | Displays both counts and percentages (typically used **after** `adorn_percentages()` |
+| **`adorn_pct_formatting()`** | Formats percentages (e.g., rounding, adding `%`) |
+| **`adorn_rounding()`** | Rounds numeric values |
+| **`adorn_title()`** | Adjusts column names  |
+:::
+
+::: {.obs-box .fragment}
+💡 **NOTE** For brevity we do not describe all function details and arguments. Instead, look them up by typing `?function_name` (e.g. `?adorn_totals`) in your R console!
+:::
+
+
+# {flextable}
+
+## {flextable}
+
+::: slide-header
+{janitor}
+:::
+
+For publication-ready tables that can go straight into automated
+reports, we recommend {flextable}.
+
+-   *Purpose*: Create and customize formatted tables to output as images
+    or into Word, PowerPoint, or HTML reports.
+-   *Why*: This package provides good control over styling, layout, and
+    formatting
+-   *How*: **Create a summary table first**, then apply the
+    `flextable()` function. You can then apply several functions from
+    the {flextable} package to further customize.
+
+::: code-box
+```{r, eval=F, echo=T}
+flextable(summary_table) 
+```
+:::
+
+## {flextable}
+
+::: slide-header
+{janitor}
+:::
+
+:::::: columns
+::: {.column width="48%"}
+This is what printing the simple case category table looks
+like in your R console: 
+
+::: {.code-box-small style="font-size: 40px;"}
+
+```{r eval=F, echo=T}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting()
+```
+:::
+
+::: arrow-box
+↓
+:::
+
+::: {.output-box style="font-size: 40px;"}
+```{r}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting()
+```
+:::
+::::::
+
+::: {.column width="2%"}
+:::
+
+::: {.column width="48%"}
+If you pipe into a `flextable()` it appears with minimal formatting in your Viewer: 
+
+::: {.code-box-small style="font-size: 40px;"}
+```{r eval=F, echo=T}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting() |> 
+  flextable()
+```
+:::
+
+::: arrow-box
+↓
+:::
+
+::: {.output-box style="font-size: 40px;"}
+```{r}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting() |> 
+  flextable() |> 
+  bg(bg = "white", part = "all") |> 
+  fontsize(size = 19, part = "all")  |> 
+  autofit()
+```
+:::
+
+:::::
+
+:::::::
+
+## {flextable}
+
+::: slide-header
+{janitor}
+:::
+
+You can apply further formatting functions from the {flextable} package, e.g.:
+
+::::::::: columns
+:::: {.column width="53%"}
+::: {.code-box-small style="width: 550px; font-size: 35px;"}
+```{r echo=T, eval=F}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting() |> 
+  flextable() |> 
+  
+  # Change column names in flextable
+  set_header_labels(case_def = "Case category",
+                    n = "Count",
+                    percent = "Percent") |> 
+  
+  # Bold header and total (5th) row
+  bold(part = "header") |> 
+  bold(part = "body", i = 5) |> 
+  
+  # Add gray background to header
+  bg(part = "header", bg = "gray90")
+
+```
+:::
+::::
+
+:::: {.column width="2%"}
+::: arrow-box
+→
+:::
+::::
+
+:::: {.column width="40%"}
+::: output-box
+```{r}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting() |> 
+  flextable() |> 
+  
+  # Change column names in flextable
+  set_header_labels(case_def = "Case category",
+                    n = "Count",
+                    percent = "Percent") |> 
+  
+  # Bold header and total (5th) row
+  bold(part = "header") |> 
+  bold(part = "body", i = 5) |> 
+  
+  # Add gray background to header
+  bg(part = "header", bg = "gray90") |> 
+  bg(part = "body", bg = "white") |> 
+  fontsize(part = "all", size=18)
+
+
+```
+:::
+::::
+:::::::::
+
+::: {.obs-box .fragment}
+💡 **NOTE** Don't worry about understanding all these functions immediately, we're just showing you what is possible!
+:::
+
+## {flextable}
+
+::: slide-header
+{janitor}
+:::
+
+**Here are some {flextable} functions for formatting your table:**
+
+::: {#general-box style="text-align: left; width: 1000px; background: #ebebeb; margin: 0 auto; font-size: 25px;"}
+
+| **Function**       | **Purpose**                                         |
+|--------------------|-----------------------------------------------------|
+| `bold()`           | Makes text bold in the table                        |
+| `color()`          | Changes text color                                  |
+| `set_caption()`    | Adds a caption to the table                         |
+| `merge_v()`        | Merges cells vertically in a column                 |
+| `align()`          | Aligns text (left, center, right)                   |
+| `add_header_row()` | Adds a new header row                               |
+| `border_inner()`   | Adds inner borders between cells                    |
+| `theme_*()`        | Applies predefined themes (e.g., `theme_vanilla()`) |
+
+:::
+
+::: {.obs-box .fragment}
+💡 **NOTE**  Most of these functions use arguments to specify which part of the table to format: `part` (= "body", "header", or "all"), `i` (for table row), and `j` (for column). <br>
+Again, type `?function_name` in R for more information!
+:::
+
+# {gtsummary}
+
+## tbl_summary() 
+
+::: slide-header
+{gtsummary}
+:::
+
+- *Purpose*: Summarizes several categorical and continuous variables in a dataset in a presentable format
+- *Why*: Allows a quick look at the distributions of several columns at once
+- *Example*: You want to prepare "Table 1" for a paper showing all the distribution of all demographic variables
+- *How*: Apply `tbl_summary()` to a full linelist with only the columns of interest
+
+::: code-box
+```{r eval=F, echo=T}
+
+data |> 
+  select(col1, col2, col3) |> 
+  tbl_summary()
+
+```
+:::
+
+## tbl_summary()
+
+See how you can quickly summarize several columns:
+
+::::::::: columns
+:::: {.column width="53%"}
+::: {.code-box-small style="width: 550px; font-size: 35px;"}
+```{r echo=T, eval=F}
+df_joined |> 
+  select(case_def, 
+         outcome,
+         age,
+         symp_diarrhea) |> 
+  tbl_summary()
+```
+:::
+
+<br>
+
+::: {.obs-box .fragment}
+💡 **NOTE** See how R treats categorical and continuous variables differently, and specifies NAs as "Unknown"
+:::
+::::
+
+:::: {.column width="2%"}
+::: arrow-box
+→
+:::
+::::
+
+:::: {.column width="40%"}
+::: output-box
+```{r}
+df_joined |> 
+  select(case_def, 
+         outcome,
+         age,
+         symp_diarrhea) |> 
+  tbl_summary()
+```
+:::
+::::
+:::::::::
+
+
+## tbl_summary()
+
+Again, you can add further formatting: 
+
+::::::::: columns
+:::: {.column width="53%"}
+::: {.code-box-small style="width: 550px; font-size: 35px;"}
+```{r echo=T, eval=F}
+df_joined |> 
+  select(case_def, 
+         outcome,
+         age,
+         symp_diarrhea) |> 
+  tbl_summary()
+```
+:::
+<br>
+
+::: {.obs-box .fragment}
+💡 **NOTE** This is an object of `gt` class, and <br> will also pop up in your Viewer. 
+:::
+::::
+
+:::: {.column width="2%"}
+::: arrow-box
+→
+:::
+::::
+
+:::: {.column width="40%"}
+::: output-box
+```{r}
+df_joined |> 
+  select(case_def, 
+         outcome,
+         age,
+         symp_diarrhea) |> 
+  tbl_summary(label = list(
+              age ~ "Age", 
+              outcome ~ "Outcome", 
+              symp_diarrhea ~ "Reported diarrhea")) |> 
+  bold_labels()   # Make variable names bold
+```
+:::
+::::
+:::::::::
+
+# Exercise
+
+## Exercise {.exercise-slide}
+
+::: incremental
+-   Your task is now to create presentable tables using the functions discussed today.
+
+- Access exercises here: 
+
+:::
+
+# Recap
+
+## 
+
+## Your total code {.exercise-slide}
+
+Your code should now look like this!
+
+```{r eval=F, echo=T}
+
+# Intro course
+# Title of script: Cleaning and analysis of GI outbreak data
+# Date started: 5th June 2021
+# Name: Paula Blomquist
+
+# Load packages-----------------------------
+
+pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, tidyr, glue, ggplot2)
+
+# Import data ------------------------------
+
+# Linelist
+df_raw <- import(here("data/gi_2021-06-17_linelist.xlsx"))
+
+# Labs
+df_lab_luh <- import(here("data/gi_2021-06-17_lab_luh.csv"))
+df_lab_vnrl <- import(here("data/gi_2021-06-17_lab_vnrl.csv"))
+df_lab_ghc <- import(here("data/gi_2021-06-17_lab_ghc.csv"))
+
+# Other symptoms
+df_symptoms <- import(here("data/gi_2021-06-17_symptoms.xlsx"))
+
+# Clean linelist data ---------------------------
+
+df <- df_raw |>
+  
+    # Clean column names
+    clean_names() |>
+    rename(date_onset = symptoms_started) |>
+  
+    # Change character class
+    mutate(admission = mdy(admission),
+           discovered = dmy(discovered),
+           found_on = mdy(found_on),
+           reported = ydm(reported),
+           told_on = mdy(told_on),
+           report  = mdy(report)) |>
+  
+    # Clean column content  
+    mutate(region = str_to_title(region),
+           sex = str_to_title(sex), 
+           sex = case_match(sex, 
+                            c("F", "Fem", "Female") ~ "Female",
+                            c("M","Man", "Male") ~ "Male",
+                            .default = NA),
+           region = case_match(region,
+             c("Bexar") ~ "Bexar",
+             c("Keda", "Kedah") ~ "Keda",
+             c("Liora", "Lioraah") ~ "Liora",
+             c("Nellus", "Nelos") ~ "Nelos",
+             c("New Ardin", "New Arden") ~ "New Arden",
+             c("Sorel", "Sorell") ~ "Sorel",
+             c("Taris") ~ "Taris",
+             c("Varek") ~ "Varek",
+             c("West Morin") ~ "West Morin",
+             .default = NA_character_))  |> 
+  
+  # Deduplicate to one row per case, based on case ID
+  distinct(id, .keep_all = TRUE) |>
+  
+  # Combine some columns
+  unite("date_of_birth", 
+          c("birthyear", "month_of_birth", "daybirth"), sep = "-") |> 
+  mutate(date_of_birth = ymd(date_of_birth)) |>
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |> 
+    select(-told_on, -reported, -discovered, -found_on, -report) |>
+  
+  # Create column for age
+  mutate(age_years = as.numeric(floor((date_report -date_of_birth)/365.25))) |> 
+
+  # Create columns labelling diarrhoea or dehydration    
+  mutate(symptoms = str_to_lower(symptoms),
+         symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
+         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids")) |>
+  
+  # Create case definition column
+  mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable"))) |> 
+  
+  # Create week column for onset date
+ # mutate(date_onset_week = floor_date(date_onset, "week")) |> 
+  
+  # Create week column for report date
+  mutate(date_report_week = floor_date(date_report, "week")) |> 
+
+  # Create column for whether cases are new
+  mutate(date_report_7 = if_else(date_report >=  ymd("2021-06-17")-7, "Reported in past 7 days", "Reported previously"))
+
+# Clean and append lab data------------------------
+
+df_lab_luh <- df_lab_luh |> 
+  clean_names()
+
+df_lab_ghc <- df_lab_ghc |> 
+  rename(cholera_pcr_result = pcr_result,
+         cholera_pcr_positive = pcr_positive,
+         cholera_pcr_date_test = pcr_date_test,
+         cholera_pcr_date_result = pcr_date_result)
+
+df_lab <- bind_rows(df_lab_luh, df_lab_ghc, df_lab_vnrl)
+
+# Link to df -------------------------------------
+
+df_joined <- df |> 
+  left_join(df_lab, by = "id")
+
+df_joined <- df_joined |>   
+  mutate(case_def = case_when(cholera_pcr_positive==1 ~ "Confirmed",
+                              cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable", "Confirmed"))) 
+
+
+# Check of joins ---------------------------------
+
+df_lab |> 
+  tabyl(cholera_pcr_positive)
+
+df_joined |> 
+  tabyl(cholera_pcr_positive)
+
+# Plots ------------------------------------------
+
+# By report date and case definition breakdown
+ggplot() +
+  geom_bar(data = df_joined,
+           aes(x=date_report_week,
+               fill = case_def)) +
+  scale_fill_manual(values = c("Unclear" = "gray70",
+                               "Suspected" = "lightblue",
+                               "Probable" = "seagreen",
+                               "Confirmed" = "navy")) +
+scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  labs(title = "Cases by report week, presented by case category and region",
+       subtitle = glue("Data as of {max(df$date_report, na.rm=T)+1}"),
+       fill = "Case category",
+       x = "Week of report (week starting)",
+       y = "Weekly case count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# By report date and case definition breakdown and region
+ggplot() +
+  geom_bar(data = df_joined,
+           aes(x=date_report_week,
+               fill = case_def)) +
+  facet_wrap(.~region) +
+  scale_fill_manual(values = c("Unclear" = "gray70",
+                               "Suspected" = "lightblue",
+                               "Probable" = "seagreen",
+                               "Confirmed" = "navy")) +
+scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  labs(title = "Cases by report week, presented by case category and region",
+       subtitle = glue("Data as of {max(df$date_report, na.rm=T)+1}"),
+       fill = "Case category",
+       x = "Week of report (week starting)",
+       y = "Weekly case count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+# Table of symptoms -----------------------------
+
+# Pivot longer
+df_symptoms_long <- df_joined |>
+  pivot_longer(cols = starts_with("symp_"),
+               values_to = "symptom_experienced",
+               names_to = "symptom") |>
+  select(id, case_def, region, symptom, symptom_experienced) |> 
+  mutate(symptom = str_to_title(str_replace(symptom, "symp_", ""))) |> 
+  mutate(symptom = str_replace(symptom, "_", " "))
+
+# Simple table
+table_symptoms <- df_symptoms_long |>
+  group_by(symptom) |>
+  summarize(reported = sum(symptom_experienced)) |>
+  mutate(percent = scales::percent(reported/nrow(df_joined))) |>
+  arrange(-reported)
+
+# Table by case definition
+df_symptoms_long |>
+  group_by(case_def, symptom) |>
+  summarize(reported = sum(symptom_experienced),
+            percent_reported = scales::percent(reported/n())) |>
+  pivot_wider(names_from = "case_def",
+              values_from = c("reported", "percent_reported"))
+
+
+# Table of cases
+table_overview <- df_joined |> 
+  group_by(region, )
+  
+  
+  group_by(region) |> 
+  summarize(n_total = n(),
+            n_confirmed = sum(case_def=="Confirmed"),
+            n_probable = sum(case_def == "Probable"),
+            n_total_y
+            earliest_report = min(date_report, na.rm=T),
+            latest_report = max(date_report, na.rm=T))) |> 
+  adorn_totals() ### CHANGE THIS
+
+
+
+
+```

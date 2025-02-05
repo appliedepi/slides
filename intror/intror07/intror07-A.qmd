@@ -1,0 +1,617 @@
+---
+title: "Applied Epi"
+subtitle: "Taking control of your data"
+format:
+  revealjs: 
+    code-line-numbers: false
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../../images/Applied_Epi_logo.png
+    css: ../../images/styles.css
+    footer: <https://appliedepi.org>
+resources:
+  - demo.pdf
+fig-align: center
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+
+# Packages
+pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, gtExtras, gt, tidyr, ggplot2, glue)
+
+
+# Lab data -------------------------------
+# Labs
+df_lab_luh <- import(here("intror/gi_2021-07-07_lab_luh.csv"))
+df_lab_vnrl <- import(here("intror/gi_2021-07-07_lab_vnrl.csv"))
+df_lab_ghc <- import(here("intror/gi_2021-07-07_lab_ghc.csv"))
+
+
+# Load data as needed 
+df_raw <- import(here("intror/gi_2021-07-07_linelist.xlsx")) 
+
+
+
+# Clean linelist data ---------------------------
+
+df <- df_raw |>
+  
+    # Clean column names
+    clean_names() |>
+    rename(date_onset = symptoms_started) |>
+  
+    # Change character class
+    mutate(admission = mdy(admission),
+           discovered = dmy(discovered),
+           found_on = mdy(found_on),
+           reported = ydm(reported),
+           told_on = mdy(told_on),
+           report  = mdy(report)) |>
+  
+    # Clean column content  
+    mutate(region = str_to_title(region),
+           sex = str_to_title(sex), 
+           sex = case_match(sex, 
+                            c("F", "Fem", "Female") ~ "Female",
+                            c("M","Man", "Male") ~ "Male",
+                            .default = NA),
+           region = case_match(region,
+             c("Bexar") ~ "Bexar",
+             c("Keda", "Kedah") ~ "Keda",
+             c("Liora", "Lioraah") ~ "Liora",
+             c("Nellus", "Nelos") ~ "Nelos",
+             c("New Ardin", "New Arden") ~ "New Arden",
+             c("Sorel", "Sorell") ~ "Sorel",
+             c("Taris") ~ "Taris",
+             c("Varek") ~ "Varek",
+             c("West Morin") ~ "West Morin",
+             .default = NA_character_))  |> 
+  
+  # Deduplicate to one row per case, based on case ID
+  distinct(id, .keep_all = TRUE) |>
+  
+  # Combine some columns
+  unite("date_of_birth", 
+          c("birthyear", "month_of_birth", "daybirth"), sep = "-") |> 
+  mutate(date_of_birth = ymd(date_of_birth)) |>
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |> 
+    select(-told_on, -reported, -discovered, -found_on, -report) |>
+  
+  # Create columns labelling diarrhoea or dehydration
+  mutate(symptoms = str_to_lower(symptoms),
+         symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
+         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids")) |>
+  
+  # Create case definition column
+  mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable"))) |> 
+  
+  # Create week column for onset date
+ # mutate(date_onset_week = floor_date(date_onset, "week")) |> 
+  
+  # Create week column for report date
+  mutate(date_report_week = floor_date(date_report, "week")) 
+  
+
+# Clean and append lab data------------------------
+
+df_lab_luh <- df_lab_luh |> 
+  clean_names()
+
+df_lab_ghc <- df_lab_ghc |> 
+  rename(cholera_pcr_result = pcr_result,
+         cholera_pcr_positive = pcr_positive,
+         cholera_pcr_date_test = pcr_date_test,
+         cholera_pcr_date_result = pcr_date_result)
+
+df_lab <- bind_rows(df_lab_luh, df_lab_ghc, df_lab_vnrl)
+
+# Link to df -------------------------------------
+
+df_joined <- df |> 
+  left_join(df_lab, by = "id")
+
+df_joined <- df_joined |>   
+  mutate(case_def = case_when(cholera_pcr_positive==1 ~ "Confirmed",
+                              cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
+                              TRUE ~ "Unclear")) |> 
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable", "Confirmed"))) 
+```
+
+# Module 7: Part A
+
+## Module 7 learning objectives
+
+In Part A you will:
+
+-   Learn how to append data with `bind_rows()`
+-   Learn how to conduct data linkage with `join_xxx()` functions
+
+In Part B you will:
+
+-   Get more familiar with error messages in R
+-   Learn how to seek help in R, including with reprex
+-   Update your case definitions and epicurves with lab data
+
+
+# Recap
+
+## Recap
+
+In previous data cleaning modules, you learned how to:
+
+:::: incremental
+-   `select()` columns and `filter()` rows
+-   Combine columns with `glue()` and split columns with `XX`
+-   Standardize capitalisation with `str_to_xxx()` functions and clean
+    contents with `case_match()`
+-   Change column class, including with {lubridate} functions and with
+    factor()
+-   `mutate()` new columns, including with logic e.g. `if_else()` and
+    `case_when()` and more {lubridate} functions
+::::
+
+::: {style="background-color: lightblue; padding: 1px; border-radius: 5px; text-align: center;" .fragment}
+Great! Your dataframes will need to be clean (especially identifiers and
+column names) to effectively combine them!
+:::
+
+## Scenario {.exercise-slide}
+
+::: incremental
+
+- You loaded your lab data previously, but haven't done anything with it yet!
+- Now it's time to join your lab data so you can use it in your analysis. 
+
+:::
+
+
+# Combining data together
+
+## Brainstorm!
+
+What are examples of combining datasets together in epidemiology?
+
+:::::::: columns
+:::: {.column width="70%"}
+::: incremental
+<br>
+
+-   To combine cholera PCR results from different labs
+
+-   To collate surveillance data from different sites <br> <br><br>
+
+-   To link survey and lab data for a case-control study
+
+-   To merge different surveillance datasets for a more comprehensive
+    dataset
+:::
+::::
+
+::::: {.column .fragment width="30%"}
+<br>
+
+::: {style="background-color: lightblue; padding: 1px; border-radius: 5px; text-align: center;"}
+These are examples of *appending data*
+:::
+
+<br><br>
+
+::: {style="background-color: lightblue; padding: 1px; border-radius: 5px; text-align: center;"}
+These are examples of *joining data*
+:::
+:::::
+::::::::
+
+## Appending vs joining
+
+![](images/define.png){width="50%"}
+
+::: {.obs-box .fragment}
+💡 **NOTE** Joining is also referred to as linking, merging, matching...
+:::
+
+# Appending
+
+## bind_rows()
+
+::: slide-header
+{dplyr}
+:::
+
+::: incremental
+-   *Purpose*: Stack data frames on top of each other (row-wise).
+-   *Why*: To combine subsets of a wider dataframe together and enable
+    more complete analysis
+-   *Example*: Combine dataframes with test results from different labs
+    testing in the same outbreak
+-   *How*:
+:::
+
+::: {.code-box .fragment}
+```{r eval=F, echo=T}
+df_combined <- bind_rows(df1, df2, df3, ...)
+```
+:::
+
+::: {.obs-box .fragment}
+💡 **NOTE** This function will work even if datasets have different
+numbers of columns. But column names have to match exactly to
+successfully append!
+:::
+
+# Joining
+
+## xxx_join functions
+
+::: slide-header
+{dplyr}
+:::
+
+-   {dplyr} has several functions for joining data. We will look at
+    three: `left_join()`, `full_join()`, and `anti_join()`
+
+## xxx_join functions
+
+::: slide-header
+{dplyr}
+:::
+
+-   {dplyr} has several functions for joining data. We will look at
+    three: `left_join()`, `full_join()`, and `anti_join()`
+
+-   They use this syntax, where the first argument (`df1` here) is the
+    "left" dataframe:
+
+![](images/leftright.png){style="display: block; margin: auto; width: 70%;"}
+
+## xxx_join functions
+
+::: slide-header
+{dplyr}
+:::
+
+-   {dplyr} has several functions for joining data. We will look at
+    three: `left_join()`, `full_join()`, and `anti_join()`
+
+-   They use this syntax, where the first argument (`df1` here) is the
+    "left" dataframe. 
+
+![](images/leftright_pipe.png){style="display: block; margin: auto; width: 70%;"}
+
+## left_join()
+
+::: slide-header
+{dplyr}
+:::
+
+::: incremental
+-   *Purpose*: Merge two datasets, keeping **all rows from the left
+    dataframe** and only **matching rows from the right**
+-   *Why*: Use when you want to keep all observations from one dataset
+    and bring in matching data from another
+-   *Example*: You want to add test results to a dataframe of survey
+    data, while keeping all survey data
+-   *How*:
+:::
+
+::: {.code-box .fragment}
+```{r eval=F, echo=T}
+df_joined <- left_join(df1, df2, by = "id")
+```
+:::
+
+## left_join()
+
+::: slide-header
+{dplyr}
+:::
+
+We will look at two small example dataframes:
+
+![](images/start_join.png){style="display: block; margin: auto; width: 100%;"}
+
+## left_join()
+
+::: {.code-box-small style="width: 70%; font-size: 40px;"}
+```{r eval=F, echo=T}
+df_joined <- left_join(df_survey, df_lab, by = "id")
+```
+:::
+
+![](images/left_join.png){style="display: block; margin: auto; width: 100%;"}
+
+## full_join()
+
+::: slide-header
+{dplyr}
+:::
+
+::: incremental
+-   *Purpose*: Merge two datasets, keeping **all rows** from both
+    dataframes
+-   *Why*: For more complete data, or to conduct detailed on analyses of
+    matches
+-   *Example*: You have clinic attendance and lab results for a disease.
+    Some cases lack lab tests, and some positive tests are unreported
+    cases. You want to merge both datasets to keep all records for an
+    accurate case count
+-   *How*:
+:::
+
+::: {.code-box .fragment}
+```{r eval=F, echo=T}
+df_joined <- full_join(df1, df2, by = "id")
+```
+:::
+
+## full_join()
+
+::: slide-header
+{dplyr}
+:::
+
+::: {.code-box-small style="width: 70%; font-size: 40px;"}
+```{r eval=F, echo=T}
+df_joined <- full_join(df_survey, df_lab, by = "id")
+```
+:::
+
+![](images/full_join.png){style="display: block; margin: auto; width: 100%;"}
+
+## anti_join()
+
+::: slide-header
+{dplyr}
+:::
+
+::: incremental
+-   *Purpose*: Return rows from the left dataframe that do **not** have
+    a match in the right dataset.
+-   *Why*: Use when you want to find missing or unmatched data
+-   *Example*: You want to specifically review which cases in a clinical
+    linelist do not have lab results
+-   *How*:
+:::
+
+::: {.code-box .fragment}
+```{r eval=F, echo=T}
+df_unmatched <- anti_join(df1, df2, by = "id")
+```
+:::
+
+## anti_join()
+
+::: slide-header
+{dplyr}
+:::
+
+::: {.code-box-small style="width: 70%; font-size: 40px;"}
+```{r eval=F, echo=T}
+df_joined <- anti_join(df_survey, df_lab, by = "id")
+```
+:::
+
+![](images/anti_join.png){style="display: block; margin: auto; width: 100%;"}
+
+# Real-life scenaios
+
+## Multiple identifiers
+
+::: slide-header
+{dplyr}
+:::
+
+Here, each person is identified by **name** and **date of birth**, not
+just id.
+
+There are two Bobs, with different birthdays.
+
+![](images/ids.png){style="display: block; margin: auto; width: 100%;"}
+
+## Multiple identifiers
+
+::: slide-header
+{dplyr}
+:::
+
+You can list multiple identifiers inside a `c()` to correctly join:
+
+::: {.code-box-small style="width: 90%; font-size: 40px;"}
+```{r eval=F, echo=T}
+df_joined <- left_join(df_survey, df_lab, by = c("name", "date_birth"))
+```
+:::
+
+![](images/ids_joined.png){style="display: block; margin: auto; width: 100%;"}
+
+## Key ids with differing names
+
+::: slide-header
+{dplyr}
+:::
+
+For this scenario, you can explicitly specify which columns link:
+
+::: {.code-box-small style="width: 90%; font-size: 40px;"}
+```{r eval=F, echo=T}
+df_joined <- left_join(df_survey, df_lab, by = c("name" = "Name", 
+                                                 "date_birth" = "birthday"))
+```
+:::
+
+![](images/diffids.png){style="display: block; margin: auto; width: 100%;"}
+
+## Rows with duplicate key ids
+
+::: slide-header
+{dplyr}
+:::
+
+In this example, there is only one Bob, but repeated in `df_survey`.
+
+The results of `df_lab` get repeated in `df_joined` too. This is a
+many-to-one join.
+
+::: {.code-box-small style="width: 90%; font-size: 40px;"}
+```{r eval=F, echo=T}
+df_joined <- anti_join(df_survey, df_lab, by = c("name" = "Name", 
+                                                 "date_birth" = "birthday"))
+```
+:::
+
+![](images/manytoone.png){style="display: block; margin: auto; width: 100%;"}
+
+## Rows with duplicate key ids
+
+::: slide-header
+{dplyr}
+:::
+
+Some terms:
+
+-   A **many-to-one** join means the left dataframe has duplicates, the
+    right has only unique values
+-   A **one-to-many** means the left has unique values, the right has
+    duplicates
+-   A **many-to-many** means both have dataframes have duplicates. This
+    would cause a big headache!
+
+## Duplicate non-linking columns
+
+::: slide-header
+{dplyr}
+:::
+
+If columns not used for linkage have the same name, R will preserve both
+of them in a `left_join()` or `full_join()`.
+
+But, it will add an `.x` and `.y` suffix to differentiate between
+columns from the left and right dataframes respectively.
+
+::: {.code-box-small style="width: 70%; font-size: 40px;"}
+```{r eval=F, echo=T}
+df_joined <- anti_join(df_survey, df_lab, by = "id"))
+```
+:::
+
+![](images/samecols.png){style="display: block; margin: auto; width: 100%;"}
+
+# Exercise
+
+## Scenario {.exercise-slide}
+
+::: incremental
+
+Your task now is to:
+
+- Create one lab dataframe by appending the three lab-specific dataframes 
+- Link the lab data to the `df` linelist
+
+:::
+
+## Access the exercises {.exercise-slide}
+
+Instructions here
+
+# Recap
+
+
+## Your appending and linking code {.exercise-slide}
+
+```{r eval=F, echo=T}
+# Clean and append lab data------------------------
+
+df_lab_luh <- df_lab_luh |> 
+  clean_names()
+
+df_lab_ghc <- df_lab_ghc |> 
+  rename(cholera_pcr_result = pcr_result,
+         cholera_pcr_positive = pcr_positive,
+         cholera_pcr_date_test = pcr_date_test,
+         cholera_pcr_date_result = pcr_date_result)
+
+df_lab <- bind_rows(df_lab_luh, df_lab_ghc, df_lab_vnrl)
+
+# Link to df -------------------------------------
+
+df_joined <- df |> 
+  left_join(df_lab, by = "id")
+
+```
+
+## Inspecting values {.exercise-slide}
+
+::: slide-header
+{dplyr; janitor}
+:::
+
+You can see that all test results in `df_lab` were joined to the `df` linelist
+
+::::::: columns
+::::: {.column width="48%"}
+
+::: {.code-box-small style="width; 450px; font-size: 40px"}
+```{r eval=F, echo=T}
+df_lab |> 
+  tabyl(cholera_pcr_positive)
+```
+:::
+
+::: {.arrow-box}
+&#8595;
+:::
+
+::: {.output-box}
+```{r}
+df_lab |> 
+  tabyl(cholera_pcr_positive) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 17) 
+```
+:::
+
+:::::
+
+::::: {.column width="2%"}
+:::::
+
+::::: {.column width="48%"}
+
+::: {.code-box-small style="width; 450px; font-size: 40px"}
+```{r eval=F, echo=T}
+df_joined |> 
+  tabyl(cholera_pcr_positive)
+```
+
+:::
+
+::: {.arrow-box}
+&#8595;
+:::
+
+::: {.output-box}
+```{r}
+df_joined |> 
+  tabyl(cholera_pcr_positive) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 17) 
+```
+:::
+
+:::::
+
+:::::::
+
+
