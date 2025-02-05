@@ -21,7 +21,7 @@ fig-align: center
 ```{r}
 pacman::p_load(rio, here, janitor, dplyr, gtExtras, gt, tidyr, stringr, lubridate)
 
-df_raw <- import(here("intror/gi_2021-07-07_linelist.xlsx"), na = "") 
+df_raw <- import(here("intror/gi_2021-06-17_linelist.xlsx"), na = "") 
 
 df_raw_demo <- df_raw |> 
   filter(row_number()<6)
@@ -606,6 +606,57 @@ df_fruits %>%
 ⚠️ **NOTE**: This corrects specified typos; other values stay unchanged. To exclude invalid values, you can specify correct spellings as well and change `.default` to be `NA_character.` 
 :::
 
+## str_replace()
+
+::: slide-header
+{stringr}
+:::
+
+Another {stringr} function is: `str_replace()`
+
+- *Purpose*: Replace the first instance of a pattern *within* a string with a specified replacement
+- *Why*: To modify or clean *parts* of text data (unlike `case_match()` which replaces the whole value)
+- *Example*: You want to correct spelling errors within a free-text response column
+- *How*:
+
+::: code-box
+```{r eval=F, echo=T}
+str_replace(string, pattern, replacement)
+```
+:::
+
+::: {.obs-box .fragment}
+💡 **NOTE** If you want to replace every instance of a pattern in a string, use `str_replace_all()`
+:::
+
+## Example
+
+Here is an example with a small dataframe of symptoms. It would be too much work to use `case_match()` to clean each date value to remove the word "Symptoms", so you can use `str_replace()` to fix just that part of the script.
+
+::: {.code-box-small style="width: 690px; font-size: 35px;"}
+```{r echo=T, eval=F}
+df_dates %>%
+  mutate(symptoms_corrected = str_replace(bday, "DATE: ", ""))
+```
+:::
+
+::: {.arrow-box}
+&#8595;
+:::
+
+::: {.output-box style="width: 650px; margin: auto;"}
+```{r}
+
+df_symptoms <- tibble(
+  id = 1:5,
+  symptoms = c("Symptoms: headache, fever", "Symptoms: vomiting, fever","Symptoms: abdominal cramps", "Symptoms: headache", "Symptoms: headache"))
+
+df_symptoms %>%
+  mutate(symptoms_corrected = str_replace(symptoms, "Symptoms: ", "")) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 19) 
+```
+:::
 
 # Exercises 
 

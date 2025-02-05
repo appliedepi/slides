@@ -24,101 +24,110 @@ editor:
 ```{r}
 
 # Packages
-pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, gtExtras, gt, tidyr, ggplot2, glue, datapasta, reprex)
+pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, gtExtras, gt, tidyr, ggplot2, glue, datapasta, reprex, flextable, gtsummary)
 
 
 # Lab data -------------------------------
 # Labs
-df_lab_luh <- import(here("intror/gi_2021-07-07_lab_luh.csv"))
-df_lab_vnrl <- import(here("intror/gi_2021-07-07_lab_vnrl.csv"))
-df_lab_ghc <- import(here("intror/gi_2021-07-07_lab_ghc.csv"))
+df_lab_luh <- import(here("intror/gi_2021-06-17_lab_luh.csv"))
+df_lab_vnrl <- import(here("intror/gi_2021-06-17_lab_vnrl.csv"))
+df_lab_ghc <- import(here("intror/gi_2021-06-17_lab_ghc.csv"))
 
 
 # Load data as needed 
-df_raw <- import(here("intror/gi_2021-07-07_linelist.xlsx")) 
+df_raw <- import(here("intror/gi_2021-06-17_linelist.xlsx")) 
 
 # Other symptoms
-df_symptoms <- import(here("intror/gi_2021-07-07_symptoms.xlsx")) |> 
-  select(-date_onset, -symp_dehydration, -symp_diarrhea) 
-
-df_symptoms[] <- lapply(names(df_symptoms), function(col) { 
-  if (grepl("^symp", col)) as.logical(df_symptoms[[col]]) else df_symptoms[[col]]
-})
-
-df_symptoms[is.na(df_symptoms)] <- FALSE
-
-### REMOVE DIARRHEA AND DEHYDRATION! REMOVE NAS AS NOT MEANINGFUL ANYWAY, UNLESS ENTIRE ROW IS EMPTY. CHANGE TO TRUE AND FALSE
+df_symptoms <- import(here("intror/gi_2021-06-17_symptoms.xlsx")) 
 
 # Clean linelist data ---------------------------
 
 df <- df_raw |>
-  
-    # Clean column names
-    clean_names() |>
-    rename(date_onset = symptoms_started) |>
-  
-    # Change character class
-    mutate(admission = mdy(admission),
-           discovered = dmy(discovered),
-           found_on = mdy(found_on),
-           reported = ydm(reported),
-           told_on = mdy(told_on),
-           report  = mdy(report)) |>
-  
-    # Clean column content  
-    mutate(region = str_to_title(region),
-           sex = str_to_title(sex), 
-           sex = case_match(sex, 
-                            c("F", "Fem", "Female") ~ "Female",
-                            c("M","Man", "Male") ~ "Male",
-                            .default = NA),
-           region = case_match(region,
-             c("Bexar") ~ "Bexar",
-             c("Keda", "Kedah") ~ "Keda",
-             c("Liora", "Lioraah") ~ "Liora",
-             c("Nellus", "Nelos") ~ "Nelos",
-             c("New Ardin", "New Arden") ~ "New Arden",
-             c("Sorel", "Sorell") ~ "Sorel",
-             c("Taris") ~ "Taris",
-             c("Varek") ~ "Varek",
-             c("West Morin") ~ "West Morin",
-             .default = NA_character_))  |> 
-  
+
+  # Clean column names
+  clean_names() |>
+  rename(date_onset = symptoms_started) |>
+
+  # Change character class
+  mutate(admission = mdy(admission),
+         date_onset = mdy(date_onset),
+         discovered = dmy(discovered),
+         found_on = mdy(found_on),
+         reported = ydm(reported),
+         told_on = mdy(told_on),
+         report  = ymd(report)) |>
+
+  # Clean column content
+  mutate(region = str_to_title(region),
+         sex = str_to_title(sex),
+         sex = case_match(sex,
+                          c("F", "Fem", "Female") ~ "Female",
+                          c("M","Man", "Male") ~ "Male",
+                          .default = NA),
+         region = case_match(region,
+                             c("Bexar") ~ "Bexar",
+                             c("Keda", "Kedah") ~ "Keda",
+                             c("Liora", "Lioraah") ~ "Liora",
+                             c("Nellus", "Nelos") ~ "Nelos",
+                             c("New Ardin", "New Arden") ~ "New Arden",
+                             c("Sorel", "Sorell") ~ "Sorel",
+                             c("Taris") ~ "Taris",
+                             c("Varek") ~ "Varek",
+                             c("West Morin") ~ "West Morin",
+                             .default = NA_character_))  |>
+
   # Deduplicate to one row per case, based on case ID
   distinct(id, .keep_all = TRUE) |>
-  
-  # Combine some columns
-  unite("date_of_birth", 
-          c("birthyear", "month_of_birth", "daybirth"), sep = "-") |> 
+
+  # Bring data saved across multiple columns together
+  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |>
+  select(-told_on, -reported, -discovered, -found_on, -report) |>
+
+  # Separate outcome and date (tidyr)
+  separate_wider_delim(reported_outcome,
+                       delim = ":",
+                       names = c("outcome", "date_outcome")) |>
+  mutate(date_outcome = ymd(date_outcome)) |>
+
+  # Create date of birth and age
+  unite("date_of_birth",
+        c("birthyear", "month_of_birth", "daybirth"), sep = "-") |>
+ # mutate(date_of_birth = glue(birthyear-{month_of_birth}-{daybirth}))
   mutate(date_of_birth = ymd(date_of_birth)) |>
-  mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |> 
-    select(-told_on, -reported, -discovered, -found_on, -report) |>
-  
+
+  # Calculate age
+  mutate(age_days = date_report - date_of_birth,
+         age_years = age_days / 365.25,
+         age = floor(age_years),
+         age = as.numeric(age)) |>
+
   # Create columns labelling diarrhoea or dehydration
   mutate(symptoms = str_to_lower(symptoms),
          symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
-         symp_dehydration = str_detect(symptoms, "dehydr|lack of fluids|lack fluids|dry mou")) |>
-  
+         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids|dry mouth")) |>
+
   # Create case definition column
   mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
-                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
-                              TRUE ~ "Unclear")) |> 
-  
-  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable"))) |> 
-  
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected",
+                              TRUE ~ "Unclear")) |>
+
+  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable"))) |>
+
   # Create week column for onset date
- # mutate(date_onset_week = floor_date(date_onset, "week")) |> 
-  
+  mutate(date_onset_week = floor_date(date_onset, "week")) |>
+
   # Create week column for report date
-  mutate(date_report_week = floor_date(date_report, "week")) 
-  
+  mutate(date_report_week = floor_date(date_report, "week")) |>
+
+  # Create column for whether cases are new
+  mutate(date_report_7 = if_else(date_report >=  ymd("2021-06-17")-7, "new", "previous"))
 
 # Clean and append lab data------------------------
 
-df_lab_luh <- df_lab_luh |> 
+df_lab_luh <- df_lab_luh |>
   clean_names()
 
-df_lab_ghc <- df_lab_ghc |> 
+df_lab_ghc <- df_lab_ghc |>
   rename(cholera_pcr_result = pcr_result,
          cholera_pcr_positive = pcr_positive,
          cholera_pcr_date_test = pcr_date_test,
@@ -126,319 +135,469 @@ df_lab_ghc <- df_lab_ghc |>
 
 df_lab <- bind_rows(df_lab_luh, df_lab_ghc, df_lab_vnrl)
 
-# Link to df -------------------------------------
+# Link datasets  -------------------------------------
 
-df_joined <- df |> 
-  left_join(df_lab, by = "id") |> 
+df_joined <- df |>
+  left_join(df_lab, by = "id") |>
   left_join(df_symptoms, by = "id")
 
-# Case def update -----------------------------------------
-
-df_joined <- df_joined |>   
+df_joined <- df_joined |>
   mutate(case_def = case_when(cholera_pcr_positive==1 ~ "Confirmed",
                               cholera_rdt_positive==1 ~ "Probable",
-                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected", 
-                              TRUE ~ "Unclear")) |> 
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected",
+                              TRUE ~ "Unclear")) |>
   mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable", "Confirmed")))
+
 
 
 ```
 
-# Module 8: Part A
+# Module 8: Part B
 
 ## Scenario {.exercise-slide}
 
 ::: incremental
--   You have been asked to better understand the symptoms of cases in
-    areas where cholera has not been confirmed
+-   You have decided to collate all your analyses in an automated report, which will require formatted tables
+-   Of course, you will format your tables in R!
 
--   A very kind colleague has manually cleaned the remaining free-text
-    symptom data for you, so that there is one column per symptom.
-
--   You need to process the data and then present it!
 :::
 
 ## Module 8 learning objectives
 
-In Part A you will:
+In Part A you:
 
--   Learn how to reshape data with `pivot_wider()` and pivot_longer()\`
--   Practice making summary tables with pivoted data
+-   Learned how to reshape data with `pivot_wider()` and pivot_longer()\`
+-   Practiced making summary tables with pivoted data
 
 In Part B you will:
 
--   Learn to format tables with `flextable()`
+-   Learn to create formatted tables with {janitor}, {flextable}, and {gtsummary}
 
-# Recap
+# Tables for presentation
 
-## Recap
+## Tables for presentation
 
-# Reshaping
+You've learned how to create summary tables in R using:
 
-## Reshaping
+- *tabyl()* for quick tabulations
+- *group_by()* and *summarise()* for showing several metrics across groups
+- *pivot_wider()* to reshape data for presentation
+- Even *_join() to link tables
+
+Now, let's learn how to format these tables for automated reporting!
+
+
+# {janitor}
+
+## adorn_*() functions
 
 ::: slide-header
-{dplyr}
+{janitor}
 :::
 
-NEED TO CLEAR UP TERMINOLOGY HERE
+`tabyl()` from {janitor} is fantastic for quick tabulations, but is ugly. It can be customized with a range of adorn_*() functions.
 
-![](images/explain.png){width="50%"}
+:::::: columns
+::: {.column width="48%"}
+**For example, instead of just this: **
 
-## pivot_wider()
-
-::: slide-header
-{dplyr}
-:::
-
--   *Purpose*: Convert data from long format to wide format
--   *Why*: To create one row per subject with multiple columns for
-    different measurements
--   *How*:
-
-::: code-box-small
+::: {.code-box-small style="font-size: 40px;"}
 ```{r eval=F, echo=T}
-
-df_wide <- df_long |> 
-  pivot_wider(
-    names_from = column_to_pivot     # Specify the column to use for new columns
-    values_from = column_with_values # Specify the column that contains the values
-  )
-```
-:::
-
-## pivot_wider() example
-
-::: slide-header
-{dplyr}
-:::
-
-::: code-box-small
-```{r eval=F, echo=T}
-
-df_weekly_wide <- df_weekly |> 
-  pivot_wider(
-    names_from = "week",  
-    values_from = "cases")
-```
-:::
-
-
-![](images/pivot_longer.png)
-
-
-```{r eval=T, echo=F}
-df_weekly <- data.frame(
-  region = c("Central", "Central", "Central", 
-             "North", "North", "North", 
-             "South", "South", "South"),
-  week = rep(1:3, 3),  # Repeating weeks 1, 2, 3 for each region
-  cases = c(2, 5, 6, 4, 7, 8, 10, 11, 14)
-)
-
-
-```
-
-## pivot_longer()
-
-::: slide-header
-{dplyr}
-:::
-
--   *Purpose*: Convert data from wide format to long format
--   *Why*: To create one row per observation, useful for analysis and
-    visualization
-
-::: code-box-small
-```{r eval=F, echo=T}
-df_long <- df_wide |> 
-  pivot_longer(
-    cols = columns_to_pivot,    # Specify the columns to pivot into long format
-    names_to = "new_column_name",  # Name for the new column that holds variable names
-    values_to = "new_value_column"  # Name for the new column that holds the values
-  )
-```
-:::
-
-## pivot_longer() example
-
-::: slide-header
-{dplyr}
-:::
-
-::: code-box-small
-```{r eval=F, echo=T}
-
-df_dates_long <- df_dates |> 
-  pivot_longer(
-    cols = c(date_onset, date_report, date_admission), 
-    names_to = "date_type",  
-    values_to = "date")
-```
-:::
-
-
-![](images/pivot_longer.png)
-
-## pivot_longer() example
-
-::: slide-header
-{dplyr}
-:::
-See how the data is now analysable! We can create a timeline per case.
-
-::: {.code-box-small}
-```{r echo=T, eval=F}
-df_dates_long |> 
-  ggplot() +
-  geom_line(aes(y = id, x = date)) +
-  geom_point(aes(y = id, x = date, shape = date_type, color = date_type), size = 5) +
-  scale_color_brewer(palette=9) +
-  theme_bw() +
-  labs(x = "Date", y = "ID", color = "Event", shape = "Event") +
-  theme(legend.position = "bottom")
-  
+df_joined |> tabyl(case_def)
 ```
 :::
 
 ::: arrow-box
-&#8595;
+<br>
+↓
 :::
 
-```{r fig.height = 3, fig.align='center'}
-df_dates <- tibble(
-  id = as.character(1:3),
-  date_onset = ymd(c("2021-05-10", "2021-06-11", "2021-05-22")),
-  date_report =ymd(c("2021-05-15", "2021-06-14", "2021-05-30")),
-  date_admission = ymd(c("2021-05-16", NA, "2021-06-02"))
-)
-
-df_dates_long <- df_dates |> 
-  pivot_longer(
-    cols = c(date_onset, date_report, date_admission), 
-    names_to = "date_type",  
-    values_to = "date")
-
-df_dates_long |> 
-  ggplot() +
-  geom_line(aes(y = id, 
-                 x = date)) +
-  geom_point(aes(y = id, 
-                 x = date,
-                 shape = date_type,
-                 color = date_type), size = 5) +
-  scale_color_brewer(palette=9) +
-  theme_bw(base_size = 20) +
-  labs(x = "Date", y = "ID", color = "Event", shape = "Event") +
-  theme(legend.position = "bottom")
+::: output-box
+```{r}
+df_joined |> tabyl(case_def) |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 17) 
 ```
+:::
+::::::
 
-# str_replace (ELSEWHERE?)
+::: {.column width="2%"}
+:::
 
-## str_replace()
+::: {.column width="48%"}
+**... you can add totals and formatting!**
+
+::: {.code-box-small style="font-size: 40px;"}
+```{r eval=F, echo=T}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting()
+```
+:::
+
+::: arrow-box
+↓
+:::
+
+::: output-box
+```{r}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting() |> 
+  gt::gt() |>  gtExtras::gt_theme_guardian() |> 
+  gt::tab_options(table.font.size = 17) 
+```
+:::
+
+:::::
+
+:::::::
+
+## adorn_*() functions
 
 ::: slide-header
-{stringr}
+{janitor}
 :::
 
-You might remember other {stringr} functions like str_to_upper() to capitalise text or str_detect() to evaluate if a specific pattern is present inside a string.
+**Here are other adorn_* functions:**
 
-Another function is: `str_replace()`
-
-- *Purpose*: Replace the first instance of a pattern in a string with a specified replacement
-- *Why*: To modify or clean parts of text data
-- *Example*: You want to correct spelling errors within a free-text response column
-- *How*:
-
-::: code-box
-```{r eval=F, echo=T}
-str_replace(string, pattern, replacement)
-```
+::: {#general-box style="text-align: left; width: 1050px; background: #ebebeb; margin: 0 auto; font-size: 25px;"}
+| **Function** | **Purpose** |
+|-------------------------|-----------------------------------------------|
+| **`adorn_totals()`** | Adds row and column totals |
+| **`adorn_percentages()`** | Converts counts to percentages |
+| **`adorn_ns()`** | Displays both counts and percentages (typically used **after** `adorn_percentages()` |
+| **`adorn_pct_formatting()`** | Formats percentages (e.g., rounding, adding `%`) |
+| **`adorn_rounding()`** | Rounds numeric values |
+| **`adorn_title()`** | Adjusts column names  |
 :::
 
 ::: {.obs-box .fragment}
-💡 **NOTE** If you want to replace every instance of a pattern in a string, use `str_replace_all()`
+💡 **NOTE** For brevity we do not describe all function details and arguments. Instead, look them up by typing `?function_name` (e.g. `?adorn_totals`) in your R console!
 :::
 
-## str_replace() example
+
+# {flextable}
+
+## {flextable}
 
 ::: slide-header
-{dplyr}
+{janitor}
 :::
 
-Let's add some code to the previous chunk that created data for a timeline. We systematically remove the `date_` prefix within the `date_type` column.
+For publication-ready tables that can go straight into automated
+reports, we recommend {flextable}.
 
-::: code-box-small
-```{r eval=F, echo=T}
+-   *Purpose*: Create and customize formatted tables to output as images
+    or into Word, PowerPoint, or HTML reports.
+-   *Why*: This package provides good control over styling, layout, and
+    formatting
+-   *How*: **Create a summary table first**, then apply the
+    `flextable()` function. You can then apply several functions from
+    the {flextable} package to further customize.
 
-df_dates_long <- df_dates |> 
-  pivot_longer(
-    cols = c(date_onset, date_report, date_admission), 
-    names_to = "date_type",  
-    values_to = "date") |> 
-  mutate(date_type = str_replace(date_type, "date_", "Date of "))
-  
+::: code-box
+```{r, eval=F, echo=T}
+flextable(summary_table) 
 ```
 :::
 
-
-![](images/pivot_longer_str.png)
-
-## pivot_longer() example
+## {flextable}
 
 ::: slide-header
-{dplyr}
+{janitor}
 :::
-See how this improves the legend values, without any changes to the ggplot code!
 
-::: {.code-box-small}
-```{r echo=T, eval=F}
-df_dates_long |> 
-  ggplot() +
-  geom_line(aes(y = id, x = date)) +
-  geom_point(aes(y = id, x = date, shape = date_type, color = date_type), size = 5) +
-  scale_color_brewer(palette=9) +
-  theme_bw() +
-  labs(x = "Date", y = "ID", color = "Event", shape = "Event") +
-  theme(legend.position = "bottom")
-  
+:::::: columns
+::: {.column width="48%"}
+This is what printing the simple case category table looks
+like in your R console: 
+
+::: {.code-box-small style="font-size: 40px;"}
+
+```{r eval=F, echo=T}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting()
 ```
 :::
 
 ::: arrow-box
-&#8595;
+↓
 :::
 
-```{r fig.height = 3, fig.align='center'}
-df_dates <- tibble(
-  id = as.character(1:3),
-  date_onset = ymd(c("2021-05-10", "2021-06-11", "2021-05-22")),
-  date_report =ymd(c("2021-05-15", "2021-06-14", "2021-05-30")),
-  date_admission = ymd(c("2021-05-16", NA, "2021-06-02"))
-)
-
-df_dates_long <- df_dates |> 
-  pivot_longer(
-    cols = c(date_onset, date_report, date_admission), 
-    names_to = "date_type",  
-    values_to = "date") |> 
-  mutate(date_type = str_replace(date_type, "date_", "Date of "))
-
-df_dates_long |> 
-  ggplot() +
-  geom_line(aes(y = id, 
-                 x = date)) +
-  geom_point(aes(y = id, 
-                 x = date,
-                 shape = date_type,
-                 color = date_type), size = 5) +
-  scale_color_brewer(palette=9) +
-  theme_bw(base_size = 20) +
-  labs(x = "Date", y = "ID", color = "Event", shape = "Event") +
-  theme(legend.position = "bottom")
+::: {.output-box style="font-size: 40px;"}
+```{r}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting()
 ```
+:::
+::::::
+
+::: {.column width="2%"}
+:::
+
+::: {.column width="48%"}
+If you pipe into a `flextable()` it appears with minimal formatting in your Viewer: 
+
+::: {.code-box-small style="font-size: 40px;"}
+```{r eval=F, echo=T}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting() |> 
+  flextable()
+```
+:::
+
+::: arrow-box
+↓
+:::
+
+::: {.output-box style="font-size: 40px;"}
+```{r}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting() |> 
+  flextable() |> 
+  bg(bg = "white", part = "all") |> 
+  fontsize(size = 19, part = "all")  |> 
+  autofit()
+```
+:::
+
+:::::
+
+:::::::
+
+## {flextable}
+
+::: slide-header
+{janitor}
+:::
+
+You can apply further formatting functions from the {flextable} package, e.g.:
+
+::::::::: columns
+:::: {.column width="53%"}
+::: {.code-box-small style="width: 550px; font-size: 35px;"}
+```{r echo=T, eval=F}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting() |> 
+  flextable() |> 
+  
+  # Change column names in flextable
+  set_header_labels(case_def = "Case category",
+                    n = "Count",
+                    percent = "Percent") |> 
+  
+  # Bold header and total (5th) row
+  bold(part = "header") |> 
+  bold(part = "body", i = 5) |> 
+  
+  # Add gray background to header
+  bg(part = "header", bg = "gray90")
+
+```
+:::
+::::
+
+:::: {.column width="2%"}
+::: arrow-box
+→
+:::
+::::
+
+:::: {.column width="40%"}
+::: output-box
+```{r}
+df_joined |> tabyl(case_def) |> 
+  adorn_totals() |> 
+  adorn_pct_formatting() |> 
+  flextable() |> 
+  
+  # Change column names in flextable
+  set_header_labels(case_def = "Case category",
+                    n = "Count",
+                    percent = "Percent") |> 
+  
+  # Bold header and total (5th) row
+  bold(part = "header") |> 
+  bold(part = "body", i = 5) |> 
+  
+  # Add gray background to header
+  bg(part = "header", bg = "gray90") |> 
+  bg(part = "body", bg = "white") |> 
+  fontsize(part = "all", size=18)
+
+
+```
+:::
+::::
+:::::::::
+
+::: {.obs-box .fragment}
+💡 **NOTE** Don't worry about understanding all these functions immediately, we're just showing you what is possible!
+:::
+
+## {flextable}
+
+::: slide-header
+{janitor}
+:::
+
+**Here are some {flextable} functions for formatting your table:**
+
+::: {#general-box style="text-align: left; width: 1000px; background: #ebebeb; margin: 0 auto; font-size: 25px;"}
+
+| **Function**       | **Purpose**                                         |
+|--------------------|-----------------------------------------------------|
+| `bold()`           | Makes text bold in the table                        |
+| `color()`          | Changes text color                                  |
+| `set_caption()`    | Adds a caption to the table                         |
+| `merge_v()`        | Merges cells vertically in a column                 |
+| `align()`          | Aligns text (left, center, right)                   |
+| `add_header_row()` | Adds a new header row                               |
+| `border_inner()`   | Adds inner borders between cells                    |
+| `theme_*()`        | Applies predefined themes (e.g., `theme_vanilla()`) |
+
+:::
+
+::: {.obs-box .fragment}
+💡 **NOTE**  Most of these functions use arguments to specify which part of the table to format: `part` (= "body", "header", or "all"), `i` (for table row), and `j` (for column). <br>
+Again, type `?function_name` in R for more information!
+:::
+
+# {gtsummary}
+
+## tbl_summary() 
+
+::: slide-header
+{gtsummary}
+:::
+
+- *Purpose*: Summarizes several categorical and continuous variables in a dataset in a presentable format
+- *Why*: Allows a quick look at the distributions of several columns at once
+- *Example*: You want to prepare "Table 1" for a paper showing all the distribution of all demographic variables
+- *How*: Apply `tbl_summary()` to a full linelist with only the columns of interest
+
+::: code-box
+```{r eval=F, echo=T}
+
+data |> 
+  select(col1, col2, col3) |> 
+  tbl_summary()
+
+```
+:::
+
+## tbl_summary()
+
+See how you can quickly summarize several columns:
+
+::::::::: columns
+:::: {.column width="53%"}
+::: {.code-box-small style="width: 550px; font-size: 35px;"}
+```{r echo=T, eval=F}
+df_joined |> 
+  select(case_def, 
+         outcome,
+         age,
+         symp_diarrhea) |> 
+  tbl_summary()
+```
+:::
+
+<br>
+
+::: {.obs-box .fragment}
+💡 **NOTE** See how R treats categorical and continuous variables differently, and specifies NAs as "Unknown"
+:::
+::::
+
+:::: {.column width="2%"}
+::: arrow-box
+→
+:::
+::::
+
+:::: {.column width="40%"}
+::: output-box
+```{r}
+df_joined |> 
+  select(case_def, 
+         outcome,
+         age,
+         symp_diarrhea) |> 
+  tbl_summary()
+```
+:::
+::::
+:::::::::
+
+
+## tbl_summary()
+
+Again, you can add further formatting: 
+
+::::::::: columns
+:::: {.column width="53%"}
+::: {.code-box-small style="width: 550px; font-size: 35px;"}
+```{r echo=T, eval=F}
+df_joined |> 
+  select(case_def, 
+         outcome,
+         age,
+         symp_diarrhea) |> 
+  tbl_summary()
+```
+:::
+<br>
+
+::: {.obs-box .fragment}
+💡 **NOTE** This is an object of `gt` class, and <br> will also pop up in your Viewer. 
+:::
+::::
+
+:::: {.column width="2%"}
+::: arrow-box
+→
+:::
+::::
+
+:::: {.column width="40%"}
+::: output-box
+```{r}
+df_joined |> 
+  select(case_def, 
+         outcome,
+         age,
+         symp_diarrhea) |> 
+  tbl_summary(label = list(
+              age ~ "Age", 
+              outcome ~ "Outcome", 
+              symp_diarrhea ~ "Reported diarrhea")) |> 
+  bold_labels()   # Make variable names bold
+```
+:::
+::::
+:::::::::
+
+# Exercise
+
+## Exercise {.exercise-slide}
+
+::: incremental
+-   Your task is now to create presentable tables using the functions discussed today.
+
+- Access exercises here: 
+
+:::
 
 # Recap
+
+## 
 
 ## Your total code {.exercise-slide}
 
@@ -458,15 +617,15 @@ pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, tidyr, glue, ggplo
 # Import data ------------------------------
 
 # Linelist
-df_raw <- import(here("data/gi_2021-07-07_linelist.xlsx"))
+df_raw <- import(here("data/gi_2021-06-17_linelist.xlsx"))
 
 # Labs
-df_lab_luh <- import(here("data/gi_2021-07-07_lab_luh.csv"))
-df_lab_vnrl <- import(here("data/gi_2021-07-07_lab_vnrl.csv"))
-df_lab_ghc <- import(here("data/gi_2021-07-07_lab_ghc.csv"))
+df_lab_luh <- import(here("data/gi_2021-06-17_lab_luh.csv"))
+df_lab_vnrl <- import(here("data/gi_2021-06-17_lab_vnrl.csv"))
+df_lab_ghc <- import(here("data/gi_2021-06-17_lab_ghc.csv"))
 
 # Other symptoms
-df_symptoms <- import(here("data/gi_2021-07-07_symptoms.xlsx"))
+df_symptoms <- import(here("data/gi_2021-06-17_symptoms.xlsx"))
 
 # Clean linelist data ---------------------------
 
@@ -513,9 +672,10 @@ df <- df_raw |>
   mutate(date_report =  coalesce(told_on, reported, discovered, found_on, report)) |> 
     select(-told_on, -reported, -discovered, -found_on, -report) |>
   
-  # Create columns labelling diarrhoea or dehydration
+  # Create column for age
   mutate(age_years = as.numeric(floor((date_report -date_of_birth)/365.25))) |> 
-  
+
+  # Create columns labelling diarrhoea or dehydration    
   mutate(symptoms = str_to_lower(symptoms),
          symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
          symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids")) |>
@@ -531,8 +691,10 @@ df <- df_raw |>
  # mutate(date_onset_week = floor_date(date_onset, "week")) |> 
   
   # Create week column for report date
-  mutate(date_report_week = floor_date(date_report, "week")) 
-  
+  mutate(date_report_week = floor_date(date_report, "week")) |> 
+
+  # Create column for whether cases are new
+  mutate(date_report_7 = if_else(date_report >=  ymd("2021-06-17")-7, "Reported in past 7 days", "Reported previously"))
 
 # Clean and append lab data------------------------
 
@@ -635,44 +797,20 @@ df_symptoms_long |>
 
 
 # Table of cases
-
 table_overview <- df_joined |> 
+  group_by(region, )
+  
+  
   group_by(region) |> 
   summarize(n_total = n(),
             n_confirmed = sum(case_def=="Confirmed"),
             n_probable = sum(case_def == "Probable"),
+            n_total_y
             earliest_report = min(date_report, na.rm=T),
-            latest_report = max(date_report, na.rm=T),
-            median_age = median(age_years, na.rm=T),
-            max_age = max(age_years, na.rm=T)) |> 
+            latest_report = max(date_report, na.rm=T))) |> 
   adorn_totals() ### CHANGE THIS
 
-table_overview |>  
-  flextable() |> 
-    set_header_labels(         # Rename the columns in original header row
-      region = "Region", 
-      n_total = "Total",                  
-      n_confirmed = "Confirmed",
-      n_probable = "Probable",
-      earliest_report = "Earliest",
-      latest_report = "Most recent",
-      median_age = "Median age",
-      max_age = "Max age")   |> 
-  add_header_row(
-    top = TRUE,                # New header goes on top of existing header row
-    values = c("Region",     # Header values for each column below
-               "Case counts", 
-               "",    # This will be the top-level header for this and two next columns
-               "",
-               "Report dates",
-               "",
-               "Age",         # This will be the top-level header for this and two next columns
-               ""))  |> 
-    merge_at(i = 1, j = 2:4, part = "header") |>  # Horizontally merge columns 3 to 5 in new header row
-  merge_at(i = 1, j = 5:6, part = "header") |>     # Horizontally merge columns 6 to 8 in new header row
-  merge_at(i = 1, j = 7:8, part = "header")     # Horizontally merge columns 6 to 8 in new header row
-    
-  
+
 
 
 ```
