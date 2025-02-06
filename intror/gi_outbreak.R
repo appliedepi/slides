@@ -158,9 +158,9 @@ df_joined |>
 
 # By onset date and case definition breakdown
 ggplot() +
-  geom_bar(data = df_joined,
+  geom_histogram(data = df_joined,
            aes(x=date_onset_week,
-               fill = case_def)) +
+               fill = case_def), binwidth = 7, color = "white") +
   scale_fill_manual(values = c("Unclear" = "gray70",
                                "Suspected" = "lightblue",
                                "Probable" = "seagreen",
@@ -175,10 +175,12 @@ ggplot() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # By onset date and case definition breakdown and region
+#ADD COMMENTARY HERE ABOUT DISCRETE
+
 ggplot() +
-  geom_bar(data = df_joined,
+  geom_histogram(data = df_joined,
            aes(x=date_onset_week,
-               fill = case_def)) +
+               fill = case_def), binwidth = 7, color = "white") +
   facet_wrap(.~region) +
   scale_fill_manual(values = c("Unclear" = "gray70",
                                "Suspected" = "lightblue",
