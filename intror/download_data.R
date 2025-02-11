@@ -5,8 +5,8 @@ library(googledrive)
 drive_auth()
 
 # Deleting old data files ---------------
-local_folder <- "intror/"
-files_local <- list.files(local_folder, full.names = TRUE, pattern = "^gi")
+local_folder <- "intror"
+files_local <- list.files(local_folder, full.names = TRUE, pattern = "^cholera_")
 
 if (readline("Are you sure you want to delete files? Press 1 to proceed: ") == "1") {
   cat("Running code...\n")
