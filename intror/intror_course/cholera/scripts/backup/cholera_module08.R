@@ -1,14 +1,5 @@
----
-title: "Untitled"
-format: docx
-editor: visual
----
-
-## Test
-
-```{r echo=F}
 # Intro course
-# Title of script: Cleaning and analysis of GI outbreak data
+# Title of script: Cleaning and analysis of suspected cholera outbreak data
 # Date started: 17th June 2021
 # Name: Paula Blomquist
 
@@ -19,29 +10,29 @@ pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, tidyr, glue, ggplo
 
 # JUST FOR ME - REMOVE THIS EVENTUALLY ------------
 # Labs
-df_lab_luh <- import(here("intror/gi_2021-06-17_lab_luh.csv"))
-df_lab_vnrl <- import(here("intror/gi_2021-06-17_lab_vnrl.csv"))
-df_lab_ghc <- import(here("intror/gi_2021-06-17_lab_ghc.csv"))
+df_lab_luh <- import(here("intror/cholera_2021-06-17_lab_luh.csv"))
+df_lab_vnrl <- import(here("intror/cholera_2021-06-17_lab_vnrl.csv"))
+df_lab_ghc <- import(here("intror/cholera_2021-06-17_lab_ghc.csv"))
 
 
 # Load data as needed
-df_raw <- import(here("intror/gi_2021-06-17_linelist.xlsx"))
+df_raw <- import(here("intror/cholera_2021-06-17_linelist.xlsx"))
 
 # Other symptoms
-df_symptoms <- import(here("intror/gi_2021-06-17_symptoms.xlsx"))
+df_symptoms <- import(here("intror/cholera_2021-06-17_symptoms.xlsx"))
 
 # Import data ------------------------------
 
 # # Linelist
-# df_raw <- import(here("data/gi_2021-06-17_linelist.xlsx"))
+# df_raw <- import(here("data/cholera_2021-06-17_linelist.xlsx"))
 #
 # # Labs
-# df_lab_luh <- import(here("data/gi_2021-06-17_lab_luh.csv"))
-# df_lab_vnrl <- import(here("data/gi_2021-06-17_lab_vnrl.csv"))
-# df_lab_ghc <- import(here("data/gi_2021-06-17_lab_ghc.csv"))
+# df_lab_luh <- import(here("data/cholera_2021-06-17_lab_luh.csv"))
+# df_lab_vnrl <- import(here("data/cholera_2021-06-17_lab_vnrl.csv"))
+# df_lab_ghc <- import(here("data/cholera_2021-06-17_lab_ghc.csv"))
 #
 # # Other symptoms
-# df_symptoms <- import(here("data/gi_2021-06-17_symptoms.xlsx"))
+# df_symptoms <- import(here("data/cholera_2021-06-17_symptoms.xlsx"))
 
 # Clean linelist data ---------------------------
 
@@ -49,10 +40,11 @@ df <- df_raw |>
 
   # Clean column names
   clean_names() |>
-  rename(date_onset = symptoms_started) |>
+  rename(date_onset = symptoms_started,
+         date_admission = admission) |>
 
   # Change character class
-  mutate(admission = mdy(admission),
+  mutate(date_admission = mdy(date_admission),
          date_onset = mdy(date_onset),
          discovered = dmy(discovered),
          found_on = mdy(found_on),
@@ -90,12 +82,12 @@ df <- df_raw |>
   separate_wider_delim(reported_outcome,
                        delim = ":",
                        names = c("outcome", "date_outcome")) |>
-  mutate(date_outcome = ymd(date_outcome)) |>
+  mutate(date_outcome = dmy(date_outcome)) |>
 
   # Create date of birth and age
   unite("date_of_birth",
         c("birthyear", "month_of_birth", "daybirth"), sep = "-") |>
- # mutate(date_of_birth = glue(birthyear-{month_of_birth}-{daybirth}))
+  # mutate(date_of_birth = glue(birthyear-{month_of_birth}-{daybirth}))
   mutate(date_of_birth = ymd(date_of_birth)) |>
 
   # Calculate age
@@ -107,14 +99,14 @@ df <- df_raw |>
   # Create columns labelling diarrhoea or dehydration
   mutate(symptoms = str_to_lower(symptoms),
          symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
-         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids|dry mouth")) |>
+         symp_dehydration = str_detect(symptoms, "dehydr|lack of fluids|lack fluids|dry mouth")) |>
 
   # Create case definition column
   mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
                               symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected",
                               TRUE ~ "Unclear")) |>
 
-  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable"))) |>
+  mutate(case_def = fct_relevel(case_def, "Unclear", "Suspected", "Probable")) |>
 
   # Create week column for onset date
   mutate(date_onset_week = floor_date(date_onset, "week")) |>
@@ -149,7 +141,7 @@ df_joined <- df_joined |>
                               cholera_rdt_positive==1 ~ "Probable",
                               symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected",
                               TRUE ~ "Unclear")) |>
-  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable", "Confirmed")))
+  mutate(case_def = fct_relevel(case_def, "Unclear", "Suspected", "Probable", "Confirmed"))
 
 
 # Check of joins ---------------------------------
@@ -277,5 +269,3 @@ table_total |>
 
 
 
-
-```

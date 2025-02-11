@@ -575,16 +575,18 @@ df_ages|>
 
 :::::::::
 
+# Factors
+
 ## Factors
 
 - A class of data for categorical values (e.g. age group, gender, case definitions)
 - This class allows R to recognize data as categories rather than text
 - Useful for ordering categories; R otherwise orders values alphabetically 
-- You can use the `factor()` function from baseR. 
+- You can use the `fct_relevel()` function from {forcats}. 
 
 ::: code-box
 ```{r eval=F, echo=T}
-factor(x, levels= c(level1, level2, level3))
+fct_relevel(col, "level1", "level2", "level3",...))
 ```
 :::
 
@@ -631,12 +633,12 @@ df_ages |>
 ```{r, eval=F, echo=T}
 
 df_ages |> 
-  mutate(age_group = factor(age_group, 
-                            levels = c("Infant", 
-                                       "Toddler", 
-                                       "Child", 
-                                       "Adolescent", 
-                                       "Adult"))) |> 
+  mutate(age_group = fct_relevel(age_group, 
+                                "Infant", 
+                                "Toddler", 
+                                "Child", 
+                                "Adolescent", 
+                                "Adult")) |> 
   count(age_group)
 ```
 :::
@@ -648,9 +650,12 @@ df_ages |>
 ```{r}
 
 df_ages |> 
-  mutate(age_group = factor(age_group, 
-                            levels = c("Infant", "Toddler", "Child",
-                                       "Adolescent", "Adult"))) |> 
+  mutate(age_group = fct_relevel(age_group, 
+                                "Infant", 
+                                "Toddler", 
+                                "Child", 
+                                "Adolescent", 
+                                "Adult")) |> 
   count(age_group) |>
   gt() |>  gt_theme_guardian() |> 
   tab_options(table.font.size = 23) 
