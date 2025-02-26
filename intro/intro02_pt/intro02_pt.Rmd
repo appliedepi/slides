@@ -1,0 +1,1418 @@
+---
+title: Introdução ao R</br>para Epidemiologia Aplicada
+subtitle: <br>Cleaning data with R
+author: Applied Epi
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: en
+---
+
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+# allow panels in slides
+xaringanExtra::use_panelset()
+
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,       # for decorating code chunks with colors
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+```
+
+```{r xaringan-themer, include=FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+```{css, echo=F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+
+.medium-large-table table {
+  font-size: 10px;     
+}
+
+.medium-large-table2 table {
+  font-size: 11px;     
+}
+
+.small-code .remark-code{
+  font-size: 40%
+}
+```
+
+```{r, echo=F, include=F}
+# vig_bruto <- rio::import(here::here("data", "vigilancia_lista_de_casos_20141201"))
+vig_bruto <- rio::import(here::here("data", "vigilancia_lista_de_casos_20141201.csv"))
+# gen <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "generic", col_types = "c") %>%
+#   clean_names()
+# 
+# mod3 <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "mod3", col_types = "c") %>%
+#   clean_names()
+```
+
+# Introdução ao R para </br> Epidemiologia aplicada
+
+### O estudo de caso do Ebola e a limpeza de dados
+
+[contact@appliedepi.org](mailto:contact@appliedepi.org)
+
+---
+
+# Objetivos e cronograma
+
+- Criar um novo projeto do RStudio para o estudo de caso do Ebola
+- Importar dados de uma subpasta do projeto usando `import()` e `here()`
+- Ganhar familiaridade com {dplyr} funções de limpeza de dados
+- Começar a escrever um comando de limpeza usando o  `%>%` operador pipe
+
+</br>
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Tempo,  ~Tópico,
+  "10 minutos",      "Configuração do estudo de caso do Ebola",
+  "20 minutos",      "Funções para limpeza de dados",
+  "10 minutos",      "Demonstração de limpeza de dados",
+  "2 horas",         "Exercício",
+  "20 minutos",      "Resumo"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Faça pausas como desejar durante o exercício")
+```
+
+???
+Observe as pausas para alongamento ao longo do texto.
+
+---
+
+# Revisão
+
+- **Projetos do RStudio** - um local para dados e scripts de uma análise específica
+
+--
+
+- Executar comandos em **um script R**, com comentários
+
+--
+
+- Criando **objetos** com o operador de atribuição **`<-`**
+
+--
+
+- Usando **funções** como `max()`, `min()`, e `paste()`
+
+--
+
+- Importando um conjunto de dados com **`import()`**
+
+--
+
+- Revisando um conjunto de dados com `skim()` e `summary()`
+
+--
+
+- As colunas têm **classes** que podem ser verificadas com `class()`
+
+---
+
+class: inverse, center, middle
+
+# O estudo de caso do Ebola
+
+Os módulos 2-8 usarão dados de um surto simulado de Ebola em Serra Leoa.
+
+---
+
+# Um novo projeto do RStudio
+
+.pull-left[
+
+O exercício orientará você a criar um novo **projeto RStudio** no diretório "intro\_course/**ebola**/".
+
+```{r, eval=TRUE, echo=FALSE, out.width="85%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "project_briefcase.png")))
+```
+
+]
+
+.pull-right[
+
+`r emo::ji("folder")` intro\_course
+
+- `r emo::ji("folder")` módulo1
+- `r emo::ji("folder")` covid
+- **`r emo::ji("folder")` ebola**
+  - **ebola.Rproj**
+  - `r emo::ji("folder")` dados
+  - `r emo::ji("folder")` resultados
+  - `r emo::ji("folder")` scripts
+
+]
+
+---
+
+# Um novo script R
+
+.pull-left[
+
+Você escreverá um novo script R chamado "analise\_ebola.R" para conter seus comandos.
+
+O script será salvo na subpasta "ebola/**scripts**/"
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%", out.height="200%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "ebola_setup.png")))
+```
+
+]
+
+.pull-right[
+
+`r emo::ji("folder")` intro\_course
+
+- `r emo::ji("folder")` módulo1
+- `r emo::ji("folder")` covid
+- `r emo::ji("folder")` **ebola**
+  - **ebola.Rproj**
+  - `r emo::ji("folder")` dados
+  - `r emo::ji("folder")` resultados
+  - `r emo::ji("folder")` **scripts**
+    - **analise\_ebola.R**
+
+]
+
+---
+
+# Carregar pacotes
+
+Qual será seu primeiro comando no novo script do R? Qual função você usará?
+
+--
+
+Use **`pacman::p_load()`** para **carregar os pacotes** necessários para a análise
+
+```{r, echo=T, eval=F}
+pacman::p_load(
+     rio,          # para importar dados
+     here,         # para caminhos relativos de arquivos
+     skimr,        # para revisar os dados
+     janitor,      # para limpar os dados
+     epikit,       # para criar categorias de idade
+     tidyverse     # para gerenciamento e visualização de dados
+)
+```
+
+---
+
+# Importar dados de uma subpasta
+
+A lista de linhas do ebola é salva no novo projeto "**dados**/**brutos**/":
+
+`r emo::ji("folder")` **ebola**
+
+- ebola.Rproj
+- `r emo::ji("folder")` **dados**
+  - `r emo::ji("folder")` limpos
+  - `r emo::ji("folder")` **brutos**
+    - **vigilância\_lista\_\_de\_casos\_20141201.csv**
+- `r emo::ji("folder")` scripts
+- `r emo::ji("folder")` resultados
+
+`import()` espera um *caminho de arquivo* - o local ou "endereço" dos dados em seu computador.
+
+Esse comando funcionará para importar a lista de casos do Ebola?
+
+```{r, echo=T, eval=F}
+import("vigilancia_lista_de_casos_20141201")
+```
+
+--
+
+**Não**, você precisa especificar em qual *subpasta* do projeto  os dados estão salvos.
+
+---
+
+# Caminhos de arquivo
+
+**Evitar** o frágil caminho "absoluto" do arquivo *(só funcionará em um computador)*
+
+```{r, echo=T, eval=F}
+import("C:/Users/Me/Docs/intro_course/ebola/dados/brutos/vigilancia_lista_de_casos_20141201")
+```
+
+--
+
+**Em um projeto do RStudio** o caminho pode começar na pasta raiz do projeto
+
+```{r, echo=T, eval=F}
+import("dados/brutos/vigilancia_lista_de_casos_20141201") # funcionará em quase todos os computadores
+```
+
+--
+
+**Use `here()` para criar o caminho do arquivo** sem barras
+
+`here("dados", "brutos", "vigilancia_lista_de_casos_20141201.csv")`
+
+--
+
+**A etapa final** é colocar o comando de caminho de arquivo `here()` *dentro de* `import()`
+
+```{r, echo=T, eval=F}
+vig_bruto <- import(here("dados", "brutos", "vigilancia_lista_de_casos_20141201"))
+```
+
+--
+
+*O operador `<-` salva o conjunto de dados como um objeto de nome `vig_bruto`.*
+
+???
+Nós os ensinamos here() porque isso elimina a necessidade de lidar com barras, e isso realmente ajuda quando você chega a relatórios automatizados.
+
+---
+
+class: medium-large-table
+
+# Os dados
+
+```{r}
+head(vig_bruto, 25) %>% 
+  tibble() %>% 
+  DT::datatable(
+    options = list(
+      scrollY = 300,
+      scrollX = 600,
+      pageLength = 25,
+      fontSize = '25%',
+      dom = "ti",
+      ordering = FALSE,
+      rownames = FALSE,
+      options = list(pageLength = 5, scrollX=T),
+      class = 'white-space: nowrap' 
+    )
+  )
+```
+
+.footnote[Apenas 25 linhas são mostradas aqui]
+
+???
+A tabela mostra apenas as primeiras 25 linhas, para carregar mais rápido.
+
+---
+
+class: inverse, center, middle
+
+# Demonstração ao vivo
+
+## Novo projeto RStudio e script R
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "functions_packages", "piano_man.jpg")))
+```
+
+---
+
+class: inverse, center, middle
+
+## Limpeza de dados no R
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "data_cleaning.png")))
+```
+
+---
+
+# Dados limpos, dados bagunçados
+
+Agora seus dados foram importados. O que normalmente está envolvido na "limpeza" de um conjunto de dados?
+
+.pull-left[
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_broom.png")))
+```
+
+]
+
+--
+
+.pull-right[
+
+- Preparar para análise e visualização
+
+- Padronizar nomes de colunas
+
+- Subconjunto de linhas e colunas
+
+- Alinhar a ortografia
+
+- Criar variáveis categóricas e calculadas
+
+- Unir com outros dados
+
+- Remover duplicatas...
+
+]
+
+.footnote []
+
+???
+Pergunte aos participantes que medidas eles tomam para limpar conjuntos de dados
+
+---
+
+# O pacote {dplyr} 
+
+.pull-left[
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "dplyr_hex.png")))
+```
+
+]
+
+.pull-right[
+
+- O pacote mais fácil e versátil para limpeza de dados
+
+- Esse pacote é instalado no universo do {tidyverse}
+
+- O pacote {tidyverse} transformou o R nos últimos 10 anos
+
+]
+
+.footnote["dplyr" é uma abreviação de "data plier" (alicate de dados)]
+
+???
+O Tidyverse tornou a codificação em R muito mais fácil de usar, intuitiva e acessível para programadores iniciantes
+
+---
+
+# Conjunto de dados de prática
+
+Vamos usar um mini **`vig_bruto`** conjunto de dados para você praticar algumas funções essenciais do R.
+
+```{r, echo=F}
+vig_bruto <- data.frame(
+  stringsAsFactors = FALSE,
+       check.names = FALSE,
+         caso_id = c("694928","86340d","92d002","544bd1","544bd1"),
+         idade = c(23L, 0L, 16L, 10L, 10L),
+         sexo = c("m", "f", "m", "f", "f"), 
+         lab_confirmado = c(FALSE, TRUE, TRUE, TRUE, FALSE),
+         `sintomas data` = c("11/9/2014", "10/30/2014","8/16/2014","8/29/2014","8/29/2014"),
+         `peso (kg)` = c(70L, 18L, 59L, 39L, 39L)
+                       )
+vig_bruto <- vig_bruto %>% 
+  add_row(vig_bruto[4,], .before = 5)
+```
+
+```{r, eval=T}
+vig_bruto %>% 
+  knitr::kable()
+     
+```
+
+---
+
+# Funções para hoje
+
+| Função | Utilitário                       | 
+| ------ | -------------------------------- |
+| `filter()`       | subconjunto **linhas**                     | 
+| `select()`       | subconjunto **colunas**                     | 
+| `clean_names()`       | padronizar os nomes das colunas  | 
+| `rename()`       | renomear colunas manualmente     | 
+| `mutate()`       | criar e transformar colunas      | 
+| `mdy()`, `dmy()`, `ymd()`     | diga ao R como entender as datas | 
+
+---
+
+class: medium-large-table2
+
+# `filter()` linhas
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+filter(vig_bruto)
+```
+
+1º argumento: um conjunto de dados
+
+]
+
+.pull-right[
+
+```{r, eval=T, echo=F}
+filter(vig_bruto) %>% knitr::kable()
+```
+
+]
+
+---
+
+class: medium-large-table2
+
+# `filter()` linhas
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+filter(vig_bruto, idade < 18)
+```
+
+2º+ argumentos: testes lógicos para que as linhas sejam *mantidas*
+
+]
+
+.pull-right[
+
+```{r, eval=T, echo=F}
+filter(vig_bruto, idade < 18) %>% knitr::kable()
+```
+
+]
+
+---
+
+class: medium-large-table2
+
+# `filter()` linhas
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+filter(vig_bruto, idade < 18, sexo == "f")
+```
+
+2º+ argumentos: testes lógicos para que as linhas sejam *mantidas*
+
+]
+
+.pull-right[
+
+```{r, eval=T, echo=F}
+filter(vig_bruto,
+  idade < 18,
+  sexo == "f") %>%
+  knitr::kable()
+```
+
+]
+
+.footnote[Observe o uso de dois iguais `==` para testar a equivalência]
+
+---
+
+class: medium-large-table2
+
+# `filter()` linhas
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+filter(vig_bruto, 
+  idade < 18 & 
+  (sexo == "f" | lab_confirmado == TRUE)
+)
+```
+
+*As linhas novas e os recuos não afetam o código*
+
+A lógica pode se tornar complexa quando você  utiliza:
+
+- `&` (E)
+- `|` (OU)
+- Parênteses
+
+]
+
+.pull-right[
+
+```{r, eval=T, echo=F}
+filter(vig_bruto, idade < 18 & (sexo == "f" | lab_confirmado == TRUE)) %>%
+  knitr::kable()
+```
+
+]
+
+---
+
+class: medium-large-table2
+
+# `select()` colunas
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+select(vig_bruto, ___) 
+```
+
+`select()` também espera um conjunto de dados como primeiro argumento
+
+]
+
+.pull-right[
+
+```{r, eval=T, echo=F}
+vig_bruto %>%
+  knitr::kable()
+```
+
+]
+
+---
+
+class: medium-large-table2
+
+# `select()` colunas
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+select(vig_bruto, caso_id, idade)
+```
+
+Você fornece ao `select()` os nomes das colunas para *manter*
+
+]
+
+.pull-right[
+
+```{r, eval=T, echo=F}
+select(vig_bruto, caso_id, idade) %>%
+  knitr::kable()
+```
+
+]
+
+---
+
+class: medium-large-table2
+
+# `select()` colunas
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+select(vig_bruto, caso_id, idade, sexo)
+```
+
+Você fornece ao `select()` os nomes das colunas para *manter*
+
+]
+
+.pull-right[
+
+```{r, eval=T, echo=F}
+select(vig_bruto, caso_id, idade, sexo) %>%
+  knitr::kable()
+```
+
+]
+
+---
+
+class: medium-large-table2
+
+# `select()` colunas
+
+.pull-left[
+
+```{r, eval=F, echo=T}
+select(vig_bruto, -caso_id, -lab_confirmado)
+```
+
+Ou você pode designar quais colunas serão *removidas* com -
+
+]
+
+.pull-right[
+
+```{r, eval=T, echo=F}
+select(vig_bruto, -caso_id, -lab_confirmado) %>%
+  knitr::kable()
+```
+
+]
+
+---
+
+# `filter()` *e* `select()`?
+
+Sim! Use o pipe **%>%** "para "passar" dados de uma função para outra.
+
+.pull-left[
+
+É como dizer as palavras **"e depois"**.
+
+Um comando de limpeza típico contém um *sequência* de etapas vinculadas
+
+- Renomear colunas
+- Filtrar linhas
+- Selecionar colunas
+- Desduplicar
+- Limpar valores...
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="75%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "cleaning.png")))
+```
+
+]
+
+---
+
+class: medium-large-table2
+
+# "Piping" dados
+
+Anteriormente, o primeiro argumento era o conjunto de dados
+
+`filter(`**vig\_bruto**`, idade < 18)`
+
+--
+
+Usando pipes, isso agora é escrito como:
+
+**vig\_bruto** `%>% filter(idade < 18)`
+
+--
+
+Você pode passar os dados por  *múltiplas* funções com o pipe
+`vig_bruto`
+
+```{r, eval=T, echo=F}
+vig_bruto %>% knitr::kable()
+```
+
+---
+
+class: medium-large-table2
+
+# Dados da tubulação
+
+Anteriormente, o primeiro argumento era o quadro de dados
+
+`filter(`**vig\_bruto**`, idade < 18)`
+
+Usando pipes, isso agora é escrito como:
+
+**vig\_bruto** `%>% filter(idade < 18)`
+
+Você pode passar os dados por  *múltiplas* funções com o pipe
+`vig_bruto` **%>%** `filter(idade < 18)`
+
+```{r, eval=T, echo=F}
+vig_bruto %>% filter(idade < 18) %>% knitr::kable()
+```
+
+---
+
+class: medium-large-table2
+
+# Dados da tubulação
+
+Anteriormente, o primeiro argumento era o conjunto de dados
+
+`filter(`**vig\_bruto**`, idade < 18)`
+
+Usando pipes, isso agora é escrito como:
+
+**surv\_raw** `%>% filter(idade < 18)`
+
+Você pode passar os dados por  *múltiplas* funções com o pipe
+`vig_bruto` **%>%** `filter(idade < 18)` **%>%** `select(caso_id, idade, sexo)`
+
+```{r, eval=T, echo=F}
+vig_bruto %>% filter(idade < 18) %>% select(caso_id, idade, sexo) %>% knitr::kable()
+```
+
+---
+
+# Estilo de codificação vertical
+
+Um estilo *vertical* com recuos não afeta o código, mas o torna mais legível!
+
+```{r, eval=F, echo=T}
+vig_bruto
+```
+
+```{r, eval=T, echo=F}
+vig_bruto %>%  
+  #add_row(vig_bruto[5,]) %>% 
+  knitr::kable() 
+```
+
+---
+
+# Estilo de codificação vertical
+
+Um estilo *vertical* com recuos não afeta o código, mas o torna mais legível!
+
+```{r, eval=F, echo=params$lang == "en"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado)                  # selecionar colunas
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado)        # sélectionner les colonnes
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado)        # выбрать столбцы
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado)        # seleccionar columnas
+```
+
+
+```{r, eval=F, echo=params$lang == "pt"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado)        # selecionar colunas
+```
+
+```{r, eval=params$lang == "en", echo=F}
+vig_bruto %>% 
+  #add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # selecionar colunas
+  knitr::kable() 
+```
+
+```{r, eval=params$lang == "fr", echo=F}
+vig_bruto %>% 
+  add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # sélectionner les colonnes
+  knitr::kable() 
+```
+
+```{r, eval=params$lang == "ru", echo=F}
+vig_bruto %>% 
+  add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # выбрать столбцы
+  knitr::kable() 
+```
+
+```{r, eval=params$lang == "es", echo=F}
+vig_bruto %>% 
+  #add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # de-duplicar
+  knitr::kable() 
+```
+
+
+---
+
+# Estilo de codificação vertical
+
+O estilo de codificação **`%>%`** passa o conjunto de dados para a próxima etapa
+
+```{r, eval=F, echo=params$lang == "en"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%              # selecionar colunas
+  distinct()                                                # de-duplicar
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # sélectionner les colonnes
+  distinct()                                         # dédupliquer 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # выбрать столбцы
+  distinct()                                         # де-дублировать
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # seleccionar columnas
+  distinct()                                         # de-duplicar
+```
+
+```{r, eval=T, echo=F}
+vig_bruto %>% 
+  #add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # selecionar colunas
+  distinct() %>%                                     # de-duplicar
+  knitr::kable() 
+```
+
+---
+
+# Estilo de codificação vertical
+
+O **`%>%`** pipe passa o conjunto de dados para a próxima etapa
+
+```{r, eval=F, echo=params$lang == "en"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%              # selecionar colunas
+  distinct() %>%                                            # de-duplicar
+  filter(idade < 18, lab_confirmado == TRUE)                   # só casos de crianças
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # Sélectionner les colonnes
+  distinct() %>%                                     # dédupliquer 
+  filter(idade < 18, lab_confirmado == TRUE)            # uniquement les cas confirmés d'enfants 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # выбрать столбцы
+  distinct()  %>%                                    # де-дублировать
+  filter(idade < 18, lab_confirmado == TRUE)            #подтвержденные случаи заболевания только у маленьких детей
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # seleccionar columnas
+  distinct() %>%                                     # de-duplicar
+  filter(idade < 18, lab_confirmado == TRUE)            # sólo los casos confirmados de niños pequeños
+```
+
+```{r, eval=T, echo=F}
+vig_bruto %>% 
+  #add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # selecionar colunas
+  distinct() %>%                                     # de-duplicar
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # only children confirmed cases
+  knitr::kable() 
+```
+
+---
+
+# Estilo de codificação vertical
+
+Os **`%>%`** passa o conjunto de dados para a próxima etapa
+
+```{r, eval=F, echo=params$lang == "en"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%              # selecionar colunas
+  distinct() %>%                                            # de-duplicar
+  filter(idade < 18, lab_confirmado == TRUE) %>%               # só casos de crianças      
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))  # criar uma coluna      
+ 
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # Sélectionner les colonnes
+  distinct() %>%                                     # dédupliquer 
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # uniquement les cas confirmés d'enfants
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))  # créer une colonne       
+ 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # выбрать столбцы
+  distinct()  %>%                                    # де-дублировать
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # подтвержденные случаи заболевания только у детей младшего возраста                   
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))   # создать столбец
+ 
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # seleccionar columnas
+  distinct() %>%                                     # de-duplicar
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # casos confirmados sólo en niños pequeños      
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))   # crear una columna      
+ 
+```
+
+```{r, eval=T, echo=F}
+vig_bruto %>% 
+  #add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%          
+  distinct() %>%                                           
+  filter(idade < 18, lab_confirmado == TRUE) %>%              
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))  %>% 
+  knitr::kable()
+```
+
+---
+
+# Estilo de codificação vertical
+
+Você tem um operador de pipe no final desse fluxo de trabalho?
+
+```{r, eval=F, echo=params$lang == "en"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%              # selecionar colunas
+  distinct() %>%                                            # de-duplicar
+  filter(idade < 18, lab_confirmado == TRUE) %>%               # só casos de crianças      
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))   #<<      
+ 
+```
+
+```{r, eval=F, echo=params$lang == "fr"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # Sélectionner les colonnes
+  distinct() %>%                                     # dédupliquer 
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # uniquement les cas confirmés d'enfants
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))  # créer une colonne       
+ 
+```
+
+```{r, eval=F, echo=params$lang == "ru"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # выбрать столбцы
+  distinct()  %>%                                    # де-дублировать
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # подтвержденные случаи заболевания только у детей младшего возраста                   
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))   # создать столбец
+ 
+```
+
+```{r, eval=F, echo=params$lang == "es"}
+vig_bruto %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%    # seleccionar columnas
+  distinct() %>%                                     # de-duplicar
+  filter(idade < 18, lab_confirmado == TRUE) %>%        # casos confirmados sólo en niños pequeños      
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))   # crear una columna      
+ 
+```
+
+```{r, eval=T, echo=F}
+vig_bruto %>% 
+  #add_row(vig_bruto[5,]) %>% 
+  select(caso_id, idade, sexo, lab_confirmado) %>%          
+  distinct() %>%                                           
+  filter(idade < 18, lab_confirmado == TRUE) %>%              
+  mutate(menor1 = ifelse(idade < 1, "menor de 1 ano", "maior de 1 ano"))  %>% 
+  knitr::kable()
+```
+
+--
+
+Os pipes conectam todas essas funções em um único comando.  
+Como você executaria esse comando no RStudio?
+
+---
+
+# Limpar os nomes das colunas
+
+Podemos observar as alterações nos nomes das colunas imprimindo-as com `names()`
+
+```{r, echo=T, eval=T}
+# imprime o nome das colunas
+names(vig_bruto)  
+```
+
+---
+
+# Limpar os nomes das colunas
+
+Da mesma maneira, `vig_bruto` pode ser passado para `names()` usando um **pipe**:
+
+```{r, echo=T, eval=F}
+vig_bruto %>%  # comece com dados brutos
+  names()     # imprime o nome das colunas                           
+```
+
+```{r, eval=T, echo=F}
+vig_bruto %>%           # comece com dados brutos
+  names()              # imprime o nome das colunas                           
+```
+
+--
+
+Aplicar `clean_names()` para `vig_bruto` inserindo-o na sequência do pipe.  
+Isso padroniza os nomes das colunas (em letras minúsculas, sem espaços ou caracteres especiais).
+
+```{r, echo=T, eval=T}
+vig_bruto %>%            # comece com dados brutos
+  clean_names() %>%     # padroniza o nome das colunas #<<
+  names()               # imprime o nome das colunas
+```
+
+*Veja as alterações nas duas últimas colunas*
+
+---
+
+# Limpar os nomes das colunas
+
+Da mesma maneira, `vig_bruto` pode ser passado para `names()` usando um **pipe**:
+
+```{r, echo=T, eval=F}
+vig_bruto %>%  # comece com dados brutos
+  names()     # imprime o nome das colunas                           
+```
+
+```{r, eval=T, echo=F}
+vig_bruto %>%           # comece com dados brutos
+  names()              # imprime o nome das colunas                           
+```
+
+Em seguida, use o pipe para `rename()` para edições manuais.  
+Observe que `rename()` faz referência as colunas já padronizadas (`data_sintomas`).
+
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
+vig_bruto %>%                        # comece com dados brutos
+  clean_names() %>%                 # padroniza o nome das colunas 
+  rename(                           # edição manual #<<
+      idade_anos  = idade,             # NOVO = ANTIGO    #<<
+      data_sintomas = `sintomas_data`) %>%                 #<<       
+  names()                           # imprime o nome das colunas
+```
+
+---
+
+# Imprimir vs. salvar
+
+Clique nas abas para ver a diferença.
+
+.panelset[
+.panel[.panel-name[Printing]
+
+As alterações anteriores em `vig_bruto` **não** foram salvas.
+
+Nós apenas *imprimimos com modificações*. 
+
+```{r, eval=F, echo=params$lang == "en"}
+# modify, then print column names
+vig_bruto %>%                        # comece com dados brutos        #<<
+  clean_names() %>%                 # padroniza o nome das colunas 
+  rename(                           # edição manual
+      idade_anos  = idade,             # NOVO = ANTIGO    
+      `sintomas_data` = `sintomas_data`) %>%                        
+  names()                           # imprime o nome das colunas #<<
+```
+
+**`vig_bruto`** ainda tem os *nomes das colunas originais*!
+
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
+names(vig_bruto) 
+```
+
+]
+
+.panel[.panel-name[Saving]
+
+Use **`<-`** para salvar as alterações em um novo conjunto de dados **`vig_limpo`**.
+
+Nenhuma saída é impressa, mas o novo objeto aparecerá no RStudio Environment. 
+
+```{r, eval=T, echo=T}
+# create new data frame
+vig_limpo <- vig_bruto %>%  #<<
+  clean_names() %>%          
+  rename(                           # edição manual
+      idade_anos  = idade,             # NOVO = ANTIGO    
+      `data_sintomas` = `sintomas_data`)
+```
+
+**`vig_limpo`** tem os *nomes de colunas novos*!
+
+```{r, eval=params$lang == "en", echo=params$lang == "en"}
+names(vig_limpo) 
+```
+
+]
+]
+
+
+
+
+
+
+---
+class: medium-large-table2
+
+# `mutate()` para *criar* colunas
+
+A sintaxe é a seguinte:
+
+```{r, echo=T, eval=F}
+DADOS %>% 
+  mutate(NOME_NOVA_COLUNA = UMA_FUNCAO(argumentos))
+```
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+vig_bruto %>% 
+  mutate(idade_grupo = ifelse(
+    test = idade >= 18,
+    yes = "adulto",  
+    no = "menor")) 
+```
+
+`ifelse()` testa logicamente cada linha e grava na nova coluna `idade_grupo` :
+
+- "adulto" se o teste for VERDADEIRO
+- "menor" se o teste for FALSO
+
+]
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+vig_bruto %>% 
+  mutate(idade_grupo = ifelse(
+    test = idade >= 18,
+    yes = "adulto",  
+    no = "menor"))  %>% 
+  knitr::kable()
+```
+
+]
+
+---
+
+class: medium-large-table2
+
+# `mutate()` para *editar* colunas
+
+A sintaxe é semelhante:
+
+```{r, echo=T, eval=F}
+DATASET %>% 
+  mutate(MESMO_NOME_COLUNA = UMA_FUNCAO(argumentos))
+```
+
+.pull-left[
+
+```{r, echo=T, eval=F}
+vig_bruto %>% 
+  mutate(sexo = recode(sexo,  
+    "m" = "Masculino",           
+    "f" = "Feminino"))        
+```
+
+A coluna `sexo` é sobrescrita.
+
+`recode()` começa com a coluna `sexo` original e aplica as alterações:
+
+- "m" para "Masculino"
+- "f" para "Feminino"
+
+]
+
+.pull-right[
+
+```{r, echo=F, eval=T}
+vig_bruto %>% 
+  mutate(sexo = recode(sexo,  
+    'm' = 'Masculino',           
+    'f' = 'Feminino'))  %>% 
+  knitr::kable()
+```
+
+]
+
+---
+
+# `mutate()` com datas
+
+A `class()` das colunas de data deve ser "date", não "character".
+
+Para alterar a classe, você deve *dizer* R como entender as datas brutas.
+
+.pull-left[
+
+As datas são apresentadas em vários formatos:
+
+Você sabe se "03/09/2024" é o dia 9 de março ou o dia 3 de setembro?
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "Dates_500x500.png")))
+```
+
+]
+
+.footnote[Mais detalhes neste [Capítulo do Manual do Epi R](https://epirhandbook.com/pt/new_pages/dates.pt.html)]
+
+---
+
+# Converter para classe de data
+
+Dentro de `mutate()` use a opção {lubridate} que se alinha com a função *formato de data bruta*.
+
+- `ymd()` se os valores brutos forem AAAA-MM-DD
+- `dmy()` se os valores brutos forem DD-MM-AAAA
+- `mdy()` se os valores brutos forem MM-DD-YYYY
+
+--
+
+.pull-left[
+
+```{r, eval=T, echo=T}
+vig_limpo %>% 
+  select(caso_id, data_sintomas) %>% 
+  tibble()
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r, eval=T, echo=T}
+vig_limpo %>% 
+  mutate(data_sintomas = mdy(data_sintomas)) %>%  #<<
+  select(caso_id, data_sintomas) %>% 
+  tibble()
+```
+
+]
+
+---
+
+class: inverse, center, middle
+
+## Exercício!
+
+Acesse o site do curso  
+Abra o exercício do Módulo 2 e faça login  
+Siga as instruções para criar um novo projeto do RStudio e começar a programar  
+Informe um instrutor se você não tiver certeza do que fazer
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "COVID dominoes.png")))
+```
+
+
