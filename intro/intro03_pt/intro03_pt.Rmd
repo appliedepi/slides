@@ -1,0 +1,809 @@
+---
+title: Introdução ao R</br>para Epidemiologia Aplicada
+subtitle: '<br>Cleaning data with R: Part 2'
+author: '2022'
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: en
+---
+
+class: inverse, center, middle, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+# allow panels in slides
+xaringanExtra::use_panelset()
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data management and visualization
+  gtsummary,  # summary tables
+  flair,       # for decorating code chunks with colors
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+```
+
+```{r xaringan-themer, include=FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+```{css, echo=F}
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+```
+
+```{r, echo=F, include=F}
+vig_bruto <-  rio::import(here::here("data", "vigilancia_lista_de_casos_20141201.csv"))
+
+vig_bruto <- vig_bruto %>% 
+  filter(num_linha %in% c(635, 2, 11, 227, 641)) %>% 
+  select(id_caso, idade, sexo, hospital, lab_confirmado, epilink, febre)
+
+# gen <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "generic", col_types = "c") %>%
+#   clean_names()
+# 
+# mod4 <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "mod4", col_types = "c") %>%
+#   clean_names()
+```
+
+# Introdução ao R para Epidemiologia Aplicada
+
+### Limpeza de dados com o R (parte 2)
+
+[contact@appliedepi.org](mailto:contact@appliedepi.org)
+
+---
+
+# Hoje: objetivos e cronograma
+
+**Neste módulo, pretendemos ajudar você a:**
+
+- Familiarizar-se com mais funções usadas para limpar dados de saúde pública
+- Adicionar etapas complexas de recodificação lógica à sua "cadeia de pipes" de limpeza de dados
+- Você será apresentado aos conceitos de estrutura de "dados organizados (tidy data)"
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- outline <- dplyr::tribble(
+  ~Tempo, ~Tópico,
+  "20 minutos",  "Revisão do módulo anterior", 
+  "20 minutos", "Demonstração - codificação lógica",
+  "2,5 horas",  "Exercício",
+  "20 minutos", "Debriefing"
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Faça pausas conforme desejar durante o exercício")
+```
+
+???
+Observe as pausas no texto.
+
+---
+
+# Mais funções de limpeza de dados
+
+Neste módulo, abordaremos:
+
+| Função | Utilitário                               | 
+| ------ | ---------------------------------------- |
+| `mutate()`       | Criar e transformar colunas              | 
+| `ifelse()`       | Recodificação lógica simples de valores  | 
+| `case_when()`       | recodificação lógica complexa de valores | 
+| `age_categories()`       | criar coluna de categoria de idade       | 
+| `coalesce()`       | priorização de valores                   | 
+| `select()`       | subconjunto e organização de colunas     | 
+
+---
+
+class: inverse, center, middle
+
+# Revisão do módulo anterior
+
+---
+
+# Contar uma história com o pipe
+
+O **comando de limpeza** é uma história, um **série de ações** realizadas em dados brutos.
+
+O **`%>%`** pipe  significa **"e depois"** (...realizar a ação na próxima linha).
+
+Alguém pode explicar esse comando verbalmente?
+
+```{r, echo=T, eval=F}
+vig <- vig_bruto %>% 
+  clean_names() %>% 
+  rename(
+    idade_anos = idade,
+    data_sintomas = inicio_sintomas_data,
+    data_notificacao = data_de_notificacao) %>% 
+  mutate(data_sintomas = mdy(data_sintomas)) %>% 
+  mutate(data_notificacao = mdy(data_notificacao)) %>% 
+  mutate(sexo = recode(sexo,  
+    "m" = "Masculino",           
+    "f" = "Feminino"))  
+
+```
+
+---
+
+# Contar uma história com o pipe
+
+O **comando de limpeza** é uma história, um **série de ações** realizadas em dados brutos.
+
+O **`%>%`** pipe  significa **"e depois"** (...realizar a ação na próxima linha).
+
+Alguém pode explicar esse comando verbalmente?
+
+```{r, echo=T, eval=F}
+vig <- vig_bruto %>%        # criar novos dados limpos a partir dos dados brutos com...
+  clean_names() %>%                           # padronizar os nomes das colunas
+  rename(                                     # edições manuais dos nomes das colunas:
+    idade_anos = idade,                            # idade para idade_anos
+    data_sintomas = inicio_sintomas_data,                    # usar data_ como prefixo
+    data_notificacao = data_de_notificacao) %>%           # usar data_ como prefixo
+  mutate(data_sintomas = mdy(data_sintomas)) %>%    # ajudar o R a entender as datas de início dos sintomas
+  mutate(data_notificacao = mdy(data_notificacao)) %>%  # ajudar o R a entender as datas de notificação
+  mutate(sexo = recode(sexo,                    # editar os valores de sexo para que:
+    "m" = "Masculino",                               # "m" agora seja "Masculino"
+    "f" = "Feminino"))                            # "f" agora seja "Feminino"
+
+```
+
+---
+
+# Erros comuns
+
+Qual é a causa dessa mensagem de erro?
+
+```{r, echo=T, eval=F}
+# Criando dados limpos
+vig <- vig_bruto %>% 
+  clean_names() %>% 
+  rename(
+    idade_anos = idade,
+    data_sintomas = inicio_sintomas_data,
+    data_notificacao = data_de_notificacao) %>% 
+  mutate(data_sintomas = mdy(data_sintomas)) %>% 
+  mutate(data_notificacao = mdy(data_notificacao)) 
+  mutate(sexo = recode(sexo,  
+    "m" = "Masculino",           
+    "f" = "Feminino"))  
+```
+
+```{r, echo=T, eval=F}
+Error in recode(sexo, m = "Masculino", f = "Feminino") : object 'sexo' not found
+```
+
+---
+
+# Erros comuns
+
+Qual é a causa dessa mensagem de erro?
+
+```{r, echo=T, eval=F}
+# Criando dados limpos
+vig <- vig_bruto %>% 
+  clean_names() %>% 
+  rename(
+    idade_anos = idade,
+    data_sintomas = inicio_sintomas_data,
+    data_notificacao = data_de_notificacao) %>% 
+  mutate(data_sintomas = mdy(data_sintomas)) %>% 
+  mutate(data_notificacao = mdy(data_notificacao))     #<<
+  mutate(sexo = recode(sexo,  
+    "m" = "Masculino",           
+    "f" = "Feminino"))  
+```
+
+```{r, echo=T, eval=F}
+Error in recode(sexo, m = "Masculino", f = "Feminino") : object 'sexo' not found
+```
+
+Um operador de pipe está faltando, quebrando a cadeia.
+
+O `mutate(sexo...` não recebeu o conjunto de dados da etapa anterior e, portanto, o R não tem contexto do que a coluna `sexo` é.
+
+---
+
+# Erros comuns
+
+Qual é a causa dessa mensagem de erro?
+
+```{r, echo=T, eval=F}
+# Criando dados limpos
+vig <- vig_bruto %>% 
+  clean_names() %>% 
+  rename(
+    idade_anos = idade,
+    data_sintomas = inicio_sintomas_data,
+    data_notificacao = data_de_notificacao) %>% 
+  mutate(data_sintomas = mdy(data_sintomas)) %>% 
+  mutate(data_notificacao = mdy(data_notificacao)) %>% 
+  mutate(sexo = recode(sexo,  
+    "m" = "Masculino",           
+    "f" = "Feminino"))  %>% 
+
+# Fazer uma tabela com os dados limpos
+tabyl(vig, sexo, district)
+```
+
+```{r, echo=T, eval=F}
+Error in `dplyr::select()`:
+! Can't subset columns that don't exist.
+✖ Column `vig` doesn't exist.
+```
+
+---
+
+# Erros comuns
+
+Qual é a causa dessa mensagem de erro?
+
+```{r, echo=T, eval=F}
+# Criando dados limpos
+vig <- vig_bruto %>% 
+  clean_names() %>% 
+  rename(
+    idade_anos = idade,
+    data_sintomas = inicio_sintomas_data,
+    data_notificacao = data_de_notificacao) %>% 
+  mutate(data_sintomas = mdy(data_sintomas)) %>% 
+  mutate(data_notificacao = mdy(data_notificacao)) %>%      
+  mutate(sexo = recode(sexo,  
+    "m" = "Masculino",           
+    "f" = "Feminino"))  %>%       #<<
+
+# make a table with the clean data
+tabyl(vig, sexo, district)
+
+```
+
+```{r, echo=T, eval=F}
+Error in `dplyr::select()`:
+! Can't subset columns that don't exist.
+✖ Column `vig` doesn't exist.
+```
+
+Um pipe extra 'solto' passou o conjunto de dados limpo para um comando tabyl() *separado*.
+Para uma função, forneça um conjunto de dados *ou* através de um pipe, *OU* como o primeiro argumento
+
+---
+
+# Script bagunçado
+
+.pull-left[
+
+**Evite isso**
+
+```{r, echo=T, eval=F}
+vig <- vig_bruto %>%    #<<
+  clean_names()
+  
+vig <- vig_bruto %>%    #<<
+  clean_names() %>% 
+  rename(
+    data_sintomas = inicio_sintomas_data,
+    data_notificacao = data_de_notificacao)
+
+tabyl(vig, sexo, district)
+class(vig$data_sintomas)
+
+vig <- vig_bruto %>% #<<
+  clean_names() %>% 
+  rename(
+    data_sintomas = inicio_sintomas_data,
+    data_notificacao = report_date) %>% 
+  mutate(data_sintomas = mdy(data_sintomas)) %>% 
+  mutate(data_notificacao = mdy(data_notificacao)) %>%     
+  mutate(sexo = recode(sexo,  
+    "m" = "Masculino",           
+    "f" = "Feminino"))
+  
+```
+
+]
+
+.pull-right[
+
+- Mantenha **um comando de limpeza** apenas. Adicione novas funções com pipes no fim.
+
+]
+
+---
+
+# Limpar script
+
+.pull-left[
+
+Script limpo
+
+```{r, echo=T, eval=F}
+# Criando dados limpos -------------------------------------
+vig <- vig_bruto %>%                       #<<               
+  clean_names() %>% 
+  rename(
+    data_sintomas = inicio_sintomas_data,
+    data_notificacao = report_date) %>% 
+  mutate(data_sintomas = mdy(data_sintomas))  %>% 
+  mutate(data_notificacao = mdy(data_de_notificacao)) %>%     
+  mutate(sexo = recode(sexo,  
+    "m" = "Masculino",           
+    "f" = "Feminino"))
+```
+
+]
+
+.pull-right[
+
+- Manter **um comando de limpeza** apenas. Adicione novas funções com pipes no fim.
+
+]
+
+---
+
+# Limpar script
+
+.pull-left[
+
+Script limpo
+
+```{r, echo=T, eval=F}
+# Criando dados limpos -------------------------------------
+vig <- vig_bruto %>%                                     
+  clean_names() %>% 
+  rename(
+    data_sintomas = inicio_sintomas_data,
+    data_notificacao = report_date) %>% 
+  mutate(data_sintomas = mdy(data_sintomas))  %>% 
+  mutate(data_notificacao = mdy(data_de_notificacao)) %>%     
+  mutate(sexo = recode(sexo,  
+    "m" = "Masculino",           
+    "f" = "Feminino"))
+  
+# Testing area ---------------------------------------------
+tabyl(vig, sexo, district)    # tabela cruzada       #<<
+class(vig$data_sintomas)        # checar classe das colunas    #<<
+```
+
+]
+
+.pull-right[
+
+- Consolide outros comandos pequenos em uma **área de teste** separada
+
+]
+
+---
+
+# Imprimir vs. salvar
+
+**Imprimir**
+
+Esse comando não tem **`<-`** portanto, ele apenas *imprime* os dados modificados `vig` no console. O conjunto de dados real não foi alterado.
+
+```{r, echo=params$lang == "en", eval=F}
+vig_bruto %>%              # Imprimir apenas casos maiores que 10 anos  #<<
+  filter(idade > 10)
+```
+
+```{r, echo=params$lang == "fr", eval=F}
+vig_bruto %>%                    # IMPRIMER seulement les cas plus que 10 ans
+  filter(idade > 10)
+```
+
+```{r, echo=params$lang == "ru", eval=F}
+vig_bruto %>%                    # ПЕЧАТАТЬ только случаи старше 10 лет
+  filter(idade > 10)
+```
+
+```{r, echo=params$lang == "es", eval=F}
+vig_bruto %>%                    # IMPRIMIR sólo los casos de más de 10 años
+  filter(idade > 10)
+```
+
+```{r, echo=F, eval=F}
+vig_bruto %>%                    # Imprimir apenas casos maiores que 10 anos
+  filter(idade > 10) %>% 
+  knitr::kable()
+```
+
+**Economia**
+
+Adicionar o operador de atribuição **<-** para criar um novo conjunto de dados.
+
+```{r pipe-assign, eval=F, echo=T}
+vig_mais10 <- vig_bruto %>%     # criar um novo conjunto de dados   #<<
+  filter(idade > 10)
+```
+
+(Nenhuma saída para o console do R, mas um novo objeto no painel Environment)
+
+???
+Observe como os nomes das colunas em `vig` são antigos! Isso ocorre porque nossas alterações ainda não foram salvas.
+
+---
+
+class: inverse, center, middle
+
+# Valores de recodificação
+
+---
+
+# Exemplo de conjunto de dados
+
+```{r, eval=T, echo=T}
+vig_bruto
+```
+
+---
+
+# `recode()` para edições manuais
+
+Use `recode()` dentro de `mutate()` para *recodificação* manual extensa
+
+```{r, echo=params$lang == "en", eval=params$lang == "en"}
+vig_bruto %>% 
+  mutate(hospital = recode(hospital,
+      # Para referência: ANTIGO = NOVO
+      "Mitilary Hospital"  = "Military Hospital",
+      "Port"               = "Port Hospital",
+      "Port Hopital"       = "Port Hospital",
+      "St. Mark's Maternity Hospital (SMMH)" = "SMMH"))
+```
+
+---
+
+# `ifelse()` para lógica simples
+
+`ifelse()` dentro de `mutate()` testará logicamente cada linha.
+
+Ele escreve na nova coluna `idade_grupo`:
+
+- "adulto", se o teste for VERDADEIRO
+- "menor", se o teste for FALSO
+
+```{r, echo=T, eval=T}
+vig_bruto %>% 
+  mutate(idade_grupo = ifelse(
+    test = idade >= 18,
+    yes = "adulto",  
+    no = "menor")) 
+```
+
+---
+
+# Nomes e ordem dos argumentos
+
+Se os argumentos forem escritos na ordem padrão de acordo com a documentação da função, não será necessário escrever explicitamente seus nomes.
+
+Os argumentos de `ifelse()` são `ifelse(test = , yes = , no = )`
+
+Este comando:
+
+```{r, echo=T, eval=F}
+vig_bruto %>% 
+  mutate(idade_grupo = ifelse(
+    test = idade >= 18,
+    yes = "adult",  
+    no = "minor")) 
+```
+
+Também pode ser escrito como:
+
+```{r, echo=T, eval=F}
+vig_bruto %>% 
+  mutate(idade_grupo = ifelse(idade >= 18, "adulto", "menor")) 
+```
+
+.footnote[Quais são as vantagens e desvantagens disso?]
+
+---
+
+# Lógica complexa
+
+Usar **`case_when()`** dentro de `mutate()` para testar uma série de critérios lógicos em cada linha e atribuir um novo valor correspondente.
+
+```{r, results="asis", echo=FALSE}
+str_glue("A sintaxe de case_when() é: critério lógico para linha ~ resultado se atendido") %>%
+  flair("critério lógico para linha", color = "orange") %>%
+  flair("~", color = "deeppink") %>%
+  flair("resultado se atendido", color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+```{r mutate3, include=F}
+vig_bruto %>% 
+  mutate(def_caso = case_when(
+    lab_confirmado == TRUE             ~ "Confirmado",       #  Primeiro checa isso
+    epilink == 'yes' & febre == 'sim' ~ "Suspeito",         # Depois isso
+    TRUE                              ~ "Em investigação")) # o que sobrou
+```
+
+```{r mutate3_flair, echo=F}
+decorate("mutate3") %>%
+  flair('"Confirmado"', color = "cornflowerblue") %>%
+  flair('"Suspeito"', color = "cornflowerblue") %>%
+  flair('"Em investigação"', color = "cornflowerblue") %>%
+  flair("~", color = "deeppink") %>%
+  flair("lab_confirmado == TRUE", color = "orange") %>%
+  flair(" epilink == 'yes' & febre == 'sim'", color = "orange") %>%
+  flair("TRUE", color = "orange") %>%
+  knitr::knit_print()
+```
+
+A **ordem importa**. Escreva os critérios mais específicos na parte superior do comando (para serem acionados primeiro) e os critérios mais gerais na parte inferior (como um "pega-tudo").
+
+---
+
+class: inverse, center, middle
+
+# Dados organizados
+
+## Reflexões para o final deste exercício
+
+---
+
+# Dados confusos
+
+Em geral, os dados brutos de saúde pública têm a seguinte aparência:
+
+```{r}
+knitr::include_graphics(xfun::relative_path(here::here("images", "messy_data.png")))
+```
+
+Que desafios você vê para lidar com esses dados no R?
+
+---
+
+# Dados organizados
+
+Os dados limpos também devem ser "organizados". A seguir, você encontrará três princípios básicos de "dados organizados":
+
+--
+
+1. Cada **valor** deve ter seu próprio **célula**
+
+--
+
+2. Cada **variável** deve ter sua própria **coluna**
+
+--
+
+3. Cada **observação** deve ter seu próprio **linha**
+
+.footnote[Fonte : [R para ciência de dados](https://r4ds.had.co.nz/tidy-data.html)  
+]
+
+???
+
+---
+
+# Valores em sua própria célula
+
+```{r, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
+# CRIAR DADOS DE EXEMPLO
+#####################
+dados_exemplo_limpos_5 <- data.frame(caso = c("Caso 1", "Caso 2", "Caso 3", "Caso 4"), idade = c("31, anos", "24, anos", "18, meses", "33, anos")) 
+
+dados_exemplo_limpos_6 <- dados_exemplo_limpos_5 %>%
+    separate(idade, 
+           into = c("idade", "unidade_idade"), 
+           sep = ", "
+           ) %>%
+  mutate(idade = as.numeric(idade))
+```
+
+.pull-left[
+
+**Desarrumado:** Que mudanças você faria para deixar esse conjunto de dados mais organizado?
+
+```{r, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
+
+dados_exemplo_limpos_5  %>%
+  knitr::kable()
+  
+```
+
+]
+
+--
+
+.pull-right[
+
+**Arrumado:** A idade e a unidade de idade são separadas em células distintas
+
+```{r, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
+
+dados_exemplo_limpos_6  %>%
+  knitr::kable()
+
+```
+
+]
+
+???
+Vamos começar com uma fácil...
+
+---
+
+# Terminologia
+
+Estruturalmente, os "conjuntos de dados" no R consistem em **colunas** e **linhas**.
+
+--
+
+No entanto, **"variáveis"** e **"observações"** são conceitos mais *abstratos*:
+
+- **Variáveis** medem um *atributo subjacente* (idade, resultado ou data de início)
+- As **Observações** estão relacionadas a uma *unidade de análise*
+
+--
+
+O ideal é que eles se alinhem: **colunas = variáveis** e **linhas = observações**
+
+```{r, eval=TRUE, echo=FALSE, out.height="65%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+#knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", "tidy_image.png")))
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "data_cleaning", paste0("tidy_image_", params$lang, ".png"))))
+
+```
+
+.footnote[Fonte da imagem: [R para Ciência de Dados](https://r4ds.had.co.nz/tidy-data.html)]
+
+---
+
+# Mas nem sempre está claro...
+
+.pull-left[
+
+**Dados não organizados**
+
+```{r}
+long_example <- tribble(
+     ~"País", ~Janeiro, ~Fevereiro, ~Março, 
+     "Mozambique", 3200,    3300,      4100,  
+     "Nigéria", 500,     750,       900,   
+     "Africa do Sul", 5100, 6200, 8100,)
+          
+long_example %>%
+  knitr::kable()
+```
+
+- "Janeiro" é uma variável?
+- Onde está a variável "mês"?
+- Ela tem sua própria coluna?
+- Cada observação é uma linha?
+
+]
+
+--
+
+.pull-right[
+
+**Dados organizados**
+
+```{r}
+long_example %>%
+  pivot_longer(cols=2:4, names_to="mês", values_to = "casos") %>% 
+     knitr::kable()
+```
+
+]
+
+---
+
+class: inverse, center, middle
+
+## Exercício!
+
+Acesse o site do curso  
+Abra o exercício do Módulo 3 e faça login  
+Siga as instruções para abrir o projeto R "ebola" e continuar a codificação  
+Informe um instrutor se você não tiver certeza do que fazer
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "COVID dominoes.png")))
+```
+
+

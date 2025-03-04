@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introdução ao R para Epidemiologia aplicada</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
+    <script src="libs/tabwid/tabwid.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Introdução ao R para<br>Epidemiologia aplicada
+]
+.subtitle[
+## Relatórios e boletins com {rmarkdown}
+]
+.date[
+### <a href="mailto:contact@appliedepi.org">contact@appliedepi.org</a>
+]
+
+---
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-code {
+      font-size: 70%;
+    }
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+    }
+    tr:last-child {
+    border-bottom: none;
+    }
+&lt;/style&gt;
+
+# Hoje: objetivos e cronograma
+
+- Entender o R markdown como uma ferramenta para criar relatórios
+
+- Explorar a variedade de formatos e integrações para relatórios do R markdown
+
+- Converter seu código de estudo de caso do Ebola em um relatório R markdown
+
+- Fazer com que o script R Markdown altere de forma dinâmica com a atualizações de dados
+
+&lt;div class="tabwid"&gt;&lt;style&gt;.cl-fc6dbc1e{}.cl-fc65a646{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-fc685a4e{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-fc6873ee{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fc6873ef{width:4.124in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fc6873f8{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fc6873f9{width:4.124in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fc6873fa{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fc687402{width:4.124in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fc687403{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fc687404{width:4.124in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fc687405{width:1.033in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-fc68740c{width:4.124in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table data-quarto-disable-processing='true' class='cl-fc6dbc1e'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;th class="cl-fc6873ee"&gt;&lt;p class="cl-fc685a4e"&gt;&lt;span class="cl-fc65a646"&gt;Tempo&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-fc6873ef"&gt;&lt;p class="cl-fc685a4e"&gt;&lt;span class="cl-fc65a646"&gt;Tópico&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fc6873f8"&gt;&lt;p class="cl-fc685a4e"&gt;&lt;span class="cl-fc65a646"&gt;30 minutos&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fc6873f9"&gt;&lt;p class="cl-fc685a4e"&gt;&lt;span class="cl-fc65a646"&gt;Apresentação de slides do R markdown e demonstração&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fc6873fa"&gt;&lt;p class="cl-fc685a4e"&gt;&lt;span class="cl-fc65a646"&gt;2.5 horas&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fc687402"&gt;&lt;p class="cl-fc685a4e"&gt;&lt;span class="cl-fc65a646"&gt;Criar seu relatório de situação do Ebola&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-fc687403"&gt;&lt;p class="cl-fc685a4e"&gt;&lt;span class="cl-fc65a646"&gt;30 minutos&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-fc687404"&gt;&lt;p class="cl-fc685a4e"&gt;&lt;span class="cl-fc65a646"&gt;Recapitulação&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="2"class="cl-fc687405"&gt;&lt;p class="cl-fc685a4e"&gt;&lt;span class="cl-fc65a646"&gt;Faça pausas quando desejar durante o exercício&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;
+
+---
+
+# Saúde pública e os relatórios 
+
+.pull-left[
+
+Os boletins ou relatórios fazem parte da rotina da vigilância
+
+- Relatórios de situação de surtos
+- Apresentações de slides semanais
+- Briefings executivos
+- Relatórios voltados para o público
+- Pesquisas de saúde 
+- Análises de pesquisas de vacinação
+- ...
+
+**A produção manual é trabalhosa e propensa a erros humanos**
+
+]
+
+.pull-right[
+
+&lt;img src="../../images/welcome/automated_reports.png" width="100%" /&gt;
+
+]
+
+---
+
+# Saúde pública e os relatórios 
+
+.pull-left[
+
+Muitas vezes, temos que produzi-los para muitas subpopulações:
+
+- Bairro, código postal
+- Condado, distrito, província, estado, país
+- Subpopulações étnicas ou ocupacionais
+- Grupos de alto risco
+- Semanalmente, trimestralmente, anualmente
+
+**A produção manual é trabalhosa e propensa a erros humanos**
+
+]
+
+.pull-right[
+
+&lt;img src="../../images/welcome/automated_reports.png" width="100%" /&gt;
+
+]
+
+---
+
+# "Automação" versus o olho humano
+
+.pull-left[
+
+"Aprendizado de máquina" e "IA" são tópicos quentes no momento.
+
+Mas na maioria dos cenários de saúde pública e epidemiologia aplicada, a interpretação correta das tendências também requer:
+
+- Experiência
+- Conhecimento do contexto local
+- Compreensão do fluxo e das limitações dos dados
+
+Como você vivenciou as limitações da "automação" em seu trabalho?
+
+]
+
+.pull-right[
+
+&lt;img src="../../images/rmarkdown/human_robot.png" width="75%" /&gt;
+
+]
+
+---
+
+class: inverse, center, middle
+
+# R markdown
+
+##Um lugar para código baseada em dados, texto, tabelas e gráficos juntos"
+
+---
+
+# Vários formatos
+
+&lt;img src="../../images/rmarkdown/rmarkdown_overview.png" width="100%" /&gt;
+
+---
+
+# Dashboards
+
+{rmarkdown} pode produzir painéis simples para serem enviados por e-mail ou hospedados on-line.
+
+&lt;img src="../../images/rmarkdown/flexdashboard_output.png" width="75%" /&gt;
+
+.footnote[Inscreva-se em nosso curso Advanced R Markdown ou consulte a seção [capítulo do Epi R Handbook](https://epirhandbook.com/pt/new_pages/flexdashboard.pt.html)!]
+
+---
+
+class: inverse, center, middle
+
+## Até mesmo os slides das aulas foram criados com o R Markdown!
+
+&lt;img src="../../images/rmd_1/pt/even_slides.png" width="75%" /&gt;
+
+.footnote[Veja o pacote {xaringan} e inscreva-se em nosso curso avançado de R Markdown!]
+
+---
+
+# Visão geral
+
+**O script inteiro agora é um documento** que integra **frases de texto** com  **códigos R** e suas **saídas (outputs)**. Tudo é atualizado quando o script é executado.
+
+&lt;img src="../../images/rmd_1/pt/rmarkdown_translation.png" width="100%" /&gt;
+
+---
+
+# Vocabulário
+
+- **Markdown (.md)** - é uma "linguagem" não específica do R, que permite que seu texto simples seja convertido em html e outros formatos
+
+--
+
+- **R Markdown (.Rmd)** - uma variação do markdown que é específica do R
+
+--
+
+- {rmarkdown} um pacote R usado para renderizar o markdown (texto) no arquivo de R markdown e produzir o resultado desejado
+
+--
+
+- {knitr} - um pacote R que lê trechos de código R (code chunks) e os integra ao documento final
+
+--
+
+- **Pandoc** - um software separado (mas incluído no RStudio) que converte a saída em word/pdf/powerpoint etc.
+
+&lt;img src="../../images/rmarkdown/0_rmd.png" width="75%" /&gt;
+
+.footnote[[fonte da imagem](https://rmarkdown.rstudio.com/authoring_quick_tour.html)]
+
+???
+Esse processo ocorre em segundo plano, portanto você não precisa conhecer todas essas etapas. No entanto, você pode encontrar esses nomes.
+
+O arquivo .Rmd é enviado ao knitr, que executa os blocos de código R e cria um novo arquivo .md (markdown) que inclui o código R e sua saída renderizada. O arquivo .md é então processado pelo pandoc para criar o produto final: um documento do Microsoft Word, um arquivo HTML, um documento do PowerPoint, um PDF etc.
+
+---
+
+class: center, middle
+
+# Code chunks (trechos de código)
+
+---
+
+# Code chunks (trechos de código)
+
+No R Markdown, seu código ficará em "chunks" - pequenos pedaços de script R dentro do documento. Crie partes para tarefas distintas (por exemplo, carregar pacotes, importar dados, limpar dados)
+
+.pull-left[
+Partes de um code chunk ou trecho de código:
+
+- 3 "backticks" e `{r}` iniciam o trecho
+- **Código R no meio**
+- 3 "backticks" fecham o trecho
+
+*Atalho de teclado: Ctrl + Alt + i*  
+*Atalho do menu: Código -&gt; Inserir trecho/Insert chunk*
+
+]
+
+.pull-right[
+
+````r
+```{r}
+
+Seu código ficará aqui
+
+```
+````
+
+&lt;/br&gt;
+
+````r
+```{r}
+
+Mais código aqui
+
+```
+````
+
+]
+
+---
+
+# Script R normal (.R)
+
+&lt;img src="../../images/rmarkdown/pt/r_script.png" width="100%" /&gt;
+
+---
+
+# Trechos de código do R Markdown (.Rmd)
+
+&lt;img src="../../images/rmarkdown/pt/rmd_script.png" width="100%" /&gt;
+
+---
+
+# O relatório final em formato Word
+
+&lt;img src="../../images/rmarkdown/pt/word_simple.png" width="100%" /&gt;
+
+---
+
+class: inverse, center, middle
+
+# Texto
+
+---
+
+# Texto
+
+&lt;img src="../../images/rmarkdown/pt/rmd_text.png" width="100%" /&gt;
+
+---
+
+# Texto
+
+.panelset[
+.panel[.panel-name[Para criar isso]
+Uma frase de texto normal.
+
+*Aqui um texto em itálico*
+
+**Aqui um texto em  negrito**
+
+* Item 1
+
+* Item 2
+
+]
+.panel[.panel-name[Escreva isso]
+Uma frase de texto normal.
+
+`*Aqui um texto em itálico*`
+
+`**Aqui um texto em negrito**`
+
+`* Item 1`
+
+`* Item 2`
+
+]
+]
+
+.footnote[Veja mais sobreformatação RMarkdown [aqui](https://rmarkdown.rstudio.com/authoring_basics.html)]
+
+---
+
+# Títulos/cabeçalhos e seções do relatório
+.panelset[
+.panel[.panel-name[Para criar isso]
+  
+# Título grande
+
+## Títulos menores
+
+### Títulos menores
+
+#### Títulos ainda menores
+
+]
+.panel[.panel-name[Escreva isso]
+
+
+`# Título grande`
+
+`## Títulos menores`
+
+`### Títulos menores`
+
+`#### Títulos ainda menores`
+
+
+
+]
+]
+
+---
+
+# Adicionar texto ao relatório
+
+&lt;img src="../../images/rmarkdown/pt/word_text.png" width="100%" /&gt;
+
+---
+
+class: inverse, center, middle
+
+# Configurações
+
+---
+
+# Configurações YAML
+
+Esta seção no **topo do documento** especifica as configurações principais do produto final.
+
+As configurações são escritas como pares de `chave: valor`.
+
+```{results='asis'}
+---
+title: "Boletim epidemiológico surto de Ebola"
+author: "Neale Batra"
+output: word_document
+date: "2024-09-09"
+---
+```
+
+???
+Observe que ele começa e termina com três traços, e que a colocação de espaços e dois pontos é muito importante
+
+---
+
+# O trecho "setup" (configuração)
+
+**O trecho "setup"** ajusta como o código R e seus resultados serão exibidos no relatório.
+
+O trecho `setup` perto do topo do R Markdown usa uma função {knitr} para definir as "opções" **padrão** para todos os outros trechos (chunks).
+
+- Executar chunks: `eval = TRUE`
+- Mostrar o código no relatório: `echo = TRUE`
+- Mostrar avisos no relatório: `warning = TRUE`
+- Mostrar erros no relatório: `error = TRUE`
+- Mostrar os outputs no relatório: `include = TRUE`
+
+Abaixo, o padrão é definido para que o código R apareça no relatório final, mas os avisos e as mensagens de erro não.
+
+````r
+```{r setup, include=FALSE} 
+
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, error = FALSE)
+
+```
+````
+---
+# Opções de trechos 
+
+Para substituir os padrões, você pode ajustar as opções de cada trecho separadamente:
+
+.pull-left[
+Ajuste as "opções" do trecho dentro do `{r}`
+
+- Executar o trecho: `eval = TRUE`
+- Mostrar o código: `echo = TRUE`
+- Mostrar avisos: `warning = TRUE`
+- Mostrar erros: `error = TRUE`
+- Mostrar saída: `include = TRUE`
+
+Observe as vírgulas entre cada opção.
+
+]
+
+.pull-right[
+
+````r
+```{r packages, echo = FALSE, warning = FALSE} 
+
+pacman::p_load(
+  rio,      # importar/exportar
+  here,     # caminho dos arquivos
+  janitor,  # limpeza e tabelas simples
+  tidyverse # gestão e visualização de dados
+)
+
+```
+````
+
+]
+
+Saiba mais sobre as opções de trechos de código [aqui](https://rmarkdown.rstudio.com/lesson-3.html)
+
+???
+Os nomes dos code chunks não podem conter espaços
+
+---
+
+# Executando o documento
+
+Clique no botão "knit" na parte superior. Use o menu para ver as opções.
+
+&lt;img src="../../images/rmarkdown/4_knitbutton.PNG" width="10%" /&gt;
+
+O progresso será exibido no painel "R Markdown" (ao lado do console do R)
+
+&lt;img src="../../images/rmarkdown/4_progress.png" width="100%" /&gt;
+
+Por padrão, o documento será salvo junto com o arquivo .Rmd.
+
+???
+Consulte o Manual para conhecer as opções de criação de uma "Fábrica de relatórios", onde fica mais fácil catalogar os resultados de vários relatórios diferentes em pastas com data e hora marcadas.
+
+---
+
+class: inverse, center, middle
+
+# Demonstração ao vivo
+
+&lt;img src="../../images/functions_packages/piano_man.jpg" width="50%" /&gt;
+
+---
+
+class: inverse, center, middle
+
+# Dicas mais avançadas
+
+---
+
+# Código R em linha
+
+Você pode escrever código e texto juntos.
+
+Essa frase:
+
+&lt;img src="../../images/rmarkdown/pt/verbatin 1.png" width="100%" /&gt;
+
+produz isto:
+
+&lt;img src="../../images/rmarkdown/pt/verbatin 2.png" width="100%" /&gt;
+
+---
+
+# Código R em linha
+
+Você pode escrever código e texto juntos.
+
+Essa frase:
+
+&lt;img src="../../images/rmarkdown/pt/verbatin 3.png" width="100%" /&gt;
+
+produz isso:
+
+&lt;img src="../../images/rmarkdown/pt/verbatin 4.png" width="100%" /&gt;
+
+---
+
+# Funções auxiliares
+
+{epikit}
+
+
+``` r
+epikit::fmt_count(vig, is.na(data_inicio_sintomas))
+```
+
+```
+## [1] "33 (5.2%)"
+```
+
+
+``` r
+str_glue("{fmt_count(vig, is.na(data_inicio_sintomas))} estão sem data de início dos sintomas e não são exibidos.")
+```
+
+```
+## 33 (5.2%) estão sem data de início dos sintomas e não são exibidos.
+```
+
+
+
+
+
+
+
+--
+
+{scales}
+
+
+``` r
+str_glue("Houve um total de {comma(sum(as.numeric(vig$dif), na.rm=T))} dias de atraso entre o início dos sintomas e a notificação.")
+```
+
+```
+## Houve um total de 1,826 dias de atraso entre o início dos sintomas e a notificação.
+```
+
+
+
+
+
+
+
+---
+
+# Tabelas estáticas
+
+Isso escrito em seu R markdown:
+
+```
+Coluna 1 |Coluna  2 |Coluna 3
+---------|----------|--------
+Célula A   |Célula B    |Célula C
+Célula D   |Célula E    |Célula F
+```
+
+produz isso:
+
+| Coluna 1 | Coluna 2 | Coluna 3 | 
+| -------- | -------- | -------- |
+| Célula A | Célula B | Célula C | 
+| Célula D | Célula E | Célula F | 
+
+As tabelas dinâmicas podem ser criadas com pacotes como {flextable} e {DT}.
+
+---
+
+# Modo Source
+
+Seu script pode ficar parecido com o seguinte:
+
+&lt;img src="../../images/rmarkdown/source_mode_en.png" width="80%" /&gt;
+
+---
+
+# Modo visual
+
+O RStudio permite que você edite no "Modo Visual", que se parece com um documento do Word
+
+&lt;img src="../../images/rmarkdown/visual_mode_en.png" width="80%" /&gt;
+
+???
+Se escrever o documento em código for intimidador, o RStudio permite que você alterne o script para o "Modo Visual", de modo que o documento seja semelhante a um documento do Word.
+
+---
+
+# `params`
+
+No YAML, você pode definir `params` para o relatório:
+
+```{results='asis'}
+---
+title: "Relatório de situação surto de Ebola"
+author: "Neale Batra"
+output: word_document
+date: "2024-09-09"
+---
+```
+
+Você pode criar nomes para esses parâmetros
+
+---
+
+# `params`
+
+No R Markdown, refira aos `params` em seu código usando: `params$`
+
+&lt;img src="../../images/rmarkdown/5_parameterized_1.png" width="100%" /&gt;
+
+---
+
+# `params`
+
+No R Markdown, chame isso de `params` em seu código usando: `params$`
+
+&lt;img src="../../images/rmarkdown/5_parameterized_2.png" width="100%" /&gt;
+
+---
+
+# `params`
+
+No R Markdown, chame estes `params` em seu código usando: `params$`
+
+&lt;img src="../../images/rmarkdown/5_parameterized_3.png" width="100%" /&gt;
+
+---
+
+# `params`
+
+.pull-left[
+
+&lt;img src="../../images/rmarkdown/5_parameterized_menu_1.png" width="100%" /&gt;
+
+]
+
+.pull-right[
+
+&lt;img src="../../images/rmarkdown/5_parameterized_menu_2.png" width="100%" /&gt;
+
+]
+
+---
+
+# Modelos de relatório
+
+Você pode fornecer templates para o R Markdown do Word ou PPT (por exemplo, com logotipos, etc.)
+
+Depois que o relatório for renderizado, você poderá editar o texto para adicionar interpretações.
+
+A Applied Epi trabalha com os Médicos sem Fronteiras (MSF) para oferecer templates de R Markdown para relatórios de situação:
+
+- Cólera/diarreia aquosa aguda
+- Meningite
+- Sarampo/Rubéola
+- Síndrome de icterícia aguda (muitas vezes suspeita-se que seja hepatite E)
+
+e para análise de pesquisas:
+
+- Mortalidade retrospectiva e acesso a cuidados
+- Cobertura de vacinação
+- Desnutrição
+
+---
+
+# Exercício
+
+&lt;!-- --- --&gt;
+
+&lt;!-- # código R em linha --&gt;
+
+&lt;!-- A partir de --&gt;
+
+&lt;!-- `` `r format(Sys.Date())` ``, havia --&gt;
+
+&lt;!-- `` `r nrow(vig)` `` casos confirmados.   --&gt;
+
+&lt;!-- A partir de --&gt;
+
+&lt;!-- `` `r format(Sys.Date(), '%d %B, %Y')` ``, havia --&gt;
+
+&lt;!-- `` `r nrow(vig)` `` casos confirmados.   --&gt;
+
+&lt;!-- Produz o seguinte:   --&gt;
+
+&lt;!-- A partir de 09 setembro, 2024, havia 636 casos confirmados.   --&gt;
+
+&lt;!-- --- --&gt;
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
