@@ -1,0 +1,1009 @@
+---
+title: Introdução ao R para<br>Epidemiologia aplicada
+subtitle: Joining data
+author: '2022'
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: en
+---
+
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      messidade = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packidades 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # data manidadement and visualization
+  gtsummary,  # summary tables
+  countdown,  # countdown timer
+  flextable,  # tables
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+
+
+# data prep --------------------------------------------------------------------
+# linelist_raw <- rio::import(here::here("data", "linelist_raw.xlsx"))
+vig <- rio::import(here::here("data", "vigilancia_lista_de_casos_20141201.rds"))
+
+
+
+# gen <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "generic") %>%
+#   clean_names()
+# 
+# mod7_1 <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "mod7_1", col_types = "c") %>%
+#   clean_names()
+```
+
+```{r xaringan-themer, include=FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} packidade 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title pidade (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+# Introdução ao R para Epidemiologia Aplicada
+
+### Juntando dados
+
+[contact@appliedepi.org](mailto:contact@appliedepi.org)
+---
+
+# Hoje: objetivos e cronograma
+
+**Neste módulo, pretendemos ajudar você a:**
+
+- Saber como unir dois ou mais conjunto de dados
+- Saber mais sobre os diferentes tipos de uniões e o uso de chaves de identificação
+- Praticar a dinamização de dados do formato largo para o longo para criar "linhas do tempo" de pacientes
+- Converter variáveis para classe "fator" com o pacote {forcats}
+
+```{r, echo=FALSE, warning=F, messidade=F}
+outline <- dplyr::tribble(
+  ~Tempo, ~Tópico,
+  "20 minutos", "Demonstração: Joins",
+  "1h 15 minutos", "Exercício: Juntando dados", 
+  "15 minutos", "Demonstração: Pivotando dados", 
+  "1 hora",  "Exercício: Pivotando dados e Fatores", 
+  "10 minutos", "Recapitulação" 
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Faça pausas como desejar durante o exercício")
+```
+
+---
+
+class: inverse, center, middle
+
+# Juntando conjunto de dados
+
+*Juntar, mesclar, unir, vincular, combinar* conjunto de dados
+
+.footnote[Obrigado a Garrick Aden-Buie por fornecer os gifs usados nestes slides]
+
+???
+
+Explique isso:
+
+- pessoas de diferentes origens podem ter palavras diferentes para esse tipo de operação: juntar, unir, fundir, combinar, montar...
+- Neste módulo, usaremos a palavra "juntar" para nos atermos ao conceito de `join_` da família de funções do tidyverse, bem como funções bem conhecidas do SQL. O equivalente básico em R é `merge`.
+
+---
+
+# Situação: os dados estão dispersos entre conjunto de dados
+
+???
+
+Forneça exemplos de situações que eles podem encontrar para destacar o quanto isso é comum:
+
+- conectar dados laboratoriais aos resultados clínicos do paciente
+- conectar dados de pacientes com dados GIS,
+- conectar dados de mobilidade do Google a tendências de doenças infecciosas
+- outro exemplo relevante para seu trabalho, sugerido pela pesquisa dos participantes
+
+---
+
+# Tipos de junção
+
+#### Tipos de join
+
+- **Mutating joins** adiciona uma nova variável a um dataframe
+  - **Left join** / **Right join** adiciona dados a um dataframe
+  - **Full join**: combina dois dataframes completos
+  - **Inner join**: obtém a interseção de dois conjunto de dados
+- **Filtering joins** Filtra um dataframe com base em outro
+  - **Anti join** / **Semi join**
+
+#### Sintaxe geral
+
+- Usamos o as funções `join` do pacote {dplyr}
+- Sintaxe homogênea:
+
+```{r, include=TRUE, echo=TRUE, eval=FALSE}
+xxx_join(dataframe_1, dataframe_2, 
+         by = "chave_id")
+```
+
+???
+Insista em que existem globalmente dois tipos de junções: as junções mutantes, que adicionarão novas colunas e possivelmente afetarão o número de linhas, e as junções filtrantes, que não adicionarão novas colunas, apenas alterarão as linhas em um conjunto de dados.
+
+Explique que a função está sempre nesse formato, dois conjunto de dados, o primeiro deles é chamado de *esquerda* e o segundo é chamado de dataframe *direito* direito. O *por* fornece colunas usadas para identificar correspondências entre observações
+
+---
+
+## Exemplo: adicionar desfechos dos pacientes
+
+```{r, include=FALSE, echo=F}
+# Make smaller linelists for exemple purpose
+# pacientes <- linelist_surv %>% 
+#      select(id_caso, idade, unidade_idade, sex) %>% 
+#      arrange(id_caso) %>% 
+#      head(5)
+
+pacientes <- tribble(
+     ~id_caso, ~idade, ~unidade_idade, ~sexo,
+     "5fe599", 2, "anos", "m",
+     "8689b7", 3, "anos", "f",
+     "11f8ea", 56, "anos", "m",
+     "b8812a", 18, "anos", "f",
+     "893f25", 3, "anos", "m")
+
+
+hosp <- tribble(
+     ~id_paciente, ~desfecho,
+      "5fe599", "Óbito",
+      "8689b7", "Recuperado",
+      "11f8ea", "Recuperado",
+      "ebd24z", "Óbito")
+
+
+# hosp <- linelist_surv %>% 
+#      select(id_paciente = id_caso, hospital) %>% 
+#      arrange(id_paciente) %>% 
+#      head(3)
+```
+
+Vamos fazer uma demonstração com esses pequenos conjuntos de dados: queremos que você *juntar* ambos os conjunto de dados:
+
+.pull-left[
+
+`pacientes` *(Informações sobre os pacientes)*
+
+```{r, include=TRUE, echo=FALSE}
+pacientes %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+]
+
+.pull-right[
+
+`hosp` *(Informações sobre hospitalizações)*
+
+```{r, include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+]
+
+<br>
+
+A **CHAVE** que vincula os dois conjunto de dados são **id\_caso** e **id\_paciente**
+
+???
+Para os fins dos slides, criamos dois *mini* conjunto de dados para ver o que está acontecendo, um com as características do paciente (idade e sexo) e o outro com o hospital em que o paciente foi internado.
+**Observe que ambos os conjuntos de dados têm o ID do paciente em comum, mas um nome ligeiramente diferente (uma situação muito comum)**. Chamamos essa coluna de KEY, ou coluna de identificador. Ela permite que você *corresponder* observações em ambos os conjunto de dados.
+
+---
+
+# Left join
+
+.pull-left[
+
+- As junções à esquerda são frequentemente usadas para **adicionar colunas** a um conjunto de dados.
+
+- Todas as linhas do conjunto de dados (esquerda) são mantidas
+
+- As linhas do segundo conjunto de dados (direito) que coincidem são unidas
+
+- As colunas do segundo conjunto de dados são adicionadas (com `NA` preenchendo todas as lacunas)
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "left-join.gif")))
+```
+
+]
+
+???
+Às vezes chamado de esquerda *externo* esquerda
+
+---
+
+# Left join
+
+.pull-left[
+
+```{r, include=TRUE, echo=FALSE}
+pacientes %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+
+```
+
+]
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+left_join(pacientes, hosp,      
+  by = c(
+    "id_caso" = "id_paciente")) #<<
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
+left_join(pacientes, 
+          hosp, 
+     by = c("id_caso" = "id_paciente")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+
+
+
+```
+
+]
+
+---
+
+# Left join
+
+.pull-left[
+
+```{r, include=TRUE, echo=FALSE}
+pacientes %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow") %>% 
+     bg(part = "body",   i = 4, j = 1:2, bg = "red") %>% 
+     bg(part = "body",   i = 1:3, j = 2, bg = "lightgreen")
+
+
+```
+
+]
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+left_join(pacientes, hosp,      
+  by = c(
+    "id_caso" = "id_paciente")) #<<
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
+left_join(pacientes, 
+          hosp, 
+     by = c("id_caso" = "id_paciente")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow") %>% 
+     bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = 1:3, j = 5, bg = "lightgreen")
+
+
+```
+
+]
+
+---
+
+# Right join
+
+.pull-left[
+
+- Não é usado com muita frequência
+
+- Mantém as linhas correspondentes do dataframe de referência
+
+- Adiciona linhas *sem correspondência* do segundo conjunto de dados
+
+- Adiciona colunas do segundo conjunto de dados
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "right-join.gif")))
+```
+
+]
+
+---
+
+# Right join
+
+.pull-left[
+
+```{r, include=TRUE, echo=FALSE}
+pacientes %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "body",   i = 4:5, j = 1:4, bg = "red")
+
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable()
+```
+
+]
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+right_join(pacientes, hosp,      
+  by = c(
+    "id_caso" = "id_paciente")) 
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
+right_join(pacientes, 
+          hosp, 
+     by = c("id_caso" = "id_paciente")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = 1:4, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = 4, j = 1, bg = "lightgreen")
+
+
+```
+
+]
+
+???
+Não é usado com muita frequência.
+
+---
+
+# Full join
+
+.pull-left[
+
+- A mais inclusiva das uniões
+
+- Mantém **todas as linhas de ambos os conjunto de dados**
+
+- Preenche os espaços com `NA` conforme necessário
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "full-join.gif")))
+```
+
+]
+
+.footnote[Às vezes chamada de *junção externa completa* ou *Junção externa*]
+
+---
+
+# Às vezes chamada de *Full outer join* ou *Outer join*
+
+.pull-left[
+
+```{r, include=TRUE, echo=FALSE}
+pacientes %>% 
+     # head(5) %>% 
+     qflextable()
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable()
+```
+
+]
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+full_join(pacientes, hosp,       
+  by = c(
+    "id_caso" = "id_paciente")) 
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
+full_join(pacientes, 
+          hosp, 
+     by = c("id_caso" = "id_paciente")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = c(1:3, 6), j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = 6, j = 1, bg = "lightgreen")
+
+
+```
+
+]
+
+???
+Agora é um bom momento para insistir na consistência dos argumentos da família de funções join: você sempre os escreve da mesma forma
+
+---
+
+# Inner join
+
+.pull-left[
+
+- O mais **restritivo** das uniões
+
+- Mantém apenas **interseção** entre dois conjunto de dados:  apenas as linhas que correspondem
+
+- **Descarta** linhas sem correspondências
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "inner-join.gif")))
+```
+
+]
+
+.footnote[Também chamada de *natural join*]
+
+???
+Bem, todos os itens dizem mais ou menos a mesma coisa, mas acho que é bom ter certeza de que todos entendem o que significa tomar o *interseção*.
+
+---
+
+# Inner join
+
+.pull-left[
+
+```{r, include=TRUE, echo=FALSE}
+pacientes %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "body",   i = 4:5, j = 1:4, bg = "red")
+
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "body",   i = 4, j = 1:2, bg = "red")
+
+```
+
+]
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+inner_join(pacientes, hosp,       
+  by = c(
+    "id_caso" = "id_paciente")) 
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
+inner_join(pacientes, 
+          hosp, 
+     by = c("id_caso" = "id_paciente")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = c(1:3), j = 5, bg = "lightgreen") 
+
+```
+
+]
+
+---
+
+# Dicas de sintaxe
+
+- Joins podem ser usados em *pipelines* (o dataframe canalizado é o da esquerda):
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+pacientes %>%               
+     left_join(hosp, by = c("id_caso" = "id_paciente")) %>%  #<<
+     filter(idade > 25)
+```
+
+--
+
+- Sintaxe mais simples se **a coluna do identificador tiver o mesmo nome** em ambos os conjunto de dados:
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+left_join(pacientes, hosp,       
+           by = "id_caso")   #<<
+```
+
+--
+
+- Use **várias colunas** como identificadores:
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+left_join(dataframe1, dataframe2,       
+           by = c("name" = "first_name",  
+                  "idade",       #<<
+                  "sex"))   #<<
+```
+
+---
+
+# Filtering joins
+
+- As filtering joins são usadas para **filtrar linhas** dos dados *referência* com base nas correspondências com o segundo conjunto de dados.
+- Filtering joins *não adicionam nenhuma coluna ou linha*
+
+.pull-left[
+
+#### Anti join
+
+Mantém as linhas da base referência  
+**sem correspondência em outro dataframe**
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "anti-join.gif")))
+```
+
+]
+
+.pull-right[
+
+#### Semi join
+
+Mantém as linhas da base referência  
+**com correspondência em outro dataframe**
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "semi-join.gif")))
+```
+
+]
+
+**As filtering joins nunca duplicam linhas, apenas eliminam**
+
+???
+Anti-joins são muito úteis para ver quais linhas em um conjunto de dados  *não* correspondem
+
+---
+
+# Desafios da vida real
+
+---
+
+# Sobreposição de nomes de colunas
+
+```{r, eval=TRUE, echo=FALSE}
+df1 <- tibble(ID = c("id_1", "id_2", "id_3", "id_4"), sexo = c("F", "M", "M", "F"))
+df2 <- tibble(ID = c("id_1", "id_2", "id_5"), idade = c(5, 5, 7), sexo = c("F", "F", "F"))
+```
+
+.pull-left[
+
+```{r, eval=TRUE, echo=FALSE}
+pacientes %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1:5, j = 2, bg = "orange") %>% 
+     bg(part = "header", i = 1, j = 2, bg = "orange")
+
+```
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+hosp %>%
+     mutate(idade = c(2, 3, 56, 40)) %>% 
+     qflextable() %>% 
+     bg(part = "body", i = c(1:4), j = 3, bg = "orange") %>% 
+     bg(part = "header", i = 1, j = 3, bg = "orange") 
+
+```
+
+]
+
+.pull-left[
+
+```{r, eval=FALSE, echo=TRUE}
+left_join(pacientes, hosp,
+  by = c(
+   "id_caso" = "id_paciente"))
+```
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+left_join(pacientes,
+          hosp %>% mutate(idade = c(2, 3, 56, 40)),
+  by = c("id_caso" = "id_paciente")) %>% 
+  qflextable() %>% 
+  bg(part = "header", i = 1, j = 2, bg = "orange") %>% 
+  bg(part = "header", i = 1, j = 6, bg = "orange") 
+```
+
+]
+
+???
+Se as colunas estiverem em comum, o R mudará o nome delas para desambiguá-las.
+
+- Se você tiver certeza de que as duas colunas contêm as mesmas informações, remova-as de um dos conjunto de dados antes da união
+- Se não tiver certeza, você poderá compará-las facilmente após a união.
+  Mencione oralmente que há um argumento "sufixo" e que você pode dar a ele um vetor para renomear em vez de .x e .y
+
+---
+
+# Sobreposição de nomes de colunas
+
+.pull-left[
+
+```{r, eval=TRUE, echo=FALSE}
+pacientes %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1:5, j = 2, bg = "orange") %>% 
+     bg(part = "header", i = 1, j = 2, bg = "orange")
+
+```
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+hosp %>%
+     mutate(idade = c(2, 3, 56, 40)) %>% 
+     qflextable() %>% 
+     bg(part = "body", i = c(1:4), j = 3, bg = "orange") %>% 
+     bg(part = "header", i = 1, j = 3, bg = "orange") 
+
+```
+
+]
+
+.pull-left[
+
+```{r, eval=FALSE, echo=TRUE}
+left_join(pacientes, hosp,
+  by = c(
+   "id_caso" = "id_paciente",
+   "idade"))    #<<
+```
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+left_join(pacientes,
+          hosp %>% mutate(idade = c(2, 3, 56, 40)),
+  by = c("id_caso" = "id_paciente", "idade")) %>% 
+  qflextable() %>% 
+  bg(part = "header", i = 1, j = 2, bg = "orange")
+```
+
+]
+
+???
+Se as colunas estiverem em comum, o R mudará o nome delas para desambiguá-las.
+
+- Se você tiver certeza de que as duas colunas contêm as mesmas informações, remova-as de um dos conjunto de dados antes da união
+- Se não tiver certeza, você poderá compará-las facilmente após a união.
+  Mencione oralmente que há um argumento "sufixo" e que você pode dar a ele um vetor para renomear em vez de .x e .y
+
+---
+
+### Um para muitos
+Isso se refere a uma relação em que uma única linha de um dataframe pode corresponder a várias linhas em outro dataframe.
+
+.pull-left[
+
+```{r, eval=TRUE, echo=FALSE}
+pacientes %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1, j = 1:4, bg = "orange")
+```
+
+]
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+
+hosp_dup <- tribble(
+     ~id_paciente, ~outcome,
+      "5fe599", "Óbito",
+      "5fe599", "Recuperado",
+      "8689b7", "Recuperado",
+      "11f8ea", "Recuperado",
+      "ebd24z", "Óbito")
+
+hosp_dup %>%
+    qflextable() %>% 
+     bg(part = "body", i = 1:2, j = 1:2, bg = "orange")
+```
+
+]
+.pull-left[
+
+```{r, eval=FALSE, echo=TRUE}
+left_join(pacientes, hosp,
+  by = c(
+   "id_caso" = "id_paciente"))
+```
+
+]
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+left_join(pacientes,
+          hosp_dup,
+  by = c("id_caso" = "id_paciente")) %>% 
+  qflextable() %>% 
+  bg(part = "body", i = 1:2, j = 1:5, bg = "orange")
+```
+
+]
+
+---
+
+### Muitos para um
+
+.pull-left[
+
+```{r, eval=TRUE, echo=FALSE}
+
+pacientes_dup <- tribble(
+     ~id_caso, ~idade, ~unidade_idade, ~sexo,
+     "5fe599", 2, "anos", "m",
+     "5fe599", 2, "anos", "m",
+     "8689b7", 3, "anos", "f",
+     "11f8ea", 56, "anos", "m",
+     "b8812a", 18, "anos", "f",
+     "893f25", 3, "anos", "m")
+
+
+pacientes_dup %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1:2, j = 1:4, bg = "orange")
+```
+
+]
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+
+hosp %>%
+    qflextable() %>% 
+     bg(part = "body", i = 1, j = 1:2, bg = "orange")
+```
+
+]
+.pull-left[
+
+```{r, eval=FALSE, echo=TRUE}
+left_join(pacientes, hosp,
+  by = c(
+   "id_caso" = "id_paciente"))
+```
+
+]
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+left_join(pacientes_dup,
+          hosp,
+  by = c("id_caso" = "id_paciente")) %>% 
+  qflextable() %>% 
+  bg(part = "body", i = 1:2, j = 1:5, bg = "orange")
+```
+
+]
+
+---
+
+# Boas práticas
+
+Use `semi_join()` e `anti_join()` para **entender por que algumas linhas são descartadas**
+
+"Quais linhas de `hosp` não serão unidas à esquerda com `pacientes`?" Examine usando `anti_join()`
+
+```{r, eval=FALSE, echo=TRUE}
+anti_join(hosp, pacientes, by = c("id_paciente" = "id_caso"))
+```
+
+```{r, eval=TRUE, echo=FALSE}
+anti_join(hosp, pacientes, by = c("id_paciente" = "id_caso")) %>% 
+     qflextable()
+```
+
+---
+
+# Boas práticas
+
+**Verifique as dimensões** dos conjunto de dados antes e depois do join!
+
+```{r, eval=TRUE, echo=TRUE}
+nrow(pacientes)
+```
+
+```{r, eval=TRUE, echo=TRUE}
+nrow(hosp)
+```
+
+```{r, eval=TRUE, echo=TRUE}
+left_join(pacientes, hosp, by = c("id_caso" = "id_paciente")) %>%
+  nrow()
+```
+
+???
+Outra boa verificação é usar o `count()` para contar o número de linhas de cada um de seus identificadores.
+
+---
+
+class: inverse, center, middle
+
+# Exercício!
+
+Acesse o site do curso  
+Abra o exercício do Módulo 8, parte 1, e faça login  
+Siga as instruções para abrir o projeto R "ebola" e continue codificando o script RMD
+Informe um instrutor se você não tiver certeza do que fazer
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "window.png")))
+```
+
+

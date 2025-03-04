@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introdução ao R para Epidemiologia aplicada</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tabwid/tabwid.css" rel="stylesheet" />
+    <script src="libs/tabwid/tabwid.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+class: center, middle, inverse, title-slide
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+&lt;/style&gt;
+
+&lt;style type="text/css"&gt;
+/* THIS IS A CSS CHUNK - THIS IS A COMMENT */
+/* Size of font in code echo. E.g. 10px or 50% */
+.remark-code {
+  font-size: 70%;
+}
+/* Size of font in text */
+.medium-text {
+  font-size: 75%;     
+}
+/* Size of font in tables */
+.small-table table {
+  font-size: 6px;     
+}
+.medium-table table {
+  font-size: 8px;     
+}
+.medium-large-table table {
+  font-size: 10px;     
+}
+&lt;/style&gt;
+
+# Introdução ao R para Epidemiologia Aplicada
+
+### Introdução à visualização de dados com {ggplot2}
+
+[contact@appliedepi.org](mailto:contact@appliedepi.org)
+---
+
+# Hoje: objetivos e cronograma
+
+**Neste módulo, pretendemos ajudar você a:**
+
+- Entender o  {ggplot2} e a "Gramática dos gráficos"
+- Criar gráficos simples de boxplot/pontos/barra e histogramas
+- Ajustar as escalas, os temas e os rótulos dos gráficos
+
+&lt;div class="tabwid"&gt;&lt;style&gt;.cl-271110f4{}.cl-2709d7ee{font-family:'Arial';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-270c8fa2{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-270c8fac{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-270ca820{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca821{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca82a{width:2.993in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca82b{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca82c{width:0.778in;background-color:transparent;vertical-align: top;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca82d{width:2.993in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca834{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca835{width:0.778in;background-color:transparent;vertical-align: top;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca836{width:2.993in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca83e{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca83f{width:0.778in;background-color:transparent;vertical-align: top;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca840{width:2.993in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca848{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca849{width:0.778in;background-color:transparent;vertical-align: top;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca84a{width:2.993in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca852{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca853{width:0.778in;background-color:transparent;vertical-align: top;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca854{width:2.993in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca855{width:1.245in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca85c{width:0.778in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-270ca85d{width:2.993in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table data-quarto-disable-processing='true' class='cl-271110f4'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;th class="cl-270ca820"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;Tempo&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-270ca821"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;Parte&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;th class="cl-270ca82a"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;Tópico&lt;/span&gt;&lt;/p&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-270ca82b"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;20 minutos&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td  rowspan="3"class="cl-270ca82c"&gt;&lt;p class="cl-270c8fac"&gt;&lt;span class="cl-2709d7ee"&gt;Parte 1&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-270ca82d"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;Slides: ggplot2 'Gramática dos Gráficos'&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-270ca834"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;10 minutos&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-270ca836"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;Demonstração&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-270ca83e"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;1h 30 minutos&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-270ca840"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;Exercício&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-270ca848"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;20 minutos&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-270ca849"&gt;&lt;p class="cl-270c8fac"&gt;&lt;span class="cl-2709d7ee"&gt;Parte 2&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-270ca84a"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;Slides: Escalas, temas &amp;amp; rótulos&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-270ca83e"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;1 hora&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-270ca83f"&gt;&lt;p class="cl-270c8fac"&gt;&lt;span class="cl-2709d7ee"&gt;&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-270ca840"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;Exercício&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-270ca852"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;10 minutos&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-270ca853"&gt;&lt;p class="cl-270c8fac"&gt;&lt;span class="cl-2709d7ee"&gt;-&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-270ca854"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;Feedback&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;tfoot&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  colspan="3"class="cl-270ca855"&gt;&lt;p class="cl-270c8fa2"&gt;&lt;span class="cl-2709d7ee"&gt;Faça pausas conforme desejar durante o exercício&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;&lt;/table&gt;&lt;/div&gt;
+
+---
+
+class: inverse, center, middle
+
+## Visualização de dados com {ggplot2}
+
+&lt;img src="../../images/ggplot_intro/ggplot2_hex.png" width="50%" /&gt;
+
+---
+
+# Opções de visualização no R
+
+Hoje nos concentramos em {ggplot2} porque ele:
+
+- é bom para a exploração rápida de dados multidimensionais
+- produz gráficos de **alta qualidade**
+- tem uma gramática bem estruturada =&gt;  **alta consistência**
+- é acompanhado por muitos pacotes que expandem a funcionalidade
+
+Veja a [Galeria de gráficos do R](https://www.r-graph-gallery.com/ggplot2-package.html) para você se inspirar.
+
+.footnote[Outras opções de plotagem incluem [**base** R](https://towardsdatascience.com/base-plotting-in-r-eb365da06b22), [**lattice**](https://www.statmethods.net/advgraphs/trellis.html) e [**plotly**](https://plotly.com/r/).
+]
+
+---
+
+# Foi produzido pelo ggplot?
+
+&lt;img src="../../images/ggplot_intro/clustering.png" width="100%" /&gt;
+
+.footnote[Fontes das imagens [aqui](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html) e [aqui](https://jcheshire.com/r-spatial-data-hints/great-maps-ggplot2/)]
+
+---
+
+# Foi produzido pelo ggplot?
+
+&lt;img src="../../images/ggplot_intro/dumbbell_chart.png" width="50%" /&gt;
+
+---
+
+# Foi produzido pelo ggplot?
+
+&lt;img src="../../images/ggplot_intro/map.png" width="50%" /&gt;
+
+---
+
+# Foi produzido pelo ggplot?
+
+&lt;img src="../../images/ggplot_intro/bike_london.png" width="100%" /&gt;
+
+---
+
+# Foi produzido pelo ggplot?
+
+&lt;img src="../../images/ggplot_intro/swiss_map.png" width="90%" /&gt;
+
+---
+
+# Foi produzido pelo ggplot?
+
+&lt;img src="../../images/ggplot_intro/phylo_tree.png" width="60%" /&gt;
+
+---
+
+# Foi produzido pelo ggplot?
+
+&lt;img src="../../images/ggplot_intro/uk_geography.jpg" width="100%" /&gt;
+
+---
+
+# Foi produzido pelo ggplot?
+
+&lt;img src="../../images/ggplot_intro/art_ggplot.png" width="50%" /&gt;
+
+---
+
+# Foi produzido pelo ggplot?
+
+&lt;img src="../../images/ggplot_intro/van_gogh.jpg" width="80%" /&gt;
+
+---
+
+# gg-o quê??
+
+--
+
+- O {ggplot2} *pacote* é a ferramenta de visualização de dados mais popular do R
+
+--
+
+- A *função* `ggplot()`  está no cerne do pacote
+
+--
+
+- Toda essa abordagem é conhecida coloquialmente como "ggplotting"
+
+--
+
+- As figuras resultantes são, às vezes, carinhosamente chamadas de "ggplots"
+
+--
+
+{ggplot2} é acompanhado por vários pacotes que ampliam suas funcionalidades, como {gganimate}, {ggthemr}, {ggdendro}, {gghighlight}, {ggforce}...
+
+.footnote[*Pergunta:* O que representa o "gg" nesses nomes?]
+
+???
+
+- "gg" representa a "gramática de gráficos" usada para construir as figuras
+
+---
+
+# Gramática de gráficos
+
+Cria um gráfico adicionando camadas de funções que especificam dados e elementos de design
+
+--
+
+A ordem geralmente é a seguinte:
+
+1) **"Abrir" o gráfico** com o comando `ggplot()` e **especificar o conjunto de dados**
+
+--
+
+2) **"Mapear" colunas de dados** para recursos "estéticos" do gráfico (eixos, cor, tamanho, forma)
+
+--
+
+3) **Exibir os dados** como camadas "geom"
+
+--
+
+4) **Modificar "escalas"** como escala de cores ou dos eixos
+
+--
+
+5) **Ajustar elementos de "tema" não relacionados a dados** como rótulos de eixo, título, legenda e fontes
+
+Essas camadas são "adicionadas" sequencialmente com **`+`** símbolos.
+
+???
+Lembre-se de que, embora os comandos possam ser longos, é infinitamente mais fácil editar e reciclar do que no Excel
+
+---
+
+# Abra o gráfico
+
+.pull-left[
+
+
+``` r
+ggplot()                   
+```
+
+`ggplot()` cria uma tela vazia.
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-17-1.png" width="504" /&gt;
+
+]
+
+???
+Essa é apenas uma tela em branco, pois não definimos o que deve estar nos eixos x e y.
+Se forem necessários vários conjuntos de dados, eles poderão ser adicionados em seus próprios geoms.
+O Piping é útil para fazer alterações únicas em um conjunto de dados antes da plotagem.
+
+---
+
+# Adicione os dados
+
+.pull-left[
+
+
+``` r
+ggplot(data = vig)                   
+```
+
+atribui o conjunto de dados a ser usado.
+
+Como alternativa, use o `%&gt;%` para "canalizar" um conjunto de dados *para* `ggplot()`
+
+
+``` r
+vig %&gt;%
+  ggplot()
+```
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-20-1.png" width="504" /&gt;
+
+]
+
+???
+Essa é apenas uma tela em branco, pois não definimos o que deve estar nos eixos x e y.
+Se forem necessários vários quadros de dados, eles poderão ser adicionados em seus próprios geoms.
+O Piping é útil para fazer alterações únicas em um conjunto de dados antes da plotagem.
+
+---
+
+# Adicione os dados
+
+.pull-left[
+
+
+``` r
+ggplot(
+  data = vig)                   
+```
+
+As linhas novas e os recuos não afetarão a execução do código.
+
+Eles podem facilitar a leitura de comandos mais longos...
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-22-1.png" width="504" /&gt;
+
+]
+
+???
+Essa é apenas uma tela em branco, pois não definimos o que deve estar nos eixos x e y.
+Se forem necessários vários quadros de dados, eles poderão ser adicionados em seus próprios geoms.
+O Piping é útil para fazer alterações únicas em um conjunto de dados antes da plotagem.
+
+---
+
+# Mapeamentos com `aes()`
+
+.pull-left[
+
+
+``` r
+ggplot(
+  data = vig,
+* mapping = aes())
+```
+
+A "estética" do gráfico são características como posição, cor, forma...
+
+`mapping = aes()` mapeia a "estética" para colunas nos dados.
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-24-1.png" width="504" /&gt;
+
+]
+
+???
+Os comandos do ggplot tendem a ficar muito verticais (longos)
+
+---
+
+# Mapeamentos com `aes()`
+
+.pull-left[
+
+
+``` r
+ggplot(
+  data = vig,
+  mapping = aes(        
+*  x = idade_anos
+   ))               
+```
+
+Os mapeamentos estéticos são colocados dentro de `aes()`.
+
+Dois mapeamentos básicos são definir as colunas dos eixos:  
+`x = `
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-26-1.png" width="504" /&gt;
+
+]
+
+???
+Os comandos do ggplot tendem a ficar muito verticais (longos)
+
+---
+
+# Mapeamentos com `aes()`
+
+.pull-left[
+
+
+``` r
+ggplot(
+  data = vig,
+  mapping = aes(        
+*  x = idade_anos,
+*  y = altura_cm))
+```
+
+Os mapeamentos estéticos são colocados dentro de `aes()`.
+
+Dois mapeamentos básicos são eixos para colunas, via:  
+`x = ` e `y = `
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-28-1.png" width="504" /&gt;
+
+]
+
+???
+Os comandos do ggplot tendem a ficar muito verticais (longos)
+
+---
+
+# Adicionar geometria
+
+.pull-left[
+
+
+``` r
+ggplot(
+  data = vig,
+  mapping = aes(
+    x = idade_anos,
+    y = altura_cm)) +
+*geom_point()
+```
+
+Os dados são visualizados usando comandos "geom", como `geom_point()`.
+
+Esses comandos são "adicionados"  
+com um **`+`** ao comando `ggplot()`.
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-30-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Geometrias
+
+.pull-left[
+
+Alguns "geoms" típicos incluem:
+
+| Tipo do gráfico        | Geom                                                          | 
+| ------------------- | ------------------------------------------------------------- |
+| Histogramas         | `geom_histogram()`                                                              | 
+| Pontos              | `geom_point()`                                                              | 
+
+.footnote[Lista completa [aqui](https://ggplot2.tidyverse.org/reference/)
+]
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-31-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Geometrias
+
+.pull-left[
+
+Alguns "geoms" típicos incluem:
+
+| Tipo do gráfico        | Geom                                                          | 
+| ------------------- | ------------------------------------------------------------- |
+| Linhas              | `geom_line()`                                                              | 
+| Gráficos de barras  | `geom_bar()` ou&lt;/br&gt; `geom_col()`                                                           | 
+
+.footnote[A escolha entre `geom_bar()` e `geom_col()` depende da estrutura de seus dados. Lista completa de geoms [aqui](https://ggplot2.tidyverse.org/reference/)]
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-32-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Geometrias
+
+.pull-left[
+
+Alguns "geoms" típicos incluem:
+
+| Tipo do gráfico        | Geom                                                          | 
+| ------------------- | ------------------------------------------------------------- |
+| Boxplots            | `geom_boxplot()`                                                              | 
+| Gráficos de violino | `geom_violin()`                                                              | 
+
+.footnote[Lista completa [aqui](https://ggplot2.tidyverse.org/reference/)]
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-33-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Adicionando geoms
+
+.pull-left[
+
+
+``` r
+ggplot(
+  data = vig,
+  mapping = aes(
+   x = idade_anos,
+   y = altura_cm)) +
+*geom_point()
+```
+
+Com os eixos agora mapeados, `geom_point()` exibe os dados como pontos.
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-35-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Adicionando geoms
+
+.pull-left[
+
+
+``` r
+ggplot(
+  data = vig,
+  mapping = aes(
+   x = idade_anos,
+   y = altura_cm)) +
+geom_point() +
+*geom_smooth()
+```
+
+Podemos adicionar geoms adicionais ao gráfico atual com `+`.
+
+*As geometrias aparecem na ordem em que são escritos*: a linha suavizada aparece sobre os pontos.
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-37-1.png" width="504" /&gt;
+
+]
+
+.footnote[`geom_smooth()` fornece médias condicionais suavizadas, ajudando a mostrar tendências na presença de "plotagem excessiva" (consulte [documentação](https://ggplot2.tidyverse.org/reference/geom_smooth.html))]
+
+???
+
+- Explique por que você pode usar um ou outro
+
+---
+
+# Uma observação sobre recuos
+
+Os recuos, espaços e novas linhas não afetam a execução do código e podem ser variados para melhorar a legibilidade.
+
+
+``` r
+ggplot(data = vig, mapping = aes(x = idade_anos, y = altura_cm)) + geom_point()
+```
+
+--
+
+é o mesmo que:
+
+
+``` r
+ggplot(data = vig,
+       mapping = aes(x = idade_anos, y = altura_cm)) +
+geom_point()
+```
+
+--
+
+é o mesmo que:
+
+
+``` r
+ggplot(
+  data = vig,        # use a base de dados "vig"
+  mapping = aes(     # faça mapeamentos estéticos para todos os geoms
+    x = idade_anos,  # atribui o eixo x à coluna de idade
+    y = altura_cm))  # atribui o eixo y à altura
+geom_point()         # exiba os dados como pontos
+```
+
+
+
+
+
+
+
+.footnote[O que você prefere?]
+
+???
+
+- Qual das opções acima é mais fácil de ler para você?
+- Explique por que você pode usar um ou outro
+  O estilo longo pode permitir comentários/anotações informativas
+- o estilo curto é muito denso (mais difícil de ler para alguns). Scripts mais curtos, mas e daí? O número de linhas do seu código não é uma métrica informativa.
+- Linhas muito longas =&gt; você precisa rolar horizontalmente para pessoas com monitores menores (não é legal)
+- O estilo longo facilita a visualização de qual argumento pertence a cada função
+- espaços ao redor de "=" ou "+" =&gt; facilitam a análise para muitas pessoas
+- Outro?
+
+---
+
+class: large-table
+
+# Outras estéticsas disponíveis
+
+Além dos eixos, outras "estéticas" comuns incluem:
+
+| Argumento           | Controles                                                     | 
+| ------------------- | ------------------------------------------------------------- |
+| `shape`                    | Exibição do ponto como ponto, estrela, triângulo, quadrado... | 
+| `fill`                    | O *interior* (por exemplo, de uma barra ou boxplot)                                                            | 
+| `color`                    | A cor *exterior* da barra, boxplot - OU cor do ponto                                                        | 
+| `size`                    | Espessura da linha, tamanho do ponto...                       | 
+| `alpha`                    | Transparência: 0 (invisível) a 1 (opaco)                      | 
+| `width`                    | Largura das barras do "gráfico de barras"                     | 
+| `linetype`                    | Sólidas, tracejadas, pontilhadas, etc.                        | 
+| `binwidth`                    | Largura dos compartimentos do histograma                      | 
+
+???
+
+Observe que "estética" no ggplot tem um significado específico que você pode associar à palavra "aesthetics" em inglês comum. No ggplot, esses detalhes são chamados de "temas" e são ajustados em um comando theme()
+
+Cada geom aceita determinadas estéticas, como `binwidth=` para `geom_histogram()`
+
+&lt;!-- --- --&gt;
+
+&lt;!-- classe: medium-text --&gt;
+
+&lt;!-- # Atribuições de estética --&gt;
+
+&lt;!-- .pull-left[ --&gt;
+
+&lt;!-- A estética pode ser atribuída a: --&gt;
+
+&lt;!-- **Valores estáticos**:  --&gt;
+
+&lt;!-- - Atribuído **fora de `aes()`** --&gt;
+
+&lt;!-- - A mesma exibição para todos os dados --&gt;
+
+&lt;!-- ```{r, echo=T, eval=F} --&gt;
+
+&lt;!-- ggplot( --&gt;
+
+&lt;!-- dados = vig, --&gt;
+
+&lt;!-- mapeamento = aes( --&gt;
+
+&lt;!-- x = idade_anos, --&gt;
+
+&lt;!-- y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(color = "purple") # estático #&lt;&lt; --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ] --&gt;
+
+&lt;!-- .pull-right[ --&gt;
+
+&lt;!-- Alguns exemplos: --&gt;
+
+&lt;!-- ```{r,eval = params$lang == "en", message=F, warning=F} --&gt;
+
+&lt;!-- color_purple &lt;- ggplot(data = vig, aes(x = idade_anos, y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(color = "purple")+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = 'Usando cor = "roxo"') --&gt;
+
+&lt;!-- color_hospital &lt;- ggplot() + theme_void() --&gt;
+
+&lt;!-- cowplot::plot_grid(color_purple, color_hospital, --&gt;
+
+&lt;!-- nrow = 2, rel_widths = c(2,2)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r, eval = params$lang == "fr", message=F, warning=F} --&gt;
+
+&lt;!-- color_purple &lt;- ggplot(data = vig, aes(x = idade_anos, y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(color = "purple")+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Utilizando cor = 'purple' (mauve)") --&gt;
+
+&lt;!-- color_hospital &lt;- ggplot() + theme_void() --&gt;
+
+&lt;!-- cowplot::plot_grid(color_purple, color_hospital, --&gt;
+
+&lt;!-- nrow = 2, rel_widths = c(2,2)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r, eval = params$lang == "ru", message=F, warning=F} --&gt;
+
+&lt;!-- color_purple &lt;- ggplot(data = vig, aes(x = idade_anos, y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(color = "purple")+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Использование цвета = 'purple'") --&gt;
+
+&lt;!-- color_hospital &lt;- ggplot() + theme_void() --&gt;
+
+&lt;!-- cowplot::plot_grid(color_purple, color_hospital, --&gt;
+
+&lt;!-- nrow = 2, rel_widths = c(2,2)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r,eval = params$lang == "es", message=F, warning=F} --&gt;
+
+&lt;!-- color_purple &lt;- ggplot(data = vig, aes(x = idade_anos, y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(color = "purple")+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Utilizar a cor = 'purple' (púrpura)") --&gt;
+
+&lt;!-- color_hospital &lt;- ggplot() + theme_void() --&gt;
+
+&lt;!-- cowplot::plot_grid(color_purple, color_hospital, --&gt;
+
+&lt;!-- nrow = 2, rel_widths = c(2,2)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ] --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- classe: medium-text --&gt;
+
+&lt;!-- # Atribuições de estética --&gt;
+
+&lt;!-- .pull-left[ --&gt;
+
+&lt;!-- A estética pode ser atribuída a: --&gt;
+
+&lt;!-- **Valores estáticos**:  --&gt;
+
+&lt;!-- - Atribuídos **fora de `aes()`** --&gt;
+
+&lt;!-- - A mesma exibição para todos os dados --&gt;
+
+&lt;!-- ```{r, echo=T, eval=F} --&gt;
+
+&lt;!-- ggplot( --&gt;
+
+&lt;!-- dados = vig, --&gt;
+
+&lt;!-- mapeamento = aes( --&gt;
+
+&lt;!-- x = idade_anos, --&gt;
+
+&lt;!-- y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(color = "purple") # estático #&lt;&lt; --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- **Uma coluna de dados**:   --&gt;
+
+&lt;!-- - Atribuído **dentro de `aes()`** --&gt;
+
+&lt;!-- - Exibe os dados como "grupos" --&gt;
+
+&lt;!-- ```{r, echo=T, eval=F} --&gt;
+
+&lt;!-- ggplot( --&gt;
+
+&lt;!-- dados = vig, --&gt;
+
+&lt;!-- mapeamento = aes( --&gt;
+
+&lt;!-- x = idade_anos, --&gt;
+
+&lt;!-- y = altura_cm, --&gt;
+
+&lt;!-- cor = hospital))+ # dinâmica #&lt;&lt; --&gt;
+
+&lt;!-- geom_point() --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ] --&gt;
+
+&lt;!-- .pull-right[ --&gt;
+
+&lt;!-- Alguns exemplos: --&gt;
+
+&lt;!-- ```{r, eval = params$lang == "en", message=F, warning=F} --&gt;
+
+&lt;!-- color_purple &lt;- ggplot(data = vig, aes(x = idade_anos, y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(color = "purple")+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Usando cor = 'roxo'") --&gt;
+
+&lt;!-- color_hospital &lt;- ggplot(data = vig, aes(x = idade_anos, y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(aes(color = hospital))+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Usando aes(color = hospital)") --&gt;
+
+&lt;!-- cowplot::plot_grid(color_purple, color_hospital, --&gt;
+
+&lt;!-- nrow = 2, rel_widths = c(2,2)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r, eval = params$lang == "fr", message=F, warning=F} --&gt;
+
+&lt;!-- color_purple &lt;- ggplot(data = vig, aes(x = idade_anos, y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(color = "purple")+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Utilizando cor = 'purple' (mauve)") --&gt;
+
+&lt;!-- color_hospital &lt;- ggplot(data = vig, aes(x = idade_anos, y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(aes(color = hospital))+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Utilizando aes(color = hospital)") --&gt;
+
+&lt;!-- cowplot::plot_grid(color_purple, color_hospital, --&gt;
+
+&lt;!-- nrow = 2, rel_widths = c(2,2)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r, eval = params$lang == "ru", message=F, warning=F} --&gt;
+
+&lt;!-- color_purple &lt;- ggplot(data = vig, aes(x = idade_anos, y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(color = "purple")+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Использование цвета = 'purple' (сиреневый)") --&gt;
+
+&lt;!-- color_hospital &lt;- ggplot(data = vig, aes(x = idade_anos, y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(aes(color = hospital))+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Использование aes(color = hospital), больница") --&gt;
+
+&lt;!-- cowplot::plot_grid(color_purple, color_hospital, --&gt;
+
+&lt;!-- nrow = 2, rel_widths = c(2,2)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r, eval = params$lang == "es", message=F, warning=F} --&gt;
+
+&lt;!-- color_purple &lt;- ggplot(data = vig, aes(x = idade_anos, y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(color = "purple")+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Utilizar a cor = 'purple' (púrpura)") --&gt;
+
+&lt;!-- color_hospital &lt;- ggplot(data = vig, aes(x = idade_anos, y = altura_cm))+ --&gt;
+
+&lt;!-- geom_point(aes(color = hospital))+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Utilizar aes(color = hospital)") --&gt;
+
+&lt;!-- cowplot::plot_grid(color_purple, color_hospital, --&gt;
+
+&lt;!-- nrow = 2, rel_widths = c(2,2)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ] --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- classe: medium-text --&gt;
+
+&lt;!-- # Atribuições de estética --&gt;
+
+&lt;!-- .pull-left[ --&gt;
+
+&lt;!-- A estética pode ser atribuída a: --&gt;
+
+&lt;!-- **Valores estáticos**:   --&gt;
+
+&lt;!-- Mesma exibição para todos os dados --&gt;
+
+&lt;!-- ```{r, echo=T, eval=F} --&gt;
+
+&lt;!-- ggplot( --&gt;
+
+&lt;!-- dados = vig, --&gt;
+
+&lt;!-- mapping = aes(x = data_inicio_sintomas)) + --&gt;
+
+&lt;!-- geom_histogram(fill = "purple") # static #&lt;&lt; --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- **Uma coluna de dados (dinâmica)**:   --&gt;
+
+&lt;!-- Exibe dados como "grupos" --&gt;
+
+&lt;!-- ```{r, echo=T, eval=F} --&gt;
+
+&lt;!-- ggplot( --&gt;
+
+&lt;!-- dados = vig, --&gt;
+
+&lt;!-- mapeamento = aes( --&gt;
+
+&lt;!-- x = data_inicio_sintomas, --&gt;
+
+&lt;!-- color = district)) + # dinâmico #&lt;&lt; --&gt;
+
+&lt;!-- geom_histogram() --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ] --&gt;
+
+&lt;!-- .pull-right[ --&gt;
+
+&lt;!-- Mais exemplos:  --&gt;
+
+&lt;!-- ```{r, eval = params$lang == "en", message=F, warning=F} --&gt;
+
+&lt;!-- fill_purple &lt;- ggplot(data = vig, aes(x = data_inicio_sintomas))+ --&gt;
+
+&lt;!-- geom_histogram(fill = "purple")+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Usando preenchimento = 'purple'") --&gt;
+
+&lt;!-- fill_hospital &lt;- ggplot(data = vig, aes(x = data_inicio_sintomas))+ --&gt;
+
+&lt;!-- geom_histogram(aes(fill = hospital))+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Usando aes(fill = hospital)") --&gt;
+
+&lt;!-- cowplot::plot_grid( --&gt;
+
+&lt;!-- fill_purple, fill_hospital, --&gt;
+
+&lt;!-- nrow = 2, rel_widths = c(2,2)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r,eval = params$lang == "fr", message=F, warning=F} --&gt;
+
+&lt;!-- fill_purple &lt;- ggplot(data = vig, aes(x = data_inicio_sintomas))+ --&gt;
+
+&lt;!-- geom_histogram(fill = "purple")+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Utilisant fill = 'purple' (mauve)") --&gt;
+
+&lt;!-- fill_hospital &lt;- ggplot(data = vig, aes(x = data_inicio_sintomas))+ --&gt;
+
+&lt;!-- geom_histogram(aes(fill = hospital))+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Utilisant aes(fill = hospital)") --&gt;
+
+&lt;!-- cowplot::plot_grid( --&gt;
+
+&lt;!-- fill_purple, fill_hospital, --&gt;
+
+&lt;!-- nrow = 2, rel_widths = c(2,2)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r, eval = params$lang == "ru", message=F, warning=F} --&gt;
+
+&lt;!-- fill_purple &lt;- ggplot(data = vig, aes(x = data_inicio_sintomas))+ --&gt;
+
+&lt;!-- geom_histogram(fill = "purple")+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Использование fill = 'purple' (сиреневый)") --&gt; --&gt;
+
+&lt;!-- fill_hospital &lt;- ggplot(data = vig, aes(x = data_inicio_sintomas))+ --&gt;
+
+&lt;!-- geom_histogram(aes(fill = hospital))+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Использование aes(fill= hospital), больница") --&gt;
+
+&lt;!-- cowplot::plot_grid( --&gt;
+
+&lt;!-- fill_purple, fill_hospital, --&gt;
+
+&lt;!-- nrow = 2, rel_widths = c(2,2)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r, eval = params$lang == "es", message=F, warning=F} --&gt;
+
+&lt;!-- fill_purple &lt;- ggplot(data = vig, aes(x = data_inicio_sintomas))+ --&gt;
+
+&lt;!-- geom_histogram(fill = "purple")+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Utilizar preenchimento = 'purple' (púrpura)") --&gt;
+
+&lt;!-- fill_hospital &lt;- ggplot(data = vig, aes(x = data_inicio_sintomas))+ --&gt;
+
+&lt;!-- geom_histogram(aes(fill = hospital))+ --&gt;
+
+&lt;!-- theme_minimal(base_size = 16)+ --&gt;
+
+&lt;!-- labs(title = "Utilizar aes(fill = hospital)") --&gt;
+
+&lt;!-- cowplot::plot_grid( --&gt;
+
+&lt;!-- fill_purple, fill_hospital, --&gt;
+
+&lt;!-- nrow = 2, rel_widths = c(2,2)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ] --&gt;
+
+---
+
+# Atribuição estética estática
+
+.pull-left[
+
+
+``` r
+ggplot(
+  data = vig,
+  mapping = aes(
+    x = idade_anos,
+    y = altura_cm)) + 
+*geom_point(color = "seagreen")
+```
+
+As atribuições estéticas **estáticas** são para um valor numérico ou de texto.
+
+A alteração se aplica a **todos** pontos de dados.
+
+Escrito **fora do `aes()`**.
+
+Outros exemplos estáticos que você pode usar:  
+`size = 3`  
+`alpha = 0.5`  
+`fill = "purple"`
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-45-1.png" width="504" /&gt;
+
+]
+
+---
+
+# Atribuição estética dinâmica
+
+.pull-left[
+
+
+``` r
+ggplot(
+  data = vig,
+  mapping = aes(
+    x = idade_anos,
+    y = altura_cm,
+*   color = hospital)) +
+geom_point()
+```
+
+As atribuições estéticas **dinâmicas** são mapeadas para um **nome de coluna**.
+
+Isso cria **grupos** no gráfico e gera uma legenda.
+
+Isso está escrito **dentro de `aes()`**.
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-47-1.png" width="504" /&gt;
+
+]
+
+???
+
+---
+
+# Estático e dinâmico
+
+.pull-left[
+
+
+``` r
+ggplot(
+  data = vig,
+  mapping = aes(
+    x = idade_anos,
+    y = altura_cm,
+*   color = hospital)) +  
+geom_point(
+* size = 7, 
+* alpha = 0.6) 
+```
+
+Acima, `size = 7` e `alpha = 0.5` são atribuídos estaticamente, fora de `aes()`.
+
+`color=` é atribuído à coluna `hospital`, dentro de `aes()`.
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-49-1.png" width="504" /&gt;
+
+]
+
+.footnote[Leia mais sobre a estética do ggplot [aqui](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html)
+]
+
+???
+Como há apenas um geom, todas as estéticas podem ser escritas em `ggplot()` ou em `geom_point()`
+
+---
+
+# Facetas
+
+.pull-left[
+
+
+``` r
+ggplot(
+  data = vig,
+  mapping = aes(x = data_inicio_sintomas)) +
+geom_histogram() +
+*facet_wrap(~hospital)
+```
+
+Os grupos também podem ser exibidos dessa forma.
+
+As facetas são "múltiplos pequenos"
+
+`facet_wrap()` produz um gráfico  
+por valor exclusivo na coluna.
+
+"~" antes do nome da coluna é como a palavra "by" (... "by hospital")
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-51-1.png" width="504" /&gt;
+
+]
+
+???
+Também chamado de "múltiplos pequenos"
+
+---
+
+# Facetas
+
+.pull-left[
+
+
+``` r
+ggplot(
+  data = vig,
+  mapping = aes(x = data_inicio_sintomas)) +
+geom_histogram() +
+*facet_wrap(~hospital,
+            scales = "free_y")
+```
+
+ Eixos "livres" em escala automática com `scales =`
+
+- "free\_y"
+- "free\_x"
+- "free" (tanto x quanto y)
+
+]
+
+.footnote[
+Alerte seu público se você usar eixos livres!
+Além disso, tente `ncol=` e `nrow=`
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-53-1.png" width="504" /&gt;
+
+
+
+
+
+
+
+]
+
+---
+
+# Facetas + `gghighlight()`
+
+.pull-left[
+
+pacotes de extensão ggplot como {gghighlight} são úteis.
+
+`gghighlight()` mostra uma "sombra" atrás de cada faceta.
+
+
+``` r
+ggplot(
+  data = vig,
+  mapping = aes(
+    x = data_inicio_sintomas,
+*   fill = hospital)) +
+geom_histogram() +
+facet_wrap(~ hospital) +
+*gghighlight()
+```
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-58-1.png" width="504" /&gt;
+
+]
+
+---
+
+# gghighlight
+
+.pull-left[
+
+`gghighlight()` também destaca valores em outros tipos de gráficos
+
+
+``` r
+vig %&gt;% 
+  # contagem semanal por hospital
+  group_by(
+     hospital,
+     semana = floor_date(data_inicio_sintomas, "week")
+     ) %&gt;%
+  count() %&gt;% 
+  
+  # plot
+  ggplot(
+    mapping = aes(
+      x = semana,
+      y = n,
+      color = hospital)) +
+  geom_line() +
+* gghighlight(
+*   hospital == "Port Hospital")+
+  theme(legend.position = "none")
+```
+
+
+
+
+
+
+
+]
+
+.pull-right[
+
+&lt;img src="intro05-1_pt_files/figure-html/unnamed-chunk-63-1.png" width="504" /&gt;
+
+]
+
+.footnote[O código agrega casos por semana e hospital e passa as contagens para o ggplot]
+
+???
+Aqui, criamos um conjunto de dados de casos por semana, por hospital, e plotamos com `geom_line()`. O destaque é aplicado ao Hospital Portuário.
+
+---
+
+class: inverse, center, middle
+
+## Exercício
+
+Acesse o site do curso  
+Abra o primeiro exercício do Módulo 5 e faça login  
+Siga as instruções para abrir o projeto R "ebola" e continuar a codificação  
+Informe um instrutor se você não tiver certeza do que fazer
+
+&lt;img src="../../images/breakout/Safety Match - COVID artwork.png" width="50%" /&gt;
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
