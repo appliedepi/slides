@@ -1,0 +1,1007 @@
+---
+title: Introduction à R pour<br>Épidémiologie appliquée
+subtitle: Joining donnees
+author: '2022'
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: fr
+---
+
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing donnees  
+  here,       # relative file pathways  
+  janitor,    # donnees cleaning and tables
+  lubridate,  # working with dates
+  tidyverse,  # donnees management and visualization
+  gtsummary,  # summary tables
+  countdown,  # countdown timer
+  flextable,  # tables
+  kableExtra, # for output tables
+  xaringanthemer  # for styling presentation 
+)
+
+
+# donnees prep --------------------------------------------------------------------
+# linelist_raw <- rio::import(here::here("donnees", "linelist_raw.xlsx"))
+linelist_surv <- rio::import(here::here("data", "linelist_surveillance_nettoyee_20141201.rds"))
+
+# gen <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "generic") %>%
+#   clean_names()
+# 
+# mod7_1 <- googlesheets4::read_sheet(
+#   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
+#   range = "mod7_1", col_types = "c") %>%
+#   clean_names()
+```
+
+```{r xaringan-themer, include=FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://brutes.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://brutes.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+# Introduction à R pour l'épidémiologie appliquée
+
+### Joindre des jeux de données
+
+contact@appliedepi.org
+---
+
+# Aujourd'hui : objectifs et planning
+
+**Dans ce module, nous avons pour objectif de vous aider à :**
+
+* Apprendre à joindre deux ou plusieurs jeux de données
+* Apprendre les différentes jointures et l'utilisation d'un identifiant/des colonnes d'identification
+* S'entraîner à faire pivoter les données d'un format large à un format long pour créer des "chronologies" des symptômes chez les patients
+* Convertir les variables en classe "facteur" à l'aide du paquet {forcats}
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Time, ~Topic,
+  "20 minutes", "Démonstration: Jointures",
+  "1h 15 minutes", "Exercice: Joindre des données", 
+  "15 minutes", "Démonstration: Pivoter des données", 
+  "1 heure",  "Exercice: Pivoter des données & les facteurs", 
+  "10 minutes", "Débrief" 
+
+)
+
+outline %>% 
+  flextable::qflextable() %>% 
+  flextable::add_footer_lines("Prenez des pauses quand vous en avez besoin pendant l'exercice")
+```
+
+---
+
+class: inverse, center, middle
+
+# Joindre des jeux de données
+
+*Joindre, fusionner, unir, combiner, assembler, lier, correspondre, ...* des jeux de données
+
+.footnote[Merci à Garrick Aden-Buie pour les gifs utilisés dans ces diapositives].
+
+???
+
+Expliquez ceci :
+
+- En fonction de votre milieu, il se peut que différents types de mots soient utilisés pour décrire ce type d'opération : joindre, unir, fusionner, combiner, assembler...
+- Dans ce module, nous utiliserons le mot "joindre" pour faire référence aux fonctions de la famille `join_` du paquet tidyverse et aussi aux fonctions populaires de SQL. L'équivalent dans le language R de base est `merge`.
+
+---
+
+# Situation : les données sont dispersées entre les jeux de données
+
+???
+
+Donnez des exemples de situations qui pourraient se produirent pour souligner à quel point cette situation est courante :
+
+- relier les données de laboratoire aux résultats cliniques des patients
+- relier les données des patients aux données SIG,
+- relier les données de mobilité de Google aux tendances des maladies infectieuses
+- autre exemples pertinent dans leur domaine, peut-être suggéré par le formulaire d'avant-cours rempli par les participants
+
+---
+
+# Types de jointures
+
+#### Types de jointures
+
+- **Jointure par mutation** : ajouter une nouvelle variable à un jeu de données
+  - **Jointure gauche** / **Jointure droite** : ajouter des données à un jeu de données
+  - **Jointure complète** : combiner deux jeux de données complets
+  - **Jointure interne** : prendre l'intersection de deux jeux de données
+- **Filtrer les jointures** : filtrer un jeu de données en fonction d'un autre jeu de données
+  - **Anti join** / **jointure partielle (semi join)**
+
+#### Syntaxe générale
+
+- Nous utilisons les fonctions `join` du paquet {dplyr}
+- Syntaxe homogène :
+
+```{r, include=TRUE, echo=TRUE, eval=FALSE}
+xxx_join(dataframe_1, dataframe_2, 
+         by = "key_id")
+```
+
+???
+Insistez sur le fait qu'il existe globalement deux types de jointures, les jointures mutantes, qui ajouteront de nouvelles colonnes et affecteront potentiellement le nombre de rangées, et les jointures filtrantes, qui n'ajouteront pas de nouvelles colonnes, mais modifieront simplement les rangées d'un jeu de données.
+
+Expliquez que la fonction se présente toujours sous cette forme, avec deux jeux de données, le premier étant nommé le jeu de données de _gauche_ et le second étant celui de _droite_. L'argument *by* (càd "par") : fournit les colonnes utilisées pour identifier les correspondances entre les observations.
+
+---
+
+# Exemple : ajouter les résultats des patients
+
+```{r, include=FALSE, echo=F}
+# Make smaller linelists for exemple purpose
+# patients <- linelist_surv %>% 
+#      select(cas_id, age, unite_age, sexe) %>% 
+#      arrange(cas_id) %>% 
+#      head(5)
+
+patients <- tribble(
+     ~cas_id, ~age, ~unite_age, ~sexe,
+     "5fe599", 2, "ans", "h",
+     "8689b7", 3, "ans", "f",
+     "11f8ea", 56, "ans", "h",
+     "b8812a", 18, "ans", "f",
+     "893f25", 3, "ans", "h")
+
+
+hosp <- tribble(
+     ~id_patient, ~resultat,
+      "5fe599", "Mort.e",
+      "8689b7", "Rétabli.e",
+      "11f8ea", "Rétabli.e",
+      "ebd24z", "Mort.e")
+
+
+# hosp <- linelist_surv %>% 
+#      select(id_patient = cas_id, hopital) %>% 
+#      arrange(id_patient) %>% 
+#      head(3)
+```
+
+Faisons une démonstration avec ces petits jeux de données : nous voulons *joindre* les deux jeux de données :
+
+.pull-left[
+
+`patients` *(informations sur les patients)*
+
+```{r, include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+]
+
+.pull-right[
+
+`hosp` *(informations sur les hospitalisations)*
+
+```{r, include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+]
+
+<br>
+
+Les colonnes **CLÉS** reliant les deux jeux de données sont **cas_id** et **id_patient**
+
+???
+Pour cet example, nous avons créé deux _petits_ jeux de données pour voir ce qui se passe, l'un avec les caractéristiques du patient (âge et sexe), l'autre avec l'hôpital dans lequel le patient a été hospitalisé.
+**Notez que les deux jeux de données ont l'identifiant du patient en commun, mais un nom légèrement différent (une situation très courante)**. Nous appelerons cette colonne la colonne CLÉ, ou colonne des identifiants. Elle permet de faire *correspondre* les observations entre les deux jeux de données.
+
+---
+
+# Jointure gauche
+
+.pull-left[
+
+* Les jointures gauche sont souvent utilisées pour **ajouter des colonnes** à un jeu de données
+
+* Toutes les rangées du jeu de données de base (gauche) sont conservées
+
+* Les lignes du deuxième jeu de données (droite) qui correspondent sont jointes.
+
+* Les colonnes du deuxième jeu de données sont ajoutées (avec `NA` comblant les données manquantes éventuelles)
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "left-join.gif")))
+```
+
+]
+
+???
+Parfois appelées jointures gauches *extérieures*
+
+---
+
+# Jointure gauche
+
+.pull-left[
+
+```{r, include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+
+```
+
+]
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+left_join(patients, hosp,      
+  by = c(
+    "cas_id" = "id_patient")) #<<
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
+left_join(patients, 
+          hosp, 
+     by = c("cas_id" = "id_patient")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+
+
+
+```
+
+]
+
+---
+
+# Jointure gauche
+
+.pull-left[
+
+```{r, include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow")
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow") %>% 
+     bg(part = "body",   i = 4, j = 1:2, bg = "red") %>% 
+     bg(part = "body",   i = 1:3, j = 2, bg = "lightgreen")
+
+
+```
+
+]
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+left_join(patients, hosp,      
+  by = c(
+    "cas_id" = "id_patient")) #<<
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
+left_join(patients, 
+          hosp, 
+     by = c("cas_id" = "id_patient")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 1, bg = "yellow") %>% 
+     bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = 1:3, j = 5, bg = "lightgreen")
+
+
+```
+
+]
+
+---
+
+# Jointure droite
+
+.pull-left[
+
+- Peu utilisée
+
+- Conserve les lignes correspondantes du jeu de données de référence.
+
+- Ajoute les rangées *non correspondantes* du deuxième jeu de données
+
+- Ajoute les colonnes du deuxième jeu de données
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "right-join.gif")))
+```
+
+]
+
+---
+
+# Jointure droite
+
+.pull-left[
+
+```{r, include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "body",   i = 4:5, j = 1:4, bg = "red")
+
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable()
+```
+
+]
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+right_join(patients, hosp,      
+  by = c(
+    "cas_id" = "id_patient")) 
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
+right_join(patients, 
+          hosp, 
+     by = c("cas_id" = "id_patient")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = 1:4, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = 4, j = 1, bg = "lightgreen")
+
+
+```
+
+]
+
+???
+N'est pas utilisé très souvent.
+
+---
+
+# Jointure complète
+
+.pull-left[
+
+- La plus inclusive des jointures
+
+- Garde **toutes les lignes des deux jeux de données**
+
+- Remplit les espaces avec `NA` si nécessaire
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "full-join.gif")))
+```
+
+]
+
+.footnote[Parfois appelée *jointure externe complète* ou *jointure externe*]
+
+---
+
+# Parfois appelée *jointure externe complète* ou *jointure externe*
+
+.pull-left[
+
+```{r, include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable()
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable()
+```
+
+]
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+full_join(patients, hosp,       
+  by = c(
+    "cas_id" = "id_patient")) 
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
+full_join(patients, 
+          hosp, 
+     by = c("cas_id" = "id_patient")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = c(1:3, 6), j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = 6, j = 1, bg = "lightgreen")
+
+
+```
+
+]
+
+???
+C'est le moment d'insister sur la cohérence des arguments de la famille de fonctions join : ils sont toujours écris de la même façon
+
+---
+
+# Jointure interne
+
+.pull-left[
+
+- La plus **restrictive** des jointures
+
+- Prend l'**intersection** entre deux jeux de données : ne garde que les lignes qui correspondent
+
+- **Enlève** lignes sans correspondance
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE, out.width="100%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "inner-join.gif")))
+```
+
+]
+
+.footnote[Également appelée *jointure naturelle*]
+
+???
+Bien qu'elles paraîssent similaires, il est important de s'assurer que tout le monde comprennent ce qu'est la signification de prendre l'_intersection_.
+
+---
+
+# Jointure interne
+
+.pull-left[
+
+```{r, include=TRUE, echo=FALSE}
+patients %>% 
+     # head(5) %>% 
+     qflextable() %>% 
+     bg(part = "body",   i = 4:5, j = 1:4, bg = "red")
+
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE}
+hosp %>% 
+     # head(3) %>% 
+     qflextable() %>% 
+     bg(part = "body",   i = 4, j = 1:2, bg = "red")
+
+```
+
+]
+
+.pull-left[
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+inner_join(patients, hosp,       
+  by = c(
+    "cas_id" = "id_patient")) 
+```
+
+]
+
+.pull-right[
+
+```{r, include=TRUE, echo=FALSE, eval=TRUE, out.width="80%"}
+inner_join(patients, 
+          hosp, 
+     by = c("cas_id" = "id_patient")) %>% 
+     qflextable() %>% 
+     bg(part = "header", i = 1, j = 5, bg = "lightgreen") %>% 
+     bg(part = "body",   i = c(1:3), j = 5, bg = "lightgreen") 
+
+```
+
+]
+
+---
+
+# Conseils de syntaxe
+
+- Les jointures peuvent être utilisées dans des **pipelines** (le jeu de donnée pipé est celui de *gauche*) :
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+patients %>%               
+     left_join(hosp, by = c("cas_id" = "id_patient")) %>%  #<<
+     filter(age > 25)
+```
+
+--
+
+- La syntaxe est simple si **la colonne de l'identificateur a le même nom** dans les deux jeux de données :
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+left_join(patients, hosp,       
+           by = "cas_id")   #<<
+```
+
+--
+
+- Pour passer **plusieurs colonnes** à utiliser comme identifiants :
+
+```{r, echo=TRUE, eval=FALSE, include=TRUE}
+left_join(dataframe1, dataframe2,       
+           by = c("name" = "first_name",  
+                  "age",       #<<
+                  "sexe"))   #<<
+```
+
+---
+
+# Jointure filtrante
+
+- Les jointures filtrantes sont utilisées pour **filtrer les lignes** du jeu de donnée *de base* sur la base des correspondances dans le deuxième jeu de données.
+- Les jointures filtrantes *n'ajoutent pas de colonnes ou de lignes*
+
+.pull-left[
+
+#### Anti join
+
+Conserve les lignes du jeu de donnée de base qui n'ont
+**pas de correspondance dans d'autres jeux de données**
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "anti-join.gif")))
+```
+
+]
+
+.pull-right[
+
+#### Semi join (jointure partielle)
+
+Conserve les lignes du jeu de donnée de base qui
+**ont une correspondance dans un autre jeu de données**
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "joins_pivots", "semi-join.gif")))
+```
+
+]
+
+**Les jointures filtrantes ne dupliquent jamais les lignes, elles peuvent seulement les supprimer.**
+
+???
+Les anti join sont très utiles pour voir quelles lignes d'un jeu de données n'ont *pas* de correspondance.
+
+---
+
+# Les défis de la vie réelle
+
+---
+
+# Noms de colonnes identiques
+
+```{r, eval=TRUE, echo=FALSE}
+df1 <- tibble(ID = c("id_1", "id_2", "id_3", "id_4"), sexe = c("F", "M", "M", "F"))
+df2 <- tibble(ID = c("id_1", "id_2", "id_5"), age = c(5, 5, 7), sexe = c("F", "F", "F"))
+```
+
+.pull-left[
+
+```{r, eval=TRUE, echo=FALSE}
+patients %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1:5, j = 2, bg = "orange") %>% 
+     bg(part = "header", i = 1, j = 2, bg = "orange")
+
+```
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+hosp %>%
+     mutate(age = c(2, 3, 56, 40)) %>% 
+     qflextable() %>% 
+     bg(part = "body", i = c(1:4), j = 3, bg = "orange") %>% 
+     bg(part = "header", i = 1, j = 3, bg = "orange") 
+
+```
+
+]
+
+.pull-left[
+
+```{r, eval=FALSE, echo=TRUE}
+left_join(patients, hosp,
+  by = c(
+   "cas_id" = "id_patient"))
+```
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+left_join(patients,
+          hosp %>% mutate(age = c(2, 3, 56, 40)),
+  by = c("cas_id" = "id_patient")) %>% 
+  qflextable() %>% 
+  bg(part = "header", i = 1, j = 2, bg = "orange") %>% 
+  bg(part = "header", i = 1, j = 6, bg = "orange") 
+```
+
+]
+
+???
+Si il y a des noms de colonnes identiques entre les deux jeux de données, R changera leur nom pour les distinguer.
+
+- Si vous êtes sûr.e.s que les deux colonnes contiennent les mêmes informations, supprimez-les de l'un des jeux de données avant la jointure.
+- Si vous n'êtes pas sûr.e.s , vous pouvez les comparer facilement après la jointure.
+  Mentionnez oralement qu'il existe un argument "suffixe" et que vous pouvez donner un vecteur pour renommer les colonnes au lieu de .x et .y.
+
+---
+
+# Nom de colonnes identiques
+
+.pull-left[
+
+```{r, eval=TRUE, echo=FALSE}
+patients %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1:5, j = 2, bg = "orange") %>% 
+     bg(part = "header", i = 1, j = 2, bg = "orange")
+
+```
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+hosp %>%
+     mutate(age = c(2, 3, 56, 40)) %>% 
+     qflextable() %>% 
+     bg(part = "body", i = c(1:4), j = 3, bg = "orange") %>% 
+     bg(part = "header", i = 1, j = 3, bg = "orange") 
+
+```
+
+]
+
+.pull-left[
+
+```{r, eval=FALSE, echo=TRUE}
+left_join(patients, hosp,
+  by = c(
+   "cas_id" = "id_patient",
+   "age"))    #<<
+```
+
+]
+
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+left_join(patients,
+          hosp %>% mutate(age = c(2, 3, 56, 40)),
+  by = c("cas_id" = "id_patient", "age")) %>% 
+  qflextable() %>% 
+  bg(part = "header", i = 1, j = 2, bg = "orange")
+```
+
+]
+
+???
+Si il y a des noms de colonnes identiques entre les deux jeux de données, R changera leur nom pour les distinguer.
+
+- Si vous êtes sûr.e.s que les deux colonnes contiennent les mêmes informations, supprimez-les de l'un des jeux de données avant la jointure.
+- Si vous n'êtes pas sûr.e.s , vous pouvez les comparer facilement après la jointure.
+  Mentionnez oralement qu'il existe un argument "suffixe" et que vous pouvez donner un vecteur pour renommer les colonnes au lieu de .x et .y.
+
+---
+
+### De un à plusieurs
+
+.pull-left[
+
+```{r, eval=TRUE, echo=FALSE}
+patients %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1, j = 1:4, bg = "orange")
+```
+
+]
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+
+hosp_dup <- tribble(
+     ~id_patient, ~resultat,
+      "5fe599", "Mort.e",
+      "5fe599", "En vie",
+      "8689b7", "Rétabli.e",
+      "11f8ea", "Rétabli.e",
+      "ebd24z", "Mort.e")
+
+hosp_dup %>%
+    qflextable() %>% 
+     bg(part = "body", i = 1:2, j = 1:2, bg = "orange")
+```
+
+]
+.pull-left[
+
+```{r, eval=FALSE, echo=TRUE}
+left_join(patients, hosp,
+  by = c(
+   "cas_id" = "id_patient"))
+```
+
+]
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+left_join(patients,
+          hosp_dup,
+  by = c("cas_id" = "id_patient")) %>% 
+  qflextable() %>% 
+  bg(part = "body", i = 1:2, j = 1:5, bg = "orange")
+```
+
+]
+
+---
+
+### De plusieurs à un
+
+.pull-left[
+
+```{r, eval=TRUE, echo=FALSE}
+
+patients_dup <- tribble(
+     ~cas_id, ~age, ~unite_age, ~sexe,
+     "5fe599", 2, "ans", "h",
+     "5fe599", 2, "ans", "h",
+     "8689b7", 3, "ans", "f",
+     "11f8ea", 56, "ans", "h",
+     "b8812a", 18, "ans", "f",
+     "893f25", 3, "ans", "h")
+
+
+patients_dup %>% 
+     qflextable() %>% 
+     bg(part = "body", i = 1:2, j = 1:4, bg = "orange")
+```
+
+]
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+
+hosp %>%
+    qflextable() %>% 
+     bg(part = "body", i = 1, j = 1:2, bg = "orange")
+```
+
+]
+.pull-left[
+
+```{r, eval=FALSE, echo=TRUE}
+left_join(patients, hosp,
+  by = c(
+   "cas_id" = "id_patient"))
+```
+
+]
+.pull-right[
+
+```{r, eval=TRUE, echo=FALSE}
+left_join(patients_dup,
+          hosp,
+  by = c("cas_id" = "id_patient")) %>% 
+  qflextable() %>% 
+  bg(part = "body", i = 1:2, j = 1:5, bg = "orange")
+```
+
+]
+
+---
+
+# Bonnes pratiques
+
+Utilisez les fonctions `semi_join()` et `anti_join()` pour **comprendre pourquoi certaines rangées sont supprimées**
+
+"Quelles rangées de `hosp` ne seront pas jointes à gauche à `patients` ?" Examinez pourquoi avec `anti_join()`
+
+```{r, eval=FALSE, echo=TRUE}
+anti_join(hosp, patients, by = c("id_patient" = "cas_id"))
+```
+
+```{r, eval=TRUE, echo=FALSE}
+anti_join(hosp, patients, by = c("id_patient" = "cas_id")) %>% 
+     qflextable()
+```
+
+---
+
+# Bonnes pratiques
+
+**Vérifiez les dimensions** des jeux de données avant et après la fusion !
+
+```{r, eval=TRUE, echo=TRUE}
+nrow(patients)
+```
+
+```{r, eval=TRUE, echo=TRUE}
+nrow(hosp)
+```
+
+```{r, eval=TRUE, echo=TRUE}
+left_join(patients, hosp, by = c("cas_id" = "id_patient")) %>%
+  nrow()
+```
+
+???
+Une autre vérification à faire consiste à utiliser la fonction `count()` pour compter le nombre de rangées pour chacun de vos identificateurs.
+
+---
+
+class: inverse, center, middle
+
+# Exercice !
+
+Allez sur le site du cours
+Ouvrez l'exercice du module 8, partie 1, et connectez-vous  
+Suivez les instructions pour ouvrir votre projet R "ebola" et continuer à coder dans votre script RMD.  
+Informez un instructeur si vous n'êtes pas sûr.e.s de ce que vous devez faire.
+
+```{r, eval=TRUE, echo=FALSE, out.width="50%"}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics(xfun::relative_path(here::here("images", "breakout", "window.png")))
+```
+
+
