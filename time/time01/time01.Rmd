@@ -144,6 +144,16 @@ timeseries <- rio::import("../data/norsyss.xlsx")
 
 ---
 
+# Time series
+
+- A set of observations arranged in chronological order
+- Performed in many fields, many applications
+- We will be focusing on "anomaly detection" (also known as "aberration analysis")
+- Used in near real-time surveillance to identify unexpected patterns in data
+- Allows for informed decision-making and outbreak detection
+
+---
+
 # Overview
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "80%", out.height = "auto"}
@@ -168,16 +178,6 @@ Please write in the chat:
     - Target 1 (data cleaning + are cases going up?)
     - Target 2 (are the cases higher than expected?)
     - Target 3 (extras)
-
----
-
-# Time series
-
-- A set of observations arranged in chronological order
-- Performed in many fields, many applications
-- We will be focusing on "anomaly detection" (also known as "aberration analysis")
-- Used in near real-time surveillance to identify unexpected patterns in data
-- Allows for informed decision-making and outbreak detection
 
 ---
 
@@ -358,14 +358,14 @@ analysis_trend <- csalert::short_term_trend_sts_v1(
 
 pd$status <- analysis_trend@alarm[,"observed1"]
 pd$sunday_of_isoweek <- as.Date(pd$sunday_of_isoweek)
-pd_triangles <- pd[pd$status==1,]
-
 
 pd <- pd %>%
   filter(isoyear %in% 2021:2022)
 
+pd_triangles <- pd[pd$status==1,]
+
 q <- ggplot(
-  pd_triangles, 
+  pd, 
   aes(
     x = as.Date(sunday_of_isoweek), 
     y = consultations_icpc2group_n
@@ -399,11 +399,15 @@ q
 
 ---
 
-# Exercise time
+# Today's structure
 
-The best way to learn is to try it yourself!
+- I will now perform a small demo.
+- After the demo, you will begin with your exercises.
+- There will be a midway presentation of around 10 minutes.
+- After the presentation, you will continue with your exercises.
+- There will be a wrap-up demo/presentation at the end.
 
-**As you go along, please remember to type into the chat if you have any questions.**
+**As you do your exercises, please raise your hand if you need help. Messages in the main chat disappear each time we go into breakout rooms, so the most reliable way to get our attention is by raising your hand.**
 
 ---
 
@@ -660,18 +664,26 @@ q
 Remember that you don't **need** to do the most complicated model.
 You can try all three models, and see if they are necessary.
 
-
 ---
 
 # Exercise time
 
 The best way to learn is to try it yourself!
 
-**As you go along, please remember to type into the chat if you have any questions.**
+**As you do your exercises, please raise your hand if you need help. Messages in the main chat disappear each time we go into breakout rooms, so the most reliable way to get our attention is by raising your hand.**
 
-**You can also raise your hand if you'd like a 1-on-1 chat in a breakout room**
+---
 
+# Wrap up 
 
+.pull-right[
+```{r, eval = TRUE, echo = FALSE}
+# Using here() alone won't work because Rmd folder becomes the rendering root.
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path. It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics("../images/example_epicurve.png")
+```
+]
 
 
 
