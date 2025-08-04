@@ -234,14 +234,6 @@ Screening using a univariate regression
 
 ---
 
-# Do's and do not's
-
-*The do not's*
-
-This is only a brief summary, please read further into the topic with this blog post for further information (https://towardsdatascience.com/stopping-stepwise-why-stepwise-selection-is-bad-and-what-you-should-use-instead-90818b3f52df)
-
----
-
 # Overfitting
 
 This is where the model "memorises" a pattern rather than "learns" it. 
@@ -295,7 +287,7 @@ A simple model is a good model
 
 .smaller[
 
-```r
+``` r
 fitControl &lt;- trainControl(
      method = "repeatedcv", # We want to use repeated cross validation
      number = 5,            # Divide the dataset into 5 sections to train and test
@@ -317,7 +309,7 @@ repeats - Repeat 10 times with different "cuts" of the data to ensure the result
 
 .smaller[
 
-```r
+``` r
 fitControl &lt;- trainControl(
      method = "repeatedcv", # We want to use repeated cross validation
      number = 5,            # Divide the dataset into 5 sections to train and test
@@ -340,7 +332,7 @@ Talk through this gif in the context of the last slide
 
 .smaller[
 
-```r
+``` r
 data_use &lt;- linelist %&gt;%
     select(gender,                           #These are the exposures
            age,                              #want to investigate
@@ -359,7 +351,7 @@ data_use &lt;- linelist %&gt;%
 
 .smaller[
 
-```r
+``` r
 data_use &lt;- linelist %&gt;%
     select(gender,                           #These are the exposures
            age,                              #want to investigate
@@ -381,7 +373,7 @@ data_use &lt;- linelist %&gt;%
 
 .smaller[
 
-```r
+``` r
 data_use &lt;- linelist %&gt;%
     select(gender,                           #These are the exposures
            age,                              #want to investigate
@@ -403,7 +395,7 @@ lasso_fit &lt;- train(form = outcome_death ~ .,
 Then we use the function `predictors()` from **caret** to 
 
 
-```r
+``` r
 lasso_predictors_raw &lt;- predictors(lasso_fit)
 
 lasso_predictors_raw
@@ -428,7 +420,7 @@ This takes our results and removes everything _not_ found in the column names in
 
 .smaller[
 
-```r
+``` r
 lasso_predictors_clean &lt;- str_extract(string = lasso_predictors_raw,
                                       pattern = paste(colnames(data_use),   
                                              collapse = "|"))
@@ -468,7 +460,7 @@ This is done in a slightly different way to our univariate regression. We will b
 #Carrying out multivariable regression
 
 
-```r
+``` r
 multivariable_regression_table &lt;- data_use %&gt;%
      select(lasso_predictors_clean, 
             outcome_death,
@@ -484,7 +476,7 @@ Talk through the stages, what formula means, what family means, remind them what
 #Carrying out multivariable regression
 
 
-```r
+``` r
 multivariable_regression_table &lt;- data_use %&gt;%
      select(lasso_predictors_clean, 
             outcome_death,
@@ -502,7 +494,7 @@ Talk through the stages, what formula means, what family means, remind them what
 #Carrying out multivariable regression
 
 
-```r
+``` r
 multivariable_regression_table &lt;- data_use %&gt;%
      select(lasso_predictors_clean, 
             outcome_death,
@@ -521,7 +513,7 @@ Talk through the stages, what formula means, what family means, remind them what
 #Carrying out multivariable regression
 
 
-```r
+``` r
 multivariable_regression_table &lt;- data_use %&gt;%
      select(lasso_predictors_clean, 
             outcome_death,
@@ -548,12 +540,11 @@ Talk through the stages, what formula means, what family means, remind them what
 #Carrying out multivariable regression
 
 
-```r
+``` r
 multivariable_regression_table &lt;- data_use %&gt;%
      select(lasso_predictors_clean, 
             outcome_death,
-            temp,
-            age) %&gt;%
+            temp, age) %&gt;%
      glm(formula = outcome_death ~.,     
          family = binomial) %&gt;%            
      tbl_regression(exponentiate = TRUE)
@@ -562,8 +553,7 @@ multivariable_regression_table &lt;- data_use %&gt;%
 cross_tab &lt;- data_use %&gt;%
   select(lasso_predictors_clean, 
             outcome_death,
-            temp,
-            age) %&gt;%
+            temp, age) %&gt;%
   tbl_summary(by = outcome_death)
 
 #Combine the regression table and the count table
@@ -1016,108 +1006,118 @@ Talk through the stages, what formula means, what family means, remind them what
 #cmzourldoj .gt_indent_5 {
   text-indent: 25px;
 }
+
+#cmzourldoj .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#cmzourldoj div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
   <thead>
-    
     <tr class="gt_col_headings gt_spanner_row">
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" scope="col" id="&lt;strong&gt;Characteristic&lt;/strong&gt;"><strong>Characteristic</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" scope="col" id="label"><span class='gt_from_md'><strong>Characteristic</strong></span></th>
       <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" scope="colgroup" id="Counts">
-        <span class="gt_column_spanner">Counts</span>
+        <div class="gt_column_spanner"><span class='gt_from_md'>Counts</span></div>
       </th>
       <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="3" scope="colgroup" id="Multivariable regression">
-        <span class="gt_column_spanner">Multivariable regression</span>
+        <div class="gt_column_spanner"><span class='gt_from_md'>Multivariable regression</span></div>
       </th>
     </tr>
     <tr class="gt_col_headings">
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;0&lt;/strong&gt;, N = 82&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>0</strong>, N = 82<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;1&lt;/strong&gt;, N = 135&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>1</strong>, N = 135<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;OR&lt;/strong&gt;&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/span&gt;"><strong>OR</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>2</sup></span></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;95% CI&lt;/strong&gt;&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/span&gt;"><strong>95% CI</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>2</sup></span></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;p-value&lt;/strong&gt;"><strong>p-value</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="stat_1_1"><span class='gt_from_md'><strong>0</strong><br />
+N = 82</span><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="stat_2_1"><span class='gt_from_md'><strong>1</strong><br />
+N = 135</span><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="estimate_2"><span class='gt_from_md'><strong>OR</strong></span><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>2</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="conf.low_2"><span class='gt_from_md'><strong>95% CI</strong></span><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>2</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="p.value_2"><span class='gt_from_md'><strong>p-value</strong></span></th>
     </tr>
   </thead>
   <tbody class="gt_table_body">
     <tr><td headers="label" class="gt_row gt_left">hospital</td>
-<td headers="stat_1_1" class="gt_row gt_center"></td>
-<td headers="stat_2_1" class="gt_row gt_center"></td>
-<td headers="estimate_2" class="gt_row gt_center"></td>
-<td headers="ci_2" class="gt_row gt_center"></td>
-<td headers="p.value_2" class="gt_row gt_center"></td></tr>
+<td headers="stat_1_1" class="gt_row gt_center"><br /></td>
+<td headers="stat_2_1" class="gt_row gt_center"><br /></td>
+<td headers="estimate_2" class="gt_row gt_center"><br /></td>
+<td headers="conf.low_2" class="gt_row gt_center"><br /></td>
+<td headers="p.value_2" class="gt_row gt_center"><br /></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Central Hospital</td>
 <td headers="stat_1_1" class="gt_row gt_center">8 (9.8%)</td>
 <td headers="stat_2_1" class="gt_row gt_center">12 (8.9%)</td>
 <td headers="estimate_2" class="gt_row gt_center">—</td>
-<td headers="ci_2" class="gt_row gt_center">—</td>
-<td headers="p.value_2" class="gt_row gt_center"></td></tr>
+<td headers="conf.low_2" class="gt_row gt_center">—</td>
+<td headers="p.value_2" class="gt_row gt_center"><br /></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Military Hospital</td>
 <td headers="stat_1_1" class="gt_row gt_center">22 (27%)</td>
 <td headers="stat_2_1" class="gt_row gt_center">24 (18%)</td>
 <td headers="estimate_2" class="gt_row gt_center">0.54</td>
-<td headers="ci_2" class="gt_row gt_center">0.17, 1.61</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.17, 1.61</td>
 <td headers="p.value_2" class="gt_row gt_center">0.3</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Other</td>
 <td headers="stat_1_1" class="gt_row gt_center">22 (27%)</td>
 <td headers="stat_2_1" class="gt_row gt_center">22 (16%)</td>
 <td headers="estimate_2" class="gt_row gt_center">0.52</td>
-<td headers="ci_2" class="gt_row gt_center">0.17, 1.55</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.17, 1.55</td>
 <td headers="p.value_2" class="gt_row gt_center">0.2</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Port Hospital</td>
 <td headers="stat_1_1" class="gt_row gt_center">24 (29%)</td>
 <td headers="stat_2_1" class="gt_row gt_center">69 (51%)</td>
 <td headers="estimate_2" class="gt_row gt_center">1.53</td>
-<td headers="ci_2" class="gt_row gt_center">0.53, 4.24</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.53, 4.24</td>
 <td headers="p.value_2" class="gt_row gt_center">0.4</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    SMMH</td>
 <td headers="stat_1_1" class="gt_row gt_center">6 (7.3%)</td>
 <td headers="stat_2_1" class="gt_row gt_center">8 (5.9%)</td>
 <td headers="estimate_2" class="gt_row gt_center">0.85</td>
-<td headers="ci_2" class="gt_row gt_center">0.20, 3.67</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.20, 3.67</td>
 <td headers="p.value_2" class="gt_row gt_center">0.8</td></tr>
     <tr><td headers="label" class="gt_row gt_left">wt_kg</td>
 <td headers="stat_1_1" class="gt_row gt_center">61 (48, 70)</td>
 <td headers="stat_2_1" class="gt_row gt_center">59 (50, 65)</td>
 <td headers="estimate_2" class="gt_row gt_center">0.96</td>
-<td headers="ci_2" class="gt_row gt_center">0.93, 1.00</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.93, 1.00</td>
 <td headers="p.value_2" class="gt_row gt_center">0.058</td></tr>
     <tr><td headers="label" class="gt_row gt_left">cough</td>
 <td headers="stat_1_1" class="gt_row gt_center">62 (76%)</td>
 <td headers="stat_2_1" class="gt_row gt_center">119 (88%)</td>
-<td headers="estimate_2" class="gt_row gt_center"></td>
-<td headers="ci_2" class="gt_row gt_center"></td>
-<td headers="p.value_2" class="gt_row gt_center"></td></tr>
+<td headers="estimate_2" class="gt_row gt_center"><br /></td>
+<td headers="conf.low_2" class="gt_row gt_center"><br /></td>
+<td headers="p.value_2" class="gt_row gt_center"><br /></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    no</td>
-<td headers="stat_1_1" class="gt_row gt_center"></td>
-<td headers="stat_2_1" class="gt_row gt_center"></td>
+<td headers="stat_1_1" class="gt_row gt_center"><br /></td>
+<td headers="stat_2_1" class="gt_row gt_center"><br /></td>
 <td headers="estimate_2" class="gt_row gt_center">—</td>
-<td headers="ci_2" class="gt_row gt_center">—</td>
-<td headers="p.value_2" class="gt_row gt_center"></td></tr>
+<td headers="conf.low_2" class="gt_row gt_center">—</td>
+<td headers="p.value_2" class="gt_row gt_center"><br /></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    yes</td>
-<td headers="stat_1_1" class="gt_row gt_center"></td>
-<td headers="stat_2_1" class="gt_row gt_center"></td>
+<td headers="stat_1_1" class="gt_row gt_center"><br /></td>
+<td headers="stat_2_1" class="gt_row gt_center"><br /></td>
 <td headers="estimate_2" class="gt_row gt_center">2.24</td>
-<td headers="ci_2" class="gt_row gt_center">1.04, 4.89</td>
+<td headers="conf.low_2" class="gt_row gt_center">1.04, 4.89</td>
 <td headers="p.value_2" class="gt_row gt_center" style="font-weight: bold;">0.040</td></tr>
     <tr><td headers="label" class="gt_row gt_left">temp</td>
 <td headers="stat_1_1" class="gt_row gt_center">38.90 (38.40, 39.30)</td>
 <td headers="stat_2_1" class="gt_row gt_center">38.90 (38.40, 39.20)</td>
 <td headers="estimate_2" class="gt_row gt_center">0.89</td>
-<td headers="ci_2" class="gt_row gt_center">0.64, 1.23</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.64, 1.23</td>
 <td headers="p.value_2" class="gt_row gt_center">0.5</td></tr>
     <tr><td headers="label" class="gt_row gt_left">age</td>
 <td headers="stat_1_1" class="gt_row gt_center">19 (11, 27)</td>
 <td headers="stat_2_1" class="gt_row gt_center">17 (10, 25)</td>
 <td headers="estimate_2" class="gt_row gt_center">1.02</td>
-<td headers="ci_2" class="gt_row gt_center">0.98, 1.07</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.98, 1.07</td>
 <td headers="p.value_2" class="gt_row gt_center">0.3</td></tr>
   </tbody>
   
   <tfoot class="gt_footnotes">
     <tr>
-      <td class="gt_footnote" colspan="6"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span> n (%); Median (IQR)</td>
+      <td class="gt_footnote" colspan="6"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span> <span class='gt_from_md'>n (%); Median (Q1, Q3)</span></td>
     </tr>
     <tr>
-      <td class="gt_footnote" colspan="6"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>2</sup></span> OR = Odds Ratio, CI = Confidence Interval</td>
+      <td class="gt_footnote" colspan="6"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>2</sup></span> <span class='gt_from_md'>OR = Odds Ratio, CI = Confidence Interval</span></td>
     </tr>
   </tfoot>
 </table>
@@ -1129,23 +1129,23 @@ Talk through the stages, what formula means, what family means, remind them what
 You can also use `tbl_merge` to compare and contrast your univariate and multivariable regression results.
 
 .tiny[
-<div id="iqklwmqzjb" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#iqklwmqzjb table {
+<div id="ezgjpdrssi" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#ezgjpdrssi table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#iqklwmqzjb thead, #iqklwmqzjb tbody, #iqklwmqzjb tfoot, #iqklwmqzjb tr, #iqklwmqzjb td, #iqklwmqzjb th {
+#ezgjpdrssi thead, #ezgjpdrssi tbody, #ezgjpdrssi tfoot, #ezgjpdrssi tr, #ezgjpdrssi td, #ezgjpdrssi th {
   border-style: none;
 }
 
-#iqklwmqzjb p {
+#ezgjpdrssi p {
   margin: 0;
   padding: 0;
 }
 
-#iqklwmqzjb .gt_table {
+#ezgjpdrssi .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1171,12 +1171,12 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   border-left-color: #D3D3D3;
 }
 
-#iqklwmqzjb .gt_caption {
+#ezgjpdrssi .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#iqklwmqzjb .gt_title {
+#ezgjpdrssi .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1188,7 +1188,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   border-bottom-width: 0;
 }
 
-#iqklwmqzjb .gt_subtitle {
+#ezgjpdrssi .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1200,7 +1200,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   border-top-width: 0;
 }
 
-#iqklwmqzjb .gt_heading {
+#ezgjpdrssi .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1212,13 +1212,13 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   border-right-color: #D3D3D3;
 }
 
-#iqklwmqzjb .gt_bottom_border {
+#ezgjpdrssi .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#iqklwmqzjb .gt_col_headings {
+#ezgjpdrssi .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1233,7 +1233,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   border-right-color: #D3D3D3;
 }
 
-#iqklwmqzjb .gt_col_heading {
+#ezgjpdrssi .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1253,7 +1253,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   overflow-x: hidden;
 }
 
-#iqklwmqzjb .gt_column_spanner_outer {
+#ezgjpdrssi .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1265,15 +1265,15 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   padding-right: 4px;
 }
 
-#iqklwmqzjb .gt_column_spanner_outer:first-child {
+#ezgjpdrssi .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#iqklwmqzjb .gt_column_spanner_outer:last-child {
+#ezgjpdrssi .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#iqklwmqzjb .gt_column_spanner {
+#ezgjpdrssi .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1285,11 +1285,11 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   width: 100%;
 }
 
-#iqklwmqzjb .gt_spanner_row {
+#ezgjpdrssi .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#iqklwmqzjb .gt_group_heading {
+#ezgjpdrssi .gt_group_heading {
   padding-top: 1px;
   padding-bottom: 1px;
   padding-left: 5px;
@@ -1315,7 +1315,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   text-align: left;
 }
 
-#iqklwmqzjb .gt_empty_group_heading {
+#ezgjpdrssi .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1330,15 +1330,15 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   vertical-align: middle;
 }
 
-#iqklwmqzjb .gt_from_md > :first-child {
+#ezgjpdrssi .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#iqklwmqzjb .gt_from_md > :last-child {
+#ezgjpdrssi .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#iqklwmqzjb .gt_row {
+#ezgjpdrssi .gt_row {
   padding-top: 1px;
   padding-bottom: 1px;
   padding-left: 5px;
@@ -1357,7 +1357,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   overflow-x: hidden;
 }
 
-#iqklwmqzjb .gt_stub {
+#ezgjpdrssi .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1370,7 +1370,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   padding-right: 5px;
 }
 
-#iqklwmqzjb .gt_stub_row_group {
+#ezgjpdrssi .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1384,15 +1384,15 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   vertical-align: top;
 }
 
-#iqklwmqzjb .gt_row_group_first td {
+#ezgjpdrssi .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#iqklwmqzjb .gt_row_group_first th {
+#ezgjpdrssi .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#iqklwmqzjb .gt_summary_row {
+#ezgjpdrssi .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1402,16 +1402,16 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   padding-right: 5px;
 }
 
-#iqklwmqzjb .gt_first_summary_row {
+#ezgjpdrssi .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#iqklwmqzjb .gt_first_summary_row.thick {
+#ezgjpdrssi .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#iqklwmqzjb .gt_last_summary_row {
+#ezgjpdrssi .gt_last_summary_row {
   padding-top: 1px;
   padding-bottom: 1px;
   padding-left: 5px;
@@ -1421,7 +1421,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   border-bottom-color: #D3D3D3;
 }
 
-#iqklwmqzjb .gt_grand_summary_row {
+#ezgjpdrssi .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1431,7 +1431,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   padding-right: 5px;
 }
 
-#iqklwmqzjb .gt_first_grand_summary_row {
+#ezgjpdrssi .gt_first_grand_summary_row {
   padding-top: 1px;
   padding-bottom: 1px;
   padding-left: 5px;
@@ -1441,7 +1441,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   border-top-color: #D3D3D3;
 }
 
-#iqklwmqzjb .gt_last_grand_summary_row_top {
+#ezgjpdrssi .gt_last_grand_summary_row_top {
   padding-top: 1px;
   padding-bottom: 1px;
   padding-left: 5px;
@@ -1451,11 +1451,11 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   border-bottom-color: #D3D3D3;
 }
 
-#iqklwmqzjb .gt_striped {
+#ezgjpdrssi .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#iqklwmqzjb .gt_table_body {
+#ezgjpdrssi .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1464,7 +1464,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   border-bottom-color: #D3D3D3;
 }
 
-#iqklwmqzjb .gt_footnotes {
+#ezgjpdrssi .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1478,7 +1478,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   border-right-color: #D3D3D3;
 }
 
-#iqklwmqzjb .gt_footnote {
+#ezgjpdrssi .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 1px;
@@ -1487,7 +1487,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   padding-right: 5px;
 }
 
-#iqklwmqzjb .gt_sourcenotes {
+#ezgjpdrssi .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1501,7 +1501,7 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   border-right-color: #D3D3D3;
 }
 
-#iqklwmqzjb .gt_sourcenote {
+#ezgjpdrssi .gt_sourcenote {
   font-size: 90%;
   padding-top: 1px;
   padding-bottom: 1px;
@@ -1509,190 +1509,198 @@ You can also use `tbl_merge` to compare and contrast your univariate and multiva
   padding-right: 5px;
 }
 
-#iqklwmqzjb .gt_left {
+#ezgjpdrssi .gt_left {
   text-align: left;
 }
 
-#iqklwmqzjb .gt_center {
+#ezgjpdrssi .gt_center {
   text-align: center;
 }
 
-#iqklwmqzjb .gt_right {
+#ezgjpdrssi .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#iqklwmqzjb .gt_font_normal {
+#ezgjpdrssi .gt_font_normal {
   font-weight: normal;
 }
 
-#iqklwmqzjb .gt_font_bold {
+#ezgjpdrssi .gt_font_bold {
   font-weight: bold;
 }
 
-#iqklwmqzjb .gt_font_italic {
+#ezgjpdrssi .gt_font_italic {
   font-style: italic;
 }
 
-#iqklwmqzjb .gt_super {
+#ezgjpdrssi .gt_super {
   font-size: 65%;
 }
 
-#iqklwmqzjb .gt_footnote_marks {
+#ezgjpdrssi .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#iqklwmqzjb .gt_asterisk {
+#ezgjpdrssi .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#iqklwmqzjb .gt_indent_1 {
+#ezgjpdrssi .gt_indent_1 {
   text-indent: 5px;
 }
 
-#iqklwmqzjb .gt_indent_2 {
+#ezgjpdrssi .gt_indent_2 {
   text-indent: 10px;
 }
 
-#iqklwmqzjb .gt_indent_3 {
+#ezgjpdrssi .gt_indent_3 {
   text-indent: 15px;
 }
 
-#iqklwmqzjb .gt_indent_4 {
+#ezgjpdrssi .gt_indent_4 {
   text-indent: 20px;
 }
 
-#iqklwmqzjb .gt_indent_5 {
+#ezgjpdrssi .gt_indent_5 {
   text-indent: 25px;
+}
+
+#ezgjpdrssi .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#ezgjpdrssi div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
 }
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
   <thead>
-    
     <tr class="gt_col_headings gt_spanner_row">
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" scope="col" id="&lt;strong&gt;Characteristic&lt;/strong&gt;"><strong>Characteristic</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" scope="col" id="label"><span class='gt_from_md'><strong>Characteristic</strong></span></th>
       <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="4" scope="colgroup" id="Univariate">
-        <span class="gt_column_spanner">Univariate</span>
+        <div class="gt_column_spanner"><span class='gt_from_md'>Univariate</span></div>
       </th>
       <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="3" scope="colgroup" id="Multivariable">
-        <span class="gt_column_spanner">Multivariable</span>
+        <div class="gt_column_spanner"><span class='gt_from_md'>Multivariable</span></div>
       </th>
     </tr>
     <tr class="gt_col_headings">
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;N&lt;/strong&gt;"><strong>N</strong></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;OR&lt;/strong&gt;&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>OR</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;95% CI&lt;/strong&gt;&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>95% CI</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;p-value&lt;/strong&gt;"><strong>p-value</strong></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;OR&lt;/strong&gt;&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>OR</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;95% CI&lt;/strong&gt;&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>95% CI</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;p-value&lt;/strong&gt;"><strong>p-value</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="stat_n_1"><span class='gt_from_md'><strong>N</strong></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="estimate_1"><span class='gt_from_md'><strong>OR</strong></span><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="conf.low_1"><span class='gt_from_md'><strong>95% CI</strong></span><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="p.value_1"><span class='gt_from_md'><strong>p-value</strong></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="estimate_2"><span class='gt_from_md'><strong>OR</strong></span><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="conf.low_2"><span class='gt_from_md'><strong>95% CI</strong></span><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="p.value_2"><span class='gt_from_md'><strong>p-value</strong></span></th>
     </tr>
   </thead>
   <tbody class="gt_table_body">
     <tr><td headers="label" class="gt_row gt_left">hospital</td>
 <td headers="stat_n_1" class="gt_row gt_center">217</td>
-<td headers="estimate_1" class="gt_row gt_center"></td>
-<td headers="ci_1" class="gt_row gt_center"></td>
-<td headers="p.value_1" class="gt_row gt_center"></td>
-<td headers="estimate_2" class="gt_row gt_center"></td>
-<td headers="ci_2" class="gt_row gt_center"></td>
-<td headers="p.value_2" class="gt_row gt_center"></td></tr>
+<td headers="estimate_1" class="gt_row gt_center"><br /></td>
+<td headers="conf.low_1" class="gt_row gt_center"><br /></td>
+<td headers="p.value_1" class="gt_row gt_center"><br /></td>
+<td headers="estimate_2" class="gt_row gt_center"><br /></td>
+<td headers="conf.low_2" class="gt_row gt_center"><br /></td>
+<td headers="p.value_2" class="gt_row gt_center"><br /></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Central Hospital</td>
-<td headers="stat_n_1" class="gt_row gt_center"></td>
+<td headers="stat_n_1" class="gt_row gt_center"><br /></td>
 <td headers="estimate_1" class="gt_row gt_center">—</td>
-<td headers="ci_1" class="gt_row gt_center">—</td>
-<td headers="p.value_1" class="gt_row gt_center"></td>
+<td headers="conf.low_1" class="gt_row gt_center">—</td>
+<td headers="p.value_1" class="gt_row gt_center"><br /></td>
 <td headers="estimate_2" class="gt_row gt_center">—</td>
-<td headers="ci_2" class="gt_row gt_center">—</td>
-<td headers="p.value_2" class="gt_row gt_center"></td></tr>
+<td headers="conf.low_2" class="gt_row gt_center">—</td>
+<td headers="p.value_2" class="gt_row gt_center"><br /></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Military Hospital</td>
-<td headers="stat_n_1" class="gt_row gt_center"></td>
+<td headers="stat_n_1" class="gt_row gt_center"><br /></td>
 <td headers="estimate_1" class="gt_row gt_center">0.73</td>
-<td headers="ci_1" class="gt_row gt_center">0.24, 2.09</td>
+<td headers="conf.low_1" class="gt_row gt_center">0.24, 2.09</td>
 <td headers="p.value_1" class="gt_row gt_center">0.6</td>
 <td headers="estimate_2" class="gt_row gt_center">0.54</td>
-<td headers="ci_2" class="gt_row gt_center">0.17, 1.61</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.17, 1.61</td>
 <td headers="p.value_2" class="gt_row gt_center">0.3</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Other</td>
-<td headers="stat_n_1" class="gt_row gt_center"></td>
+<td headers="stat_n_1" class="gt_row gt_center"><br /></td>
 <td headers="estimate_1" class="gt_row gt_center">0.67</td>
-<td headers="ci_1" class="gt_row gt_center">0.22, 1.93</td>
+<td headers="conf.low_1" class="gt_row gt_center">0.22, 1.93</td>
 <td headers="p.value_1" class="gt_row gt_center">0.5</td>
 <td headers="estimate_2" class="gt_row gt_center">0.52</td>
-<td headers="ci_2" class="gt_row gt_center">0.17, 1.55</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.17, 1.55</td>
 <td headers="p.value_2" class="gt_row gt_center">0.2</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Port Hospital</td>
-<td headers="stat_n_1" class="gt_row gt_center"></td>
+<td headers="stat_n_1" class="gt_row gt_center"><br /></td>
 <td headers="estimate_1" class="gt_row gt_center">1.92</td>
-<td headers="ci_1" class="gt_row gt_center">0.68, 5.22</td>
+<td headers="conf.low_1" class="gt_row gt_center">0.68, 5.22</td>
 <td headers="p.value_1" class="gt_row gt_center">0.2</td>
 <td headers="estimate_2" class="gt_row gt_center">1.53</td>
-<td headers="ci_2" class="gt_row gt_center">0.53, 4.24</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.53, 4.24</td>
 <td headers="p.value_2" class="gt_row gt_center">0.4</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    SMMH</td>
-<td headers="stat_n_1" class="gt_row gt_center"></td>
+<td headers="stat_n_1" class="gt_row gt_center"><br /></td>
 <td headers="estimate_1" class="gt_row gt_center">0.89</td>
-<td headers="ci_1" class="gt_row gt_center">0.22, 3.63</td>
+<td headers="conf.low_1" class="gt_row gt_center">0.22, 3.63</td>
 <td headers="p.value_1" class="gt_row gt_center">0.9</td>
 <td headers="estimate_2" class="gt_row gt_center">0.85</td>
-<td headers="ci_2" class="gt_row gt_center">0.20, 3.67</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.20, 3.67</td>
 <td headers="p.value_2" class="gt_row gt_center">0.8</td></tr>
     <tr><td headers="label" class="gt_row gt_left">wt_kg</td>
 <td headers="stat_n_1" class="gt_row gt_center">217</td>
 <td headers="estimate_1" class="gt_row gt_center">0.98</td>
-<td headers="ci_1" class="gt_row gt_center">0.96, 1.00</td>
+<td headers="conf.low_1" class="gt_row gt_center">0.96, 1.00</td>
 <td headers="p.value_1" class="gt_row gt_center">0.12</td>
 <td headers="estimate_2" class="gt_row gt_center">0.96</td>
-<td headers="ci_2" class="gt_row gt_center">0.93, 1.00</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.93, 1.00</td>
 <td headers="p.value_2" class="gt_row gt_center">0.058</td></tr>
     <tr><td headers="label" class="gt_row gt_left">cough</td>
 <td headers="stat_n_1" class="gt_row gt_center">217</td>
-<td headers="estimate_1" class="gt_row gt_center"></td>
-<td headers="ci_1" class="gt_row gt_center"></td>
-<td headers="p.value_1" class="gt_row gt_center"></td>
-<td headers="estimate_2" class="gt_row gt_center"></td>
-<td headers="ci_2" class="gt_row gt_center"></td>
-<td headers="p.value_2" class="gt_row gt_center"></td></tr>
+<td headers="estimate_1" class="gt_row gt_center"><br /></td>
+<td headers="conf.low_1" class="gt_row gt_center"><br /></td>
+<td headers="p.value_1" class="gt_row gt_center"><br /></td>
+<td headers="estimate_2" class="gt_row gt_center"><br /></td>
+<td headers="conf.low_2" class="gt_row gt_center"><br /></td>
+<td headers="p.value_2" class="gt_row gt_center"><br /></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    no</td>
-<td headers="stat_n_1" class="gt_row gt_center"></td>
+<td headers="stat_n_1" class="gt_row gt_center"><br /></td>
 <td headers="estimate_1" class="gt_row gt_center">—</td>
-<td headers="ci_1" class="gt_row gt_center">—</td>
-<td headers="p.value_1" class="gt_row gt_center"></td>
+<td headers="conf.low_1" class="gt_row gt_center">—</td>
+<td headers="p.value_1" class="gt_row gt_center"><br /></td>
 <td headers="estimate_2" class="gt_row gt_center">—</td>
-<td headers="ci_2" class="gt_row gt_center">—</td>
-<td headers="p.value_2" class="gt_row gt_center"></td></tr>
+<td headers="conf.low_2" class="gt_row gt_center">—</td>
+<td headers="p.value_2" class="gt_row gt_center"><br /></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    yes</td>
-<td headers="stat_n_1" class="gt_row gt_center"></td>
+<td headers="stat_n_1" class="gt_row gt_center"><br /></td>
 <td headers="estimate_1" class="gt_row gt_center">2.40</td>
-<td headers="ci_1" class="gt_row gt_center">1.16, 5.02</td>
+<td headers="conf.low_1" class="gt_row gt_center">1.16, 5.02</td>
 <td headers="p.value_1" class="gt_row gt_center" style="font-weight: bold;">0.018</td>
 <td headers="estimate_2" class="gt_row gt_center">2.24</td>
-<td headers="ci_2" class="gt_row gt_center">1.04, 4.89</td>
+<td headers="conf.low_2" class="gt_row gt_center">1.04, 4.89</td>
 <td headers="p.value_2" class="gt_row gt_center" style="font-weight: bold;">0.040</td></tr>
     <tr><td headers="label" class="gt_row gt_left">temp</td>
 <td headers="stat_n_1" class="gt_row gt_center">217</td>
 <td headers="estimate_1" class="gt_row gt_center">0.92</td>
-<td headers="ci_1" class="gt_row gt_center">0.67, 1.25</td>
+<td headers="conf.low_1" class="gt_row gt_center">0.67, 1.25</td>
 <td headers="p.value_1" class="gt_row gt_center">0.6</td>
 <td headers="estimate_2" class="gt_row gt_center">0.89</td>
-<td headers="ci_2" class="gt_row gt_center">0.64, 1.23</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.64, 1.23</td>
 <td headers="p.value_2" class="gt_row gt_center">0.5</td></tr>
     <tr><td headers="label" class="gt_row gt_left">age</td>
 <td headers="stat_n_1" class="gt_row gt_center">217</td>
 <td headers="estimate_1" class="gt_row gt_center">0.99</td>
-<td headers="ci_1" class="gt_row gt_center">0.97, 1.01</td>
+<td headers="conf.low_1" class="gt_row gt_center">0.97, 1.01</td>
 <td headers="p.value_1" class="gt_row gt_center">0.4</td>
 <td headers="estimate_2" class="gt_row gt_center">1.02</td>
-<td headers="ci_2" class="gt_row gt_center">0.98, 1.07</td>
+<td headers="conf.low_2" class="gt_row gt_center">0.98, 1.07</td>
 <td headers="p.value_2" class="gt_row gt_center">0.3</td></tr>
   </tbody>
   
   <tfoot class="gt_footnotes">
     <tr>
-      <td class="gt_footnote" colspan="8"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span> OR = Odds Ratio, CI = Confidence Interval</td>
+      <td class="gt_footnote" colspan="8"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span> <span class='gt_from_md'>OR = Odds Ratio, CI = Confidence Interval</span></td>
     </tr>
   </tfoot>
 </table>
@@ -1716,15 +1724,14 @@ And you can create forest plots using `ggplot()`
 Any questions?
 
 
-
 **Resources**
 
-Course website (initial setup and slides access): [https://appliedepi.github.io/intro_course/](https://appliedepi.github.io/intro_course/)
+- Course website (initial setup and slides access): [https://courses.appliedepi.org/statsr/](https://courses.appliedepi.org/statsr/)
 
-[Epi R Handbook](epirhandbook.com/)
+- [Epi R Handbook](https://epirhandbook.com/en/) 50 chapters of best-practice code examples available online and offline
 
-Applied Epi Community
-https://community.appliedepi.org/
+- [Applied Epi Community](https://community.appliedepi.org/) A great resource for asking questions and help!
+
 
 
 
@@ -1738,9 +1745,9 @@ https://community.appliedepi.org/
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "github",
-"highlightLines": true,
-"countIncrementalSlides": false
+  "highlightStyle": "github",
+  "highlightLines": true,
+  "countIncrementalSlides": false
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));
