@@ -549,11 +549,11 @@ Si se presenta, La entrada `Groups:` aparece encima de los datos.
 
 ```{r, echo=F, eval=T}
 vig %>% 
-  group_by(hospital)
+  group_by(hospital) %>% 
+  head(4)
 ```
 
-???
-Observa la `groups: hospital`, en la parte superior del tibble
+.footnote[Observa la `groups: hospital`, en la parte superior del tibble]
 
 ---
 
@@ -565,21 +565,21 @@ Con la función `summarise()`, *se crean columnas en una **nueva** base de datos
 
 ```{r, results="asis", echo=FALSE}
 str_glue("summarise(nombre de nueva columna = una función para aplicar a cada grupo de filas)") %>%
-  flair("Nombre de nueva columna", color = "deeppink") %>%
-  flair("Una función", color = "cornflowerblue") %>%
+  flair("nombre de nueva columna", color = "deeppink") %>%
+  flair("una función", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
 
 --
 
-```{r summarise, include=F}
+```{r summarise, echo=TRUE}
 vig %>% 
   group_by(hospital) %>% 
   summarise()   
 ```
 
-```{r summarise_flair, echo=F}
+```{r summarise_flair, echo=F, eval = F}
 decorate("summarise") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
@@ -593,14 +593,14 @@ decorate("summarise") %>%
 Dentro de los paréntesis, *enumera las nuevas columnas para la **nueva** base de datos resumen.*
 
 ```{r, results="asis", echo=FALSE}
-str_glue("summarise(Nombre de nueva columna = Una función a ser aplicada a cada fila de cada grupo)") %>%
-  flair("Nombre de nueva columna", color = "deeppink") %>%
-  flair("Una función", color = "cornflowerblue") %>%
+str_glue("summarise(nombre de nueva columna = una función para aplicar a cada grupo de filas)") %>%
+  flair("nombre de nueva columna", color = "deeppink") %>%
+  flair("una función", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
 
-```{r summarise2_en, include=F}
+```{r summarise2_en, include=FALSE}
 vig %>% 
   group_by(hospital) %>% 
   summarise(n_rows = n())                        # n() counts the number of rows per group
@@ -618,34 +618,34 @@ vig %>%
   summarise(n_rows = n())                        # n() подсчитывает количество строк в группе
 ```
 
-```{r summarise2_es, include=F}
+```{r summarise2_es, echo=TRUE}
 vig %>% 
   group_by(hospital) %>% 
-  summarise(n_rows = n())                        # n() cuenta el número de filas del grupo
+  summarise(n_rows = n()) # n() cuenta el número de filas del grupo
 ```
 
-```{r, echo=F, eval=params$lang == "en"}
+```{r, echo=F, eval=F}
 decorate("summarise2_en") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "fr"}
+```{r, echo=F, eval=F}
 decorate("summarise2_fr") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "ru"}
+```{r, echo=F, eval=F}
 decorate("summarise2_ru") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "es"}
+```{r, echo=F, eval=F}
 decorate("summarise2_es") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("n()", color = "cornflowerblue") %>% 
@@ -659,9 +659,9 @@ decorate("summarise2_es") %>%
 Dentro de los paréntesis, *enumera las nuevas columnas para la **nueva** base de datos resumen.*
 
 ```{r, results="asis", echo=FALSE}
-str_glue("summarise(Nombre de nueva columna = Una función a ser aplicada a cada fila de cada grupo)") %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("a function", color = "cornflowerblue") %>%
+str_glue("summarise(nombre de nueva columna = una función para aplicar a cada grupo de filas)") %>%
+  flair("nombre de nueva columna", color = "deeppink") %>%
+  flair("una función", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -690,15 +690,15 @@ vig %>%
     age_avg = mean(edad_anios, na.rm = T))        # средний возраст в группе
 ```
 
-```{r summarise3_es, include=F}
+```{r summarise3_es, echo=TRUE}
 vig %>% 
   group_by(hospital) %>% 
   summarise(
-    n_rows  = n(),                               # n() cuenta el número de filas por grupo
-    age_avg = mean(edad_anios, na.rm = T))        # edad media del grupo
+    n_rows  = n(), # n() cuenta el número de filas por grupo
+    age_avg = mean(edad_anios, na.rm = T)) # edad media del grupo
 ```
 
-```{r, echo=F, eval=params$lang == "en"}
+```{r, echo=F, eval=F}
 decorate("summarise3_en") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -707,7 +707,7 @@ decorate("summarise3_en") %>%
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "fr"}
+```{r, echo=F, eval=F}
 decorate("summarise3_fr") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -716,7 +716,7 @@ decorate("summarise3_fr") %>%
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "ru"}
+```{r, echo=F, eval=F}
 decorate("summarise3_ru") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -725,7 +725,7 @@ decorate("summarise3_ru") %>%
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "es"}
+```{r, echo=F, eval=F}
 decorate("summarise3_es") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -741,9 +741,9 @@ decorate("summarise3_es") %>%
 Dentro de los paréntesis, *enumera las nuevas columnas para la **nueva** base de datos resumen.*
 
 ```{r, results="asis", echo=FALSE}
-str_glue("summarise(Nombre de nueva columna = función a ser aplicada a cada fila de cada grupo)") %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("a function", color = "cornflowerblue") %>%
+str_glue("summarise(nombre de nueva columna = una función para aplicar a cada grupo de filas)") %>%
+  flair("nombre de nueva columna", color = "deeppink") %>%
+  flair("una función", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -778,17 +778,17 @@ vig %>%
 
 ```
 
-```{r summarise4_es, include=F}
+```{r summarise4_es, echo=TRUE}
 vig %>% 
   group_by(hospital) %>% 
   summarise(
-    n_rows  = n(),                               # n() cuenta el número de filas por grupo
-    age_avg = mean(edad_anios, na.rm = T),        # edad media del grupo
-    max_onset = max(fecha_sintomas, na.rm=T))        # Fecha de inicio más tardía
+    n_rows  = n(), # n() cuenta el número de filas por grupo
+    age_avg = mean(edad_anios, na.rm = T), # edad media del grupo
+    max_onset = max(fecha_sintomas, na.rm=T)) # Fecha de inicio más tardía
 
 ```
 
-```{r, echo=F, eval=params$lang == "en"}
+```{r, echo=F, eval=F}
 decorate("summarise4_en") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -799,7 +799,7 @@ decorate("summarise4_en") %>%
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "fr"}
+```{r, echo=F, eval=F}
 decorate("summarise4_fr") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -810,7 +810,7 @@ decorate("summarise4_fr") %>%
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "ru"}
+```{r, echo=F, eval=F}
 decorate("summarise4_ru") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -821,7 +821,7 @@ decorate("summarise4_ru") %>%
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "es"}
+```{r, echo=F, eval=F}
 decorate("summarise4_es") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -839,9 +839,9 @@ decorate("summarise4_es") %>%
 Dentro de los paréntesis, *enumera las nuevas columnas para la **nueva** base de datos resumen.*
 
 ```{r, results="asis", echo=FALSE}
-str_glue("summarise(Nombre de nueva columna = función a ser aplicada a cada fila de cada grupo") %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("a function", color = "cornflowerblue") %>%
+str_glue("summarise(nombre de nueva columna = una función para aplicar a cada grupo de filas)") %>%
+  flair("nombre de nueva columna", color = "deeppink") %>%
+  flair("una función", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -879,18 +879,18 @@ vig %>%
 
 ```
 
-```{r summarise5_es, include=F}
+```{r summarise5_es, echo=TRUE}
 vig %>% 
   group_by(hospital) %>% 
   summarise(
-    n_rows  = n(),                               # n() cuenta el número de filas por grupo
-    age_avg = mean(edad_anios, na.rm = T),        # edad media del grupo
-    max_onset = max(fecha_sintomas, na.rm=T),        # Fecha de inicio más tardía
+    n_rows  = n(), # n() cuenta el número de filas por grupo
+    age_avg = mean(edad_anios, na.rm = T), # edad media del grupo
+    max_onset = max(fecha_sintomas, na.rm=T), # Fecha de inicio más tardía
     n_female = sum(sexo == 'mujer', na.rm=T)) # número de mujeres en el grupo
 
 ```
 
-```{r, echo=F, eval=params$lang == "en"}
+```{r, echo=F, eval=F}
 decorate("summarise5_en") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -903,7 +903,7 @@ decorate("summarise5_en") %>%
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "fr"}
+```{r, echo=F, eval=F}
 decorate("summarise5_fr") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -916,7 +916,7 @@ decorate("summarise5_fr") %>%
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "ru"}
+```{r, echo=F, eval=F}
 decorate("summarise5_ru") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -929,7 +929,7 @@ decorate("summarise5_ru") %>%
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "es"}
+```{r, echo=F, eval=F}
 decorate("summarise5_es") %>%
   flair("n_rows", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -949,9 +949,9 @@ decorate("summarise5_es") %>%
 Dentro de los paréntesis, *enumera las nuevas columnas para la **nueva** base de datos resumen.*
 
 ```{r, results="asis", echo=FALSE}
-str_glue("summarise(Nombre de nueva columna = función a ser aplicada a cada fila de cada grupo") %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("a function", color = "cornflowerblue") %>%
+str_glue("summarise(nombre de nueva columna = una función para aplicar a cada grupo de filas)") %>%
+  flair("nombre de nueva columna", color = "deeppink") %>%
+  flair("una función", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -989,18 +989,18 @@ vig %>%
     pct_female = percent(n_female / n_rows))     # процент женщин в группе
 ```
 
-```{r summarise6_es, include=F}
+```{r summarise6_es, echo=TRUE}
 vig %>% 
   group_by(hospital) %>% 
   summarise(
-    n_rows  = n(),                                # n() cuenta el número de filas por grupo
-    age_avg = mean(edad_anios, na.rm = T),        # edad media del grupo
-    max_onset = max(fecha_sintomas, na.rm=T),        # Fecha de inicio más tardía
+    n_rows  = n(), # n() cuenta el número de filas por grupo
+    age_avg = mean(edad_anios, na.rm = T),    # edad media del grupo
+    max_onset = max(fecha_sintomas, na.rm=T), # Fecha de inicio más tardía
     n_female = sum(sexo == 'mujer', na.rm=T), # número de mujeres en el grupo
-    pct_female = percent(n_female / n_rows))     # Porcentaje de mujeres en el grupo
+    pct_female = percent(n_female / n_rows)) # % de mujeres en el grupo
 ```
 
-```{r, echo=F, eval=params$lang == "en"}
+```{r, echo=F, eval=F}
 decorate("summarise6_en") %>%
   flair(" n_rows ", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -1015,7 +1015,7 @@ decorate("summarise6_en") %>%
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "fr"}
+```{r, echo=F, eval=F}
 decorate("summarise6_fr") %>%
   flair(" n_rows ", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -1030,7 +1030,7 @@ decorate("summarise6_fr") %>%
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "ru"}
+```{r, echo=F, eval=F}
 decorate("summarise6_ru") %>%
   flair(" n_rows ", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
@@ -1045,7 +1045,7 @@ decorate("summarise6_ru") %>%
   knit_print()
 ```
 
-```{r, echo=F, eval=params$lang == "es"}
+```{r, echo=F, eval=F}
 decorate("summarise6_es") %>%
   flair(" n_rows ", color = "deeppink") %>%
   flair("age_avg", color = "deeppink") %>%
