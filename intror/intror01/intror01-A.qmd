@@ -1,6 +1,6 @@
 ---
 title: "Module 1A"
-subtitle: "Let's learn R!"
+subtitle: "Starting with R"
 author: "[Applied Epi: Intro to R Course]"
 format:
   revealjs: 
@@ -26,19 +26,103 @@ editor:
     wrap: 72
 ---
 
-# Introduction to R
+# Introduction
 
 ## Welcome!
 
--   A bit about Applied Epi
--   Course objectives
+::::::::::::: columns
+::: {.column width="45%"}
 
-## About this course
+![](../../images/Applied_Epi_logo.png)
+:::
+  
+::::: {.column width="5%"}
+:::::
+  
+::::: {.column width="45%"}
+*Applied Epi* is a non-profit created by and for epidemiologists. 
+<br><br>
+We aim to *improve applied epidemiology worldwide*, particularly in low-resource settings.
+:::::
+  
+:::::::::::::
 
--   Modules
--   Tutoring
--   Support Desk
--   Rules of engagement
+## Course objectives
+
+Through this course, we aim that you will: 
+
+::: {.incremental style="background: lightblue; border-radius: 5px;"}
+
+- Achieve basic competency in use of R for common public health tasks such as data management, data visualization, summary tables, and automated reports
+
+- Have experience applying R to a variety of datasets
+
+- Be equipped for sustained self-learning in R
+:::
+
+## Course structure
+
+- This course has *ten 3.5 hour modules*, each with two parts 
+- Each part has a *lecture*, *online exercises*, and a *debrief*
+- 10 minute break between parts
+
+```{r}
+
+library(flextable)
+
+# Create the data frame
+df <- data.frame(
+  Module = paste("Module", 1:10),
+  Part_A = c(
+    "Starting with R: Part A", "Summarising data with functions", "Introducing RStudio",
+    "Standardising column names", "Deduplicating rows and restructuring columns",
+    "Creating ggplots", "Appending and linking data", "Reshaping data",
+    "Automated reporting with Quarto: Part A", "COVID-19 Case Study: Part A"
+  ),
+  Part_B = c(
+    "Starting with R: Part B", "Summarising data with pipes", "Importing data",
+    "Standardising column values", "Generating new columns from existing data",
+    "Beautifying ggplots", "Errors, getting help, and reprex", "Creating publication-ready tables",
+    "Automated reporting with Quarto: Part B", "COVID-19 Case Study: Part B"
+  )
+)
+
+# Create the flextable
+flextable(df) |>
+  theme_vanilla() |>
+  set_header_labels(Part_A = "Part A", Part_B = "Part B") |>
+  fontsize(part = "all", size=15) |>
+  bg(part = "header", bg = "lightblue") |> 
+  autofit()
+```
+
+## Course support
+
+You will have access to Applied Epi's *Support Desk* for one-to-one support via online calls:
+
+- During the course: *Unlimited tutoring* on course material
+- After the course: A one-hour *Code Review* to help apply R to your work (valid for 12 months)
+
+
+## Certificate of completion
+
+To receive a *certificate of completion*, you must:
+
+1) *Attend 80% of the sessions* (or make them up with course tutoring)
+2) *Complete the anonymous feedback survey*
+3) *Submit your work* via email to training@appliedepi.org with:
+   - The link to your practice post in our community forum (Module 7)
+   - Your Quarto file from the COVID-19 case study (Module 10)
+
+## Course preparation
+
+You should have:
+
+- Installed *R*, *RStudio*, and *RTools*
+- Downloaded and unzipped the *course folder* (*intror_course*)
+- *Installed packages* with the install_packages.R
+- Set up an *Applied Epi account*
+
 
 # Module 1: Part A
 
@@ -50,51 +134,65 @@ In *Part A* you will:
 -   Explore three key concepts: code, functions, and assignment
 -   Practice running code with numeric and character values
 
-In *Part B* you will you dive further into functions:
-
--   Be shown how functions are structured and organized in packages
--   Get an overview of key functions from {base} R, {dplyr}, and {janitor}
--   Practice running and writing simple code to quickly summarize data
+In *Part B* you will you dive further into functions
 
 # Power of R
 
 ## About R
 
--   *What is R:* R is a free and open-source programming language for
+::: incremental
+-   *What is R?* R is an open-source programming language for
     statistical computing and graphics.
--   Talk about benefits
--   Mention cost/benefit analysis
+-   *Why R?*
+    - 🤖 *Automation*: Speed up repetitive tasks
+    - 📊 *Visualization*: Create high quality and flexible figures
+    - 🤸‍♀️ *Versatility*: Compatible with various software and file types
+    - 💰 *Cost-effective*: Completely free 
+    - 👐 *Community*: Supported by a large, active, and friendly community
+:::
 
 ## Scenario {.exercise-slide}
 
+In the course exercises, you will be working through tasks as part of a fictional outbreak scenario:
+
 ::: incremental
--   *You*: You are an epidemiologist working in a surveillance unit
-    located in the country **Viraland**
+
+-   *Your role*: You are an epidemiologist working in a surveillance unit located in the country **Viraland**
 
 -   *Outbreak!* Last week an outbreak of severe gastro-intestinal
     disease was detected in your area. Cholera is suspected.
 
 -   *Investigation*: Your team is monitoring the outbreak, including
-    collecting case data from local clinics.
+    collecting case data from local clinics. Your colleague Pragya was analysing the data in R but has now left the job!
 
--   *Let's take a look* at the situation reports in R that your
-    colleague Pragya has created!
 :::
 
-## Demo {.exercise-slide}
+## Sitrep {.exercise-slide}
 
-## Scenario {.exercise-slide}
+Before Pragya left, she made a video for you to understand her work: 
+
+{{< video https://www.youtube.com/watch?v=XIc-VHFeUl8 width = "100%" height = "80%">}}
+
+## Sitrep {.exercise-slide}
+
+Here is her output:
+
+## Sitrep {.exercise-slide}
+
+You can see how coding the sitrep in R:
 
 ::: incremental
--   But now... Pragya is now on holiday.
-
--   The outbreak continues, so your boss has asked you to be responsible
-    for reporting!
-
--   Using R!
+- 🤖 Enables fast and reproducible data processing, analysis, and file production
+- 📊 Looks professional, with high quality figures
+- 🤸‍♀️ Is compatible with MS word, MS powerpoint... and other file types!
 :::
 
-# Let's get started: Code and functions!
+## Scenario
+
+- Now it will be your turn to analyse the outbreak data in R
+- Let's get started!
+
+# Code and functions
 
 ## What is code?
 

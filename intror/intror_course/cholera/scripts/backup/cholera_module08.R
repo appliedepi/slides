@@ -1,47 +1,38 @@
----
-title: "Untitled"
-format: docx
-editor: visual
----
-
-## Test
-
-```{r echo=F}
 # Intro course
-# Title of script: Cleaning and analysis of GI outbreak data
+# Title of script: Cleaning and analysis of suspected cholera outbreak data
 # Date started: 17th June 2021
 # Name: Paula Blomquist
 
 # Load packages-----------------------------
 
-pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, tidyr, glue, ggplot2, flextable)
+pacman::p_load(rio, here, janitor, dplyr, stringr, lubridate, tidyr, glue, ggplot2, flextable, forcats)
 
 
 # JUST FOR ME - REMOVE THIS EVENTUALLY ------------
 # Labs
-df_lab_luh <- import(here("intror/gi_2021-06-17_lab_luh.csv"))
-df_lab_vnrl <- import(here("intror/gi_2021-06-17_lab_vnrl.csv"))
-df_lab_ghc <- import(here("intror/gi_2021-06-17_lab_ghc.csv"))
+df_lab_luh <- import(here("intror/cholera_2021-06-17_lab_luh.csv"))
+df_lab_vnrl <- import(here("intror/cholera_2021-06-17_lab_vnrl.csv"))
+df_lab_ghc <- import(here("intror/cholera_2021-06-17_lab_ghc.csv"))
 
 
 # Load data as needed
-df_raw <- import(here("intror/gi_2021-06-17_linelist.xlsx"))
+df_raw <- import(here("intror/cholera_2021-06-17_linelist.xlsx"))
 
 # Other symptoms
-df_symptoms <- import(here("intror/gi_2021-06-17_symptoms.xlsx"))
+df_symptoms <- import(here("intror/cholera_2021-06-17_symptoms.xlsx"))
 
 # Import data ------------------------------
 
 # # Linelist
-# df_raw <- import(here("data/gi_2021-06-17_linelist.xlsx"))
+# df_raw <- import(here("data/cholera_2021-06-17_linelist.xlsx"))
 #
 # # Labs
-# df_lab_luh <- import(here("data/gi_2021-06-17_lab_luh.csv"))
-# df_lab_vnrl <- import(here("data/gi_2021-06-17_lab_vnrl.csv"))
-# df_lab_ghc <- import(here("data/gi_2021-06-17_lab_ghc.csv"))
+# df_lab_luh <- import(here("data/cholera_2021-06-17_lab_luh.csv"))
+# df_lab_vnrl <- import(here("data/cholera_2021-06-17_lab_vnrl.csv"))
+# df_lab_ghc <- import(here("data/cholera_2021-06-17_lab_ghc.csv"))
 #
 # # Other symptoms
-# df_symptoms <- import(here("data/gi_2021-06-17_symptoms.xlsx"))
+# df_symptoms <- import(here("data/cholera_2021-06-17_symptoms.xlsx"))
 
 # Clean linelist data ---------------------------
 
@@ -49,10 +40,11 @@ df <- df_raw |>
 
   # Clean column names
   clean_names() |>
-  rename(date_onset = symptoms_started) |>
+  rename(date_onset = symptoms_started,
+         date_admission = admission) |>
 
   # Change character class
-  mutate(admission = mdy(admission),
+  mutate(date_admission = mdy(date_admission),
          date_onset = mdy(date_onset),
          discovered = dmy(discovered),
          found_on = mdy(found_on),
@@ -90,12 +82,12 @@ df <- df_raw |>
   separate_wider_delim(reported_outcome,
                        delim = ":",
                        names = c("outcome", "date_outcome")) |>
-  mutate(date_outcome = ymd(date_outcome)) |>
+  mutate(date_outcome = dmy(date_outcome)) |>
 
   # Create date of birth and age
-  unite("date_of_birth",
-        c("birthyear", "month_of_birth", "daybirth"), sep = "-") |>
- # mutate(date_of_birth = glue(birthyear-{month_of_birth}-{daybirth}))
+  mutate(date_of_birth = str_glue("{birthyear}-{month_of_birth}-{daybirth}")) |>
+  select(-birthyear, -month_of_birth, -daybirth) |>
+
   mutate(date_of_birth = ymd(date_of_birth)) |>
 
   # Calculate age
@@ -107,14 +99,14 @@ df <- df_raw |>
   # Create columns labelling diarrhoea or dehydration
   mutate(symptoms = str_to_lower(symptoms),
          symp_diarrhea = str_detect(symptoms, "diarrhoea|diarrhea|watery stool|loose stool|awd"),
-         symp_dehydration = str_detect(symptoms, "dehydra|lack of fluids|lack fluids|dry mouth")) |>
+         symp_dehydration = str_detect(symptoms, "dehydr|lack of fluids|lack fluids|dry mouth")) |>
 
   # Create case definition column
   mutate(case_def = case_when(cholera_rdt_positive==1 ~ "Probable",
                               symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected",
                               TRUE ~ "Unclear")) |>
 
-  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable"))) |>
+  mutate(case_def = fct_relevel(case_def, "Unclear", "Suspected", "Probable")) |>
 
   # Create week column for onset date
   mutate(date_onset_week = floor_date(date_onset, "week")) |>
@@ -124,6 +116,16 @@ df <- df_raw |>
 
   # Create column for whether cases are new
   mutate(date_report_7 = if_else(date_report >=  ymd("2021-06-17")-7, "new", "previous"))
+
+# Check case definition and filter to just Probable and Suspected cases ----------
+
+# Before removing unclear category
+df |> tabyl(region, case_def)
+
+# Filter
+df <- df |>
+  filter(case_def %in% c("Probable", "Suspected"))
+
 
 # Clean and append lab data------------------------
 
@@ -140,38 +142,47 @@ df_lab <- bind_rows(df_lab_luh, df_lab_ghc, df_lab_vnrl)
 
 # Link datasets  -------------------------------------
 
+# Linkage
 df_joined <- df |>
   left_join(df_lab, by = "id") |>
   left_join(df_symptoms, by = "id")
 
-df_joined <- df_joined |>
-  mutate(case_def = case_when(cholera_pcr_positive==1 ~ "Confirmed",
-                              cholera_rdt_positive==1 ~ "Probable",
-                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected",
-                              TRUE ~ "Unclear")) |>
-  mutate(case_def = factor(case_def, levels = c("Unclear", "Suspected", "Probable", "Confirmed")))
-
-
-# Check of joins ---------------------------------
-
+# Check linkage
 df_lab |>
   tabyl(cholera_pcr_positive)
 
 df_joined |>
-  tabyl(cholera_pcr_positive)
+  tabyl(region, cholera_pcr_positive)
 
+
+# Update case definitions and filter to just Confirmed, Probable, and Suspected cases ----------
+
+# Case definition update
+df_joined <- df_joined |>
+  mutate(case_def = case_when(cholera_pcr_positive==1 ~ "Confirmed",
+                              cholera_pcr_positive==0 ~ "Discarded",
+                              cholera_rdt_positive==1 ~ "Probable",
+                              symp_diarrhea ==TRUE & symp_dehydration==TRUE ~ "Suspected",
+                              TRUE ~ "Unclear")) |>
+  mutate(case_def = fct_relevel(case_def, "Discarded", "Suspected", "Probable", "Confirmed"))
+
+# Check categories
 df_joined |>
   tabyl(region, case_def)
 
+# Filter
+df_joined <- df_joined |>
+  filter(case_def %in% c("Confirmed", "Probable", "Suspected"))
+
+
 # Plots ------------------------------------------
 
-# By onset date and case definition breakdown
+# By report date and case definition breakdown
 ggplot() +
-  geom_bar(data = df_joined,
-           aes(x=date_onset_week,
-               fill = case_def)) +
-  scale_fill_manual(values = c("Unclear" = "gray70",
-                               "Suspected" = "lightblue",
+  geom_histogram(data = df_joined,
+           aes(x=date_report_week,
+               fill = case_def), binwidth = 7, color = "white") +
+  scale_fill_manual(values = c("Suspected" = "lightblue",
                                "Probable" = "seagreen",
                                "Confirmed" = "navy")) +
   scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
@@ -183,14 +194,13 @@ ggplot() +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-# By onset date and case definition breakdown and region
+# By report date and case definition breakdown and region
 ggplot() +
-  geom_bar(data = df_joined,
-           aes(x=date_onset_week,
-               fill = case_def)) +
+  geom_histogram(data = df_joined,
+                 aes(x=date_report_week,
+                     fill = case_def), binwidth = 7, color = "white") +
   facet_wrap(.~region) +
-  scale_fill_manual(values = c("Unclear" = "gray70",
-                               "Suspected" = "lightblue",
+  scale_fill_manual(values = c("Suspected" = "lightblue",
                                "Probable" = "seagreen",
                                "Confirmed" = "navy")) +
   scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
@@ -239,7 +249,7 @@ table_casedefs |>
   flextable() |>
   autofit() %>%
   bold(part = "header") %>%
-  bold(part = "body", i = 10) %>%
+  bold(part = "body", i = 3) %>%
   bg(part = "header", bg = "gray90")
 
 # Table of overall cases by recency ---------------------------
@@ -264,18 +274,12 @@ table_total |>
   autofit() |>
   align(align = "center", j = c(2:5), part = "all")%>%
   bold(part = "header", i = 1) %>%
-  bold(part = "body", i = 10) %>%
+  bold(part = "body", i = 3) %>%
   bg(part = "header", bg = "gray90") |>
   bg(j = 5, i = ~ Deaths_percent >= 5, bg = "#ebbab7")
 
-# -ptjerwose use
-# add_header_row() to add an additional header ontop
-# merge_at() to merge cells (e.g. header ntop)
 
 
 
 
 
-
-
-```
