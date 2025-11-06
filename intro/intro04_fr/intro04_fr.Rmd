@@ -1,7 +1,7 @@
 ---
-title: Introduction à R pour<br>Épidémiologie appliquée
-subtitle: <br>Grouping and summarizing donnees
-author: Applied Epi
+title: "Introduction à R pour<br>Épidémiologie appliquée"
+subtitle: "<br>Grouping and summarizing donnees"
+author: "Applied Epi"
 date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
 output:
   xaringan::moon_reader:
@@ -13,7 +13,7 @@ output:
       countIncrementalSlides: false
     css: xaringan-themer.css
 params:
-  lang: en
+  lang: "fr"
 ---
 
 class: center, middle, inverse, title-slide
@@ -53,6 +53,7 @@ pacman::p_load(
   flextable,  # pretty tables
   scales,     # percents in tables
   flair,      # text highlights
+  knitr,
   kableExtra, # for output tables
   xaringanthemer  # for styling presentation 
 )
@@ -73,11 +74,11 @@ style_mono_accent(
   base_color = "#00538c", 
   link_color = "#48a878", 
   ## add logo to the title page (bit bigger)
-  title_slide_background_image = "https://brutes.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
   title_slide_background_position = "95% 95%", 
   title_slide_background_size = "25%", 
   ## add logo to all following slides
-  background_image = "https://brutes.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
   background_size = "10%",
   background_position = "100% 0%"
 )
@@ -85,7 +86,7 @@ style_mono_accent(
 
 ```{r, include=FALSE}
 # donnees prep --------------------------------------------------------------------
-surv <- rio::import(here::here("donnees", "linelist_surveillance_nettoyee_20141201.rds"))
+surv <- rio::import(here::here("data", "linelist_surveillance_nettoyee_20141201.rds"))
 
 # gen <- googlesheets4::read_sheet(
 #   "https://docs.google.com/spreadsheets/d/1-Xqv5xvakmhKSxipVP6a9GF3H54RN-rbilhdNhPHx6M/edit#gid=998182281",
@@ -154,14 +155,14 @@ knitr::include_graphics(xfun::relative_path(here::here("images", "grouping", "Gr
 
 ---
 
-# Aujourd'hui : objectifs et calendrier
+# Aujourd'hui: objectifs et calendrier
 
 **Dans ce module, nous avons pour objectif de t'aider à :**
 
 - t'entraîner à utiliser {janitor} pour créer rapidement des tableaux simples
 - S'entraîner à utiliser {dplyr} pour résumer des données avec polyvalence
 - Pratique de l'utilisation {gtsummary} pour créer des tableaux prêts à être publiés
-- Crée des tableaux de qualité imprimable et exporte-les au format PNG, Word, etc.
+- Crée des tableaux de qualité imprimable et exporte-les au format PNG, Word
 
 ```{r, echo=FALSE, warning=F, message=F}
 outline <- dplyr::tribble(
@@ -529,7 +530,7 @@ Mais que faire si tu veux plus que les chiffres ?
 
 `group_by()` et `summarise()` Ensemble, ils offrent la souplesse nécessaire à la création d'un **nouveau cadre de données récapitulatif** avec **statistiques par groupe**.
 
-.note de bas de page[`summarise()` et `summarize()` sont équivalents]
+.footnote[`summarise()` et `summarize()` sont équivalents]
 
 ---
 
@@ -563,16 +564,16 @@ Dans `summarise()`, *créer des colonnes dans un **nouveau** dans un nouvel ense
 --
 
 ```{r, results="asis", echo=FALSE}
-str_glue("summarise(new column name = a function to apply to each group of rows)") %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("a function", color = "cornflowerblue") %>%
+str_glue("summarise(nouveau nom de colonne = une fonction à appliquer à chaque groupe de lignes)") %>%
+  flair("nouveau nom de colonne", color = "deeppink") %>%
+  flair("une fonction", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
 
 --
 
-```{r summarise, include=F}
+```{r summarise, include=T, echo = T}
 surv %>% 
   group_by(hopital) %>% 
   summarise()   
@@ -592,9 +593,9 @@ decorate("summarise") %>%
 Entre les parenthèses, *la liste des nouvelles colonnes pour le **nouvelles** pour le nouvel ensemble de données résumé*
 
 ```{r, results="asis", echo=FALSE}
-str_glue("summarise(new column name = a function to apply to each group of rows)") %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("a function", color = "cornflowerblue") %>%
+str_glue("summarise(nouveau nom de colonne = une fonction à appliquer à chaque groupe de lignes)") %>%
+  flair("nouveau nom de colonne", color = "deeppink") %>%
+  flair("une fonction", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -605,7 +606,7 @@ surv %>%
   summarise(n_rows = n())                        # n() compte the number of rows per group
 ```
 
-```{r summarise2_fr, include=F}
+```{r summarise2_fr, include=T, echo = T}
 surv %>% 
   group_by(hopital) %>% 
   summarise(n_rows = n())                       # n(): le nombre de lignes par groupe
@@ -658,9 +659,9 @@ decorate("summarise2_es") %>%
 Entre les parenthèses, *la liste des nouvelles colonnes pour le **nouvelles** pour le nouvel ensemble de données résumé*
 
 ```{r, results="asis", echo=FALSE}
-str_glue("summarise(new column name = a function to apply to each group of rows)") %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("a function", color = "cornflowerblue") %>%
+str_glue("summarise(nouveau nom de colonne = une fonction à appliquer à chaque groupe de lignes)") %>%
+  flair("nouveau nom de colonne", color = "deeppink") %>%
+  flair("une fonction", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -673,12 +674,12 @@ surv %>%
     age_avg = mean(age_ans, na.rm = T))        # mean age in the group
 ```
 
-```{r summarise3_fr, include=F}
+```{r summarise3_fr, include=T, echo = T}
 surv %>% 
   group_by(hopital) %>% 
   summarise(
-    n_rows  = n(),                               # n(): le nombre de lignes par groupe
-    age_avg = mean(age_ans, na.rm = T))        # âge moyen dans le groupe
+    n_rows  = n(),                            # n(): le nombre de lignes par groupe
+    age_avg = mean(age_ans, na.rm = T))       # âge moyen dans le groupe
 ```
 
 ```{r summarise3_ru, include=F}
@@ -740,9 +741,9 @@ decorate("summarise3_es") %>%
 Entre les parenthèses, *créer des colonnes dans un **nouveau** dans un nouvel ensemble de données récapitulatif*
 
 ```{r, results="asis", echo=FALSE}
-str_glue("summarise(new column name = a function to apply to each group of rows)") %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("a function", color = "cornflowerblue") %>%
+str_glue("summarise(nouveau nom de colonne = une fonction à appliquer à chaque groupe de lignes)") %>%
+  flair("nouveau nom de colonne", color = "deeppink") %>%
+  flair("une fonction", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -757,13 +758,13 @@ surv %>%
 
 ```
 
-```{r summarise4_fr, include=F}
+```{r summarise4_fr, include=T, echo = T}
 surv %>% 
   group_by(hopital) %>% 
   summarise(
-    n_rows  = n(),                               # n(): le nombre de lignes par groupe
+    n_rows  = n(),                             # n(): le nombre de lignes par groupe
     age_avg = mean(age_ans, na.rm = T),        # âge moyen dans le groupe
-    max_onset = max(date_symptomes, na.rm=T))        # date d'apparition la plus récente
+    max_onset = max(date_symptomes, na.rm=T))  # date d'apparition la plus récente
 
 ```
 
@@ -838,9 +839,9 @@ decorate("summarise4_es") %>%
 Entre les parenthèses, *créer des colonnes dans un **nouveau** dans un nouvel ensemble de données récapitulatif*
 
 ```{r, results="asis", echo=FALSE}
-str_glue("summarise(new column name = a function to apply to each group of rows)") %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("a function", color = "cornflowerblue") %>%
+str_glue("summarise(nouveau nom de colonne = une fonction à appliquer à chaque groupe de lignes)") %>%
+  flair("nouveau nom de colonne", color = "deeppink") %>%
+  flair("une fonction", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -856,14 +857,14 @@ surv %>%
 
 ```
 
-```{r summarise5_fr, include=F}
+```{r summarise5_fr, include=T, echo = T}
 surv %>% 
   group_by(hopital) %>% 
   summarise(
-    n_rows  = n(),                               # n(): le nombre de lignes par groupe
+    n_rows  = n(),                             # n(): le nombre de lignes par groupe
     age_avg = mean(age_ans, na.rm = T),        # âge moyen dans le groupe
-    max_onset = max(date_symptomes, na.rm=T),        # date d'apparition la plus récente
-    n_female = sum(sexe == 'femme', na.rm=T)) # nombre de femmes dans le groupe
+    max_onset = max(date_symptomes, na.rm=T),  # date d'apparition la plus récente
+    n_female = sum(sexe == 'femme', na.rm=T))  # nombre de femmes dans le groupe
 
 ```
 
@@ -948,9 +949,9 @@ decorate("summarise5_es") %>%
 Entre les parenthèses, *créer des colonnes dans un **nouveau** dans un nouvel ensemble de données récapitulatif*
 
 ```{r, results="asis", echo=FALSE}
-str_glue("summarise(new column name = a function to apply to each group of rows)") %>%
-  flair("new column name", color = "deeppink") %>%
-  flair("a function", color = "cornflowerblue") %>%
+str_glue("summarise(nouveau nom de colonne = une fonction à appliquer à chaque groupe de lignes)") %>%
+  flair("nouveau nom de colonne", color = "deeppink") %>%
+  flair("une fonction", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
@@ -966,15 +967,15 @@ surv %>%
     pct_female = percent(n_female / n_rows))     # percent femme in group
 ```
 
-```{r summarise6_fr, include=F}
+```{r summarise6_fr, include=T, echo=T}
 surv %>% 
   group_by(hopital) %>% 
   summarise(
-    n_rows  = n(),                               # n(): le nombre de lignes par groupe
+    n_rows  = n(),                             # n(): le nombre de lignes par groupe
     age_avg = mean(age_ans, na.rm = T),        # âge moyen dans le groupe
-    max_onset = max(date_symptomes, na.rm=T),        # date d'apparition la plus récente
-    n_female = sum(sexe == 'femme', na.rm=T), # nombre de femmes dans le groupe
-    pct_female = percent(n_female / n_rows))     # pourcentage de femmes dans le groupe
+    max_onset = max(date_symptomes, na.rm=T),  # date d'apparition la plus récente
+    n_female = sum(sexe == 'femme', na.rm=T),  # nombre de femmes dans le groupe
+    pct_female = percent(n_female / n_rows))   # pourcentage de femmes dans le groupe
 ```
 
 ```{r summarise6_ru, include=F}
@@ -1082,9 +1083,9 @@ surv %>%
   group_by(hopital) %>% 
   summarise(
     n_rows  = n(),                               # n(): le nombre de lignes par groupe
-    age_avg = mean(age_ans, na.rm = T),        # âge moyen dans le groupe
-    max_onset = max(date_symptomes, na.rm=T),        # date d'apparition la plus récente
-    n_female = sum(sexe == 'femme', na.rm=T), # nombre de femmes dans le groupe
+    age_avg = mean(age_ans, na.rm = T),          # âge moyen dans le groupe
+    max_onset = max(date_symptomes, na.rm=T),    # date d'apparition la plus récente
+    n_female = sum(sexe == 'femme', na.rm=T),    # nombre de femmes dans le groupe
     pct_female = percent(n_female / n_rows)) %>% # pourcentage de femmes dans le groupe
   arrange(n_rows)
 ```
@@ -1136,11 +1137,11 @@ surv %>%
   group_by(hopital) %>% 
   summarise(
     n_rows  = n(),                               # n(): le nombre de lignes par groupe
-    age_avg = mean(age_ans, na.rm = T),        # âge moyen dans le groupe
-    max_onset = max(date_symptomes, na.rm=T),        # date d'apparition la plus récente
-    n_female = sum(sexe == 'femme', na.rm=T), # nombre de femmes dans le groupe
+    age_avg = mean(age_ans, na.rm = T),          # âge moyen dans le groupe
+    max_onset = max(date_symptomes, na.rm=T),    # date d'apparition la plus récente
+    n_female = sum(sexe == 'femme', na.rm=T),    # nombre de femmes dans le groupe
     pct_female = percent(n_female / n_rows)) %>% # pourcentage de femmes dans le groupe
-  arrange(-n_rows)                                   
+  arrange(desc(n_rows))                               
 ```
 
 ```{r, echo=params$lang == "ru", eval=params$lang == "ru"}
@@ -1319,6 +1320,7 @@ Tu trouveras des conseils sur la personnalisation dans la section [Epi R Handboo
 ```{r, echo=F, eval=T}
 surv %>% 
   select(age_ans, hopital, sexe) %>%   
+  filter(sexe %in% c("femme","homme")) %>% 
   tbl_summary(by = sexe)   #<<
 ```
 
@@ -1345,6 +1347,7 @@ surv %>%
 ```{r, echo=params$lang == "fr", eval=F}
 surv %>% 
   select(hopital, age_ans, sexe) %>% 
+  filter(sexe %in% c("femme","homme")) %>% 
   tbl_summary(
        by = sexe,
        label = list(
@@ -1391,6 +1394,7 @@ surv %>%
 ```{r, echo=F, eval=params$lang == "fr"}
 surv %>% 
   select(hopital, age_ans, sexe) %>% 
+  filter(sexe %in% c("femme","homme")) %>% 
   tbl_summary(by = sexe,
               label = list(
                    age_ans = "Âge (années)", #<<
