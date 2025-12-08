@@ -1,0 +1,294 @@
+---
+title: "Introduction to R for<br>Applied Epidemiology"
+subtitle: "Course wrap up"
+author: "Applied Epi"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "en"
+---
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  sf,         # spatial
+  ggspatial,  # spatial
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation
+  tidyverse  # data management and visualization
+
+)
+
+## load packages from github
+pacman::p_load_gh(
+     "R4IDSR/epichecks"   # bivariate colour maps 
+)
+
+
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+```
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+# Introduction to R for Applied Epidemiology
+
+### Course Wrap Up
+
+contact@appliedepi.org
+
+---
+
+# Course completion requirements
+
+--
+
+* Anonymous **survey** link
+
+--
+
+* Link to your posted reproducible example (**Module 6 Reprex**) in the [Community Forum](https://community.appliedepi.org/)
+
+--
+
+* R Markdown script and Word output from **Module 10 COVID-19 case study**
+  * As a last resort, you may send your Ebola .Rmd script instead
+
+
+---
+# Course schedule
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Module, ~Topic, ~`Support`,
+  "Pre-course", "Installation troubleshooting", "Preparation calls",
+  "1",   "RStudio, basic R syntax", "Unlimited tutoring\non course material\n\n\nAfter-hours booking\nlink provided by email",
+  "2",   "Data cleaning", "",
+  "3",   "More complex data cleaning", "",
+  "4",   "Grouping and summarising data", "",
+  "5",   "Data visualization with ggplot2", "",
+  "6",   "Troubleshooting and getting help", "",
+  "7",   "Automated reports with R Markdown", "",
+  "8",   "Transforming data with joins and pivots", "",
+  "9",   "Public health plots: Heat plots, epi curves,\nage/sex pyramids, & GIS demo", "",
+  "10",   "COVID-19 case study", "",
+  "Post-course", "We help you apply R to your work.\n1 hour coupon valid 12 months.*", "R Support Desk", 
+  )
+
+outline %>% 
+  flextable::qflextable() %>% 
+  
+  flextable::set_header_labels(
+    Support = "1-on-1 Support\n(24/7 availability)"
+  ) %>% 
+  # merge cells
+  #flextable::merge_at(part = "body", i = 1, j = 2:3) %>%   # prep calls
+  #flextable::merge_at(part = "body", i = 12, j = 2:3) %>%   # Desk calls
+  flextable::merge_at(part = "body", i = 2:11, j = 3) %>%  # tutoring
+
+  
+  # background color
+  flextable::bg(part = "header", i = 1, j = 1:3, bg = "#a8b4bd") %>% 
+  flextable::bg(i = 1, j = 1:3, bg = "#bccad4") %>% 
+  flextable::bg(i = 12, j = 1:3, bg = "#2ecc71") %>% 
+  flextable::bg(i = 2:11, j = 3, bg = "#bccad4") %>% 
+  flextable::bg(i = 2:11, j = 1:2, bg = "grey100") %>% 
+  # bold
+  flextable::bold(j = 1, part = "body") %>% 
+  
+  # alignment  
+  #flextable::align(i = 1, align = "center") %>% 
+
+  # column width
+  flextable::set_table_properties(layout = "autofit") %>% 
+  
+  # borders
+  flextable::theme_box() %>% 
+  
+  flextable::add_footer_lines(values = "*Coupon time and duration may vary by cohort. Additional time can be purchased.")
+```
+
+
+---
+
+# Available resources
+
+* **Course tutoring:** 1 week post-course
+
+* **Course website:** 6 months post-course
+
+* **Code review:** 6 months post-course
+
+* [Community Forum](https://community.appliedepi.org/) & [Epi R Handbook](https://epirhandbook.com/en/)
+
+--
+
+You will receive email within next week with more info and instructions.
+
+
+---
+# R Support Desk  
+
+.pull-left[
+
+- Rapid expert technical support
+
+- 24/7 and multilingual
+
+- **Code Review:** debug/optimize code and get guidance across the full R project lifecycle.
+
+- **Technical Projects:** build repeatable analytics tools/processes, clean/analyze data, and lead analysis planning.
+
+- [R Support Desk website](https://appliedepi.org/support/support)
+
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%", out.height="75%"}
+knitr::include_graphics(xfun::relative_path(here::here("images","welcome", "headphones.jpg")))
+```
+
+]
+
+.footnote[Email [contact@appliedepi.org](mailto:contact@appliedepi.org) to purchase hours or discuss a project.]
+
+
+---
+# R Support Desk examples
+
+*TO DO --> Include examples of how Support desk can help you.*
+
+---
+# Advanced R courses
+
+Enjoyed the course and excited to learn more?
+
+---
+# Advanced R courses
+
+* **Duration:** 7 hours (two half-day synchronous modules)
+
+* **Activities:** live lecture and coding demos, exercises using simulated data, in-lessons support with 1-on-1 meetings
+
+* **Eligibility:** R skills at least equivalent to our intro course
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Course, ~Description,
+  "Advanced R Markdown","Build automated R Markdown reports and {flexdashboard} dashboards with templates, dynamic content, and parameterized workflows.",
+  "Introduction to GIS in R","Create GIS-informed maps and basic spatial analyses in R, from data prep to interactive outputs.",
+  "Introduction to statistics in R","Build reproducible R code for descriptive stats, key tests, and regression with strong reporting outputs.",
+  "Time series analysis and outbreak detection in R","Apply R-based time series methods for surveillance, from data QC to modeling and outbreak-relevant interpretation.",
+  "Shiny in R","Create entry-level Shiny apps for epidemiology with reactivity, dynamic UI, and interactive outputs."
+  )
+
+outline %>% 
+  flextable::qflextable() %>% 
+  # Background color
+  flextable::bg(part = "header", i = 1, j = 1:2, bg = "#a8b4bd") %>% 
+  flextable::bg(i = 1:5, j = 2, bg = "grey100") %>% 
+  flextable::bg(i = 1:5, j = 1, bg = "#ccdce7") %>% 
+  
+  # Fitting
+  flextable::bold(j = 1, part = "body") %>% 
+  flextable::align(i = 1, align = "center") %>% 
+  flextable::set_table_properties(layout = "autofit") %>% 
+  flextable::theme_box()
+```
+
+[Course overview website.](https://appliedepi.org/training/training.html) Private or public cohorts available!
+
+---
+class: inverse, center, middle
+
+## Thank you!
+
+Stay connected to hear more about our upcoming schedule and free resources!
+
+[LinkedIn](https://www.linkedin.com/company/appliedepi/), [X](https://x.com/appliedepi), [Community](https://community.appliedepi.org/)
+
+
+Sign-up for our [newsletter](TODO)
+
+Post-course survey
+
+```{r, eval = TRUE, echo = FALSE, out.width = "60%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "moz-banner.png")))
+```
