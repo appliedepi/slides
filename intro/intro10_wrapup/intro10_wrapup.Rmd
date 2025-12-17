@@ -119,7 +119,7 @@ contact@appliedepi.org
 
 --
 
-* Anonymous **survey** link
+* Complete anonymous post-course [survey](https://docs.google.com/forms/d/e/1FAIpQLScEKzkZiY4FWgNyYc6-ggJ96DvTLhxVXXZ0CcrKvUtR1NVOvQ/viewform)
 
 --
 
@@ -129,6 +129,16 @@ contact@appliedepi.org
 
 * R Markdown script and Word output from **Module 10 COVID-19 case study**
   * As a last resort, you may send your Ebola .Rmd script instead
+  
+<br>
+  
+<div style="text-align:center;">
+```{r, eval=TRUE, echo=FALSE, out.width="25%"}
+knitr::include_graphics(
+  xfun::relative_path(here::here("images", "wrap_up", "checklist.png"))
+)
+```
+</div>
 
 
 ---
@@ -227,14 +237,68 @@ knitr::include_graphics(xfun::relative_path(here::here("images","welcome", "head
 
 
 ---
-# R Support Desk examples
 
-*TO DO --> Include examples of how Support desk can help you.*
+# R Support Desk
+
+#### Code Review structure alternatives
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=5}
+calls <- tibble(
+  scenario = c(
+    "1 hour → 1 × 60 min",
+    "1 hour → 2 × 30 min",
+    "3 hours → 3 × 60 min"
+  ),
+  duration_min = list(
+    c(60),
+    c(30, 30),
+    rep(60, 3)
+  )
+) %>%
+  unnest_longer(duration_min, indices_to = "call_n") %>%
+  group_by(scenario) %>%
+  mutate(
+    start_min = lag(cumsum(duration_min), default = 0),
+    x_mid     = start_min + duration_min / 2
+  ) %>%
+  ungroup() %>%
+  mutate(total_hours = ave(duration_min, scenario, FUN = function(x) sum(x) / 60))
+
+calls <- calls %>%
+  mutate(scenario = factor(scenario, levels = rev(unique(scenario))))
+
+
+ggplot(calls, aes(x = x_mid, y = scenario)) +
+  geom_tile(aes(width = duration_min, height = 0.6), alpha = 0.9, fill = "green") +
+  geom_tile(aes(width = duration_min, height = 0.6),
+          alpha = 0.9,
+          color = "white", linewidth = 1)+
+  geom_text(aes(label = paste0(duration_min, "m")), size = 8, color = "white") +
+  scale_x_continuous(
+    breaks = seq(0, 300, 30),
+    labels = function(x) x / 60,
+    expand = c(0, 0)
+  ) +
+  labs(x = "Scheduled time (hours)", y = NULL) +
+  theme_minimal(base_size = 22) +
+  theme(panel.grid.major.y = element_blank())
+```
 
 ---
 # Advanced R courses
 
 Enjoyed the course and excited to learn more?
+
+<br>
+<br>
+
+<div style="text-align:center;">
+```{r, eval=TRUE, echo=FALSE, out.width="90%"}
+knitr::include_graphics(
+  xfun::relative_path(here::here("images", "breakout", "COVID dominoes.png"))
+)
+```
+</div>
 
 ---
 # Advanced R courses
