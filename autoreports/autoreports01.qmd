@@ -1,0 +1,386 @@
+---
+title: "Automated reporting in R"
+subtitle: "Module 1 of 2: Customising reports in Quarto"
+author: "[Applied Epi]"
+format:
+  revealjs: 
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../images/Applied_Epi_logo.png
+    css: ../images/styles.css
+    footer: <https://appliedepi.org>
+    title-slide-attributes:
+      data-background-color: "#012d78"
+      style: "font-size: 40px;"
+      data-subtitle-style: "font-size: 80px;"  # Subtitle size
+      data-author-style: "font-size: 10px;"  # Author size
+resources:
+  - demo.pdf
+fig-align: center
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+# Introduction
+
+## Welcome!
+
+:::::: columns
+::: {.column width="45%"}
+![](../images/Applied_Epi_logo.png)
+:::
+
+::: {.column width="5%"}
+:::
+
+::: {.column width="45%"}
+*Applied Epi* is a non-profit created by and for epidemiologists.
+<br><br> We aim to *improve applied epidemiology worldwide*,
+particularly in low-resource settings.
+:::
+::::::
+
+## Course objectives
+
+Through this intermediate course, we aim that you will:
+
+::: {style="background: lightblue; border-radius: 5px;"}
+-   Gain proficiency in creating customised automated reports with
+    Quarto, in Word or Powerpoint (Module 1)
+-   Learn to optimise and modularise the structure of your R project,
+    for more efficient report generation (Module 2)
+:::
+
+## Course structure
+
+-   This course has *two 3.5 hour modules*
+-   Each module has a *lecture*, *online exercises*, and a *debrief*
+-   You will receive a certificate of completion after:
+    -   Attending both sessions
+    -   Completing our feedback survey
+    -   Submit your RStudio project via email to
+        training\@appliedepi.org
+
+## Course preparation
+
+You should have:
+
+-   Installed *R*, *RStudio*, and *RTools*
+-   Downloaded and unzipped the *course folder* (*autoreports_course*)
+-   *Installed packages* with the install_packages.R
+-   Set up an *Applied Epi account* (if you didn't have one already)
+
+You should also already know:
+
+-   *How to code in R using standard tidyverse packages*, including
+    `dplyr`, `flextable`, `ggplot2`
+-   *How to set up an RStudio project*
+-   *The basics of creating a quarto or Rmarkdown file*: chunks, in-line
+    code, and text.
+
+# A refresher: quarto
+
+## Power of quarto
+
+Quarto is an open-source scientific and technical publishing system, which is powerful for automated reporting in R. It uses the file format *.qmd*, which contains code alongside narrative text, allowing you to:
+
+::: incremental
+-   *Complete document automation*: Automate the
+    production of an entire document, with tables, figures, narrative
+    text, and formatting.
+-   *Reproducibility*: Render the .qmd file reading in new data
+    and the content will get updated automatically
+-   *Dynamic outputs*: Produce a variety of outputs - HTML,
+    Word, PPT, dashboards, PDF - even websites.
+-   *Team benefits*: Save your team time and
+    improve collaboration by making the workflow easier to reproduce     between team-members.
+:::
+
+# .qmd file structure
+
+## 
+
+![](../autoreports/images/example1_yaml.png)
+
+## 
+
+![](../autoreports/images/example1_chunks.png)
+
+## 
+
+![](../autoreports/images/example1_text.png)
+
+## How quarto works
+
+When you click 'render', your .qmd file gets processed in two stages:
+
+- **Execution Phase**: `knitr` run the R code in the code chunks, creating an intermediate .md file with the code outputs and markdown text.
+- **Conversion Phase**: Pandoc translates the .md file into the requested output document (e.g., HTML, PDF).
+
+```{r}
+#| label: fig-quarto
+#| fig-width: 12
+#| fig-height: 2
+#| fig-align: center
+#| results: asis
+
+library(DiagrammeR)
+
+grViz("
+digraph flowchart {
+  rankdir=TB;  # Setting explicitly to Top-to-Bottom for consistency
+  ranksep=0.1;
+  nodesep=0.1;
+  
+  node [shape=box, style=filled, fontname=Helvetica, fontsize=12]
+
+  # Node Styles
+  node [color=LightBlue];
+  edge [color=black];
+
+  # 1. Main Process Flow (Vertical Ranks)
+  {rank=same; qmd; output; final}
+  
+  qmd [label='.qmd file']
+  output [label='Intermediate Markdown\\n(Tables and figures)']
+  final [label='Final document\\n (PDF/HTML/Word/PPT)']
+
+  # Main flow arrows: Labels are nudged right using labeldistance and negative labelangle
+  qmd -> output [label='Execution\n(knitr)', fontname=Helvetica, fontsize=12, labeldistance=1.5, labelangle=-45]
+  output -> final [label='Conversion\n(pandoc)', fontname=Helvetica, fontsize=12, labeldistance=1.5, labelangle=-45]
+}
+")
+```
+
+::: {.obs-box .fragment}
+💡 Pandoc is widely used software for document conversion
+💡 Quarto can check for and execute different code languages 
+:::
+
+## How quarto works
+
+![](../autoreports/images/example1_render_md.png)
+
+# Templates
+
+## Templates for code-free formatting
+
+Add your organisation's logo and default font styles, colours, and sizes:
+
+   1. *Create a template document* with saved formatting rules (not just superficially formatted text)
+   2. *Add the template to your YAML*
+   3. When rendering your .qmd file, R will then apply the template during the conversion phase. 
+   
+This formatting approach applies to Word and Powerpoint documents (html and pdf outputs
+    are different).
+
+## 
+
+![](../autoreports/images/example2_render_template.png)
+
+## Creating your template: Word
+
+::: {.columns}
+
+::: {.column width="50%"}
+* Create a new Word document, or edit your rendered word output as shown here. 
+* Click on *Styles* under the home tab 
+* Modify the font and paragraph spacing of relevant styles (e.g. *Heading 1* corresponds to the heading with one hash `#`, *Author* corresponds to the Author text in the YAML)
+:::
+
+::: {.column width="50%"}
+![](../autoreports/images/template_word0.png)
+:::
+
+:::
+
+
+## Creating your template: Word
+
+::: {.columns}
+
+::: {.column width="50%"}
+* *Headers*: You can also double click on the header section to add text or paste in logos 
+:::
+
+::: {.column width="50%"}
+![](../autoreports/images/template_word3.png)
+:::
+
+:::
+
+
+## Creating your template: Powerpoint
+
+::: {.columns}
+
+::: {.column width="50%"}
+* Click on 'View', 'Slide master', and then edit the font formatting, background, text box placements, and insert images
+* Edit the top slide for general themes, or edit specific slide layouts
+:::
+
+::: {.column width="50%"}
+![](../autoreports/images/template_ppt.png)
+:::
+
+:::
+
+## Creating your template: Powerpoint
+
+Make sure that your YAML is suited to your powerpoint template!
+
+![](../autoreports/images/example3_ppt_template.png)
+
+
+# Fenced divs
+
+## What are fenced divs
+
+* In Quarto, **fenced divs** (or just "divs") are blocks of content that **control the formatting and behaviour of blocks of text**; they **div**ide sections up
+* The fenced divs look like this: 
+
+``` markdown
+::: instructions about layout 
+
+Block of text that will get formatted
+
+:::
+```
+
+* This may be familiar if you are used to HTML, but they also work in Quarto for Word and Powerpoint
+* We will not explain syntax in detail, but will show specific helpful examples
+
+
+
+## Callout boxes
+
+* A "Callout Box" is simply a specialized, pre-styled Div built into Quarto. 
+* Here is an example callout box:
+
+```markdown
+::: callout-warning
+Here is a warning message!
+:::
+```
+
+Quarto recognises the 'warning' label and produces this box with the specific colours and icons:
+
+::: callout-warning
+Here is a warning message!
+:::
+
+## Callout boxes
+
+* Here is another example:
+
+::: incremental
+
+```markdown
+::: callout-note
+Here is a less dramatic note!
+:::
+```
+
+This looks like:
+
+::: callout-note
+Here is a less dramatic note!
+:::
+:::
+
+
+::: {.obs-box .fragment}
+💡 You can further customise call-outs, e.g. if you want the icon or just a simple outline. 
+:::
+
+## Portrait vs landscape
+
+- In Word reports, you may want to switch between portrait and landscape
+- For example, one page in a normally portrait report may show a wide table
+- You can do this as follows:
+
+``` markdown
+This text will be shown as the document default (portrait)
+
+::: landscape
+This text will be in a new landscape page
+:::
+
+This text will be on yet another page 
+```
+
+::: {.obs-box}
+💡 CHECK THIS! DOESN'T WORK WITH TEMPLATES?
+:::
+
+
+## Columns
+
+- You can also use **nested divs** to format text into columns; these are divs within divs
+- Note the particular syntax with {} brackets
+
+```markdown
+:::: {layout-ncol="2"}
+
+::: column
+Text in column 1 goes here
+:::
+
+::: column
+Text in column 2 goes here (but you can have more than two columns!)
+:::
+
+:::
+```
+
+::: {.obs-box .fragment}
+💡 This will look like text boxes. In powerpoint, two columns will use the template two-column slide layout so double check your Master view!
+:::
+
+# Demo
+
+## Reminder: Setting up a .qmd
+
+Open your file with by clicking **File**, **New File**, and then
+**Quarto document...**. Here you can provide some initial values such as
+the document title and the type of output.
+
+![](../autoreports/images/qmd_open.png)
+
+## Reminder: Setting up a .qmd
+
+A .qmd file will open in the scripts pane, with default chunks and text.
+Change this as needed!
+
+![](../autoreports/images/qmd_rstudio.png)
+
+
+# Exercises!
+
+## Scenario {.exercise-slide}
+
+In the course exercises, you will be working through tasks as part of
+the following scenario:
+
+::: incremental
+-   *Your role*: You are an epidemiologist working in a surveillance
+    unit in the country **Viraland**
+-   *Outbreak!* There has been an ongoing outbreak of cholera in
+    Viraland, which your team is responsible for monitoring.
+-   *Your reports*: Your team receives clean cholera surveillance data
+    every week, and produces a cholera surveillance report. You produce
+    the tables and figures in R which you copy-paste into Word.
+-   *What's next*: Your team has decided to produce your surveillance
+    report in Quarto instead. Your team-mates think you're particularly
+    efficient, so they've asked you to lead the automation effort!
+:::
+
+# Recap
+
+## Recap slides here
+

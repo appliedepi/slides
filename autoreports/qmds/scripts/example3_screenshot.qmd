@@ -1,0 +1,50 @@
+---
+title: "Surveillance report"
+date: 2025-05-22
+format: 
+  pptx:
+    reference-doc: "template.pptx" 
+---
+
+```{r setup}
+#| echo: false
+pacman::p_load(dplyr, 
+               ggplot2, 
+               flextable, 
+               here)
+```
+
+```{r data}
+#| echo: false
+
+linelist <- readRDS(here("data/Disease_x_2025-05-21.rds"))
+```
+# Epidemiology of disease X
+
+## Summary
+There have been `r nrow(linelist)` cases of _disease X_ across `r nrow(linelist |> distinct(region))` regions.
+
+```{r table_region}
+#| echo: false
+
+linelist |> 
+  group_by(region) |> 
+  summarise(count = n()) |> 
+  flextable() |> 
+  autofit()
+```
+
+## Cases over time
+
+The most recent case was reported on `r max(linelist$date_report)`.
+
+**Epicurve of cases over time, by report date**
+```{r plot_reportdate}
+#| echo: false
+
+ggplot(data = linelist) +
+  geom_histogram(aes(x = date_report), binwidth = 1, color = "white") +
+  theme_minimal()
+```
+
+

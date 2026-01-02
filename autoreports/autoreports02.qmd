@@ -1,0 +1,665 @@
+---
+title: "Automated reporting in R"
+subtitle: "Module 2 of 2: Organising your workflow in Quarto"
+author: "[Applied Epi]"
+format:
+  revealjs: 
+    slide-number: true
+    chalkboard: 
+      buttons: true
+    controls: false
+    multiplex: false
+    preview-links: auto
+    logo: ../images/Applied_Epi_logo.png
+    css: ../images/styles.css
+    footer: <https://appliedepi.org>
+    title-slide-attributes:
+      data-background-color: "#012d78"
+      style: "font-size: 40px;"
+      data-subtitle-style: "font-size: 80px;"  # Subtitle size
+      data-author-style: "font-size: 10px;"  # Author size
+execute:
+  fig-dpi: 300
+resources:
+  - demo.pdf
+fig-align: center
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+# Introduction
+
+## Course objectives
+
+Through this intermediate course, we aim that you will:
+
+::: {style="background: lightblue; border-radius: 5px;"}
+-   Gain proficiency in creating customised automated reports with
+    Quarto, in Word or Powerpoint (Module 1)
+-   Learn to optimise and modularise the structure of your R project,
+    for more efficient report generation (Module 2)
+:::
+
+# Recap
+
+## Recap slide 1
+
+Add stuff here
+
+# Rendering from an R script
+
+## How do you render from an R script?
+
+Rather than clicking 'render' when inside an open qmd file, you can:
+
+1)  *Open a new R script* - we will call this your 'controller' script
+2)  *Render your .qmd file with the `quarto_render()` function* from the
+    `{quarto}` package.
+
+::: fragment
+``` markdown
+# Load the quarto package
+library(quarto)
+
+# Render the qmd and specify the output name
+quarto_render(
+  input = "scripts/surveillance_report.qmd",
+  output_file = "Surveillance Report.docx"
+)
+```
+:::
+
+::: fragment
+Running this will render your qmd and save it as "Surveillance
+Report.docx" in the root folder of your R Project!
+:::
+
+## Why do this?
+
+You render from an R script so that you can *create a more structured
+workflow*, especially for more complex automation.
+
+## Quiz!
+
+::: {.general-box style="text-align: left; background-color: #CAE9F5;"}
+What is your working directory when clicking 'render' from inside a
+quarto file?
+:::
+
+<br><br>
+
+::::::: columns
+:::: column
+::: {.general-box style="text-align: center;"}
+The same folder as the .qmd file
+:::
+::::
+
+:::: column
+::: {.general-box style="text-align: center;"}
+The R Studio project root folder
+:::
+::::
+:::::::
+
+## Quiz!
+
+::: {.general-box style="text-align: left; background-color: #CAE9F5;"}
+What is your working directory when clicking 'render' from inside a
+quarto file?
+:::
+
+<br><br>
+
+::::::: columns
+:::: column
+::: {.general-box style="text-align: center; background-color: #AAF0C9;"}
+The same folder as the .qmd file
+:::
+
+This means your output goes in this folder after rendering, e.g your
+`scripts` folder. But note - you should be working in an R Studio
+project!
+::::
+
+:::: column
+::: {.general-box style="text-align: center;"}
+The R Studio project root folder
+:::
+::::
+:::::::
+
+## Quiz 2!
+
+::: {.general-box style="text-align: left; background-color: #CAE9F5;"}
+What is your working directory when using the `quarto_render()` function
+in a different R script?
+:::
+
+<br><br>
+
+::::::: columns
+:::: column
+::: {.general-box style="text-align: center;"}
+The same folder as the .qmd file
+:::
+::::
+
+:::: column
+::: {.general-box style="text-align: center;"}
+The R Studio project root folder
+:::
+::::
+:::::::
+
+## Quiz 2!
+
+::: {.general-box style="text-align: left; background-color: #CAE9F5;"}
+What is your working directory when using the `quarto_render()` function
+in a different R script?
+:::
+
+<br><br>
+
+::::::: columns
+:::: column
+::: {.general-box style="text-align: center;"}
+The same folder as the .qmd file
+:::
+::::
+
+:::: column
+::: {.general-box style="text-align: center; background-color: #AAF0C9;"}
+The R Studio project root folder
+:::
+
+So this is where your surveillance report output will go when using
+`render_quarto()`
+::::
+:::::::
+
+# Modularising your code
+
+## What does modularisation mean?
+
+*Modularising your code* means to **break a large, complex script (or
+.qmd file) into smaller scripts with specific tasks**
+
+::: fragment
+This is helpful because:
+
+-   Your code becomes more readable and easier to navigate
+-   Your workflow is more efficient - e.g. you can clean the data once
+    and then run the report several times
+-   R scripts can be easier to debug than .qmd files
+:::
+
+## How to modularise your code
+
+For example, you can:
+
+-   *Move data cleaning code out from your .qmd* into a separate R
+    script,
+-   Then *run that new script from your controller R script* with
+    `source()`:
+
+::: fragment
+``` markdown
+# Load the quarto package
+library(quarto)
+
+# This script will process raw data and save it
+source("scripts/clean_data.R")
+
+# Render the qmd and specify the output name
+quarto_render(
+  input = "scripts/surveillance_report.qmd",
+  output_file = "Surveillance Report.docx"
+)
+```
+:::
+
+::: {.obs-box .fragment}
+💡 The **clean_data.R** script must **save** the clean data, and the
+.qmd file will then **load it**. This is because...
+:::
+
+## Quarto and the R environment
+
+Quarto does *not* refer to your pre-existing global R environment. It
+runs in its own new isolated R session!
+
+![](../autoreports/images/renvironment_bubble.png){fig-align="center"
+width="100%"}
+
+## Quarto and the R environment
+
+This means:
+
+::: incremental
+-   *Self-Contained Code:* All packages, data, functions, etc, must be
+    explicitly defined or loaded within the .qmd file itself.
+
+-   *Temporary session:* All objects created by the code in your .qmd
+    file are not accessible after you have finished rendering
+
+-   *How this encourages reproducibility:* This isolation ensures your
+    report is entirely self-contained and cannot accidentally bring in
+    (hidden) workspace objects.
+:::
+
+## Modularising table/figure production
+
+You can move code into other R scripts, e.g.:
+
+-   **create_table.R** to create a summary table
+
+-   **create_epicurve.R** to create a ggplot epicurve
+
+Your .qmd file can then **source these R scripts inside its own R
+chunks**.
+
+## From this .qmd...
+
+![](../autoreports/images/modularise_not.png)
+
+## To this .qmd plus R scripts...
+
+![](../autoreports/images/modularise_2.png)
+
+## Modularising table/figure production
+
+This means that you will have the following files in your scripts
+folder:
+
+-   **clean_data.R** script to clean the data
+-   **.qmd file** to load clean data and generate the report, which
+    sources:
+    -   **create_table.R** to produce the table
+    -   **create_epicurve.R** to produce the epicurve ggplot
+-   **A controller R script** to run the clean_data.R script and .qmd
+    file
+
+## Quiz 3!
+
+::: {.general-box style="text-align: left; background-color: #CAE9F5;"}
+Can your .qmd file print the `table_cat` object, if it is created by the
+`create_table.R` script in your controller script before rendering?
+:::
+
+::: columns
+::: {.column width="50%" style="font-size: 24px;"}
+
+In your controller script:
+
+``` markdown
+# This script will process raw data and save it
+source("scripts/clean_data.R")
+
+# These scripts will create a `table_cat` object
+source("scripts/create_table.R")
+
+# This script will render the .qmd and load data
+quarto_render(
+  input = "scripts/surveillance_report.qmd",
+  output_file = "Surveillance Report.docx"
+)
+```
+:::
+
+::: {.column width="50%" style="font-size: 24px;"} 
+
+In your create_table.R script:
+
+``` markdown
+# Code to create the summary table
+
+table_cat <- linelist |> 
+  group_by(case_cat) |> 
+  summarise(cases = n(),
+            onset_earliest = min(date_onset, na.rm = T),
+            onset_recent = max(date_onset, na.rm = T)) |> 
+  flextable() |> 
+  set_header_labels( 
+    case_cat = "Category",
+    cases = "Number",
+    onset_earliest = "Earliest onset",
+    onset_recent = "Most recent onset") |> 
+  autofit()
+```
+
+:::
+
+:::
+
+<br>
+
+::: {.general-box .fragment style="background-color: #AAF0C9;"}
+**Answer**: No! A rendering .qmd file cannot access the global
+environment
+:::
+
+# Exercise
+
+## Consolidating your team's code {.exercise-slide}
+
+You realise that your team's data manager cleans the data in R. For
+efficiency, you agree that she should just share their code with you, so
+all R code can be processed together.
+
+Your team is increasingly reliant on you to automate this report!
+
+Go for it!
+
+# Part B: Parameters
+
+## What are params?
+
+-   *Parameters* (or *params*) are *changeable inputs* for an automated
+    report
+-   Example params:
+    -   Date of report
+    -   Region of interest
+-   This provides a *structured approach* to *interactive automated
+    reporting*.
+
+## How to use params
+
+For example, if you want to run your cholera surveillance report for
+either males or females:
+
+*STEP 1)  Define the parameter(s) in the YAML* within the *params* field:
+
+**Add this to your YAML**
+
+``` markdown
+params:
+  sex: "Female"
+```
+
+::: {.obs-box .fragment}
+💡 You can name the params whatever you want, as long as it is sensible!
+Is this run, we are specifying that we want sex to be equal to "Female".
+:::
+
+## How to use params
+
+For example, if you want to run your cholera surveillance report for
+either males or females:
+
+*STEP 1)  Define the parameter(s) in the YAML* within the *params* field:
+
+**Your YAML will look like this**
+
+``` markdown
+---
+title: "Cholera surveillance report Viraland"
+subtitle: "Date of report: 16 June 2021"
+format: 
+  docx:
+    reference-doc: "template.docx" 
+execute:
+  echo: false
+  warning: false
+params:
+  sex: "Female"
+---
+```
+
+## How to use params
+
+*STEP 2) Refer to the specific params object* in your code and text using
+    `params$object_name`
+
+::: fragment
+For example, in a chunk to filter data to the sex specified in the
+params:
+
+```{{r}}
+linelist <- readRDS(here("data/clean/XXXXXXXXXXX")) |> 
+    filter(sex == params$sex)
+
+```
+:::
+
+::: fragment
+Or, within in-line text to refer to the sex in the params:
+
+``` markdown
+This report is for `r knitr::inline_expr("params$sex")`s only.
+```
+:::
+
+## Example: reporting female cases
+
+![](../autoreports/images/params_female.png)
+
+## Example: reporting male cases
+
+![](../autoreports/images/params_male.png){width="2242"}
+
+## How to use params
+
+*STEP 3) Add the params to your `quarto_render()` function* so you can also control them via your controller script.
+
+``` markdown
+## Load the quarto package
+library(quarto)
+
+# This script will process raw data and save it
+source("scripts/clean_data.R")
+
+# This script will render the .qmd and load data
+quarto_render(
+  input = "scripts/surveillance_report.qmd",
+  output_file = "Surveillance Report.docx",
+  execute_params = list(
+    sex = "Female"
+  )
+)
+```
+
+# Loops
+
+## What are loops?
+
+-   *Looping automates a repetitive task* by running the same block of
+    code for every item in a list
+-   In the example below:
+    -   A list of names is first defined, saved as object `people`
+    -   A for-loop goes through each name in people, to print "Hello"
+        and the name
+
+:::: columns
+
+::: {.column width="50%" style="font-size: 32px;"} 
+
+**The code:**
+
+``` markdown
+# The sequence (our list of people)
+people <- c("Fred", "Wilma", "Pebbles")
+
+# The loop
+for (name in people) {
+  # This code runs for each name
+  paste("Hello", name)
+}
+```
+:::
+
+::: {.column width="50%" style="font-size: 32px;"} 
+
+**The output:**
+
+```{r}
+#| echo: false
+# The sequence (our list of people)
+people <- c("Fred", "Wilma", "Pebbles")
+
+# The loop
+for (name in people) {
+  # This code runs for each name
+  print(paste("Hello", name))
+}
+```
+:::
+
+::::
+
+## Looping a .qmd file
+
+-   Loops are useful for Quarto, as we can render a .qmd file for each
+    value in a list
+-   This prevents manual editing and re-running for each subgroup
+
+``` markdown
+# Define the sex categories in a list for loop
+sex_categories <- c("Male", "Female")
+
+# Loop through values in the list
+for (s in sex_categories) {
+  quarto_render(
+    input = "scripts/surveillance_report.qmd",
+    output_file = paste0("Surveillance Report ", s, ".docx"),
+    execute_params = list(
+      sex = s
+    )
+  )
+}
+```
+
+## Altogether: Your controller script
+
+``` markdown
+# Load the quarto package
+library(quarto)
+
+# This script will process raw data and save it
+source("scripts/clean_data.R")
+
+# Define the sex categories in a list for loop
+sex_categories <- c("Male", "Female")
+
+# Loop through values in the list
+for (s in sex_categories) {
+  quarto_render(
+    input = "scripts/surveillance_report.qmd",
+    output_file = paste0("Surveillance Report ", s, ".docx"),
+    execute_params = list(
+      sex = s
+    )
+  )
+}
+```
+
+## Output
+
+This code will produce both reports, one for males and one for females!
+
+![](../autoreports/images/loop_sex.png){fig-align="center"}
+
+# Quarto vs RMarkdown
+
+## Quarto vs RMarkdown
+
+You have probably heard of both, and are wondering - why should I use
+quarto over Rmarkdown?
+
+Our response is:
+
+::: incremental
+-   Both file types are quite similar and great for automated reporting:
+    they both use chunks, in-line code, a YAML, and narrative text.
+-   Why we use quarto in this course: It is easier to customise and
+    format reports in quarto than Rmarkdown, which is helpful when
+    producing single surveillance reports.
+-   Why you might want to use Rmarkdown: Rmarkdown is more compatible
+    with more complex workflows and folder structures. For example it is
+    good for multiple automated reports in one Rproject, or for
+    automatically saving your output in specific folders.
+:::
+
+# Exercise
+
+## Explanation {.exercise-slide}
+
+Your boss has now decided that this should be a regional report. She
+wants you to be able to easily create one report per region.
+
+Time to incorporate params!
+
+# Recap
+
+## Modularise with a controller script
+
+Data is cleaned and saved by clean_data.R, then loaded again when
+rendering surveillance_report.qmd with the `quarto_render()` function.
+
+``` markdown
+## CONTROLLER SCRIPT
+## Purpose: To render the surveillance report .qmd file
+## Date: 26/06/2021
+
+library(quarto)
+
+# This script will process raw data and save it
+source("scripts/clean_data.R")
+
+# This script will load the cleaned data and generate the report
+quarto_render(
+  input = "scripts/surveillance_report.qmd",
+  output_file = "Surveillance Report.docx"
+)
+```
+
+## Modularise with a controller script
+
+You can even change the file name to be dynamic, e.g. add the date of
+the run!
+
+``` markdown
+## CONTROLLER SCRIPT
+## Purpose: To render the surveillance report .qmd file
+## Date: 26/06/2021
+
+library(quarto)
+
+# This script will process raw data and save it
+source("scripts/clean_data.R")
+
+# This script will load the cleaned data and generate the report
+quarto_render(
+  input = "scripts/surveillance_report.qmd",
+  output_file = paste0("Surveillance Report_", Sys.Date(), ".docx"),
+)
+```
+
+## Loop with your controller script
+
+And finally, you can loop as well to clean data once and create reports
+for multiple subgroups.
+
+``` markdown
+# Load the quarto package
+library(quarto)
+
+# This script will process raw data and save it
+source("scripts/clean_data.R")
+
+# Define the sex categories in a list for loop
+sex_categories <- c("Male", "Female")
+
+# Loop through values in the list
+for (s in sex_categories) {
+  
+  quarto_render(
+    input = "scripts/surveillance_report.qmd",
+    output_file = paste0("Surveillance Report ", s, ".docx"),
+    execute_params = list(
+      sex = s
+    )
+  )
+}
+```

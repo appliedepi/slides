@@ -1,0 +1,136 @@
+---
+title: "AWD Sitrep Viraland"
+date: "22 May 2025"
+format: 
+  docx:
+    reference-doc: "template.docx" 
+execute:
+  echo: false
+  warning: false
+---
+
+```{r}
+pacman::p_load(dplyr, 
+               ggplot2, 
+               tidyr, 
+               forcats, 
+               flextable, 
+               lubridate, 
+               scales, 
+               janitor, 
+               patchwork, 
+               stringr, 
+               here)
+
+linelist <- readRDS(here("data/clean/Viraland_cholera_2021-06-17_linelist_clean.rds"))
+
+linelist <- linelist |> 
+  mutate(case_def = case_when(cholera_pcr_positive == 1 ~ "Confirmed",
+                              cholera_pcr_result %in% c("I", "ND") ~ "Indeterminate",
+                              TRUE ~ "Suspected"))
+
+
+```
+
+```{r}
+## Define items to be used throughout the report
+## Colour pallettes
+
+# Create colour palette for locations 
+pal_area <- c(
+   "Indeterminate" = "#024e96",       
+    "Confirmed" = "forestgreen",        
+  "Suspected" = "#2f8fcc"      
+)
+
+# Theme
+theme_set(theme_minimal(base_size = 25) +
+  theme(
+    axis.text.x = element_text(angle = 45, size=13),
+    panel.grid.major  = element_blank(),
+    legend.position = "bottom"))
+```
+
+```{r}
+## Reporting metrics
+df_maxregion <- linelist |> count(region) |> filter(n==max(n)) 
+df_maxdate <- linelist |> filter(!is.na(date_onset)) |> count(date_onset) |> filter(n==max(n)) 
+
+```
+
+::: callout-warning
+# Update to methodology
+As of May 5th 2021, the methodology for counting cases has changes and has been applied retrospectively. Historical case counts may differ slightly from prior reports.
+:::
+
+## Epi summary
+
+-   To date `r nrow(linelist)` cases have been reported in Viraland across `r n_distinct(linelist$region)` regions , of which `r nrow(linelist |> filter(case_def=="Confirmed"))` have been confirmed (@tbl-category), 
+-   `r df_maxregion$region` region has had the most cases (`r df_maxregion$n` cases total) 
+-   The peak of new cases by onset date was `r df_maxdate$date_onset` (@fig-epicurve).
+
+
+```{r}
+#| label: tbl-category
+#| tbl-cap: "**Number of cases and dates of earliest/most recent cases, by case category**"
+#| tbl-cap-location: top
+
+linelist |> 
+  group_by(case_def) |> 
+  summarise(Cases = n(),
+            `Earliest onset` = min(date_onset, na.rm=T),
+            `Most recent onset` = max(date_onset, na.rm=T)) |> 
+  flextable() |> 
+  autofit()
+
+```
+
+```{r fig.height=9, fig.width=20, dpi=200}
+#| label: fig-epicurve
+#| fig-cap: "**Number of cases by onset date**"
+#| fig-cap-location: top
+
+plot_epicurve <- ggplot(linelist) +
+  geom_bar(aes(x = date_onset,
+               fill = case_def), color = "white") +
+  labs(
+    x = "Onset date",
+    y = "Number of cases",
+    fill = "Region"
+  ) +
+  scale_x_date(
+    date_labels = "%b %d",     
+    date_breaks = "1 week"     
+  ) +
+  scale_fill_manual(values = pal_area)
+
+
+plot_epicurveregion <- ggplot(linelist) +
+  geom_bar(aes(x = date_onset,
+               fill = case_def), color = "white") +
+  labs(
+    x = "Onset date",
+    y = "Number of cases",
+    fill = "Region"
+  ) +
+  scale_x_date(
+    date_labels = "%b %d",     
+    date_breaks = "1 week"     
+  ) +
+  scale_fill_manual(values = pal_area) +
+  facet_wrap(~case_def, ncol=1)
+
+(plot_epicurve | plot_epicurveregion)  + plot_layout(guides = "collect")
+
+```
+
+## Interpretation notes
+:::: {layout-ncol="2"}
+::: column
+-   Data collected daily from all regions in Viraland including null reports
+
+:::
+::: column
+-   Reporting delay is a median of 5 days, but may be slower in more rural areas.
+:::
+::::
