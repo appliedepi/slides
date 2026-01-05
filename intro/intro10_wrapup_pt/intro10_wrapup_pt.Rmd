@@ -1,0 +1,361 @@
+---
+title: "Introdução ao R para<br>Epidemiologia Aplicada"
+subtitle: "Encerramento do curso"
+author: "Applied Epi"
+date: '[contact@appliedepi.org](mailto:contact@appliedepi.org)'
+output:
+  xaringan::moon_reader:
+    seal: false
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    css: xaringan-themer.css
+params:
+  lang: "pt"
+---
+class: center, middle, inverse, title-slide
+
+```{r, eval=F, echo=F, include=F}
+# Must do in order to render.
+
+pacman::p_load(xaringan)
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("mitchelloharawild/icons")
+icons::download_fontawesome()
+
+# Render with xaringan::infinite_moon_reader()
+# Slides will appear in viewer, and will update as you edit/save
+```
+
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.retina = 3  ## retina more effective than w/h (according to twitter)
+                      # fig.width = 16, 
+                      # fig.height = 10
+                      )
+## I dont know why this is included in the example xaringan slide 
+## but is something to do with background images
+options(htmltools.dir.version = FALSE)
+
+## install and load necessary packages 
+pacman::p_load(
+  rio,        # importing data  
+  here,       # relative file pathways  
+  janitor,    # data cleaning and tables
+  lubridate,  # working with dates
+  sf,         # spatial
+  ggspatial,  # spatial
+  kableExtra, # for output tables
+  xaringanthemer,  # for styling presentation
+  tidyverse  # data management and visualization
+
+)
+
+## load packages from github
+pacman::p_load_gh(
+     "R4IDSR/epichecks"   # bivariate colour maps 
+)
+
+
+# data prep --------------------------------------------------------------------
+surv <- rio::import(here::here("data", "surveillance_linelist_clean_20141201.rds"))
+
+```
+
+```{r  xaringan-themer, include = FALSE}
+
+## define presentation colours (theme) using {xaringanthemer} package 
+## https://pkg.garrickadenbuie.com/xaringanthemer/articles/xaringanthemer.html
+
+## epirhandbook logo colours: 
+  ## blue: "#00538c"
+  ## green: "#007732"
+  ## lighter green: "#48a878"
+
+## see ?style_mono_accent for all the things can customise
+style_mono_accent(
+  base_color = "#00538c", 
+  link_color = "#48a878", 
+  ## add logo to the title page (bit bigger)
+  title_slide_background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  title_slide_background_position = "95% 95%", 
+  title_slide_background_size = "25%", 
+  ## add logo to all following slides
+  background_image = "https://raw.githubusercontent.com/appliedepi/slides/master/images/logo.png", 
+  background_size = "10%",
+  background_position = "100% 0%"
+)
+```
+
+```{css, echo=F}
+    .remark-slide table{
+      border: none
+    }
+    .remark-slide-table {
+      
+    }
+    tr:first-child {
+      border-top: none;
+  }
+    tr:last-child {
+    border-bottom: none;
+  }
+```
+
+# Introdução ao R para Epidemiologia Aplicada
+
+### Encerramento do curso
+
+contact@appliedepi.org
+
+---
+
+# Requisitos para conclusão do curso
+
+--
+
+* Conclua a [pesquisa](https://docs.google.com/forms/d/e/1FAIpQLScEKzkZiY4FWgNyYc6-ggJ96DvTLhxVXXZ0CcrKvUtR1NVOvQ/viewform) anônima pós-curso
+
+--
+
+* Inclua o link do seu exemplo reproduzível publicado (**Módulo 6 Reprex**) no [Fórum da Comunidade](https://community.appliedepi.org/)
+
+--
+
+* Script em R Markdown e saída em Word do **Módulo 10 Estudo de caso de COVID-19**
+  * Como último recurso, você pode enviar o seu script .Rmd de Ebola.
+  
+<br>
+  
+<div style="text-align:center;">
+```{r, eval=TRUE, echo=FALSE, out.width="15%"}
+knitr::include_graphics(
+  xfun::relative_path(here::here("images", "wrap_up", "checklist.png"))
+)
+```
+</div>
+
+
+---
+# Cronograma do curso
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Module, ~Topic, ~`Support`,
+  "Pré-curso", "Solução de problemas de instalação", "Chamadas de preparação",
+  "1",   "RStudio, sintaxe básica do R", "Tutoria ilimitada\nsobre o material do curso\n\n\nAgendamento fora do horário\nlink fornecido por e-mail",
+  "2",   "Limpeza de dados", "",
+  "3",   "Limpeza de dados mais complexa", "",
+  "4",   "Agrupamento e resumo de dados", "",
+  "5",   "Visualização de dados com ggplot2", "",
+  "6",   "Solução de problemas e como obter ajuda", "",
+  "7",   "Relatórios automatizados com R Markdown", "",
+  "8",   "Transformação de dados com joins e pivots", "",
+  "9",   "Gráficos em saúde pública: mapas de calor, curvas epi,\npirâmides idade/sexo e demonstração de SIG", "",
+  "10",   "Estudo de caso de COVID-19", "",
+  "Pós-curso", "Ajudamos você a aplicar R no seu trabalho.\nCupom de 1 hora válido por 6 meses.*", "Central de Suporte em R", 
+  )
+
+outline %>% 
+  flextable::qflextable() %>% 
+  
+  flextable::set_header_labels(Module = "Módulo", Topic = "Tema", Support = "Suporte 1:1\n(disponível 24/7)") %>% 
+
+
+  # merge cells
+  #flextable::merge_at(part = "body", i = 1, j = 2:3) %>%   # prep calls
+  #flextable::merge_at(part = "body", i = 12, j = 2:3) %>%   # Desk calls
+  flextable::merge_at(part = "body", i = 2:11, j = 3) %>%  # tutoring
+
+  
+  # background color
+  flextable::bg(part = "header", i = 1, j = 1:3, bg = "#a8b4bd") %>% 
+  flextable::bg(i = 1, j = 1:3, bg = "#bccad4") %>% 
+  flextable::bg(i = 12, j = 1:3, bg = "#2ecc71") %>% 
+  flextable::bg(i = 2:11, j = 3, bg = "#bccad4") %>% 
+  flextable::bg(i = 2:11, j = 1:2, bg = "grey100") %>% 
+  # bold
+  flextable::bold(j = 1, part = "body") %>% 
+  
+  # alignment  
+  #flextable::align(i = 1, align = "center") %>% 
+
+  # column width
+  flextable::set_table_properties(layout = "autofit") %>% 
+  
+  # borders
+  flextable::theme_box() %>% 
+  
+  flextable::add_footer_lines(values = "*A validade do código de agendamento pode variar por turma. Horas adicionais podem ser adquiridas.")
+```
+
+
+---
+
+# Recursos disponíveis
+
+* **Tutoria do curso:** 1 semana pós-curso
+
+* **Site do curso:** 6 meses pós-curso
+
+* **Revisão de código:** 6 meses pós-curso
+
+* [Fórum da Comunidade](https://community.appliedepi.org/) & [Manual de R para Epidemiologia](https://epirhandbook.com/pt/)
+
+Você receberá um e-mail na próxima semana com mais informações e instruções.
+
+
+---
+# Revisão de código
+
+.pull-left[
+
+- Fornecido pelo Suporte da Applied Epi: uma equipe de epidemiologistas experientes em programação em R
+
+- Agende uma chamada para **obter ajuda com o seu próprio projeto em R**
+
+- Disponível 24/7 e multilíngue
+
+- [Site do Suporte](https://appliedepi.org/support/support)
+
+]
+
+.pull-right[
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%", out.height="75%"}
+knitr::include_graphics(xfun::relative_path(here::here("images","welcome", "headphones.jpg")))
+```
+
+]
+
+.footnote[Envie um e-mail para [contact@appliedepi.org](mailto:contact@appliedepi.org) para adquirir horas adicionais ou discutir um projeto.]
+
+
+---
+
+# Como usar suas chamadas de revisão de código
+
+Você pode agendar uma única chamada para resolver um problema específico ou uma série de chamadas para receber orientação ao longo do ciclo de vida do seu projeto.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=5}
+calls <- tibble(
+  scenario = c(
+    "1 hora → 1 × 60 min",
+    "1 hora → 2 × 30 min",
+    "3 horas → 3 × 60 min"
+  ),
+  duration_min = list(
+    c(60),
+    c(30, 30),
+    rep(60, 3)
+  )
+) %>%
+  unnest_longer(duration_min, indices_to = "call_n") %>%
+  group_by(scenario) %>%
+  mutate(
+    start_min = lag(cumsum(duration_min), default = 0),
+    x_mid     = start_min + duration_min / 2
+  ) %>%
+  ungroup() %>%
+  mutate(total_hours = ave(duration_min, scenario, FUN = function(x) sum(x) / 60))
+
+calls <- calls %>%
+  mutate(scenario = factor(scenario, levels = rev(unique(scenario))))
+
+
+ggplot(calls, aes(x = x_mid, y = scenario)) +
+  geom_tile(aes(width = duration_min, height = 0.6), alpha = 0.9, fill = "green") +
+  geom_tile(aes(width = duration_min, height = 0.6),
+          alpha = 0.9,
+          color = "white", linewidth = 1)+
+  geom_text(aes(label = paste0(duration_min, "m")), size = 8, color = "white") +
+  scale_x_continuous(
+    breaks = seq(0, 300, 30),
+    labels = function(x) x / 60,
+    expand = c(0, 0)
+  ) +
+  labs(x = "Tempo agendado (horas)", y = NULL) +
+  theme_minimal(base_size = 22) +
+  theme(panel.grid.major.y = element_blank())
+```
+
+???
+You can state specific examples: 
+
+- Single call: ggplot not rendering, flextable customization, simple data transformations, issues reading in data, simple cleaning operations, etc.
+- Multiple calls: guidance and feedback on developing code organisation, larger projects, data workflow planning, etc.
+
+
+---
+# Cursos adicionais de R
+
+Gostou do curso e está animado para aprender mais?
+
+<br>
+<br>
+
+<div style="text-align:center;">
+```{r, eval=TRUE, echo=FALSE, out.width="90%"}
+knitr::include_graphics(
+  xfun::relative_path(here::here("images", "breakout", "COVID dominoes.png"))
+)
+```
+</div>
+
+---
+# Cursos adicionais de R
+
+* **Duração:** 7 horas (dois módulos síncronos de meio período)
+
+* **Atividades:** aula ao vivo com demonstrações de código, exercícios com dados simulados e suporte 1:1 durante as aulas
+
+* **Elegibilidade:** habilidades em R no nível do nosso curso *Introdução ao R*
+
+```{r, echo=FALSE, warning=F, message=F}
+outline <- dplyr::tribble(
+  ~Course, ~Description,
+  "Relatórios automatizados em R","Crie relatórios Word automatizados no Quarto. Domine modelos, layouts e tabelas e simplifique seu código com parâmetros e um fluxo de trabalho escalável.",
+  "Introdução a SIG em R","Crie mapas e análises espaciais básicas em R, da preparação dos dados a saídas interativas.",
+  "Introdução à estatística em R","Desenvolva código reprodutível em R para estatística descritiva, testes essenciais e regressão, com saídas prontas para relatório.",
+  "Análise de séries temporais e detecção de surtos em R","Aplique métodos de séries temporais em R para vigilância, desde o controle de qualidade dos dados até a modelagem e a interpretação relevante para surtos.",
+  "Shiny em R","Crie aplicativos Shiny de nível introdutório para epidemiologia, com reatividade, UI dinâmica e saídas interativas."
+  )
+
+outline %>% 
+  flextable::qflextable() %>% flextable::set_header_labels(Course = "Curso", Description = "Descrição") %>% 
+  # Background color
+  flextable::bg(part = "header", i = 1, j = 1:2, bg = "#a8b4bd") %>% 
+  flextable::bg(i = 1:5, j = 2, bg = "grey100") %>% 
+  flextable::bg(i = 1:5, j = 1, bg = "#ccdce7") %>% 
+  
+  # Fitting
+  flextable::bold(j = 1, part = "body") %>% 
+  flextable::align(i = 1, align = "center") %>% 
+  flextable::set_table_properties(layout = "autofit") %>% 
+  flextable::theme_box()
+```
+
+[Site de visão geral do curso.](https://appliedepi.org/training/training.html) Turmas privadas ou públicas disponíveis!
+
+---
+class: inverse, center, middle
+
+## Obrigado!
+
+Fique conectado para saber mais sobre nossa programação e recursos gratuitos!
+
+[LinkedIn](https://www.linkedin.com/company/appliedepi/), [X](https://x.com/appliedepi), [BlueSky](https://bsky.app/profile/appliedepi.bsky.social), [Comunidade](https://community.appliedepi.org/)
+
+Inscreva-se em nosso [boletim informativo](https://docs.google.com/forms/d/e/1FAIpQLSdtk7Mg32lYQ3ucbIM-kIwIRxgRwDfG5TJHsVAbFjQ1i6fwiw/viewform)
+
+Pós-curso [pesquisa](https://docs.google.com/forms/d/e/1FAIpQLScEKzkZiY4FWgNyYc6-ggJ96DvTLhxVXXZ0CcrKvUtR1NVOvQ/viewform)
+
+```{r, eval = TRUE, echo = FALSE, out.width = "60%"}
+knitr::include_graphics(xfun::relative_path(here::here("images", "moz-banner.png")))
+```
+
